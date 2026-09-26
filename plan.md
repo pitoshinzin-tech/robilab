@@ -100,9 +100,13 @@
 - [x] 公開ロードマップの承認、フォルダの決定、v0.1 の作り方の決定
 - [x] v0.1 の設計をセクションごとに提示して確認をもらう(設計 1〜5/5)
 - [x] ブランドのトーンを決める(D29)
-- [ ] 設計書を作成し、確認をもらう → 作成済み:[docs/superpowers/specs/2026-09-26-v0.1-design.md](docs/superpowers/specs/2026-09-26-v0.1-design.md)(確認待ち)
-- [ ] 実装計画(writing-plans)を作成し、確認をもらう
-- [ ] 中身の叩き台(設問12問、16タイプ、ロールの目標値)→ 本人が確認
+- [x] 設計書を作成し、本人が承認:[docs/superpowers/specs/2026-09-26-v0.1-design.md](docs/superpowers/specs/2026-09-26-v0.1-design.md)
+- [x] 感度の係数の調査([research/sensitivity-yaw.md](research/sensitivity-yaw.md))
+- [x] 中身の叩き台(設問12問、タイプコード、16タイプ、ロール)→ [content/drafts/](content/drafts/)(本人の確定は実装の途中で OK)
+- [ ] 実装計画を作成し、確認をもらう → 作成済み(確認待ち):
+  - 計画1(基盤・診断・感度計算、13タスク):[docs/superpowers/plans/2026-09-26-v0.1-part1-foundation-diagnosis.md](docs/superpowers/plans/2026-09-26-v0.1-part1-foundation-diagnosis.md)
+  - 計画2(マッチング・公開、8タスク):[docs/superpowers/plans/2026-09-26-v0.1-part2-matching.md](docs/superpowers/plans/2026-09-26-v0.1-part2-matching.md)
+- [ ] 実行方法(サブエージェント型/ネイティブ型)を本人が選ぶ → 実装開始
 
 ### v0.1 最小版(10月中旬)
 - [ ] 土台づくり(Next.js、GitHub、Vercel、Supabase)
@@ -178,3 +182,4 @@
 | 2026-09-26 | ブレインストーミング開始。目的、使える時間、エイム診断の方式、対象ゲーム5本、16タイプ・4軸・12問を決定。企画書の叩き台 v0.1 を作成 |
 | 2026-09-26 | 技術スタックのルール(D14)。収益目標(月25万円)と目指す姿(ポケ徹)を共有。競合調査と収益調査が完了。楽天ROOM フォルダのチームとルールを引き継ぎ |
 | 2026-09-26 | 10月中旬に最小版を公開(D16)、ハブ方針と Discord(D21)、公開ロードマップ(D22)を決定。フォルダを `C:\Users\pitos\dev\gamer-hub` に移し、git で管理開始 |
+| 2026-09-26 | サービス名「ロビラボ」(D27)、商標の確認(同じ表記・読みなし、D28)、ブランドのトーン(D29)、マッチングを v0.1 に・公開目標10月末(D30)、18歳以上から(D31)、フルフォーカス(D32)、マッチングの流れ(D33)、相性の考え方(D34)、技術構成と Vercel Pro(D35)を決定。設計書・中身の叩き台・感度の調査・実装計画1と2が完成 |
