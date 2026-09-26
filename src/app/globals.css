@@ -143,3 +143,11 @@ body {
     @apply font-sans;
   }
 }
+
+.rl-glitch {
+  text-shadow: 1.5px 0 0 var(--rl-magenta), -1.5px 0 0 var(--rl-cyan);
+}
+.rl-pixel {
+  image-rendering: pixelated;
+  shape-rendering: crispEdges;
+}
