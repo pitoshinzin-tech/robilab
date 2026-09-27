@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Zen_Kaku_Gothic_New, Orbitron } from "next/font/google";
 import "./globals.css";
 import { BRAND } from "@/lib/brand";
+import { getSiteUrl } from "@/lib/site-url";
 import { SiteHeader } from "@/components/brand/SiteHeader";
 import { SiteFooter } from "@/components/brand/SiteFooter";
 
@@ -9,7 +10,7 @@ const body = Zen_Kaku_Gothic_New({ weight: ["500", "700"], subsets: ["latin"], v
 const display = Orbitron({ weight: ["700", "900"], subsets: ["latin"], variable: "--font-display", display: "swap" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(getSiteUrl()),
   title: { default: `${BRAND.name}|${BRAND.tagline}`, template: `%s|${BRAND.name}` },
   description: BRAND.description,
 };

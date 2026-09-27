@@ -6,6 +6,7 @@ import { normalizeTypeCode } from "@/lib/type-code";
 import { parseAxesParam } from "@/lib/axes-param";
 import { rankGames } from "@/lib/role-match";
 import { buildShareText, buildXShareUrl } from "@/lib/share";
+import { getSiteUrl } from "@/lib/site-url";
 import { GlitchTitle } from "@/components/brand/GlitchTitle";
 import { PixelIcon } from "@/components/brand/PixelIcon";
 import { AxisBars } from "@/components/result/AxisBars";
@@ -30,12 +31,16 @@ export default async function TypePage({ params, searchParams }: Props) {
   const { code: raw } = await params;
   const normalized = normalizeTypeCode(raw);
   if (!normalized) notFound();
-  if (normalized !== raw) redirect(`/type/${normalized}`);
+  if (normalized !== raw) {
+    const { axes: rawAxes } = await searchParams;
+    const query = rawAxes ? `?axes=${encodeURIComponent(rawAxes)}` : "";
+    redirect(`/type/${normalized}${query}`);
+  }
   const type = getType(normalized)!;
   const { axes: axesParam } = await searchParams;
   const axes = parseAxesParam(axesParam, type.code);
   const ranks = rankGames(axes);
-  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const site = getSiteUrl();
   const shareUrl = buildXShareUrl(
     buildShareText(type, { name: ranks[0].game.name, role: ranks[0].best.role.name }),
     `${site}/type/${type.code}`,
