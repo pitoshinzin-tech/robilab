@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { SENS_GAMES, getSensGame } from "@/data/sensitivity";
 import { parseNumber } from "@/lib/parse-number";
-import { edpi, cm360, convertSens, validateInput } from "@/lib/sensitivity";
+import { edpi, cm360, convertSens, validateInput, isInGameRange } from "@/lib/sensitivity";
 
 export function SensitivityClient() {
   const [gameId, setGameId] = useState(SENS_GAMES[0].id);
@@ -60,7 +60,9 @@ export function SensitivityClient() {
               {results.others.map((o) => (
                 <li key={o.game.id} className="flex justify-between rounded-lg bg-white/5 px-4 py-3">
                   <span>{o.game.name}</span>
-                  <span className="font-[family-name:var(--font-display)]">{o.sens}</span>
+                  <span className="font-[family-name:var(--font-display)]">
+                    {isInGameRange(o.sens, o.game) ? o.sens : "範囲外"}
+                  </span>
                 </li>
               ))}
             </ul>

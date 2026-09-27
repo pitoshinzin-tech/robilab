@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { edpi, cm360, convertSens, validateInput, DPI_MIN, DPI_MAX } from "@/lib/sensitivity";
+import { edpi, cm360, convertSens, validateInput, isInGameRange, DPI_MIN, DPI_MAX } from "@/lib/sensitivity";
 import { getSensGame } from "@/data/sensitivity";
 
 const val = getSensGame("valorant")!;
@@ -43,5 +43,18 @@ describe("validateInput", () => {
     expect(validateInput(800, -1, val)).toMatch(/感度/);
     expect(validateInput(800, 0, val)).toMatch(/感度/);
     expect(validateInput(800, 11, val)).toMatch(/感度/);
+  });
+});
+
+describe("isInGameRange", () => {
+  it("accepts values within min/max inclusive", () => {
+    expect(isInGameRange(val.min, val)).toBe(true);
+    expect(isInGameRange(val.max, val)).toBe(true);
+    expect(isInGameRange(1, val)).toBe(true);
+  });
+  it("rejects 0 and out-of-range values", () => {
+    expect(isInGameRange(0, val)).toBe(false);
+    expect(isInGameRange(val.min - 0.0001, val)).toBe(false);
+    expect(isInGameRange(val.max + 1, val)).toBe(false);
   });
 });

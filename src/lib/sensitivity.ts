@@ -22,6 +22,11 @@ export function convertSens(sens: number, from: SensGame, to: SensGame): number 
   return round(sens * (from.yaw / to.yaw), to.decimals);
 }
 
+/** 換算後の感度が対象ゲームの入力可能範囲に収まっているか(0 や範囲外を弾く) */
+export function isInGameRange(sens: number, game: SensGame): boolean {
+  return sens >= game.min && sens <= game.max;
+}
+
 export function validateInput(dpi: number | null, sens: number | null, game: SensGame): string | null {
   if (dpi === null) return "DPI を数字で入力してください。";
   if (dpi < DPI_MIN || dpi > DPI_MAX) return `DPI は ${DPI_MIN}〜${DPI_MAX} の範囲で入力してください。`;
