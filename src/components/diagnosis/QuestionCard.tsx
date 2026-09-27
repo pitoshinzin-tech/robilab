@@ -9,6 +9,7 @@ export function QuestionCard({ question, selected, onAnswer }: { question: Quest
           <button
             key={o.value}
             type="button"
+            aria-pressed={selected === o.value}
             onClick={() => onAnswer(o.value)}
             className={`min-h-12 rounded-xl border px-4 text-left transition active:scale-[0.99] ${
               selected === o.value ? "border-[var(--rl-cyan)] bg-[var(--rl-cyan)]/15" : "border-white/15 hover:border-[var(--rl-cyan)]/60"
