@@ -106,7 +106,13 @@
 - [ ] 実装計画を作成し、確認をもらう → 作成済み(確認待ち):
   - 計画1(基盤・診断・感度計算、13タスク):[docs/superpowers/plans/2026-09-26-v0.1-part1-foundation-diagnosis.md](docs/superpowers/plans/2026-09-26-v0.1-part1-foundation-diagnosis.md)
   - 計画2(マッチング・公開、8タスク):[docs/superpowers/plans/2026-09-26-v0.1-part2-matching.md](docs/superpowers/plans/2026-09-26-v0.1-part2-matching.md)
-- [ ] 実行方法(サブエージェント型/ネイティブ型)を本人が選ぶ → 実装開始
+- [x] 実行方法:サブエージェント型(09-26 開始)
+
+### v0.1 計画1 の実装状況(ブランチ feat/v0.1-part1)
+- [x] Task 1〜12 完了(タスクごとのレビュー済み)。最終レビューの指摘(シェア画像のアイコン、URL の localhost 化など)も修正済み。テスト 63件すべて成功、ビルド成功
+- [ ] Task 13:GitHub と Vercel のプレビュー公開 → **本人のアカウント作成待ち**
+- 公開前に本人が決めること:規約・プライバシーポリシーの「お問い合わせ先」、アフィリエイト商品(実際に使ったもの)、16タイプの名前・設問の確定([content/drafts/](content/drafts/))
+- 専門家への確認を推奨(規約チェック担当より):マッチングと出会い系サイト規制法の関係、通報者を停止するときの手続き
 
 ### v0.1 最小版(10月中旬)
 - [ ] 土台づくり(Next.js、GitHub、Vercel、Supabase)
