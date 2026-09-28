@@ -186,6 +186,27 @@ describe("delete_me", () => {
       .single();
     expect(reportRow?.target_discord_id).toMatch(/^d-/);
   });
+
+  it("an active user with no open reports can delete their account, and a report they filed keeps the row with reporter_id NULL", async () => {
+    const a = await makeUser();
+    const b = await makeUser({ signIn: false });
+    expect((await a.client!.rpc("report_user", { p_id: b.id, p_reason: "spam", p_detail: "" })).error).toBeNull();
+
+    expect((await a.client!.rpc("delete_me")).error).toBeNull();
+
+    const { data: profileRow } = await admin.from("profiles").select("id").eq("id", a.id).maybeSingle();
+    expect(profileRow).toBeNull();
+    const { data: privateInfoRow } = await admin.from("private_info").select("user_id").eq("user_id", a.id).maybeSingle();
+    expect(privateInfoRow).toBeNull();
+
+    const { data: reportRow } = await admin
+      .from("reports")
+      .select("reporter_id, target_id")
+      .eq("target_id", b.id)
+      .single();
+    expect(reportRow?.reporter_id).toBeNull();
+    expect(reportRow?.target_id).toBe(b.id);
+  });
 });
 
 describe("report abuse", () => {
