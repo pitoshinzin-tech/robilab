@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { InboxList } from "@/components/lobby/InboxList";
+import { InboxSeenPing } from "./InboxSeenPing";
 import type { InboxRow } from "@/lib/lobby-types";
 
 export default async function InboxPage() {
@@ -11,6 +12,7 @@ export default async function InboxPage() {
   await supabase.rpc("mark_inbox_seen");
   return (
     <main className="mx-auto max-w-md px-4 py-6">
+      <InboxSeenPing />
       <h1 className="mb-6 text-2xl font-bold">🔔 通知</h1>
       <InboxList rows={(data ?? []) as InboxRow[]} />
     </main>
