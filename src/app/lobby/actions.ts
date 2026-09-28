@@ -3,35 +3,43 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { errorCodeOf, lobbyErrorMessage } from "@/lib/lobby-errors";
+import { parseAxesField } from "@/lib/lobby-form";
 
 type Result = { error?: string; ok?: string };
 
-function profileArgs(form: FormData) {
+function profileArgs(form: FormData): { error: string } | { args: Record<string, unknown> } {
   const games = form.getAll("games").map((id) => ({ id: String(id), rank: String(form.get(`rank-${id}`) ?? "unranked") }));
-  const axesRaw = form.get("axes");
+  const axes = parseAxesField(form.get("axes"));
+  if (axes === "invalid") return { error: lobbyErrorMessage("INVALID_INPUT") };
   return {
-    p_nickname: String(form.get("nickname") ?? ""),
-    p_type_code: (form.get("typeCode") as string) || null,
-    p_axes: axesRaw ? JSON.parse(String(axesRaw)) : null,
-    p_games: games,
-    p_platforms: form.getAll("platforms").map(String),
-    p_voice_ok: form.get("voiceOk") === "on",
-    p_time_slots: form.getAll("timeSlots").map(String),
-    p_bio: String(form.get("bio") ?? ""),
+    args: {
+      p_nickname: String(form.get("nickname") ?? ""),
+      p_type_code: (form.get("typeCode") as string) || null,
+      p_axes: axes,
+      p_games: games,
+      p_platforms: form.getAll("platforms").map(String),
+      p_voice_ok: form.get("voiceOk") === "on",
+      p_time_slots: form.getAll("timeSlots").map(String),
+      p_bio: String(form.get("bio") ?? ""),
+    },
   };
 }
 
 export async function registerAction(_: Result, form: FormData): Promise<Result> {
   if (form.get("agree") !== "on") return { error: "利用規約への同意が必要です。" };
+  const parsed = profileArgs(form);
+  if ("error" in parsed) return { error: parsed.error };
   const supabase = await createSupabaseServer();
-  const { error } = await supabase.rpc("register_profile", { p_birthdate: String(form.get("birthdate") ?? ""), ...profileArgs(form) });
+  const { error } = await supabase.rpc("register_profile", { p_birthdate: String(form.get("birthdate") ?? ""), ...parsed.args });
   if (error) return { error: lobbyErrorMessage(errorCodeOf(error)) };
   redirect("/lobby");
 }
 
 export async function updateProfileAction(_: Result, form: FormData): Promise<Result> {
+  const parsed = profileArgs(form);
+  if ("error" in parsed) return { error: parsed.error };
   const supabase = await createSupabaseServer();
-  const { error } = await supabase.rpc("update_profile", profileArgs(form));
+  const { error } = await supabase.rpc("update_profile", parsed.args);
   if (error) return { error: lobbyErrorMessage(errorCodeOf(error)) };
   revalidatePath("/lobby");
   return { ok: "保存しました。" };
