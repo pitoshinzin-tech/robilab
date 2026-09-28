@@ -20,6 +20,7 @@ export function DiagnosisClient() {
     const code = toTypeCode(axes);
     void recordDiagnosis(code, axes);
     const packed = [axes.attack, axes.instinct, axes.team, axes.heat].map((n) => n.toFixed(2)).join(",");
+    try { sessionStorage.setItem("robilab:lastDiagnosis", JSON.stringify({ code, axes: JSON.stringify(axes) })); } catch {}
     router.push(`/type/${code}?axes=${packed}`);
   }, [state.done, state.answers, router]);
 
