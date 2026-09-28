@@ -115,7 +115,10 @@
 - 注意:今は Vercel の無料プラン。アフィリエイト商品を載せる・正式公開するタイミングで Pro に切り替える(D35)
 
 ### v0.1 計画2(マッチング)
-- [ ] Task 1:Supabase(robilab / robilab-dev)と Discord アプリの準備 → 本人の操作待ち
+- [ ] Task 1:Supabase と Discord アプリの準備
+  - [x] Supabase の組織 `robilab`(Free)に、プロジェクト `robilab`(本番、ref: bncjzilfehkjftzraajd)と `robilab-dev`(テスト、ref: hmipbsncbemuttxxxbqn)を作成。どちらも Tokyo(09-28)
+  - [x] Claude の Supabase 連携を `robilab` の組織につなぎ直し、2つのプロジェクトが見えることを確認
+  - [ ] Discord アプリの作成と、Supabase の Discord ログインの設定 → 本人の操作待ち
 - 公開前に本人が決めること:規約・プライバシーポリシーの「お問い合わせ先」、アフィリエイト商品(実際に使ったもの)、16タイプの名前・設問の確定([content/drafts/](content/drafts/))
 - 専門家への確認を推奨(規約チェック担当より):マッチングと出会い系サイト規制法の関係、通報者を停止するときの手続き
 
