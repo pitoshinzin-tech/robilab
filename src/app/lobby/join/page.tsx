@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { assertNoRpcError } from "@/lib/lobby-errors";
 import { ProfileForm } from "@/components/lobby/ProfileForm";
 import { registerAction } from "../actions";
 
@@ -7,7 +8,7 @@ export default async function JoinPage() {
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/lobby");
-  const { data: me } = await supabase.rpc("my_profile");
+  const me = assertNoRpcError(await supabase.rpc("my_profile"));
   if (me && me.length > 0) redirect("/lobby");
   return (
     <main className="mx-auto max-w-md px-4 py-6">

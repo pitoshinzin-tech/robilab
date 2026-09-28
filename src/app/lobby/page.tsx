@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { assertNoRpcError } from "@/lib/lobby-errors";
 import { LoginButton } from "@/components/lobby/LoginButton";
 import { CandidateCard } from "@/components/lobby/CandidateCard";
+import { AccountStatusNotice } from "@/components/lobby/AccountStatusNotice";
 import { sortAndFilter } from "@/lib/lobby-sort";
 import { GAMES } from "@/data/games";
 import { TIME_SLOTS } from "@/data/lobby-options";
@@ -32,19 +34,12 @@ export default async function LobbyPage({ searchParams }: Props) {
     );
   }
 
-  const { data: meRows } = await supabase.rpc("my_profile");
+  const meRows = assertNoRpcError(await supabase.rpc("my_profile"));
   const me = (meRows as MyProfileRow[] | null)?.[0];
   if (!me) redirect("/lobby/join");
-  if (me.status !== "active") {
-    return (
-      <main className="mx-auto max-w-md px-4 py-10 text-center">
-        <p>現在、アカウントが{me.status === "banned" ? "利用停止" : "一時停止"}中です。</p>
-        <p className="mt-2 text-sm text-[var(--rl-muted)]">お問い合わせは <Link href="/terms" className="underline">利用規約</Link> の連絡先からお願いします。</p>
-      </main>
-    );
-  }
+  if (me.status !== "active") return <AccountStatusNotice status={me.status} />;
 
-  const { data } = await supabase.rpc("lobby_candidates");
+  const data = assertNoRpcError(await supabase.rpc("lobby_candidates"));
   const rows = sortAndFilter({ axes: me.axes }, (data ?? []) as Candidate[], { game: sp.game, slot: sp.slot, voice: sp.voice === "1" });
 
   return (

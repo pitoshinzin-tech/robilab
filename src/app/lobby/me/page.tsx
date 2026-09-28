@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { assertNoRpcError } from "@/lib/lobby-errors";
 import { ProfileForm } from "@/components/lobby/ProfileForm";
+import { AccountStatusNotice } from "@/components/lobby/AccountStatusNotice";
 import type { Candidate } from "@/lib/lobby-types";
 import { updateProfileAction } from "../actions";
 import { DeleteAccount } from "./DeleteAccount";
@@ -9,9 +11,10 @@ export default async function MePage() {
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/lobby");
-  const { data } = await supabase.rpc("my_profile");
+  const data = assertNoRpcError(await supabase.rpc("my_profile"));
   const me = data?.[0];
   if (!me) redirect("/lobby/join");
+  if (me.status !== "active") return <AccountStatusNotice status={me.status} />;
   const initial: Partial<Candidate> = {
     id: me.id,
     nickname: me.nickname,

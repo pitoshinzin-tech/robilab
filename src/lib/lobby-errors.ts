@@ -23,3 +23,15 @@ export function lobbyErrorMessage(code: string | undefined): string {
 export function errorCodeOf(error: { message?: string } | null): string | undefined {
   return error?.message?.match(/[A-Z_]{4,}/)?.[0];
 }
+
+/**
+ * Server Component から RPC を呼んだ結果を検証する。
+ * `error` があるのに黙って空データ扱いにすると、たとえば my_profile の
+ * 通信エラーを「未登録」と誤認して /lobby/join に誘導してしまう。
+ * ここで throw して、一番近い error.tsx(「もう一度試す」ボタン)に
+ * 処理を渡す。
+ */
+export function assertNoRpcError<T>(result: { data: T; error: { message?: string } | null }): T {
+  if (result.error) throw new Error(result.error.message ?? "RPC error");
+  return result.data;
+}

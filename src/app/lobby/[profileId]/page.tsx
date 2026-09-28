@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { assertNoRpcError } from "@/lib/lobby-errors";
 import { peopleScore } from "@/lib/people-match";
 import { CandidateCard } from "@/components/lobby/CandidateCard";
 import { ApproachButton } from "@/components/lobby/ApproachButton";
@@ -16,7 +17,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ profil
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/lobby");
-  const [{ data: meRows }, { data }] = await Promise.all([supabase.rpc("my_profile"), supabase.rpc("get_profile", { p_id: profileId })]);
+  const [meResult, profileResult] = await Promise.all([supabase.rpc("my_profile"), supabase.rpc("get_profile", { p_id: profileId })]);
+  const meRows = assertNoRpcError(meResult);
+  const data = assertNoRpcError(profileResult);
   const me = (meRows as MyProfileRow[] | null)?.[0];
   if (!me) redirect("/lobby/join");
   const c = (data as Candidate[] | null)?.[0];
