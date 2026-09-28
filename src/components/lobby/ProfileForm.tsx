@@ -1,5 +1,5 @@
 "use client";
-import { useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
 import { GAMES } from "@/data/games";
 import { TIME_SLOTS, PLATFORMS, RANK_BANDS } from "@/data/lobby-options";
 import type { Candidate } from "@/lib/lobby-types";
@@ -14,6 +14,7 @@ type Props = {
 export function ProfileForm({ mode, action, initial }: Props) {
   const [state, formAction, pending] = useActionState(action, {});
   const [diag, setDiag] = useState<{ code: string; axes: string } | null>(null);
+  const [clientError, setClientError] = useState<string | null>(null);
 
   // 診断結果(sessionStorage に保存したもの)があれば自動で入れる
   useEffect(() => {
@@ -23,9 +24,41 @@ export function ProfileForm({ mode, action, initial }: Props) {
     } catch {}
   }, []);
 
-  const selectedGames = new Set((initial?.games ?? []).map((g) => g.id));
+  const [checkedGames, setCheckedGames] = useState<Set<string>>(
+    () => new Set((initial?.games ?? []).map((g) => g.id)),
+  );
+
+  function toggleGame(id: string, checked: boolean) {
+    setCheckedGames((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    // React 19 の <form action> は、成功・失敗にかかわらず送信後にフォームを
+    // リセットしてしまう(requestFormReset)。サーバー側エラーで入力内容が
+    // 消えるのを防ぐため、ここで preventDefault してから FormData を作り、
+    // startTransition 経由で formAction を手動で呼び出す。
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const hasGame = formData.getAll("games").length > 0;
+    const hasTimeSlot = formData.getAll("timeSlots").length > 0;
+    if (!hasGame || !hasTimeSlot) {
+      setClientError("遊ぶゲームと時間帯を、それぞれ1つ以上選んでください。");
+      return;
+    }
+    setClientError(null);
+    startTransition(() => {
+      formAction(formData);
+    });
+  }
+
   return (
-    <form action={formAction} className="grid gap-5">
+    <form onSubmit={handleSubmit} className="grid gap-5">
       {mode === "register" && (
         <label className="grid gap-1 text-sm">
           生年月日(公開されません。年齢の確認だけに使います)
@@ -39,11 +72,26 @@ export function ProfileForm({ mode, action, initial }: Props) {
       <fieldset className="grid gap-2 text-sm">
         <legend className="mb-1">遊ぶゲーム(1つ以上)とランク帯</legend>
         {GAMES.map((g) => (
-          <div key={g.id} className="flex items-center justify-between gap-2">
-            <label className="flex items-center gap-2"><input type="checkbox" name="games" value={g.id} defaultChecked={selectedGames.has(g.id)} />{g.name}</label>
-            <select name={`rank-${g.id}`} defaultValue={initial?.games?.find((x) => x.id === g.id)?.rank ?? "unranked"} className="rounded bg-[#151a33] px-2 py-1">
-              {RANK_BANDS.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
-            </select>
+          <div key={g.id} className="grid gap-2 rounded-lg border border-white/10 p-2">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="games"
+                value={g.id}
+                checked={checkedGames.has(g.id)}
+                onChange={(e) => toggleGame(g.id, e.target.checked)}
+              />
+              {g.name}
+            </label>
+            {checkedGames.has(g.id) && (
+              <select
+                name={`rank-${g.id}`}
+                defaultValue={initial?.games?.find((x) => x.id === g.id)?.rank ?? "unranked"}
+                className="w-full rounded bg-[#151a33] px-2 py-1"
+              >
+                {RANK_BANDS.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
+              </select>
+            )}
           </div>
         ))}
       </fieldset>
@@ -75,6 +123,7 @@ export function ProfileForm({ mode, action, initial }: Props) {
           <span><a href="/terms" target="_blank" className="underline">利用規約</a>と<a href="/privacy" target="_blank" className="underline">プライバシーポリシー</a>に同意します(18歳以上であることを含みます)</span>
         </label>
       )}
+      {clientError && <p role="alert" className="text-sm text-[var(--rl-magenta)]">{clientError}</p>}
       {state.error && <p role="alert" className="text-sm text-[var(--rl-magenta)]">{state.error}</p>}
       {state.ok && <p className="text-sm text-[var(--rl-lime)]">{state.ok}</p>}
       <button disabled={pending} className="h-12 rounded-full bg-[var(--rl-cyan)] font-bold text-[#0a0c16] disabled:opacity-50">
