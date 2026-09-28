@@ -1,5 +1,5 @@
 import { describe, it, expect, afterAll } from "vitest";
-import { admin, makeUser, cleanup, birthdateYearsAgo, errorCode } from "./helpers";
+import { admin, makeUser, cleanup, birthdateYearsAgo, errorCode, trackForCleanup } from "./helpers";
 
 afterAll(cleanup);
 
@@ -19,15 +19,23 @@ describe("age", () => {
     await expect(makeUser({ birthdate: birthdateYearsAgo(18, 1) })).rejects.toThrow(/UNDER_AGE/);
   });
   it("blocks banned Discord accounts", async () => {
-    await admin.from("banned_discord_ids").insert({ discord_user_id: "d-banned-test" });
-    const { error } = await admin.rpc("_register_profile", {
-      p_uid: (await admin.auth.admin.createUser({ email: `b-${crypto.randomUUID()}@example.test`, email_confirm: true })).data.user!.id,
-      p_discord_id: "d-banned-test", p_discord_name: "x", p_birthdate: birthdateYearsAgo(30), p_nickname: "x",
-      p_type_code: null, p_axes: null, p_games: [{ id: "valorant" }], p_platforms: [], p_voice_ok: false,
-      p_time_slots: ["weekday-night"], p_bio: "",
+    const { data: userData, error: createError } = await admin.auth.admin.createUser({
+      email: `b-${crypto.randomUUID()}@example.test`, email_confirm: true,
     });
-    expect(errorCode(error)).toBe("BANNED");
-    await admin.from("banned_discord_ids").delete().eq("discord_user_id", "d-banned-test");
+    if (createError) throw createError;
+    trackForCleanup(userData.user!.id);
+    await admin.from("banned_discord_ids").insert({ discord_user_id: "d-banned-test" });
+    try {
+      const { error } = await admin.rpc("_register_profile", {
+        p_uid: userData.user!.id,
+        p_discord_id: "d-banned-test", p_discord_name: "x", p_birthdate: birthdateYearsAgo(30), p_nickname: "x",
+        p_type_code: null, p_axes: null, p_games: [{ id: "valorant" }], p_platforms: [], p_voice_ok: false,
+        p_time_slots: ["weekday-night"], p_bio: "",
+      });
+      expect(errorCode(error)).toBe("BANNED");
+    } finally {
+      await admin.from("banned_discord_ids").delete().eq("discord_user_id", "d-banned-test");
+    }
   });
 });
 
@@ -99,6 +107,29 @@ describe("approaches", () => {
     const sent = ((await a.client.rpc("my_inbox")).data as { kind: string; status: string }[]).find((r) => r.kind === "sent")!;
     expect(sent.status).toBe("pending");
   });
+
+  it("resending after a pass is blocked (does not reveal the pass)", async () => {
+    const a = await makeUser();
+    const b = await makeUser();
+    await a.client.rpc("send_approach", { p_to: b.id });
+    const received = ((await b.client.rpc("my_inbox")).data as { kind: string; approach_id: string }[]).find((r) => r.kind === "received")!;
+    await b.client.rpc("respond_approach", { p_id: received.approach_id, p_accept: false });
+    expect(errorCode((await a.client.rpc("send_approach", { p_to: b.id })).error)).toBe("ALREADY_PENDING");
+  });
+
+  it("daily limit holds exactly at 10 under concurrent sends (advisory lock)", async () => {
+    const a = await makeUser();
+    const nineTargets = await Promise.all(Array.from({ length: 9 }, () => makeUser()));
+    for (const t of nineTargets) expect((await a.client.rpc("send_approach", { p_to: t.id })).data).toBe("sent");
+    const fiveMore = await Promise.all(Array.from({ length: 5 }, () => makeUser()));
+    const results = await Promise.all(fiveMore.map((t) => a.client.rpc("send_approach", { p_to: t.id })));
+    const sentCount = results.filter((r) => r.data === "sent").length;
+    const limitCount = results.filter((r) => errorCode(r.error) === "DAILY_LIMIT").length;
+    expect(sentCount).toBe(1);
+    expect(limitCount).toBe(4);
+    const { count } = await admin.from("approaches").select("*", { count: "exact", head: true }).eq("from_id", a.id);
+    expect(count).toBe(10);
+  });
 });
 
 describe("blocks and reports", () => {
@@ -138,5 +169,71 @@ describe("lobby filters", () => {
     expect(ids).toContain(b.id);
     expect(ids).not.toContain(other.id);
     expect(ids).not.toContain(a.id);
+  });
+});
+
+describe("delete_me", () => {
+  it("a suspended (reported) user cannot delete their own account, and the report keeps the discord id", async () => {
+    const a = await makeUser();
+    const b = await makeUser();
+    expect((await a.client.rpc("report_user", { p_id: b.id, p_reason: "harassment", p_detail: "" })).error).toBeNull();
+    expect(errorCode((await b.client.rpc("delete_me")).error)).toBe("NOT_ACTIVE");
+    const { data: reportRow } = await admin
+      .from("reports")
+      .select("target_discord_id")
+      .eq("reporter_id", a.id)
+      .eq("target_id", b.id)
+      .single();
+    expect(reportRow?.target_discord_id).toMatch(/^d-/);
+  });
+});
+
+describe("report abuse", () => {
+  it("cannot report someone outside shared visibility with no approach history", async () => {
+    const a = await makeUser();
+    const b = await makeUser();
+    await a.client.rpc("block_user", { p_id: b.id });
+    expect(errorCode((await a.client.rpc("report_user", { p_id: b.id, p_reason: "spam", p_detail: "" })).error)).toBe("NOT_FOUND");
+  });
+
+  it("limits reports to 5 per JST day", async () => {
+    const a = await makeUser();
+    const targets = await Promise.all(Array.from({ length: 6 }, () => makeUser()));
+    for (let i = 0; i < 5; i++) {
+      expect((await a.client.rpc("report_user", { p_id: targets[i].id, p_reason: "spam", p_detail: "" })).error).toBeNull();
+    }
+    expect(errorCode((await a.client.rpc("report_user", { p_id: targets[5].id, p_reason: "spam", p_detail: "" })).error)).toBe(
+      "REPORT_LIMIT",
+    );
+  });
+});
+
+describe("input validation", () => {
+  it("rejects a game id containing spaces or non-ascii text", async () => {
+    const a = await makeUser({ register: false });
+    const { error } = await admin.rpc("_register_profile", {
+      p_uid: a.id, p_discord_id: `d-${a.id}`, p_discord_name: "x", p_birthdate: birthdateYearsAgo(25), p_nickname: "x",
+      p_type_code: null, p_axes: null, p_games: [{ id: "ヴァロラント" }], p_platforms: [], p_voice_ok: false,
+      p_time_slots: ["weekday-night"], p_bio: "",
+    });
+    expect(errorCode(error)).toBe("INVALID_INPUT");
+  });
+});
+
+describe("private_info immutability", () => {
+  it("cannot change birthdate after registration", async () => {
+    const a = await makeUser();
+    const { error } = await admin.from("private_info").update({ birthdate: "2000-01-01" }).eq("user_id", a.id);
+    expect(errorCode(error)).toBe("INVALID_INPUT");
+  });
+});
+
+describe("diagnosis_results constraints", () => {
+  it("rejects axes that are not a small json object", async () => {
+    const { error: notObject } = await admin.from("diagnosis_results").insert({ type_code: "ARCH", axes: [1, 2, 3] });
+    expect(notObject).not.toBeNull();
+    const big = { pad: "x".repeat(1000) };
+    const { error: tooBig } = await admin.from("diagnosis_results").insert({ type_code: "ARCH", axes: big });
+    expect(tooBig).not.toBeNull();
   });
 });

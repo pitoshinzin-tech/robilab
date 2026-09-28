@@ -40,6 +40,11 @@ export async function cleanup() {
   for (const id of created.splice(0)) await admin.auth.admin.deleteUser(id);
 }
 
+/** makeUser を経由せず作成した auth ユーザーを cleanup() の対象に加える */
+export function trackForCleanup(id: string): void {
+  created.push(id);
+}
+
 export function errorCode(error: { message?: string } | null): string | undefined {
   return error?.message?.match(/[A-Z_]{4,}/)?.[0];
 }
