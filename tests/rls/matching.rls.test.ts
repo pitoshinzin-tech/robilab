@@ -206,6 +206,31 @@ describe("report abuse", () => {
       "REPORT_LIMIT",
     );
   });
+
+  it("report limit holds exactly at 5 under concurrent reports (advisory lock)", async () => {
+    const a = await makeUser();
+    const fourTargets = await Promise.all(Array.from({ length: 4 }, () => makeUser({ signIn: false })));
+    for (const t of fourTargets) {
+      expect((await a.client!.rpc("report_user", { p_id: t.id, p_reason: "spam", p_detail: "" })).error).toBeNull();
+    }
+    const threeMore = await Promise.all(Array.from({ length: 3 }, () => makeUser({ signIn: false })));
+    const results = await Promise.all(
+      threeMore.map((t) => a.client!.rpc("report_user", { p_id: t.id, p_reason: "spam", p_detail: "" })),
+    );
+    const successCount = results.filter((r) => r.error === null).length;
+    const limitCount = results.filter((r) => errorCode(r.error) === "REPORT_LIMIT").length;
+    expect(successCount).toBe(1);
+    expect(limitCount).toBe(2);
+    const { count: suspendedCount } = await admin
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .in(
+        "id",
+        threeMore.map((t) => t.id),
+      )
+      .eq("status", "suspended");
+    expect(suspendedCount).toBe(1);
+  });
 });
 
 describe("input validation", () => {
@@ -214,6 +239,26 @@ describe("input validation", () => {
     const { error } = await admin.rpc("_register_profile", {
       p_uid: a.id, p_discord_id: `d-${a.id}`, p_discord_name: "x", p_birthdate: birthdateYearsAgo(25), p_nickname: "x",
       p_type_code: null, p_axes: null, p_games: [{ id: "ヴァロラント" }], p_platforms: [], p_voice_ok: false,
+      p_time_slots: ["weekday-night"], p_bio: "",
+    });
+    expect(errorCode(error)).toBe("INVALID_INPUT");
+  });
+
+  it("rejects a game object missing an id", async () => {
+    const a = await makeUser({ register: false, signIn: false });
+    const { error } = await admin.rpc("_register_profile", {
+      p_uid: a.id, p_discord_id: `d-${a.id}`, p_discord_name: "x", p_birthdate: birthdateYearsAgo(25), p_nickname: "x",
+      p_type_code: null, p_axes: null, p_games: [{}], p_platforms: [], p_voice_ok: false,
+      p_time_slots: ["weekday-night"], p_bio: "",
+    });
+    expect(errorCode(error)).toBe("INVALID_INPUT");
+  });
+
+  it("rejects a game object with keys other than id/rank", async () => {
+    const a = await makeUser({ register: false, signIn: false });
+    const { error } = await admin.rpc("_register_profile", {
+      p_uid: a.id, p_discord_id: `d-${a.id}`, p_discord_name: "x", p_birthdate: birthdateYearsAgo(25), p_nickname: "x",
+      p_type_code: null, p_axes: null, p_games: [{ id: "valorant", x: "abuse" }], p_platforms: [], p_voice_ok: false,
       p_time_slots: ["weekday-night"], p_bio: "",
     });
     expect(errorCode(error)).toBe("INVALID_INPUT");
