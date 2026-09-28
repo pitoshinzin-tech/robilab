@@ -4,7 +4,7 @@ const url = process.env.TEST_SUPABASE_URL!;
 const anon = process.env.TEST_SUPABASE_ANON_KEY!;
 export const admin = createClient(url, process.env.TEST_SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
 
-export type TestUser = { id: string; client: SupabaseClient };
+export type TestUser = { id: string; client: SupabaseClient | null };
 const created: string[] = [];
 
 /** 日本時間の今日から years 年前の日付(誕生日の当日を作る) */
@@ -14,7 +14,15 @@ export function birthdateYearsAgo(years: number, dayOffset = 0): string {
   return d.toISOString().slice(0, 10);
 }
 
-export async function makeUser(opts: { birthdate?: string; register?: boolean; nickname?: string } = {}): Promise<TestUser> {
+/**
+ * テスト用ユーザーを作る。
+ * `signIn: false` を指定すると signInWithPassword をスキップして `client: null` を返す。
+ * 自分自身の RPC を一度も呼ばない(id しか使わない相手役・的役のユーザー)には必ず指定し、
+ * Supabase Auth の IP ごとのサインイン回数制限に当たらないようにする。
+ */
+export async function makeUser(
+  opts: { birthdate?: string; register?: boolean; nickname?: string; signIn?: boolean } = {},
+): Promise<TestUser> {
   const email = `rls-${crypto.randomUUID()}@example.test`;
   const password = `pw-${crypto.randomUUID()}`;
   const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
@@ -30,6 +38,7 @@ export async function makeUser(opts: { birthdate?: string; register?: boolean; n
     });
     if (e) throw new Error(e.message);
   }
+  if (opts.signIn === false) return { id, client: null };
   const client = createClient(url, anon, { auth: { persistSession: false } });
   const { error: signInError } = await client.auth.signInWithPassword({ email, password });
   if (signInError) throw signInError;
