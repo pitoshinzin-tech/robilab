@@ -3,6 +3,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { respondAction } from "@/app/lobby/actions";
 import type { InboxRow } from "@/lib/lobby-types";
+import { discordProfileUrl } from "@/lib/discord-link";
 
 export function InboxList({ rows }: { rows: InboxRow[] }) {
   const [done, setDone] = useState<Record<string, string>>({});
@@ -41,13 +42,24 @@ export function InboxList({ rows }: { rows: InboxRow[] }) {
         <h2 className="mb-3 font-bold">つながった相手</h2>
         {matched.length === 0 ? <p className="text-sm text-[var(--rl-muted)]">まだいません。</p> : (
           <ul className="grid gap-3">
-            {matched.map((r) => (
-              <li key={r.approach_id} className="rounded-xl border border-[var(--rl-border)] bg-[var(--rl-surface)] p-4">
-                <div className="font-bold">{r.nickname}</div>
-                <div className="mt-1 text-sm">Discord:<b className="select-all text-[var(--rl-cyan)]">{r.discord_username}</b></div>
-                <p className="mt-1 text-xs text-[var(--rl-muted)]">Discord でフレンド申請して、一緒に遊ぼう。</p>
-              </li>
-            ))}
+            {matched.map((r) => {
+              const profileUrl = discordProfileUrl(r.discord_user_id);
+              return (
+                <li key={r.approach_id} className="rounded-xl border border-[var(--rl-border)] bg-[var(--rl-surface)] p-4">
+                  <div className="font-bold">{r.nickname}</div>
+                  {profileUrl && (
+                    <a href={profileUrl} target="_blank" rel="noopener noreferrer"
+                      className="mt-2 inline-flex h-10 items-center rounded-full bg-[var(--rl-cyan)] px-4 text-sm font-bold text-[#0a0c16]">
+                      Discord のプロフィールを開く
+                    </a>
+                  )}
+                  <div className="mt-2 text-sm">登録時の Discord 名:<b className="select-all text-[var(--rl-cyan)]">{r.discord_username}</b></div>
+                  <p className="mt-1 text-xs text-[var(--rl-muted)]">
+                    プロフィールからフレンド申請して、一緒に遊ぼう。名前は変わることがあるので、申請前にプロフィールで本人か確かめてね。
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

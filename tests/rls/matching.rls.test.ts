@@ -66,12 +66,16 @@ describe("approaches", () => {
     const a = await makeUser();
     const b = await makeUser();
     expect((await a.client!.rpc("send_approach", { p_to: b.id })).data).toBe("sent");
-    const beforeA = (await a.client!.rpc("my_inbox")).data as { kind: string; discord_username: string | null }[];
-    expect(beforeA.every((r) => r.discord_username === null)).toBe(true);
+    type Row = { kind: string; discord_username: string | null; discord_user_id: string | null };
+    const beforeA = (await a.client!.rpc("my_inbox")).data as Row[];
+    expect(beforeA.every((r) => r.discord_username === null && r.discord_user_id === null)).toBe(true);
+    const beforeB = (await b.client!.rpc("my_inbox")).data as Row[];
+    expect(beforeB.every((r) => r.discord_username === null && r.discord_user_id === null)).toBe(true);
     const received = ((await b.client!.rpc("my_inbox")).data as { kind: string; approach_id: string }[]).find((r) => r.kind === "received")!;
     await b.client!.rpc("respond_approach", { p_id: received.approach_id, p_accept: true });
-    const afterA = (await a.client!.rpc("my_inbox")).data as { kind: string; discord_username: string | null }[];
-    expect(afterA.find((r) => r.kind === "matched")?.discord_username).toMatch(/^name-/);
+    const matchedA = ((await a.client!.rpc("my_inbox")).data as Row[]).find((r) => r.kind === "matched");
+    expect(matchedA?.discord_username).toMatch(/^name-/);
+    expect(matchedA?.discord_user_id).toBe(`d-${b.id}`);
   });
 
   it("double-clicking send creates one approach only", async () => {

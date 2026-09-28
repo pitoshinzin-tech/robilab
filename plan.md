@@ -207,3 +207,4 @@
 | 2026-09-26 | 10月中旬に最小版を公開(D16)、ハブ方針と Discord(D21)、公開ロードマップ(D22)を決定。フォルダを `C:\Users\pitos\dev\gamer-hub` に移し、git で管理開始 |
 | 2026-09-26 | サービス名「ロビラボ」(D27)、商標の確認(同じ表記・読みなし、D28)、ブランドのトーン(D29)、マッチングを v0.1 に・公開目標10月末(D30)、18歳以上から(D31)、フルフォーカス(D32)、マッチングの流れ(D33)、相性の考え方(D34)、技術構成と Vercel Pro(D35)を決定。設計書・中身の叩き台・感度の調査・実装計画1と2が完成 |
 | 2026-09-29 | セキュリティ監査 run-1(Cloudflare security-audit、deep、ソースのみ、`b4c3060`)。confirmed 0件。needs_validation 3件:①退会と再登録で通報上限・ブロックがリセットされる ②公開する Discord ユーザー名が更新されない ③匿名の診断記録 INSERT に上限がない。rejected 2件。サンドボックスがないため run_status は incomplete。正式な判定は WSL かクラウドで再実行。結果は `~/security-audit-skill/gamer-hub/run-1/REPORT.md` |
+| 2026-09-30 | 監査の未確定事項②に対応:相互 OK 後は、変わらない Discord の数字 ID で作るプロフィールリンク(`discord.com/users/<ID>`)を主な連絡先にし、ユーザー名は「登録時の名前」として補助表示にした。migration `20261001000500_discord_link`(my_inbox に discord_user_id を追加)を dev に適用済み。**本番 DB には未適用**(マージ・公開の前に適用する)。単体テスト 81/81、RLS 25/25 |

@@ -35,6 +35,7 @@ export type InboxRow = {
   axes: Axes | null;
   games: GameEntry[];
   discord_username: string | null;
+  discord_user_id: string | null;
   status: "pending" | "accepted" | "expired";
   created_at: string;
 };
