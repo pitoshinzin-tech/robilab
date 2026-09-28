@@ -42,6 +42,7 @@ export async function updateProfileAction(_: Result, form: FormData): Promise<Re
   const { error } = await supabase.rpc("update_profile", parsed.args);
   if (error) return { error: lobbyErrorMessage(errorCodeOf(error)) };
   revalidatePath("/lobby");
+  revalidatePath("/lobby/me");
   return { ok: "保存しました。" };
 }
 
