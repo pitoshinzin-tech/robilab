@@ -28,6 +28,14 @@
 update profiles set status = 'suspended' where id = '<reporter_id>';
 ```
 
+**報復通報の確認:** 通報された人(target)が、通報した人(reporter)を先にブロックしていないかを確認する:
+
+```sql
+select * from blocks where blocker_id = '<target_id>' and blocked_id = '<reporter_id>';
+```
+
+先にブロックされていた場合は、報復通報の可能性があります。
+
 ### ケース2: BAN する(年齢詐称、出会い目的、迷惑行為など)
 
 **パターン A: 対象ユーザーがまだ登録済みの場合**
@@ -63,9 +71,27 @@ update profiles set status = 'suspended' where id = '<reporter_id>';
 ## 未成年が関わる通報
 
 1. **最優先で確認する** — この通報は他の確認よりも優先度が高い
-2. 相手のプロフィール(年齢、自己紹介など)から年齢詐称が確かかどうかを判断する
+2. プロフィールには年齢が表示されないため、`private_info.birthdate` を確認する:
+   ```sql
+   select birthdate from private_info where user_id = '<target_id>';
+   ```
 3. 年齢詐称が確かなら、**その日のうちに BAN する** — 上記「ケース2」の手順に従う
-4. 特に出会い目的や援助交際の疑いがある場合は、詳細の記録を残し、必要に応じて法務に報告する
+4. 特に出会い目的や援助交際の疑いがある場合は、詳細の記録を残し、必要に応じて警察や相談窓口に相談する
+
+## 公開前の準備: 本番の NG ワード初期リスト
+
+連絡先の直接交換で相互 OK を迂回されるのを防ぐため、以下の言葉を最初の NG ワードとして入れています(controller が投入済み):
+
+- `discord.gg`
+- `discord.com/invite`
+- `http`
+- `line.me`
+- `@gmail`
+- `@icloud`
+- `LINE交換`
+- `ID交換`
+
+追加したい言葉がある場合は、下記「NG ワードの追加」の手順で追加してください。
 
 ## NG ワードの追加
 
@@ -172,4 +198,4 @@ limit 20;
 ---
 
 **最終確認日:** 2026-09-28  
-**ドキュメント作成者:** ops team
+**ドキュメント作成者:** 運営(1人)
