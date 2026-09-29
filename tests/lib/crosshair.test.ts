@@ -20,7 +20,7 @@ describe("isValidCrosshair", () => {
 describe("drawCrosshair", () => {
   it("draws four arms for a cross and a dot for cross-dot", () => {
     const calls: string[] = [];
-    const ctx = new Proxy({}, { get: (_, k) => (k === "canvas" ? {} : (..._a: unknown[]) => calls.push(String(k))), set: () => true }) as unknown as CanvasRenderingContext2D;
+    const ctx = new Proxy({}, { get: (_, k) => (k === "canvas" ? {} : () => calls.push(String(k))), set: () => true }) as unknown as CanvasRenderingContext2D;
     drawCrosshair(ctx, { ...CROSSHAIR_DEFAULT, shape: "cross", outline: false }, 50, 50);
     expect(calls.filter((c) => c === "fillRect")).toHaveLength(4);
     calls.length = 0;
