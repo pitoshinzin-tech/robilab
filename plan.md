@@ -135,7 +135,8 @@
 
 ### 公開後の機能(D36・D37)
 - [x] マイ設定:実装済み(ブランチ feat/my-settings、公開待ち)。設計書 [docs/superpowers/specs/2026-09-29-my-settings-design.md](docs/superpowers/specs/2026-09-29-my-settings-design.md)
-- [ ] 次の候補:マウス探し/プロ設定/エイム練習「今日の文字」
+- [x] エイム練習「今日の文字」:実装済み(ブランチ feat/aim-daily、公開待ち)。設計書 [docs/superpowers/specs/2026-09-29-aim-daily-design.md](docs/superpowers/specs/2026-09-29-aim-daily-design.md)
+- [ ] 次の候補:マウス探し/プロ設定
 
 ### v0.2(11月、GAG の時期なので本人の作業は少なめ)
 - [ ] デイリーエイム(PC)
@@ -229,3 +230,4 @@
 | 2026-09-29 | 今日の文字の設計書を本人が承認。実装計画(12タスク)を作成:[docs/superpowers/plans/2026-09-29-aim-daily.md](docs/superpowers/plans/2026-09-29-aim-daily.md) |
 | 2026-09-29 | エイム練習「今日の文字」を実装(feat/aim-daily、Task 1〜10)。dev に migration 1300・1400 を適用。ランキングの名前は名刺公開者のみ(本人確認待ち) |
 | 2026-09-29 | 監査 run-4(quick、`cf64960..2c0d0a7`)の後回し・強化メモに対応(feat/aim-daily):migration `20261001001500_card_locks`(運営の公開禁止の印を `card_locks` にも残し、設定を消して作り直しても印が戻る)、`get_aim_ranking` の利用停止・BAN の判定を上位10件がそろうまでに限定し索引を並びと一致させる(1400 を修正)、クロスヘアの shape を文字列に限定(1300 を修正)。launch.md に「migration 0500〜1500 をマージ前にすべて適用」「`/aim/opengraph-image` の回数制限」「本番と dev の関数定義の見比べ」を追加。ER 図を更新。1300〜1500 は本番未適用 |
+| 2026-09-29 | 今日の文字の仕上げ:最終レビューの修正6件(新しい端末ではサーバーのマイ設定を使う、Esc 直後の再開の文言、お題が変わったときの停止、軌跡の描き方、path の読み取り、lint 警告)。監査 run-4:confirmed 0・needs_validation 0。dev に 1500 まで適用。単体 188、RLS 50、lint 0、ビルド成功。本人の確認待ち:ランキングの名前の扱い、お題60字、初期値、正確さの数え方、MAX_STEP の手応え、実際のプレイ |
