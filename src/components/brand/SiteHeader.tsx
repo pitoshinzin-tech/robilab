@@ -9,6 +9,7 @@ export function SiteHeader() {
       <nav className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-sm text-[var(--rl-muted)]">
         <Link href="/diagnosis" className="whitespace-nowrap">診断</Link>
         <Link href="/aim" className="whitespace-nowrap">今日の文字</Link>
+        <Link href="/mouse" className="whitespace-nowrap">マウス探し</Link>
         <Link href="/tools/sensitivity" className="whitespace-nowrap">感度計算</Link>
         <Link href="/my" className="whitespace-nowrap">マイ設定</Link>
         <Link href="/types" className="whitespace-nowrap">タイプ一覧</Link>

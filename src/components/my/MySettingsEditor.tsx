@@ -95,6 +95,7 @@ export function MySettingsEditor() {
           ))}
         </div>
         <p className="text-xs text-[var(--rl-muted)]">手の大きさはマウス探しで使います。公開する名刺には出しません。</p>
+        <Link href="/mouse" className="text-sm underline">合うマウスを探す</Link>
       </section>
 
       <section className={box}>
