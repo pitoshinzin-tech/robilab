@@ -118,7 +118,7 @@ export function MySettingsEditor() {
       </div>
 
       <CardPreview data={valid ? toPublicCardData(draft) : null} />
-      <SyncPanel loggedIn={loggedIn} slug={slug} status={status} serverError={serverError} canPublish={valid && status !== "server-error"}
+      <SyncPanel loggedIn={loggedIn} slug={slug} status={status} serverError={serverError} canPublish={valid && status !== "server-error"} hasErrors={!valid}
         onPublic={(on) => void setPublic(on)} onRemove={() => void removeAll().then((ok) => { if (ok) window.location.reload(); })} />
     </div>
   );

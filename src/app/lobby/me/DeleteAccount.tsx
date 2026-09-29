@@ -2,7 +2,8 @@
 import { useState, useTransition } from "react";
 import { deleteMeAction } from "@/app/lobby/actions";
 
-export function DeleteAccount() {
+/** onDeleted: 退会を確定したとき(サーバーへの削除を始める直前)に呼ぶ。/my でこの端末の設定を消すのに使う。 */
+export function DeleteAccount({ onDeleted }: { onDeleted?: () => void } = {}) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   return (
@@ -10,6 +11,7 @@ export function DeleteAccount() {
       <button type="button" disabled={pending}
         onClick={() => {
           if (confirm("退会すると、プロフィールと声かけの記録がすべて消えます。退会から7日間は、同じ Discord アカウントで再登録できません。よろしいですか?")) {
+            onDeleted?.();
             start(async () => {
               const res = await deleteMeAction();
               if (res?.error) setError(res.error);

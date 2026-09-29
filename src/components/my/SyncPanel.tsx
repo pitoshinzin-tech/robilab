@@ -2,6 +2,7 @@
 import { LoginButton } from "@/components/lobby/LoginButton";
 import { DeleteAccount } from "@/app/lobby/me/DeleteAccount";
 import { buildXShareUrl } from "@/lib/share";
+import { browserStorage, clearDirty, clearLocal } from "@/lib/my-settings-store";
 import type { SyncStatus } from "./useMySettings";
 
 type Props = {
@@ -10,6 +11,8 @@ type Props = {
   status: SyncStatus;
   serverError: string | null;
   canPublish: boolean;
+  /** 入力に誤りがある欄があるか(あるあいだは保存していない) */
+  hasErrors: boolean;
   onPublic: (on: boolean) => void;
   onRemove: () => void;
 };
@@ -22,11 +25,19 @@ const STATUS_TEXT: Record<SyncStatus, string> = {
   "server-error": "",
 };
 
-export function SyncPanel({ loggedIn, slug, status, serverError, canPublish, onPublic, onRemove }: Props) {
+const INVALID_TEXT = "入力に誤りがある欄があるため、保存していません。赤い表示の欄を直してください。";
+
+function clearThisDevice() {
+  const storage = browserStorage();
+  clearLocal(storage);
+  clearDirty(storage);
+}
+
+export function SyncPanel({ loggedIn, slug, status, serverError, canPublish, hasErrors, onPublic, onRemove }: Props) {
   const pageUrl = slug && typeof window !== "undefined" ? `${window.location.origin}/c/${slug}` : null;
   return (
     <section className="grid gap-3 rounded-xl border border-[var(--rl-border)] bg-[var(--rl-surface)] p-4 text-sm">
-      <p>{serverError ?? STATUS_TEXT[status]}</p>
+      <p>{hasErrors ? INVALID_TEXT : (serverError ?? STATUS_TEXT[status])}</p>
       {!loggedIn ? (
         <div className="grid gap-2">
           <p className="text-[var(--rl-muted)]">Discord でログインすると、スマホと PC で共有でき、名刺を URL で公開できます。</p>
@@ -46,7 +57,7 @@ export function SyncPanel({ loggedIn, slug, status, serverError, canPublish, onP
               </a>
             </div>
           )}
-          <DeleteAccount />
+          <DeleteAccount onDeleted={clearThisDevice} />
         </div>
       )}
       <button type="button" onClick={() => { if (confirm("マイ設定を消します(この端末とサーバーの両方)。よろしいですか?")) onRemove(); }}
