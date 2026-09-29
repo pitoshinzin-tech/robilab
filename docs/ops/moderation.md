@@ -143,6 +143,16 @@ update my_settings set card_locked = true, public_slug = null where public_slug 
 
 内容そのものを消す場合は、`delete from my_settings where public_slug = '<slug>';` を使う。
 
+## 今日の文字のランキング
+
+不自然な記録(明らかに人間に無理な点数など)を消す場合:
+
+```sql
+delete from aim_scores where play_date = '<日付>' and user_id = '<user_id>';
+```
+
+利用停止・BAN 中の人は、ランキングに自動で表示されない。ランキングの名前は、名刺を公開している人だけ表示される。表示名に問題がある場合は、名刺と同じく `card_locked = true` にすると「名無しのゲーマー」になる。名刺を非公開にするだけでも名前は隠れ、「名無しのゲーマー」になる。
+
 ## よく使う確認用 SQL
 
 ### open の通報を一覧表示(新しい順)

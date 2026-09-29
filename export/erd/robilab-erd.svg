@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 1310" width="1640" height="1310" font-family="'Yu Gothic UI', 'Meiryo', sans-serif">
-<g id="background"><rect width="1640" height="1310" fill="#f7f8fb"/></g>
-<g id="title"><text x="40" y="52" font-size="28" font-weight="700" fill="#1b1f2a">ロビラボ データベース ER 図</text><text x="40" y="82" font-size="15" fill="#5b6270">Supabase public スキーマ(dev: robilab-dev で確認、migration 20261001001200 まで)</text></g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 1380" width="1640" height="1380" font-family="'Yu Gothic UI', 'Meiryo', sans-serif">
+<g id="background"><rect width="1640" height="1380" fill="#f7f8fb"/></g>
+<g id="title"><text x="40" y="52" font-size="28" font-weight="700" fill="#1b1f2a">ロビラボ データベース ER 図</text><text x="40" y="82" font-size="15" fill="#5b6270">Supabase public スキーマ(dev: robilab-dev で確認、migration 20261001001400 まで)</text></g>
 <g id="areas">
 <rect x="20" y="96" width="1200" height="772" rx="14" fill="none" stroke="#c9cedb" stroke-dasharray="6 5"/>
 <text x="36" y="858" font-size="13" fill="#7a8190">マッチング(Discord ログインが必要)</text>
@@ -13,8 +13,9 @@
 <g id="rel-profiles-id"><path d="M400,171 C340,171 370,171 310,171" stroke="#4a5263"/><circle cx="310" cy="171" r="3.5" fill="#4a5263"/><text x="394" y="166" font-size="11" fill="#4a5263" text-anchor="end">1</text><text x="316" y="166" font-size="11" fill="#4a5263" text-anchor="start">1</text></g>
 <g id="rel-private_info-user_id"><path d="M40,391 C-8,391 -8,171 40,171" stroke="#4a5263"/><circle cx="40" cy="171" r="3.5" fill="#4a5263"/><text x="34" y="386" font-size="11" fill="#4a5263" text-anchor="end">1</text><text x="34" y="166" font-size="11" fill="#4a5263" text-anchor="end">1</text></g>
 <g id="rel-my_settings-user_id"><path d="M400,941 C340,941 370,171 310,171" stroke="#4a5263"/><circle cx="310" cy="171" r="3.5" fill="#4a5263"/><text x="394" y="936" font-size="11" fill="#4a5263" text-anchor="end">1</text><text x="316" y="166" font-size="11" fill="#4a5263" text-anchor="start">1</text></g>
-<g id="rel-approaches-from_id"><path d="M400,667 C366,667 366,171 400,171" stroke="#4a5263"/><circle cx="400" cy="171" r="3.5" fill="#4a5263"/><text x="394" y="662" font-size="11" fill="#4a5263" text-anchor="end">N</text><text x="394" y="166" font-size="11" fill="#4a5263" text-anchor="end">1</text></g>
-<g id="rel-approaches-to_id"><path d="M400,693 C352,693 352,171 400,171" stroke="#4a5263"/><circle cx="400" cy="171" r="3.5" fill="#4a5263"/><text x="394" y="688" font-size="11" fill="#4a5263" text-anchor="end">N</text><text x="394" y="166" font-size="11" fill="#4a5263" text-anchor="end">1</text></g>
+<g id="rel-aim_scores-user_id"><path d="M40,967 C6,967 6,171 40,171" stroke="#4a5263"/><circle cx="40" cy="171" r="3.5" fill="#4a5263"/><text x="34" y="962" font-size="11" fill="#4a5263" text-anchor="end">N</text><text x="34" y="166" font-size="11" fill="#4a5263" text-anchor="end">1</text></g>
+<g id="rel-approaches-from_id"><path d="M400,667 C352,667 352,171 400,171" stroke="#4a5263"/><circle cx="400" cy="171" r="3.5" fill="#4a5263"/><text x="394" y="662" font-size="11" fill="#4a5263" text-anchor="end">N</text><text x="394" y="166" font-size="11" fill="#4a5263" text-anchor="end">1</text></g>
+<g id="rel-approaches-to_id"><path d="M400,693 C338,693 338,171 400,171" stroke="#4a5263"/><circle cx="400" cy="171" r="3.5" fill="#4a5263"/><text x="394" y="688" font-size="11" fill="#4a5263" text-anchor="end">N</text><text x="394" y="166" font-size="11" fill="#4a5263" text-anchor="end">1</text></g>
 <g id="rel-blocks-blocker_id"><path d="M860,171 C800,171 800,171 740,171" stroke="#4a5263"/><circle cx="740" cy="171" r="3.5" fill="#4a5263"/><text x="854" y="166" font-size="11" fill="#4a5263" text-anchor="end">N</text><text x="746" y="166" font-size="11" fill="#4a5263" text-anchor="start">1</text></g>
 <g id="rel-blocks-blocked_id"><path d="M860,197 C800,197 800,171 740,171" stroke="#4a5263"/><circle cx="740" cy="171" r="3.5" fill="#4a5263"/><text x="854" y="192" font-size="11" fill="#4a5263" text-anchor="end">N</text><text x="746" y="166" font-size="11" fill="#4a5263" text-anchor="start">1</text></g>
 <g id="rel-carried_blocks-blocker_id"><path d="M860,361 C800,361 800,171 740,171" stroke="#4a5263"/><circle cx="740" cy="171" r="3.5" fill="#4a5263"/><text x="854" y="356" font-size="11" fill="#4a5263" text-anchor="end">N</text><text x="746" y="166" font-size="11" fill="#4a5263" text-anchor="start">1</text></g>
@@ -269,21 +270,65 @@
 <text x="492" y="1050" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">card_locked</text>
 <text x="730" y="1050" font-size="11" fill="#6b7280" text-anchor="end">boolean(運営の公開禁止)</text>
 </g>
+<g id="table-aim_chars">
+<rect x="1290" y="880" width="310" height="152" rx="8" fill="#ffffff" stroke="#c46a1a" stroke-width="1.5"/>
+<path d="M1290,888 a8,8 0 0 1 8,-8 h294 a8,8 0 0 1 8,8 v40 h-310 z" fill="#c46a1a"/>
+<text x="1302" y="901" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">aim_chars</text>
+<text x="1302" y="920" font-size="12" fill="#eef1f7">今日の文字の一覧(運営/関数だけ)</text>
+<rect x="1298" y="934" width="24" height="15" rx="3" fill="#e2b714"/><text x="1310" y="945.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<text x="1382" y="946" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">idx</text>
+<text x="1590" y="946" font-size="11" fill="#6b7280" text-anchor="end">int</text>
+<rect x="1291" y="954" width="308" height="26" fill="#f3f5f9"/>
+<rect x="1298" y="960" width="24" height="15" rx="3" fill="#7a8190"/><text x="1310" y="971.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">UQ</text>
+<text x="1382" y="972" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">char_id</text>
+<text x="1590" y="972" font-size="11" fill="#6b7280" text-anchor="end">text(u+16進)</text>
+<text x="1382" y="998" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">glyph</text>
+<text x="1590" y="998" font-size="11" fill="#6b7280" text-anchor="end">text</text>
+<rect x="1291" y="1006" width="308" height="26" fill="#f3f5f9"/>
+<text x="1382" y="1024" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">strokes</text>
+<text x="1590" y="1024" font-size="11" fill="#6b7280" text-anchor="end">int(1〜40)</text>
 </g>
-<g id="legend"><rect x="20" y="1080" width="1600" height="210" rx="12" fill="#ffffff" stroke="#d7dbe5"/>
-<text x="40" y="1110" font-size="15" font-weight="700" fill="#1b1f2a">凡例</text>
-<rect x="40" y="1124" width="16" height="16" rx="3" fill="#2f6fde"/><text x="64" y="1137" font-size="13" fill="#333a48">本人の行だけ読める(RLS)。書き込みは関数経由</text>
-<rect x="600" y="1124" width="16" height="16" rx="3" fill="#7b4fd6"/><text x="624" y="1137" font-size="13" fill="#333a48">直接は読み書き不可。関数(RPC)経由だけ</text>
-<rect x="40" y="1150" width="16" height="16" rx="3" fill="#c46a1a"/><text x="64" y="1163" font-size="13" fill="#333a48">運営だけ(ダッシュボード / 関数の内部で使用)</text>
-<rect x="600" y="1150" width="16" height="16" rx="3" fill="#1f9d6b"/><text x="624" y="1163" font-size="13" fill="#333a48">だれでも関数経由で記録だけできる(件数上限あり・読めない)</text>
-<rect x="40" y="1176" width="16" height="16" rx="3" fill="#5b6270"/><text x="64" y="1189" font-size="13" fill="#333a48">Supabase Auth が管理</text>
-<rect x="1160" y="1124" width="24" height="15" rx="3" fill="#e2b714"/><text x="1190" y="1136" font-size="13" fill="#333a48">主キー</text>
-<rect x="1250" y="1124" width="24" height="15" rx="3" fill="#4a5263"/><text x="1280" y="1136" font-size="13" fill="#333a48">外部キー</text>
-<rect x="1356" y="1124" width="24" height="15" rx="3" fill="#7a8190"/><text x="1386" y="1136" font-size="13" fill="#333a48">一意</text>
-<rect x="1160" y="1150" width="50" height="15" rx="3" fill="#5865f2"/><text x="1216" y="1162" font-size="13" fill="#333a48">Discord ID の値でつながる(外部キーではない)</text>
-<path d="M40,1224 h60" stroke="#4a5263" stroke-width="1.6"/><text x="110" y="1228" font-size="13" fill="#333a48">親が消えると一緒に消える(ON DELETE CASCADE)</text>
-<path d="M520,1224 h60" stroke="#c46a1a" stroke-width="1.6" stroke-dasharray="7 4"/><text x="590" y="1228" font-size="13" fill="#333a48">親が消えると空欄になる(ON DELETE SET NULL)。通報は証跡として残る</text>
-<text x="40" y="1260" font-size="13" fill="#333a48">N / 1 = 多対一。profiles・private_info・my_settings は auth.users と 1 対 1。「?」は空欄(NULL)を許す列。</text>
-<text x="40" y="1282" font-size="13" fill="#333a48">Discord ID の値でつながる列:private_info.discord_user_id = reports.reporter_discord_id / target_discord_id = carried_blocks.blocked_discord_id = banned_discord_ids / left_discord_ids.discord_user_id</text>
+<g id="table-aim_scores">
+<rect x="40" y="880" width="320" height="230" rx="8" fill="#ffffff" stroke="#7b4fd6" stroke-width="1.5"/>
+<path d="M40,888 a8,8 0 0 1 8,-8 h304 a8,8 0 0 1 8,8 v40 h-320 z" fill="#7b4fd6"/>
+<text x="52" y="901" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">aim_scores</text>
+<text x="52" y="920" font-size="12" fill="#eef1f7">今日の文字の自己ベスト(1日1人1件)</text>
+<rect x="48" y="934" width="24" height="15" rx="3" fill="#e2b714"/><text x="60" y="945.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<text x="132" y="946" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">play_date</text>
+<text x="350" y="946" font-size="11" fill="#6b7280" text-anchor="end">date</text>
+<rect x="41" y="954" width="318" height="26" fill="#f3f5f9"/>
+<rect x="48" y="960" width="24" height="15" rx="3" fill="#e2b714"/><text x="60" y="971.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<rect x="75" y="960" width="24" height="15" rx="3" fill="#4a5263"/><text x="87" y="971.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">FK</text>
+<text x="132" y="972" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">user_id</text>
+<text x="350" y="972" font-size="11" fill="#6b7280" text-anchor="end">uuid</text>
+<text x="132" y="998" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">char_id</text>
+<text x="350" y="998" font-size="11" fill="#6b7280" text-anchor="end">text</text>
+<rect x="41" y="1006" width="318" height="26" fill="#f3f5f9"/>
+<text x="132" y="1024" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">accuracy</text>
+<text x="350" y="1024" font-size="11" fill="#6b7280" text-anchor="end">numeric(0〜100)</text>
+<text x="132" y="1050" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">time_ms</text>
+<text x="350" y="1050" font-size="11" fill="#6b7280" text-anchor="end">int</text>
+<rect x="41" y="1058" width="318" height="26" fill="#f3f5f9"/>
+<text x="132" y="1076" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">score</text>
+<text x="350" y="1076" font-size="11" fill="#6b7280" text-anchor="end">int(0〜10000)</text>
+<text x="132" y="1102" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">submitted_at</text>
+<text x="350" y="1102" font-size="11" fill="#6b7280" text-anchor="end">timestamptz</text>
+</g>
+</g>
+<g id="legend"><rect x="20" y="1150" width="1600" height="210" rx="12" fill="#ffffff" stroke="#d7dbe5"/>
+<text x="40" y="1180" font-size="15" font-weight="700" fill="#1b1f2a">凡例</text>
+<rect x="40" y="1194" width="16" height="16" rx="3" fill="#2f6fde"/><text x="64" y="1207" font-size="13" fill="#333a48">本人の行だけ読める(RLS)。書き込みは関数経由</text>
+<rect x="600" y="1194" width="16" height="16" rx="3" fill="#7b4fd6"/><text x="624" y="1207" font-size="13" fill="#333a48">直接は読み書き不可。関数(RPC)経由だけ</text>
+<rect x="40" y="1220" width="16" height="16" rx="3" fill="#c46a1a"/><text x="64" y="1233" font-size="13" fill="#333a48">運営だけ(ダッシュボード / 関数の内部で使用)</text>
+<rect x="600" y="1220" width="16" height="16" rx="3" fill="#1f9d6b"/><text x="624" y="1233" font-size="13" fill="#333a48">だれでも関数経由で記録だけできる(件数上限あり・読めない)</text>
+<rect x="40" y="1246" width="16" height="16" rx="3" fill="#5b6270"/><text x="64" y="1259" font-size="13" fill="#333a48">Supabase Auth が管理</text>
+<rect x="1160" y="1194" width="24" height="15" rx="3" fill="#e2b714"/><text x="1190" y="1206" font-size="13" fill="#333a48">主キー</text>
+<rect x="1250" y="1194" width="24" height="15" rx="3" fill="#4a5263"/><text x="1280" y="1206" font-size="13" fill="#333a48">外部キー</text>
+<rect x="1356" y="1194" width="24" height="15" rx="3" fill="#7a8190"/><text x="1386" y="1206" font-size="13" fill="#333a48">一意</text>
+<rect x="1160" y="1220" width="50" height="15" rx="3" fill="#5865f2"/><text x="1216" y="1232" font-size="13" fill="#333a48">Discord ID の値でつながる(外部キーではない)</text>
+<path d="M40,1294 h60" stroke="#4a5263" stroke-width="1.6"/><text x="110" y="1298" font-size="13" fill="#333a48">親が消えると一緒に消える(ON DELETE CASCADE)</text>
+<path d="M520,1294 h60" stroke="#c46a1a" stroke-width="1.6" stroke-dasharray="7 4"/><text x="590" y="1298" font-size="13" fill="#333a48">親が消えると空欄になる(ON DELETE SET NULL)。通報は証跡として残る</text>
+<text x="40" y="1330" font-size="13" fill="#333a48">N / 1 = 多対一。profiles・private_info・my_settings は auth.users と 1 対 1(aim_scores は 1 人につき 1 日 1 件)。「?」は空欄(NULL)を許す列。</text>
+<text x="40" y="1352" font-size="13" fill="#333a48">Discord ID の値でつながる列:private_info.discord_user_id = reports.reporter_discord_id / target_discord_id = carried_blocks.blocked_discord_id = banned_discord_ids / left_discord_ids.discord_user_id</text>
 </g>
 </svg>

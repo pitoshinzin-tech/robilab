@@ -67,6 +67,10 @@
 
 本規約の解釈にあたっては、日本法を準拠法とします。
 
+## クレジット
+
+「今日の文字」の文字データは、KanjiVG(https://kanjivg.tagaini.net/ 、© Ulrich Apel)を元にしています。このデータは Creative Commons Attribution-Share Alike 3.0 のもとで提供されています(本サイトで変換したデータも同じ条件です)。
+
 ## お問い合わせ
 
 お問い合わせ先:【公開前に本人が記入】
