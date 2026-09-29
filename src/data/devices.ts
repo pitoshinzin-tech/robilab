@@ -1,0 +1,91 @@
+import type { DeviceSlot } from "@/lib/my-settings";
+import type { Option } from "@/lib/item-ref";
+
+/**
+ * デバイスの候補(名前だけ。公式のロゴや画像は使わない)。
+ * 製品名はメーカー公式サイトの表記に合わせる。追加はこの配列に足すだけでよい。
+ */
+export type Device = { id: string; category: DeviceSlot; brand: string; name: string };
+
+export const DEVICES: Device[] = [
+  // マウス
+  { id: "logicool-g-pro-x-superlight-2", category: "mouse", brand: "Logicool G", name: "PRO X SUPERLIGHT 2" },
+  { id: "logicool-g-pro-x-superlight-2-dex", category: "mouse", brand: "Logicool G", name: "PRO X SUPERLIGHT 2 DEX" },
+  { id: "logicool-g-pro-x-superlight", category: "mouse", brand: "Logicool G", name: "PRO X SUPERLIGHT" },
+  { id: "logicool-g502-x-plus", category: "mouse", brand: "Logicool G", name: "G502 X PLUS" },
+  { id: "logicool-g502-hero", category: "mouse", brand: "Logicool G", name: "G502 HERO" },
+  { id: "logicool-g305", category: "mouse", brand: "Logicool G", name: "G305" },
+  { id: "logicool-g304", category: "mouse", brand: "Logicool G", name: "G304" },
+  { id: "razer-deathadder-v3-pro", category: "mouse", brand: "Razer", name: "DeathAdder V3 Pro" },
+  { id: "razer-deathadder-v3", category: "mouse", brand: "Razer", name: "DeathAdder V3" },
+  { id: "razer-viper-v3-pro", category: "mouse", brand: "Razer", name: "Viper V3 Pro" },
+  { id: "razer-viper-mini", category: "mouse", brand: "Razer", name: "Viper Mini" },
+  { id: "razer-basilisk-v3-pro", category: "mouse", brand: "Razer", name: "Basilisk V3 Pro" },
+  { id: "zowie-ec2-cw", category: "mouse", brand: "ZOWIE", name: "EC2-CW" },
+  { id: "zowie-ec2-c", category: "mouse", brand: "ZOWIE", name: "EC2-C" },
+  { id: "zowie-fk2-c", category: "mouse", brand: "ZOWIE", name: "FK2-C" },
+  { id: "zowie-s2-c", category: "mouse", brand: "ZOWIE", name: "S2-C" },
+  { id: "zowie-za13-c", category: "mouse", brand: "ZOWIE", name: "ZA13-C" },
+  { id: "pulsar-x2-v2", category: "mouse", brand: "Pulsar", name: "X2 V2" },
+  { id: "pulsar-xlite-v3", category: "mouse", brand: "Pulsar", name: "Xlite V3" },
+  { id: "finalmouse-ultralightx", category: "mouse", brand: "Finalmouse", name: "UltralightX" },
+  { id: "lamzu-atlantis-mini", category: "mouse", brand: "LAMZU", name: "Atlantis Mini" },
+  { id: "endgame-gear-op1-8k", category: "mouse", brand: "Endgame Gear", name: "OP1 8k" },
+  { id: "endgame-gear-xm2we", category: "mouse", brand: "Endgame Gear", name: "XM2we" },
+  { id: "vaxee-xe", category: "mouse", brand: "VAXEE", name: "XE" },
+  { id: "glorious-model-o-2-wireless", category: "mouse", brand: "Glorious", name: "Model O 2 Wireless" },
+  { id: "steelseries-aerox-3", category: "mouse", brand: "SteelSeries", name: "Aerox 3" },
+  { id: "steelseries-rival-3", category: "mouse", brand: "SteelSeries", name: "Rival 3" },
+  { id: "corsair-m75-wireless", category: "mouse", brand: "CORSAIR", name: "M75 WIRELESS" },
+  { id: "hyperx-pulsefire-haste-2", category: "mouse", brand: "HyperX", name: "Pulsefire Haste 2" },
+  { id: "benq-zowie-u2", category: "mouse", brand: "ZOWIE", name: "U2" },
+  // マウスパッド
+  { id: "artisan-zero", category: "pad", brand: "ARTISAN", name: "零 ZERO" },
+  { id: "artisan-hien", category: "pad", brand: "ARTISAN", name: "飛燕 HIEN" },
+  { id: "artisan-raiden", category: "pad", brand: "ARTISAN", name: "雷電 RAIDEN" },
+  { id: "artisan-shidenkai", category: "pad", brand: "ARTISAN", name: "紫電改 SHIDENKAI" },
+  { id: "logicool-g640", category: "pad", brand: "Logicool G", name: "G640" },
+  { id: "logicool-g240", category: "pad", brand: "Logicool G", name: "G240" },
+  { id: "razer-gigantus-v2", category: "pad", brand: "Razer", name: "Gigantus V2" },
+  { id: "razer-strider", category: "pad", brand: "Razer", name: "Strider" },
+  { id: "zowie-g-sr", category: "pad", brand: "ZOWIE", name: "G-SR" },
+  { id: "zowie-g-sr-se", category: "pad", brand: "ZOWIE", name: "G-SR-SE" },
+  { id: "steelseries-qck-heavy", category: "pad", brand: "SteelSeries", name: "QcK Heavy" },
+  { id: "steelseries-qck", category: "pad", brand: "SteelSeries", name: "QcK" },
+  { id: "lgg-saturn-pro", category: "pad", brand: "Lethal Gaming Gear", name: "Saturn Pro" },
+  { id: "lgg-jupiter", category: "pad", brand: "Lethal Gaming Gear", name: "Jupiter Pro" },
+  { id: "vaxee-pa", category: "pad", brand: "VAXEE", name: "PA" },
+  // キーボード
+  { id: "wooting-60he-plus", category: "keyboard", brand: "Wooting", name: "60HE+" },
+  { id: "wooting-80he", category: "keyboard", brand: "Wooting", name: "80HE" },
+  { id: "razer-huntsman-v3-pro-tkl", category: "keyboard", brand: "Razer", name: "Huntsman V3 Pro TKL" },
+  { id: "razer-huntsman-v3-pro-mini", category: "keyboard", brand: "Razer", name: "Huntsman V3 Pro Mini" },
+  { id: "logicool-g-pro-x-tkl", category: "keyboard", brand: "Logicool G", name: "PRO X TKL" },
+  { id: "logicool-g-pro-x-60", category: "keyboard", brand: "Logicool G", name: "PRO X 60" },
+  { id: "steelseries-apex-pro-tkl", category: "keyboard", brand: "SteelSeries", name: "Apex Pro TKL" },
+  { id: "steelseries-apex-pro-mini", category: "keyboard", brand: "SteelSeries", name: "Apex Pro Mini" },
+  { id: "corsair-k70-rgb-tkl", category: "keyboard", brand: "CORSAIR", name: "K70 RGB TKL" },
+  { id: "realforce-gx1", category: "keyboard", brand: "REALFORCE", name: "GX1" },
+  { id: "hyperx-alloy-origins", category: "keyboard", brand: "HyperX", name: "Alloy Origins" },
+  { id: "drunkdeer-a75", category: "keyboard", brand: "DrunkDeer", name: "A75" },
+  { id: "keychron-k2-he", category: "keyboard", brand: "Keychron", name: "K2 HE" },
+  // ヘッドセット
+  { id: "logicool-g-pro-x-2-lightspeed", category: "headset", brand: "Logicool G", name: "PRO X 2 LIGHTSPEED" },
+  { id: "logicool-g733", category: "headset", brand: "Logicool G", name: "G733" },
+  { id: "logicool-g435", category: "headset", brand: "Logicool G", name: "G435" },
+  { id: "razer-blackshark-v2-pro", category: "headset", brand: "Razer", name: "BlackShark V2 Pro" },
+  { id: "razer-blackshark-v2-x", category: "headset", brand: "Razer", name: "BlackShark V2 X" },
+  { id: "hyperx-cloud-iii", category: "headset", brand: "HyperX", name: "Cloud III" },
+  { id: "hyperx-cloud-ii", category: "headset", brand: "HyperX", name: "Cloud II" },
+  { id: "hyperx-cloud-alpha", category: "headset", brand: "HyperX", name: "Cloud Alpha" },
+  { id: "steelseries-arctis-nova-pro", category: "headset", brand: "SteelSeries", name: "Arctis Nova Pro" },
+  { id: "steelseries-arctis-nova-7", category: "headset", brand: "SteelSeries", name: "Arctis Nova 7" },
+  { id: "sony-inzone-h9", category: "headset", brand: "Sony", name: "INZONE H9" },
+  { id: "sony-inzone-h5", category: "headset", brand: "Sony", name: "INZONE H5" },
+  { id: "sony-inzone-buds", category: "headset", brand: "Sony", name: "INZONE Buds" },
+  { id: "corsair-hs80-rgb-wireless", category: "headset", brand: "CORSAIR", name: "HS80 RGB WIRELESS" },
+];
+
+export function deviceOptions(category: DeviceSlot): Option[] {
+  return DEVICES.filter((d) => d.category === category).map((d) => ({ id: d.id, label: `${d.brand} ${d.name}` }));
+}
