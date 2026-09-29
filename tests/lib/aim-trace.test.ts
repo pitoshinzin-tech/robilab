@@ -39,6 +39,7 @@ describe("stepTrace", () => {
   it("frames outside the tolerance lower the accuracy but still progress only within it", () => {
     const s = run([...along(10, 55, 15), ...along(55, 100, 15, 10)]); // 後半は 10 ずれ(許容 6 の外)
     expect(s.phase).toBe("tracing");
+    expect(s.frames).toBeGreaterThan(s.inTol);
   });
   it("multi-stroke: waits for the next start circle", () => {
     const two = [line, toStroke(parsePath("M10,80L100,80"))];
@@ -46,6 +47,23 @@ describe("stepTrace", () => {
     along(10, 100, 30).forEach((p, i) => (s = stepTrace(s, two, p, i * 16)));
     expect(s.stroke).toBe(1);
     expect(s.phase).toBe("await-start");
+  });
+  it("loitering on the line does not inflate accuracy", () => {
+    // Run A: perfect trace
+    const pointsA = along(10, 100, 30);
+    const sA = run(pointsA);
+    const rA = traceResult(sA)!;
+    expect(rA.accuracy).toBe(100);
+
+    // Run B: same but with 60 loitering frames at (10.5, 50) after start
+    const pointsB = [
+      { x: 10, y: 50 },
+      ...Array(60).fill({ x: 10.5, y: 50 }),
+      ...along(10, 100, 30).slice(1)
+    ];
+    const sB = run(pointsB);
+    const rB = traceResult(sB)!;
+    expect(rB.accuracy).toBe(100);
   });
 });
 

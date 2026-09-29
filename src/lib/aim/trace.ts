@@ -33,8 +33,26 @@ export function stepTrace(s: TraceState, strokes: Stroke[], p: Point, now: numbe
   }
   const q = closestOnStroke(st, p);
   const within = q.dist <= TOLERANCE;
-  const progress = within && q.t > s.progress && q.t - s.progress <= MAX_STEP ? q.t : s.progress;
-  const next = { ...s, frames: s.frames + 1, inTol: s.inTol + (within ? 1 : 0), progress };
+  const progressed = q.t > s.progress && q.t - s.progress <= MAX_STEP;
+
+  let frames = s.frames;
+  let inTol = s.inTol;
+  let progress = s.progress;
+
+  if (within && progressed) {
+    // advancing: within tolerance and progress increased → counts as good
+    frames += 1;
+    inTol += 1;
+    progress = q.t;
+  } else if (!within) {
+    // off-line: outside tolerance → counts as bad
+    frames += 1;
+  }
+  // else: neutral (within tolerance but no progress) → not counted
+  // ニュートラルフレームを数えない理由: プレイヤーが線上に停止しているだけで
+  // 実際には進捗していない場合、精度計算に含めるべきではない
+
+  const next = { ...s, frames, inTol, progress };
   if (progress < COMPLETE) return next;
   const perStroke = [...s.perStroke, next.inTol / next.frames];
   if (s.stroke + 1 >= strokes.length) return { ...next, perStroke, phase: "done", finishedAt: now };
