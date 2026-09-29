@@ -9,6 +9,7 @@ export function SiteHeader() {
       <nav className="flex items-center gap-4 text-sm text-[var(--rl-muted)]">
         <Link href="/diagnosis">診断</Link>
         <Link href="/tools/sensitivity">感度計算</Link>
+        <Link href="/my">マイ設定</Link>
         <Link href="/types">タイプ一覧</Link>
         <Link href="/lobby">仲間</Link>
         <Bell />

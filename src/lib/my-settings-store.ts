@@ -71,3 +71,11 @@ export function applyDiagnosisToLocal(storage: SettingsStorage | null, typeCode:
 export function saveSensToLocal(storage: SettingsStorage | null, gameId: string, dpi: number, sens: number, now: Date = new Date()) {
   return updateLocal(storage, (s) => ({ ...s, dpi, sens: { ...s.sens, [gameId]: sens }, mainGame: s.mainGame ?? gameId }), now);
 }
+
+/** 感度計算ツールの初期値(マイ設定のメインゲーム・DPI・感度)。そろっていなければ null。 */
+export function sensDefaults(s: MySettings | null): { gameId: string; dpiText: string; sensText: string } | null {
+  if (!s || s.dpi === null || !s.mainGame) return null;
+  const sens = s.sens[s.mainGame];
+  if (sens === undefined) return null;
+  return { gameId: s.mainGame, dpiText: String(s.dpi), sensText: String(sens) };
+}

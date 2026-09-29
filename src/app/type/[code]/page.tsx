@@ -56,6 +56,7 @@ export default async function TypePage({ params, searchParams }: Props) {
         <GlitchTitle className="text-2xl">{type.name}</GlitchTitle>
         <p className="text-[var(--rl-cyan)]">「{type.catchcopy}」</p>
         <ShareButton href={shareUrl} />
+        <Link href="/my" className="inline-block rounded-full border border-[var(--rl-border)] px-6 py-3 font-bold">マイ設定に登録しよう</Link>
       </section>
       <section><AxisBars axes={axes} /></section>
       <section><p className="leading-relaxed">{type.description}</p></section>

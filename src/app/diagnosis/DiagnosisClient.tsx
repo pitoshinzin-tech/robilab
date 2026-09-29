@@ -5,6 +5,7 @@ import { QUESTIONS, DIAGNOSIS_NOTE } from "@/data/questions";
 import { diagnosisReducer, initialState } from "@/lib/diagnosis-state";
 import { scoreAxes, toTypeCode } from "@/lib/scoring";
 import { recordDiagnosis } from "@/lib/analytics";
+import { applyDiagnosisToLocal, browserStorage } from "@/lib/my-settings-store";
 import { ProgressBar } from "@/components/diagnosis/ProgressBar";
 import { QuestionCard } from "@/components/diagnosis/QuestionCard";
 
@@ -19,6 +20,7 @@ export function DiagnosisClient() {
     const axes = scoreAxes(state.answers);
     const code = toTypeCode(axes);
     void recordDiagnosis(code, axes);
+    applyDiagnosisToLocal(browserStorage(), code, axes);
     const packed = [axes.attack, axes.instinct, axes.team, axes.heat].map((n) => n.toFixed(2)).join(",");
     try { sessionStorage.setItem("robilab:lastDiagnosis", JSON.stringify({ code, axes: JSON.stringify(axes) })); } catch {}
     router.push(`/type/${code}?axes=${packed}`);

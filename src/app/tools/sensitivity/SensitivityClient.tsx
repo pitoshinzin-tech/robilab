@@ -4,10 +4,15 @@ import { SENS_GAMES, getSensGame } from "@/data/sensitivity";
 import { parseNumber } from "@/lib/parse-number";
 import { edpi, cm360, convertSens, validateInput, isInGameRange } from "@/lib/sensitivity";
 
-export function SensitivityClient() {
-  const [gameId, setGameId] = useState(SENS_GAMES[0].id);
-  const [dpiText, setDpiText] = useState("800");
-  const [sensText, setSensText] = useState("0.35");
+import { browserStorage, saveSensToLocal } from "@/lib/my-settings-store";
+
+type Initial = { gameId: string; dpiText: string; sensText: string } | null;
+
+export function SensitivityClient({ initial = null }: { initial?: Initial }) {
+  const [gameId, setGameId] = useState(initial?.gameId ?? SENS_GAMES[0].id);
+  const [dpiText, setDpiText] = useState(initial?.dpiText ?? "800");
+  const [sensText, setSensText] = useState(initial?.sensText ?? "0.35");
+  const [saved, setSaved] = useState<string | null>(null);
   const game = getSensGame(gameId)!;
   const dpi = parseNumber(dpiText);
   const sens = parseNumber(sensText);
@@ -42,6 +47,16 @@ export function SensitivityClient() {
         </label>
       </div>
       {error && <p role="alert" className="text-sm text-[var(--rl-magenta)]">{error}</p>}
+      {!error && dpi !== null && sens !== null && (
+        <div className="grid gap-1">
+          <button type="button"
+            onClick={() => setSaved(saveSensToLocal(browserStorage(), gameId, Math.round(dpi), sens) ? "マイ設定に保存しました。" : "保存できませんでした(DPI は整数、感度は範囲内で入力してください)。")}
+            className="justify-self-start rounded-full bg-white/10 px-5 py-2 text-sm">
+            マイ設定に保存
+          </button>
+          {saved && <p className="text-xs text-[var(--rl-lime)]">{saved}</p>}
+        </div>
+      )}
       {results && (
         <div className="grid gap-4">
           <div className="grid grid-cols-2 gap-3">
