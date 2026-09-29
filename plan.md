@@ -137,7 +137,7 @@
 ### 公開後の機能(D36・D37)
 - [x] マイ設定:実装済み(ブランチ feat/my-settings、公開待ち)。設計書 [docs/superpowers/specs/2026-09-29-my-settings-design.md](docs/superpowers/specs/2026-09-29-my-settings-design.md)
 - [x] エイム練習「今日の文字」:実装済み(ブランチ feat/aim-daily、公開待ち)。設計書 [docs/superpowers/specs/2026-09-29-aim-daily-design.md](docs/superpowers/specs/2026-09-29-aim-daily-design.md)
-- [ ] マウス探し:設計中(D39、ブランチ feat/mouse-finder)
+- [x] マウス探し:実装済み(ブランチ feat/mouse-finder、公開待ち)。設計書 [docs/superpowers/specs/2026-09-29-mouse-finder-design.md](docs/superpowers/specs/2026-09-29-mouse-finder-design.md)
 - [ ] 次の候補:プロ設定
 
 ### v0.2(11月、GAG の時期なので本人の作業は少なめ)
@@ -234,3 +234,4 @@
 | 2026-09-29 | 監査 run-4(quick、`cf64960..2c0d0a7`)の後回し・強化メモに対応(feat/aim-daily):migration `20261001001500_card_locks`(運営の公開禁止の印を `card_locks` にも残し、設定を消して作り直しても印が戻る)、`get_aim_ranking` の利用停止・BAN の判定を上位10件がそろうまでに限定し索引を並びと一致させる(1400 を修正)、クロスヘアの shape を文字列に限定(1300 を修正)。launch.md に「migration 0500〜1500 をマージ前にすべて適用」「`/aim/opengraph-image` の回数制限」「本番と dev の関数定義の見比べ」を追加。ER 図を更新。1300〜1500 は本番未適用 |
 | 2026-09-29 | 今日の文字の仕上げ:最終レビューの修正6件(新しい端末ではサーバーのマイ設定を使う、Esc 直後の再開の文言、お題が変わったときの停止、軌跡の描き方、path の読み取り、lint 警告)。監査 run-4:confirmed 0・needs_validation 0。dev に 1500 まで適用。単体 188、RLS 50、lint 0、ビルド成功。本人の確認待ち:ランキングの名前の扱い、お題60字、初期値、正確さの数え方、MAX_STEP の手応え、実際のプレイ |
 | 2026-09-29 | 公開後の機能の3つ目にマウス探しを選択。設計 1/4〜4/4 を本人が承認し、設計書を作成(D39、本人の確認待ち)。ブランチ `feat/mouse-finder` を `feat/aim-daily` から作成 |
+| 2026-09-29 | **マウス探しを実装**(ブランチ `feat/mouse-finder`、サブエージェント型、Task 1〜6)。合う順の計算、Amazon・楽天・公式のリンク(審査後に環境変数で成果報酬付き)、公式サイトの数字で 20 本(ZOWIE 6 本など 10 本は公式に寸法がなく除外。SteelSeries の無線版を別候補に追加)、手の入力と測り方の図、`/mouse` ページ(絞り込み・今のマウスとの比較・TOP3 シェア)。本人の確認待ち:係数の手応え(特に幅)、G305/G304 の重さ(電池込み 99g)、データの数字 |
