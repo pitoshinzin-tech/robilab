@@ -156,6 +156,11 @@ export function saveSensToLocal(storage: SettingsStorage | null, gameId: string,
   }, now);
 }
 
+/** マウス探しの「手の情報」をマイ設定に保存する。範囲外なら保存せず null。 */
+export function saveHandToLocal(storage: SettingsStorage | null, hand: MySettings["hand"], now: Date = new Date()) {
+  return updateLocal(storage, (s) => ({ next: { ...s, hand }, keys: ["hand"] }), now);
+}
+
 /** 感度計算ツールの初期値(マイ設定のメインゲーム・DPI・感度)。そろっていなければ null。 */
 export function sensDefaults(s: MySettings | null): { gameId: string; dpiText: string; sensText: string } | null {
   if (!s || s.dpi === null || !s.mainGame) return null;

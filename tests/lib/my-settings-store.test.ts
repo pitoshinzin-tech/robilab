@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { emptyMySettings, type MySettings } from "@/lib/my-settings";
 import {
-  MY_SETTINGS_KEY, MY_SETTINGS_DIRTY_KEY, loadLocal, saveLocal, clearLocal, pickNewer, applyDiagnosisToLocal, saveSensToLocal,
+  MY_SETTINGS_KEY, MY_SETTINGS_DIRTY_KEY, loadLocal, saveLocal, clearLocal, pickNewer, applyDiagnosisToLocal, saveSensToLocal, saveHandToLocal,
   loadDirty, markDirty, clearDirty, mergeForSync, adoptServerIfLocalEmpty, type SettingsStorage,
 } from "@/lib/my-settings-store";
 
@@ -207,5 +207,20 @@ describe("adoptServerIfLocalEmpty", () => {
     expect(adoptServerIfLocalEmpty(st, { version: 1 })).toBe(false);
     expect(st.data[MY_SETTINGS_KEY]).toBeUndefined();
     expect(adoptServerIfLocalEmpty(null, at("2026-10-01T00:00:00.000Z"))).toBe(false);
+  });
+});
+
+describe("saveHandToLocal", () => {
+  it("saves the hand and marks it dirty for sync", () => {
+    const s = memoryStorage();
+    const saved = saveHandToLocal(s, { lengthCm: 18.5, widthCm: null, grip: "claw" }, new Date("2026-10-01T00:00:00Z"));
+    expect(saved?.hand).toEqual({ lengthCm: 18.5, widthCm: null, grip: "claw" });
+    expect(loadLocal(s)?.hand).toEqual({ lengthCm: 18.5, widthCm: null, grip: "claw" });
+    expect(loadDirty(s)).toContain("hand");
+  });
+  it("refuses values outside the limits", () => {
+    const s = memoryStorage();
+    expect(saveHandToLocal(s, { lengthCm: 30, widthCm: null, grip: "palm" })).toBeNull();
+    expect(loadLocal(s)).toBeNull();
   });
 });
