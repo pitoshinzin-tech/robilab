@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import { SENS_GAMES } from "@/data/sensitivity";
 import { getType } from "@/data/types";
@@ -17,15 +18,36 @@ const SLOT_LABEL = { mouse: "マウス", pad: "マウスパッド", keyboard: "�
 const GRIP_LABEL: Record<Grip, string> = { palm: "かぶせ", claw: "つかみ", fingertip: "つまみ" };
 const box = "grid gap-3 rounded-xl border border-white/10 bg-[var(--rl-surface)] p-4";
 
-export function MySettingsEditor() {
-  const { draft, errors, update, loggedIn, slug, status, serverError, setPublic, removeAll } = useMySettings();
-  const type = draft.typeCode ? getType(draft.typeCode) : undefined;
+/** 6つの枠の位置をここで持つ。画面の枠と保存される並びを常に一致させる。 */
+function FavoriteGames({ initial, error, onChange }: { initial: ItemRef[]; error?: string; onChange: (list: ItemRef[]) => void }) {
+  const max = MY_SETTINGS_LIMITS.favoriteGamesMax;
   const games = gameOptions();
-  const favSlots: (ItemRef | null)[] = Array.from({ length: MY_SETTINGS_LIMITS.favoriteGamesMax }, (_, i) => draft.favoriteGames[i] ?? null);
+  const [slots, setSlots] = useState<(ItemRef | null)[]>(() => Array.from({ length: max }, (_, i) => initial[i] ?? null));
+  return (
+    <section className={box}>
+      <h2 className="font-bold">好きなゲーム(最大{max}つ)</h2>
+      {slots.map((g, i) => (
+        <ItemPicker key={i} label={`${i + 1}つ目`} listId={`fav-games-${i}`} options={games} value={g}
+          onValue={(v) => {
+            const next = [...slots];
+            next[i] = v;
+            setSlots(next);
+            onChange(next.filter((x): x is ItemRef => x !== null));
+          }} />
+      ))}
+      {error && <p role="alert" className="text-xs text-[var(--rl-magenta)]">{error}</p>}
+    </section>
+  );
+}
+
+export function MySettingsEditor() {
+  const { draft, errors, update, loggedIn, slug, status, serverError, revision, setPublic, removeAll } = useMySettings();
+  const type = draft.typeCode ? getType(draft.typeCode) : undefined;
   const valid = Object.keys(errors).length === 0;
 
   return (
     <div className="grid gap-5">
+      <div key={revision} className="grid gap-5">
       <section className={box}>
         <h2 className="font-bold">タイプ</h2>
         {type ? (
@@ -82,18 +104,7 @@ export function MySettingsEditor() {
         ))}
       </section>
 
-      <section className={box}>
-        <h2 className="font-bold">好きなゲーム(最大{MY_SETTINGS_LIMITS.favoriteGamesMax}つ)</h2>
-        {favSlots.map((g, i) => (
-          <ItemPicker key={i} label={`${i + 1}つ目`} listId={`fav-games-${i}`} options={games} value={g}
-            onValue={(v) => {
-              const next = [...favSlots];
-              next[i] = v;
-              update({ favoriteGames: next.filter((x): x is ItemRef => x !== null) });
-            }} />
-        ))}
-        {errors.favoriteGames && <p role="alert" className="text-xs text-[var(--rl-magenta)]">{errors.favoriteGames}</p>}
-      </section>
+      <FavoriteGames initial={draft.favoriteGames} error={errors.favoriteGames} onChange={(favoriteGames) => update({ favoriteGames })} />
 
       <section className={box}>
         <h2 className="font-bold">名刺の表示名</h2>
@@ -104,10 +115,11 @@ export function MySettingsEditor() {
           {errors.cardName && <span role="alert" className="text-xs text-[var(--rl-magenta)]">{errors.cardName}</span>}
         </label>
       </section>
+      </div>
 
       <CardPreview data={valid ? toPublicCardData(draft) : null} />
       <SyncPanel loggedIn={loggedIn} slug={slug} status={status} serverError={serverError} canPublish={valid && status !== "server-error"}
-        onPublic={(on) => void setPublic(on)} onRemove={() => void removeAll().then(() => window.location.reload())} />
+        onPublic={(on) => void setPublic(on)} onRemove={() => void removeAll().then((ok) => { if (ok) window.location.reload(); })} />
     </div>
   );
 }

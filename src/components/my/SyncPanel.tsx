@@ -35,7 +35,7 @@ export function SyncPanel({ loggedIn, slug, status, serverError, canPublish, onP
       ) : (
         <div className="grid gap-3">
           <label className="flex items-center gap-2">
-            <input type="checkbox" checked={Boolean(slug)} disabled={!canPublish} onChange={(e) => onPublic(e.target.checked)} />
+            <input type="checkbox" checked={Boolean(slug)} disabled={!slug && !canPublish} onChange={(e) => onPublic(e.target.checked)} />
             名刺を公開する(URL を知っている人が見られます)
           </label>
           {pageUrl && (

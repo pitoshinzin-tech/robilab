@@ -7,4 +7,8 @@ describe("serverErrorMessage", () => {
     expect(serverErrorMessage("INVALID_INPUT")).toContain("入力内容");
     expect(serverErrorMessage(undefined)).toContain("この端末には保存されています");
   });
+
+  it("asks to save first when publishing without a saved row", () => {
+    expect(serverErrorMessage("NOT_FOUND")).toContain("先に設定を保存してから公開してください");
+  });
 });
