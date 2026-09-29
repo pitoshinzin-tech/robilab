@@ -43,14 +43,12 @@ describe("get_aim_ranking", () => {
     const named = await makeUser({ register: false });
     await named.client!.rpc("save_my_settings", { p_data: { ...emptyMySettings(), cardName: "ランカー" } });
     expect((await named.client!.rpc("set_card_public", { p_public: true })).error).toBeNull();
-    // 名刺を公開していない人の表示名は、ランキングに出さない
+    // 名刺を公開していない人の表示名は、ランキングに出さない(「名無しのゲーマー」になる)
     const hidden = await makeUser({ register: false });
     const hiddenName = `非公開${hidden.id.slice(0, 6)}`;
     await hidden.client!.rpc("save_my_settings", { p_data: { ...emptyMySettings(), cardName: hiddenName } });
     await hidden.client!.rpc("submit_aim_score", args({ p_accuracy: 100, p_time_ms: aimCharForDate(today()).strokes.length * 1500 }));
     await named.client!.rpc("submit_aim_score", args({ p_accuracy: 100, p_time_ms: aimCharForDate(today()).strokes.length * 1500 }));
-    const plain = await makeUser({ register: false });
-    await plain.client!.rpc("submit_aim_score", args({ p_accuracy: 99 }));
     const { data } = await anon().rpc("get_aim_ranking", { p_date: today() });
     const rows = data as { rank: number; name: string; score: number }[];
     expect(rows.length).toBeGreaterThanOrEqual(2);
@@ -58,7 +56,7 @@ describe("get_aim_ranking", () => {
     expect(rows.map((r) => r.name)).toContain("名無しのゲーマー");
     expect(rows.map((r) => r.name)).not.toContain(hiddenName);
     expect(Object.keys(rows[0]).sort()).toEqual(["accuracy", "name", "rank", "score", "time_ms"]);
-    const me = (await plain.client!.rpc("my_aim_rank", { p_date: today() })).data as { rank: number }[];
+    const me = (await hidden.client!.rpc("my_aim_rank", { p_date: today() })).data as { rank: number }[];
     expect(me).toHaveLength(1);
   });
 
