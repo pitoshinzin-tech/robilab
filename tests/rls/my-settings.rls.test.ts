@@ -135,3 +135,22 @@ describe("my_settings moderation", () => {
     expect(row).toEqual({ card_locked: true, public_slug: null });
   });
 });
+
+describe("my_settings v2", () => {
+  it("accepts v1 and stores it as v2 with the default crosshair", async () => {
+    const a = await makeUser({ register: false });
+    const { crosshair, ...rest } = sample();
+    void crosshair;
+    const { data, error } = await a.client!.rpc("save_my_settings", { p_data: { ...rest, version: 1 } });
+    expect(error).toBeNull();
+    expect((data as { version: number; crosshair: unknown }).version).toBe(2);
+    expect((data as { crosshair: unknown }).crosshair).toEqual({ shape: "cross", color: "#39f3ff", length: 6, thickness: 2, gap: 3, outline: true });
+  });
+  it("rejects invalid crosshairs", async () => {
+    const a = await makeUser({ register: false });
+    for (const bad of [{ length: 21 }, { thickness: 1.5 }, { color: "red" }, { shape: "star" }, { outline: "yes" }]) {
+      const p = { ...sample(), crosshair: { ...sample().crosshair, ...bad } };
+      expect(errorCode((await a.client!.rpc("save_my_settings", { p_data: p })).error), JSON.stringify(bad)).toBe("INVALID_INPUT");
+    }
+  });
+});

@@ -2,10 +2,11 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { MY_SETTINGS_LIMITS } from "@/lib/my-settings";
+import { CROSSHAIR_LIMITS } from "@/lib/crosshair";
 import { SENS_GAMES } from "@/data/sensitivity";
 
 // save_my_settings の上限値は、画面側(src/lib/my-settings.ts)と同じでなければならない。
-const sql = readFileSync(join(process.cwd(), "supabase", "migrations", "20261001001100_my_settings.sql"), "utf8");
+const sql = readFileSync(join(process.cwd(), "supabase", "migrations", "20261001001300_my_settings_v2.sql"), "utf8");
 
 function constant(name: string): number {
   const m = sql.match(new RegExp(String.raw`c_${name} numeric := (-?[0-9.]+);`));
@@ -24,6 +25,14 @@ describe("save_my_settings limits match the client", () => {
     expect(constant("free_text_max")).toBe(MY_SETTINGS_LIMITS.freeTextMax);
     expect(constant("card_name_max")).toBe(MY_SETTINGS_LIMITS.cardNameMax);
     expect(constant("favorite_games_max")).toBe(MY_SETTINGS_LIMITS.favoriteGamesMax);
+  });
+  it("crosshair limits", () => {
+    expect(constant("crosshair_length_min")).toBe(CROSSHAIR_LIMITS.lengthMin);
+    expect(constant("crosshair_length_max")).toBe(CROSSHAIR_LIMITS.lengthMax);
+    expect(constant("crosshair_thickness_min")).toBe(CROSSHAIR_LIMITS.thicknessMin);
+    expect(constant("crosshair_thickness_max")).toBe(CROSSHAIR_LIMITS.thicknessMax);
+    expect(constant("crosshair_gap_min")).toBe(CROSSHAIR_LIMITS.gapMin);
+    expect(constant("crosshair_gap_max")).toBe(CROSSHAIR_LIMITS.gapMax);
   });
   it("per-game sensitivity ranges", () => {
     const m = sql.match(/v_sens_games jsonb := '([^']+)';/);

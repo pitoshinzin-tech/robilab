@@ -55,7 +55,7 @@ export function pickNewer(local: MySettings | null, server: MySettings | null): 
 
 /** この端末で前回の同期以降に変えた項目(トップレベルのキー)を覚えておく場所。 */
 export const MY_SETTINGS_DIRTY_KEY = "robilab:mySettings:dirty";
-export const SYNC_FIELDS = ["typeCode", "axes", "dpi", "mainGame", "sens", "hand", "devices", "favoriteGames", "cardName"] as const;
+export const SYNC_FIELDS = ["typeCode", "axes", "dpi", "mainGame", "sens", "hand", "devices", "favoriteGames", "cardName", "crosshair"] as const;
 export type SyncField = (typeof SYNC_FIELDS)[number];
 
 function isSyncField(k: unknown): k is SyncField {

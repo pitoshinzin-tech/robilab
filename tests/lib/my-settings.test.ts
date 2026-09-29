@@ -1,13 +1,15 @@
 import { describe, it, expect } from "vitest";
+import { CROSSHAIR_DEFAULT } from "@/lib/crosshair";
 import { emptyMySettings, validateMySettings, parseMySettings, normalizeText, isValidItemRef, MY_SETTINGS_LIMITS } from "@/lib/my-settings";
 
 const base = () => emptyMySettings(new Date("2026-10-01T00:00:00.000Z"));
 
 describe("emptyMySettings", () => {
-  it("is valid and version 1", () => {
+  it("is valid and version 2 with the default crosshair", () => {
     const r = validateMySettings(base());
     expect(r.ok).toBe(true);
-    expect(base().version).toBe(1);
+    expect(base().version).toBe(2);
+    expect(base().crosshair).toEqual(CROSSHAIR_DEFAULT);
     expect(base().updatedAt).toBe("2026-10-01T00:00:00.000Z");
   });
 });
@@ -82,7 +84,7 @@ describe("validateMySettings", () => {
 
   it("rejects unknown keys and wrong versions", () => {
     expect(validateMySettings({ ...base(), extra: 1 }).ok).toBe(false);
-    expect(validateMySettings({ ...base(), version: 2 }).ok).toBe(false);
+    expect(validateMySettings({ ...base(), version: 3 }).ok).toBe(false);
     expect(validateMySettings(null).ok).toBe(false);
   });
 });
@@ -92,5 +94,19 @@ describe("parseMySettings", () => {
     expect(parseMySettings("not json object")).toBeNull();
     expect(parseMySettings({ version: 1 })).toBeNull();
     expect(parseMySettings(base())).toEqual(base());
+  });
+});
+
+describe("version 2 (crosshair)", () => {
+  it("upgrades v1 data to v2 with the default crosshair", () => {
+    const { crosshair, ...rest } = base();
+    const v1 = { ...rest, version: 1 };
+    void crosshair;
+    expect(parseMySettings(v1)).toEqual({ ...base(), updatedAt: v1.updatedAt });
+  });
+  it("rejects an invalid crosshair", () => {
+    const r = validateMySettings({ ...base(), crosshair: { ...CROSSHAIR_DEFAULT, length: 99 } });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(Object.keys(r.errors)).toContain("crosshair");
   });
 });

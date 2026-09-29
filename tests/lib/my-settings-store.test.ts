@@ -28,7 +28,7 @@ describe("loadLocal / saveLocal / clearLocal", () => {
   it("returns null for broken JSON, invalid shapes, and unknown versions", () => {
     expect(loadLocal(memoryStorage({ [MY_SETTINGS_KEY]: "{broken" }))).toBeNull();
     expect(loadLocal(memoryStorage({ [MY_SETTINGS_KEY]: JSON.stringify({ version: 1 }) }))).toBeNull();
-    expect(loadLocal(memoryStorage({ [MY_SETTINGS_KEY]: JSON.stringify({ ...at("2026-10-01T00:00:00.000Z"), version: 2 }) }))).toBeNull();
+    expect(loadLocal(memoryStorage({ [MY_SETTINGS_KEY]: JSON.stringify({ ...at("2026-10-01T00:00:00.000Z"), version: 3 }) }))).toBeNull();
   });
   it("does nothing without storage", () => {
     expect(loadLocal(null)).toBeNull();

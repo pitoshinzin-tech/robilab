@@ -1,14 +1,15 @@
 import { getSensGame } from "@/data/sensitivity";
 import { DPI_MIN, DPI_MAX } from "@/lib/sensitivity";
 import type { Axes } from "@/data/axes";
+import { CROSSHAIR_DEFAULT, isValidCrosshair, type Crosshair } from "@/lib/crosshair";
 
-/** マイ設定のデータ(版 1)。ブラウザとサーバーで同じ形を使う。 */
+/** マイ設定のデータ(版 2)。ブラウザとサーバーで同じ形を使う。 */
 export type Grip = "palm" | "claw" | "fingertip";
 export type DeviceSlot = "mouse" | "pad" | "keyboard" | "headset";
 export type ItemRef = { id: string } | { name: string };
 
 export type MySettings = {
-  version: 1;
+  version: 2;
   updatedAt: string;
   typeCode: string | null;
   axes: Axes | null;
@@ -19,6 +20,7 @@ export type MySettings = {
   devices: Record<DeviceSlot, ItemRef | null>;
   favoriteGames: ItemRef[];
   cardName: string | null;
+  crosshair: Crosshair;
 };
 
 export type FieldErrors = Record<string, string>;
@@ -27,7 +29,7 @@ export const DEVICE_SLOTS: DeviceSlot[] = ["mouse", "pad", "keyboard", "headset"
 export const GRIPS: Grip[] = ["palm", "claw", "fingertip"];
 export const TYPE_CODE_RE = /^[AG][RB][CL][HZ]$/;
 export const CATALOG_ID_RE = /^[a-z0-9-]{1,40}$/;
-// DB の save_my_settings(supabase/migrations/20261001001100_my_settings.sql)と同じ値。
+// DB の save_my_settings(supabase/migrations/20261001001300_my_settings_v2.sql)と同じ値。
 // 変えるときは両方を変える(tests/data/my-settings-sql.test.ts が一致を確認する)。
 export const MY_SETTINGS_LIMITS = {
   dpiMin: DPI_MIN,
@@ -41,13 +43,13 @@ export const MY_SETTINGS_LIMITS = {
   favoriteGamesMax: 6,
 } as const;
 
-const KEYS = ["version", "updatedAt", "typeCode", "axes", "dpi", "mainGame", "sens", "hand", "devices", "favoriteGames", "cardName"];
+const KEYS = ["version", "updatedAt", "typeCode", "axes", "dpi", "mainGame", "sens", "hand", "devices", "favoriteGames", "cardName", "crosshair"];
 const AXIS_KEYS = ["attack", "instinct", "team", "heat"];
 const CONTROL_RE = /[\x00-\x1f\x7f]/;
 
 export function emptyMySettings(now: Date = new Date()): MySettings {
   return {
-    version: 1,
+    version: 2,
     updatedAt: now.toISOString(),
     typeCode: null,
     axes: null,
@@ -58,6 +60,7 @@ export function emptyMySettings(now: Date = new Date()): MySettings {
     devices: { mouse: null, pad: null, keyboard: null, headset: null },
     favoriteGames: [],
     cardName: null,
+    crosshair: { ...CROSSHAIR_DEFAULT },
   };
 }
 
@@ -95,7 +98,7 @@ export function validateMySettings(input: unknown): { ok: true; value: MySetting
   if (!isPlainObject(input)) return { ok: false, errors: { _: "設定の形が正しくありません。" } };
   const keys = Object.keys(input);
   if (keys.length !== KEYS.length || !KEYS.every((k) => keys.includes(k))) errors._ = "設定の形が正しくありません。";
-  if (input.version !== 1) errors.version = "対応していない版です。";
+  if (input.version !== 2) errors.version = "対応していない版です。";
   if (typeof input.updatedAt !== "string" || Number.isNaN(Date.parse(input.updatedAt))) errors.updatedAt = "更新日時が正しくありません。";
 
   if (input.typeCode !== null && !(typeof input.typeCode === "string" && TYPE_CODE_RE.test(input.typeCode))) errors.typeCode = "タイプが正しくありません。";
@@ -140,12 +143,20 @@ export function validateMySettings(input: unknown): { ok: true; value: MySetting
 
   if (input.cardName !== null && !isCleanText(input.cardName, L.cardNameMax)) errors.cardName = `表示名は ${L.cardNameMax}字以内で入力してください。`;
 
+  if (!isValidCrosshair(input.crosshair)) errors.crosshair = "クロスヘアの設定を選び直してください。";
+
   if (Object.keys(errors).length > 0) return { ok: false, errors };
   return { ok: true, value: input as unknown as MySettings };
 }
 
-/** 保存されていたデータを読む。壊れていたら null(画面を止めない)。 */
+/** 版 1 のデータは、クロスヘアの初期値を足して版 2 にする。 */
+function upgrade(raw: unknown): unknown {
+  if (isPlainObject(raw) && raw.version === 1 && !("crosshair" in raw)) return { ...raw, version: 2, crosshair: { ...CROSSHAIR_DEFAULT } };
+  return raw;
+}
+
+/** 保存されていたデータを読む。版 1 は版 2 に変換する。壊れていたら null(画面を止めない)。 */
 export function parseMySettings(raw: unknown): MySettings | null {
-  const r = validateMySettings(raw);
+  const r = validateMySettings(upgrade(raw));
   return r.ok ? r.value : null;
 }
