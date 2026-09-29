@@ -39,9 +39,15 @@ describe("submit_aim_score", () => {
 });
 
 describe("get_aim_ranking", () => {
-  it("shows the card name or 名無しのゲーマー, never Discord info, and anon can read it", async () => {
+  it("shows the card name only for published cards, otherwise 名無しのゲーマー, never Discord info, and anon can read it", async () => {
     const named = await makeUser({ register: false });
     await named.client!.rpc("save_my_settings", { p_data: { ...emptyMySettings(), cardName: "ランカー" } });
+    expect((await named.client!.rpc("set_card_public", { p_public: true })).error).toBeNull();
+    // 名刺を公開していない人の表示名は、ランキングに出さない
+    const hidden = await makeUser({ register: false });
+    const hiddenName = `非公開${hidden.id.slice(0, 6)}`;
+    await hidden.client!.rpc("save_my_settings", { p_data: { ...emptyMySettings(), cardName: hiddenName } });
+    await hidden.client!.rpc("submit_aim_score", args({ p_accuracy: 100, p_time_ms: aimCharForDate(today()).strokes.length * 1500 }));
     await named.client!.rpc("submit_aim_score", args({ p_accuracy: 100, p_time_ms: aimCharForDate(today()).strokes.length * 1500 }));
     const plain = await makeUser({ register: false });
     await plain.client!.rpc("submit_aim_score", args({ p_accuracy: 99 }));
@@ -50,6 +56,7 @@ describe("get_aim_ranking", () => {
     expect(rows.length).toBeGreaterThanOrEqual(2);
     expect(rows.map((r) => r.name)).toContain("ランカー");
     expect(rows.map((r) => r.name)).toContain("名無しのゲーマー");
+    expect(rows.map((r) => r.name)).not.toContain(hiddenName);
     expect(Object.keys(rows[0]).sort()).toEqual(["accuracy", "name", "rank", "score", "time_ms"]);
     const me = (await plain.client!.rpc("my_aim_rank", { p_date: today() })).data as { rank: number }[];
     expect(me).toHaveLength(1);
@@ -59,6 +66,7 @@ describe("get_aim_ranking", () => {
     const a = await makeUser();
     const uniqueName = `停止${a.id.slice(0, 6)}`;
     await a.client!.rpc("save_my_settings", { p_data: { ...emptyMySettings(), cardName: uniqueName } });
+    await a.client!.rpc("set_card_public", { p_public: true });
     await a.client!.rpc("submit_aim_score", args({ p_accuracy: 100, p_time_ms: aimCharForDate(today()).strokes.length * 1500 }));
     const before = (await anon().rpc("get_aim_ranking", { p_date: today() })).data as { name: string }[];
     expect(before.map((r) => r.name)).toContain(uniqueName);

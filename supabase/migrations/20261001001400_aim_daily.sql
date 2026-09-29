@@ -136,18 +136,19 @@ begin
   return v_prev.score;
 end $$;
 
--- ランキング(上位10件)。名前はマイ設定の表示名。利用停止・BAN の人は除く。
+-- ランキング(上位10件)。名前は、名刺を公開している人だけマイ設定の表示名(公開していない名前は出さない)。
+-- 利用停止・BAN の人は除く。同点は時間、送信の早さ、user_id の順(並びを必ず一意にする)。
 create or replace function public.get_aim_ranking(p_date date)
 returns table (rank int, name text, score int, accuracy numeric, time_ms int)
 language sql stable security definer set search_path = public as $$
-  select (row_number() over (order by s.score desc, s.time_ms asc, s.submitted_at asc))::int,
-         case when m.user_id is null or m.card_locked or coalesce(m.data ->> 'cardName', '') = '' then '名無しのゲーマー'
+  select (row_number() over (order by s.score desc, s.time_ms asc, s.submitted_at asc, s.user_id))::int,
+         case when m.user_id is null or m.public_slug is null or m.card_locked or coalesce(m.data ->> 'cardName', '') = '' then '名無しのゲーマー'
               else m.data ->> 'cardName' end,
          s.score, s.accuracy, s.time_ms
   from public.aim_scores s
   left join public.my_settings m on m.user_id = s.user_id
   where s.play_date = p_date and public._my_settings_block_reason(s.user_id) is null
-  order by s.score desc, s.time_ms asc, s.submitted_at asc
+  order by s.score desc, s.time_ms asc, s.submitted_at asc, s.user_id
   limit 10
 $$;
 
@@ -156,7 +157,7 @@ create or replace function public.my_aim_rank(p_date date)
 returns table (rank int, score int, accuracy numeric, time_ms int)
 language sql stable security definer set search_path = public as $$
   select r.rank, r.score, r.accuracy, r.time_ms from (
-    select s.user_id, (row_number() over (order by s.score desc, s.time_ms asc, s.submitted_at asc))::int as rank, s.score, s.accuracy, s.time_ms
+    select s.user_id, (row_number() over (order by s.score desc, s.time_ms asc, s.submitted_at asc, s.user_id))::int as rank, s.score, s.accuracy, s.time_ms
     from public.aim_scores s
     where s.play_date = p_date and public._my_settings_block_reason(s.user_id) is null
   ) r where r.user_id = auth.uid()
