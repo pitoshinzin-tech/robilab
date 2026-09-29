@@ -122,7 +122,8 @@ function updateLocal(
   const { next, keys } = change(current);
   const r = validateMySettings({ ...next, updatedAt: now.toISOString() });
   if (!r.ok) return null;
-  saveLocal(storage, r.value);
+  // 端末に書けなかったとき(容量いっぱいなど)は「保存できなかった」として null。storage がない環境は今までどおり値を返す
+  if (storage && !saveLocal(storage, r.value)) return null;
   markDirty(storage, keys);
   return r.value;
 }

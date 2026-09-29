@@ -11,10 +11,10 @@ export function MouseFilters({ value, onChange }: { value: MouseFilter; onChange
   return (
     <div className="grid gap-2">
       {GROUPS.map((g) => (
-        <div key={g.key} className="flex flex-wrap items-center gap-2 text-sm" role="radiogroup" aria-label={g.label}>
+        <div key={g.key} className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label={g.label}>
           <span className="w-10 text-[var(--rl-muted)]">{g.label}</span>
           {g.options.map(([v, text]) => (
-            <button key={v} type="button" role="radio" aria-checked={value[g.key] === v}
+            <button key={v} type="button" aria-pressed={value[g.key] === v}
               onClick={() => onChange({ ...value, [g.key]: v } as MouseFilter)}
               className={`rounded-full border px-3 py-1 ${value[g.key] === v ? "border-[var(--rl-secondary)] bg-[var(--rl-card)]" : "border-white/10"}`}>
               {text}

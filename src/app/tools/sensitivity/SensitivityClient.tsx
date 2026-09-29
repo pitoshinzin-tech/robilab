@@ -50,7 +50,7 @@ export function SensitivityClient({ initial = null }: { initial?: Initial }) {
       {!error && dpi !== null && sens !== null && (
         <div className="grid gap-1">
           <button type="button"
-            onClick={() => setSaved(saveSensToLocal(browserStorage(), gameId, Math.round(dpi), sens) ? "マイ設定に保存しました。" : "保存できませんでした(DPI は整数、感度は範囲内で入力してください)。")}
+            onClick={() => setSaved(saveSensToLocal(browserStorage(), gameId, Math.round(dpi), sens) ? "マイ設定に保存しました。" : "保存できませんでした(DPI は整数、感度は範囲内で入力してください。この端末に保存できない設定のときも保存できません)。")}
             className="justify-self-start rounded-full bg-white/10 px-5 py-2 text-sm">
             マイ設定に保存
           </button>

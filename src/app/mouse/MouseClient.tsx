@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { DEVICES } from "@/data/devices";
 import { MICE, mouseById } from "@/data/mice";
 import { applyFilter, compareWith, fitTarget, handFrom, NO_FILTER, rankMice, targetText, type MouseFilter } from "@/lib/mouse-fit";
@@ -26,6 +26,8 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
   const [editing, setEditing] = useState(false);
   const [filter, setFilter] = useState<MouseFilter>(NO_FILTER);
   const [showAll, setShowAll] = useState(false);
+  // サーバーの設定を確かめ中か(Supabase を使う環境だけ。確かめ終わるまで入力画面を出さない)
+  const [serverPending, setServerPending] = useState(() => Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL));
 
   const settings = isClient ? loadLocal(browserStorage()) : null;
   void rev;
@@ -38,25 +40,23 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
     let cancelled = false;
     (async () => {
       const storage = browserStorage();
-      if (loadLocal(storage)) return;
-      const supabase = createSupabaseBrowser();
-      const { data } = await supabase.auth.getUser();
-      if (cancelled || !data.user) return;
-      const { data: row, error } = await supabase.from("my_settings").select("data").maybeSingle();
-      if (cancelled || error) return;
-      if (adoptServerIfLocalEmpty(storage, row?.data ?? null)) setRev((n) => n + 1);
+      if (loadLocal(storage)) return; // この端末に設定がある(下の表示条件では待たない)
+      try {
+        const supabase = createSupabaseBrowser();
+        const { data } = await supabase.auth.getUser();
+        if (!cancelled && data.user) {
+          const { data: row, error } = await supabase.from("my_settings").select("data").maybeSingle();
+          if (!cancelled && !error && adoptServerIfLocalEmpty(storage, row?.data ?? null)) setRev((n) => n + 1);
+        }
+      } catch {
+        // 読めなくても、その場の入力で進める
+      }
+      if (!cancelled) setServerPending(false);
     })();
     return () => { cancelled = true; };
   }, []);
 
-  const handKey = hand ? `${hand.lengthCm}|${hand.widthCm}|${hand.grip}` : "";
-  const ranked = useMemo(() => {
-    if (!handKey) return [];
-    const [len, wid, grip] = handKey.split("|");
-    const h: MySettings["hand"] = { lengthCm: Number(len), widthCm: wid === "null" ? null : Number(wid), grip: grip as MySettings["hand"]["grip"] };
-    const parsed = handFrom(h);
-    return parsed ? rankMice(parsed, MICE) : [];
-  }, [handKey]);
+  const ranked = hand ? rankMice(hand, MICE) : [];
   const filtered = applyFilter(ranked, filter);
   const shown = showAll ? filtered : filtered.slice(0, FIRST);
 
@@ -64,6 +64,8 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
   const currentMouse = currentRef && "id" in currentRef ? mouseById(currentRef.id) ?? null : null;
 
   if (!isClient) return <div className="h-40 rounded-2xl bg-white/5" />;
+  // この端末が空で、サーバーの設定を確かめ中のときだけ待つ(入力画面のちらつきを防ぐ)
+  if (!hand && !settings && serverPending) return <div className="h-40 rounded-2xl bg-white/5" aria-busy="true" />;
 
   if (!hand || editing) {
     return (
@@ -75,6 +77,7 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
           setEditing(false);
           setRev((n) => n + 1);
         }}
+        onCancel={hand ? () => setEditing(false) : undefined}
       />
     );
   }

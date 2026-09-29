@@ -24,8 +24,12 @@ export function SensSetup({ onSaved, initialGameId, loggedIn = false }: { onSave
       <button type="button" className="h-12 rounded-full bg-[var(--rl-accent)] font-bold text-[var(--rl-on-accent)]"
         onClick={() => {
           const d = parseNumber(dpi), s = parseNumber(sens);
-          if (d === null || s === null || !saveSensToLocal(browserStorage(), gameId, Math.round(d), s)) {
+          if (d === null || s === null) {
             setError("DPI(50〜64000の整数)と、ゲームの範囲内の感度を入力してください。");
+            return;
+          }
+          if (!saveSensToLocal(browserStorage(), gameId, Math.round(d), s)) {
+            setError("保存できませんでした。DPI(50〜64000の整数)と、ゲームの範囲内の感度を確かめてください(この端末に保存できない設定のときも保存できません)。");
             return;
           }
           onSaved();

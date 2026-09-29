@@ -10,11 +10,11 @@ export function HandGuide() {
           <path d="M70 175 Q48 160 38 135 Q32 122 42 118 Q52 114 58 128 L70 150" />
         </g>
         {/* 長さ:手首から中指の先 */}
-        <g stroke="var(--rl-accent)" strokeWidth="3" fill="var(--rl-accent)">
+        <g stroke="var(--rl-secondary)" strokeWidth="3" fill="var(--rl-secondary)">
           <line x1="190" y1="28" x2="190" y2="240" />
           <path d="M184 38 L190 28 L196 38 Z M184 230 L190 240 L196 230 Z" />
         </g>
-        <text x="200" y="140" fill="var(--rl-accent)" fontSize="14" writingMode="vertical-rl">長さ</text>
+        <text x="200" y="140" fill="var(--rl-secondary)" fontSize="14" writingMode="vertical-rl">長さ</text>
         {/* 幅:4本の付け根 */}
         <g stroke="var(--rl-highlight)" strokeWidth="3" fill="var(--rl-highlight)">
           <line x1="80" y1="135" x2="170" y2="135" />

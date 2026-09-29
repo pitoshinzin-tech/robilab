@@ -223,4 +223,20 @@ describe("saveHandToLocal", () => {
     expect(saveHandToLocal(s, { lengthCm: 30, widthCm: null, grip: "palm" })).toBeNull();
     expect(loadLocal(s)).toBeNull();
   });
+  it("returns null and does not mark dirty when the storage cannot be written", () => {
+    const data: Record<string, string> = {};
+    const st: SettingsStorage = {
+      getItem: (k) => data[k] ?? null,
+      setItem: (k, v) => { if (k === MY_SETTINGS_KEY) throw new Error("quota"); data[k] = v; },
+      removeItem: (k) => { delete data[k]; },
+    };
+    expect(saveHandToLocal(st, { lengthCm: 18.5, widthCm: null, grip: "claw" })).toBeNull();
+    expect(loadDirty(st)).not.toContain("hand");
+  });
+  it("returns null when every write throws", () => {
+    const st: SettingsStorage = { getItem: () => null, setItem: () => { throw new Error("quota"); }, removeItem: () => {} };
+    expect(saveHandToLocal(st, { lengthCm: 18.5, widthCm: null, grip: "claw" })).toBeNull();
+    expect(saveSensToLocal(st, "valorant", 800, 0.35)).toBeNull();
+    expect(loadDirty(st)).toEqual([]);
+  });
 });
