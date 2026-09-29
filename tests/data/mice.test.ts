@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import { MICE, mouseById } from "@/data/mice";
 import { DEVICES } from "@/data/devices";
 
+const MAKER_HOSTS = ["logi.com", "logitechg.com", "logicool.co.jp", "razer.com", "benq.com", "pulsar.gg", "finalmouse.com", "lamzu.com", "endgamegear.com", "vaxee.co", "gloriousgaming.com", "steelseries.com", "corsair.com", "hyperx.com"];
+
 describe("mice data", () => {
   it("has at least 20 mice with unique ids that exist as mice in devices.ts", () => {
     expect(MICE.length).toBeGreaterThanOrEqual(20);
@@ -29,7 +31,8 @@ describe("mice data", () => {
     for (const m of MICE) {
       const u = new URL(m.officialUrl);
       expect(u.protocol, m.id).toBe("https:");
-      expect(u.hostname, m.id).not.toMatch(/amazon|rakuten|yodobashi|kakaku/);
+      // 出典はメーカーのサイトだけ(増やすときはこの一覧にメーカーのドメインを足す)
+      expect(MAKER_HOSTS.some((h) => u.hostname === h || u.hostname.endsWith("." + h)), `${m.id}: ${u.hostname}`).toBe(true);
       expect(m.checkedAt, m.id).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     }
   });
