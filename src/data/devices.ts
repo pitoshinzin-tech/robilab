@@ -38,7 +38,7 @@ export const DEVICES: Device[] = [
   { id: "steelseries-rival-3", category: "mouse", brand: "SteelSeries", name: "Rival 3" },
   { id: "corsair-m75-wireless", category: "mouse", brand: "CORSAIR", name: "M75 WIRELESS" },
   { id: "hyperx-pulsefire-haste-2", category: "mouse", brand: "HyperX", name: "Pulsefire Haste 2" },
-  { id: "benq-zowie-u2", category: "mouse", brand: "ZOWIE", name: "U2" },
+  { id: "zowie-u2", category: "mouse", brand: "ZOWIE", name: "U2" },
   // マウスパッド
   { id: "artisan-zero", category: "pad", brand: "ARTISAN", name: "零 ZERO" },
   { id: "artisan-hien", category: "pad", brand: "ARTISAN", name: "飛燕 HIEN" },
