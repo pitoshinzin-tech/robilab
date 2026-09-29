@@ -8,6 +8,7 @@ export function SiteHeader() {
       <Link href="/" className="rl-glitch shrink-0 whitespace-nowrap text-xl font-bold">{BRAND.name}</Link>
       <nav className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-sm text-[var(--rl-muted)]">
         <Link href="/diagnosis" className="whitespace-nowrap">診断</Link>
+        <Link href="/aim" className="whitespace-nowrap">今日の文字</Link>
         <Link href="/tools/sensitivity" className="whitespace-nowrap">感度計算</Link>
         <Link href="/my" className="whitespace-nowrap">マイ設定</Link>
         <Link href="/types" className="whitespace-nowrap">タイプ一覧</Link>
