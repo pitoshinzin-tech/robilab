@@ -137,11 +137,21 @@ insert into ng_words (word) values ('援助') on conflict do nothing;
 update my_settings set card_locked = true, public_slug = null where public_slug = '<slug>';
 ```
 
-公開禁止を解く場合は `update my_settings set card_locked = false where user_id = '<user_id>';`(本人がもう一度公開をオンにすると、新しい URL で公開される)。
+公開禁止の印は `card_locks` にも自動で記録される。本人が「設定を消す」で行を消して保存し直しても、新しい行にまた印が付く。
+
+公開禁止を解く場合は `update my_settings set card_locked = false where user_id = '<user_id>';`(`card_locks` の記録も自動で消える。本人がもう一度公開をオンにすると、新しい URL で公開される)。
+
+マイ設定の行がない人(設定を消したあと、まだ保存していない人など)に印を付ける場合は、次を実行する。次に保存したときから公開禁止になる。
+
+```sql
+insert into card_locks (user_id) values ('<user_id>') on conflict do nothing;
+```
+
+その人の行がまだなく、印だけ外す場合は `delete from card_locks where user_id = '<user_id>';`。
 
 ※ ロビーで利用停止(suspended)・BAN(banned、または BAN 一覧の Discord)になった人は、自動でマイ設定の保存・名刺の公開ができなくなり、公開中の名刺も表示されなくなる。停止を解除すれば、公開中だった名刺はまた表示される。
 
-内容そのものを消す場合は、`delete from my_settings where public_slug = '<slug>';` を使う。
+内容そのものを消す場合は、`delete from my_settings where public_slug = '<slug>';` を使う(公開禁止の印を付けていれば、`card_locks` の記録は残る)。
 
 ## 今日の文字のランキング
 

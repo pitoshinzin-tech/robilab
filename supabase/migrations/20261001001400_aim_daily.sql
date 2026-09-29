@@ -95,7 +95,9 @@ create table if not exists public.aim_scores (
   primary key (play_date, user_id)
 );
 alter table public.aim_scores enable row level security;
-create index if not exists aim_scores_ranking on public.aim_scores (play_date, score desc, time_ms);
+-- ランキングと同じ並びの索引。上位から順に読み、10 件そろったところで止められる(監査 run-4 の 6.2)
+drop index if exists public.aim_scores_ranking;
+create index aim_scores_ranking on public.aim_scores (play_date, score desc, time_ms, submitted_at, user_id);
 
 -- 送信:点数はここで計算し直す。自己ベストだけ上書き。
 create or replace function public.submit_aim_score(p_date date, p_char_id text, p_accuracy numeric, p_time_ms int, p_strokes int)
@@ -138,21 +140,28 @@ end $$;
 
 -- ランキング(上位10件)。名前は、名刺を公開している人だけマイ設定の表示名(公開していない名前は出さない)。
 -- 利用停止・BAN の人は除く。同点は時間、送信の早さ、user_id の順(並びを必ず一意にする)。
+-- 匿名でも呼べるため、利用停止・BAN の判定は並べた順に 10 件そろうまでだけ行う
+-- (内側の問い合わせを aim_scores_ranking の順に読み、limit で止める。その日の全行は判定しない)。
 create or replace function public.get_aim_ranking(p_date date)
 returns table (rank int, name text, score int, accuracy numeric, time_ms int)
 language sql stable security definer set search_path = public as $$
-  select (row_number() over (order by s.score desc, s.time_ms asc, s.submitted_at asc, s.user_id))::int,
+  select (row_number() over (order by t.score desc, t.time_ms asc, t.submitted_at asc, t.user_id))::int,
          case when m.user_id is null or m.public_slug is null or m.card_locked or coalesce(m.data ->> 'cardName', '') = '' then '名無しのゲーマー'
               else m.data ->> 'cardName' end,
-         s.score, s.accuracy, s.time_ms
-  from public.aim_scores s
-  left join public.my_settings m on m.user_id = s.user_id
-  where s.play_date = p_date and public._my_settings_block_reason(s.user_id) is null
-  order by s.score desc, s.time_ms asc, s.submitted_at asc, s.user_id
-  limit 10
+         t.score, t.accuracy, t.time_ms
+  from (
+    select s.user_id, s.score, s.accuracy, s.time_ms, s.submitted_at
+    from public.aim_scores s
+    where s.play_date = p_date and public._my_settings_block_reason(s.user_id) is null
+    order by s.score desc, s.time_ms asc, s.submitted_at asc, s.user_id
+    limit 10
+  ) t
+  left join public.my_settings m on m.user_id = t.user_id
+  order by t.score desc, t.time_ms asc, t.submitted_at asc, t.user_id
 $$;
 
--- 自分の順位(ランキングと同じ並び)
+-- 自分の順位(ランキングと同じ並び)。
+-- その日の全行を判定するが、ログインした人(authenticated)だけが呼べる。匿名には渡さない。
 create or replace function public.my_aim_rank(p_date date)
 returns table (rank int, score int, accuracy numeric, time_ms int)
 language sql stable security definer set search_path = public as $$

@@ -122,6 +122,8 @@ begin
   -- クロスヘア
   v_cross := p_data -> 'crosshair';
   if jsonb_typeof(v_cross) <> 'object' then raise exception 'INVALID_INPUT'; end if;
+  -- shape は文字列であることを先に確かめる(null などだと下の in の判定が null になり、通ってしまう)
+  if jsonb_typeof(v_cross -> 'shape') is distinct from 'string' then raise exception 'INVALID_INPUT'; end if;
   if (select array_agg(k order by k) from jsonb_object_keys(v_cross) k) is distinct from array['color', 'gap', 'length', 'outline', 'shape', 'thickness']
      or not (v_cross ->> 'shape' in ('cross', 'dot', 'circle', 'cross-dot'))
      or jsonb_typeof(v_cross -> 'color') <> 'string' or (v_cross ->> 'color') !~ '^#[0-9a-fA-F]{6}$'

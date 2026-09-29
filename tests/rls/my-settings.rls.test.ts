@@ -133,6 +133,21 @@ describe("my_settings moderation", () => {
     expect((await a.client!.rpc("save_my_settings", { p_data: sample() })).error).toBeNull();
     const { data: row } = await admin.from("my_settings").select("card_locked, public_slug").eq("user_id", a.id).single();
     expect(row).toEqual({ card_locked: true, public_slug: null });
+
+    // 設定を消して保存し直しても、公開禁止の印は残る(監査 run-4 の 6.1)
+    expect((await a.client!.rpc("delete_my_settings")).error).toBeNull();
+    expect((await admin.from("my_settings").select("user_id").eq("user_id", a.id)).data).toHaveLength(0);
+    expect((await a.client!.rpc("save_my_settings", { p_data: sample() })).error).toBeNull();
+    const { data: again } = await admin.from("my_settings").select("card_locked, public_slug").eq("user_id", a.id).single();
+    expect(again).toEqual({ card_locked: true, public_slug: null });
+    expect(errorCode((await a.client!.rpc("set_card_public", { p_public: true })).error)).toBe("CARD_LOCKED");
+
+    // 運営が印を外すと、card_locks の記録も消える
+    expect((await admin.from("card_locks").select("user_id").eq("user_id", a.id)).data).toHaveLength(1);
+    expect((await admin.from("my_settings").update({ card_locked: false }).eq("user_id", a.id)).error).toBeNull();
+    expect((await admin.from("card_locks").select("user_id").eq("user_id", a.id)).data).toHaveLength(0);
+    // 本人からは card_locks を読めない
+    expect((await a.client!.from("card_locks").select("user_id")).error).not.toBeNull();
   });
 });
 
@@ -148,7 +163,7 @@ describe("my_settings v2", () => {
   });
   it("rejects invalid crosshairs", async () => {
     const a = await makeUser({ register: false });
-    for (const bad of [{ length: 21 }, { thickness: 1.5 }, { color: "red" }, { shape: "star" }, { outline: "yes" }]) {
+    for (const bad of [{ length: 21 }, { thickness: 1.5 }, { color: "red" }, { shape: "star" }, { shape: null }, { outline: "yes" }]) {
       const p = { ...sample(), crosshair: { ...sample().crosshair, ...bad } };
       expect(errorCode((await a.client!.rpc("save_my_settings", { p_data: p })).error), JSON.stringify(bad)).toBe("INVALID_INPUT");
     }
