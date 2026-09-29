@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildAimShareText, aimErrorMessage } from "@/lib/aim/share";
+import { buildAimShareText, aimErrorMessage, aimOgImagePath } from "@/lib/aim/share";
 
 describe("buildAimShareText", () => {
   it("formats score, accuracy and seconds", () => {
@@ -13,5 +13,11 @@ describe("aimErrorMessage", () => {
     expect(aimErrorMessage("TOO_FAST")).toContain("少し待って");
     expect(aimErrorMessage("NOT_ACTIVE")).toContain("利用停止中");
     expect(aimErrorMessage(undefined)).toContain("送れませんでした");
+  });
+});
+
+describe("aimOgImagePath", () => {
+  it("puts the date in the image URL", () => {
+    expect(aimOgImagePath("2026-11-01")).toBe("/aim/opengraph-image?d=2026-11-01");
   });
 });

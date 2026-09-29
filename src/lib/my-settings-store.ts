@@ -134,10 +134,14 @@ export function applyDiagnosisToLocal(storage: SettingsStorage | null, typeCode:
 
 /** 感度計算ツールの「マイ設定に保存」。メインゲームが未設定ならこのゲームにする。 */
 export function saveSensToLocal(storage: SettingsStorage | null, gameId: string, dpi: number, sens: number, now: Date = new Date()) {
-  return updateLocal(storage, (s) => ({
-    next: { ...s, dpi, sens: { ...s.sens, [gameId]: sens }, mainGame: s.mainGame ?? gameId },
-    keys: s.mainGame ? ["dpi", "sens"] : ["dpi", "sens", "mainGame"],
-  }), now);
+  return updateLocal(storage, (s) => {
+    // メインゲームの感度が未入力なら、今保存するゲームをメインにする(「今日の文字」が感度なしで止まらないように)
+    const keepMain = s.mainGame !== null && s.sens[s.mainGame] !== undefined;
+    return {
+      next: { ...s, dpi, sens: { ...s.sens, [gameId]: sens }, mainGame: keepMain ? s.mainGame : gameId },
+      keys: keepMain || s.mainGame === gameId ? ["dpi", "sens"] : ["dpi", "sens", "mainGame"],
+    };
+  }, now);
 }
 
 /** 感度計算ツールの初期値(マイ設定のメインゲーム・DPI・感度)。そろっていなければ null。 */

@@ -5,8 +5,8 @@ import { parseNumber } from "@/lib/parse-number";
 import { browserStorage, saveSensToLocal } from "@/lib/my-settings-store";
 
 /** マイ設定に感度がない人に、ゲーム・感度・DPI を聞いてマイ設定に保存する。 */
-export function SensSetup({ onSaved }: { onSaved: () => void }) {
-  const [gameId, setGameId] = useState(SENS_GAMES[0].id);
+export function SensSetup({ onSaved, initialGameId, loggedIn = false }: { onSaved: () => void; initialGameId?: string | null; loggedIn?: boolean }) {
+  const [gameId, setGameId] = useState(SENS_GAMES.some((g) => g.id === initialGameId) ? initialGameId! : SENS_GAMES[0].id);
   const [dpi, setDpi] = useState("800");
   const [sens, setSens] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +32,7 @@ export function SensSetup({ onSaved }: { onSaved: () => void }) {
         }}>
         保存して練習する
       </button>
+      {!loggedIn && <p className="text-xs text-[var(--rl-muted)]">ログインするとランキングに載ります</p>}
     </div>
   );
 }

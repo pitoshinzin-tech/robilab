@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { AimChar } from "@/lib/aim/daily";
@@ -21,7 +21,7 @@ type Result = { accuracy: number; timeMs: number; perStroke: number[] };
 const noSubscribe = () => () => {};
 const finePointer = () => window.matchMedia("(pointer: fine)").matches;
 // 再送しても結果が変わらないエラー
-const NO_RETRY = ["WRONG_DATE", "WRONG_CHAR", "NOT_ACTIVE", "BANNED", "INVALID_INPUT"];
+const NO_RETRY = ["NOT_LOGGED_IN", "WRONG_DATE", "WRONG_CHAR", "NOT_ACTIVE", "BANNED", "INVALID_INPUT"];
 
 export function AimClient({ char, date, rows }: { char: AimChar; date: string; rows: RankingRow[] }) {
   const router = useRouter();
@@ -33,6 +33,7 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
   const [loggedIn, setLoggedIn] = useState(false);
   const [sendMessage, setSendMessage] = useState<string | null>(null);
   const [canResend, setCanResend] = useState(false);
+  const [sending, setSending] = useState(false);
   const [mine, setMine] = useState<{ rank: number; score: number } | null>(null);
 
   const settings = isClient ? loadLocal(browserStorage()) : null;
@@ -56,34 +57,51 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
   }, [loggedIn, date]);
   useEffect(() => { refreshMine(); }, [refreshMine]);
 
+  const sendingRef = useRef(false);
   const submit = useCallback(async (r: Result) => {
-    if (!loggedIn) return;
-    if (jstDate(new Date()) !== date) { setSendMessage(aimErrorMessage("WRONG_DATE")); setCanResend(false); return; }
-    const { data, error } = await createSupabaseBrowser().rpc("submit_aim_score", {
-      p_date: date, p_char_id: char.id, p_accuracy: r.accuracy, p_time_ms: r.timeMs, p_strokes: char.strokes.length,
-    });
-    if (error) {
-      const code = errorCodeOf(error);
-      setSendMessage(aimErrorMessage(code));
-      setCanResend(!NO_RETRY.includes(code ?? ""));
-      return;
+    if (!loggedIn || sendingRef.current) return;
+    if (jstDate(new Date()) !== date) { setSendMessage(aimErrorMessage("WRONG_DATE")); setCanResend(false); router.refresh(); return; }
+    sendingRef.current = true;
+    setSending(true);
+    try {
+      const { data, error } = await createSupabaseBrowser().rpc("submit_aim_score", {
+        p_date: date, p_char_id: char.id, p_accuracy: r.accuracy, p_time_ms: r.timeMs, p_strokes: char.strokes.length,
+      });
+      if (error) {
+        const code = errorCodeOf(error);
+        setSendMessage(aimErrorMessage(code));
+        setCanResend(!NO_RETRY.includes(code ?? ""));
+        if (code === "NOT_LOGGED_IN") setLoggedIn(false);
+        // 日付・お題が変わっていたら、新しい今日の文字を読み込む
+        if (code === "WRONG_DATE" || code === "WRONG_CHAR") router.refresh();
+        return;
+      }
+      setSendMessage(`ランキングに送りました(今日の自己ベスト ${Number(data).toLocaleString("ja-JP")} 点)。`);
+      setCanResend(false);
+      refreshMine();
+      router.refresh();
+    } finally {
+      sendingRef.current = false;
+      setSending(false);
     }
-    setSendMessage(`ランキングに送りました(今日の自己ベスト ${Number(data).toLocaleString("ja-JP")} 点)。`);
-    setCanResend(false);
-    refreshMine();
-    router.refresh();
   }, [loggedIn, date, char, refreshMine, router]);
+
+  // 日付が変わっていたら、もう一度の前に新しい今日の文字を読み込む
+  const retry = () => {
+    if (jstDate(new Date()) !== date) router.refresh();
+    setResult(null); setSendMessage(null); setCanResend(false); setRound((n) => n + 1);
+  };
 
   let play;
   if (!isClient) play = <div className="aspect-video w-full animate-pulse rounded-xl bg-white/5" />;
-  else if (!hasMouse) play = <p className="rounded-xl bg-[var(--rl-card)] p-4 text-sm">「今日の文字」は PC(マウス)で遊べます。スマホでは、今日の文字とランキングを見られます。</p>;
-  else if (deg === null) play = <SensSetup onSaved={() => setSettingsRev((n) => n + 1)} />;
+  else if (!hasMouse) play = <p className="rounded-xl bg-[var(--rl-card)] p-4 text-sm">「今日の文字」は PC(マウス)で遊べます。スマホでは、今日の文字とランキングを見られます。{!loggedIn && <span className="mt-2 block text-xs text-[var(--rl-muted)]">ログインするとランキングに載ります</span>}</p>;
+  else if (deg === null) play = <SensSetup onSaved={() => setSettingsRev((n) => n + 1)} initialGameId={settings?.mainGame} loggedIn={loggedIn} />;
   else {
     play = (
       <div className="grid gap-4">
         {result ? (
-          <AimResult glyph={char.glyph} strokes={char.strokes.length} {...result} sendMessage={sendMessage} canResend={canResend}
-            onResend={() => void submit(result)} onRetry={() => { setResult(null); setSendMessage(null); setRound((n) => n + 1); }} />
+          <AimResult glyph={char.glyph} strokes={char.strokes.length} {...result} sendMessage={sendMessage} canResend={canResend} sending={sending}
+            onResend={() => void submit(result)} onRetry={retry} />
         ) : (
           <AimGame key={round} char={char} degPerCount={deg} crosshair={crosshair}
             onFinish={(r) => { setResult(r); void submit(r); }}

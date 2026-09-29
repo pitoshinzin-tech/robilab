@@ -73,6 +73,13 @@ describe("applyDiagnosisToLocal / saveSensToLocal", () => {
     expect(s.sens).toEqual({ valorant: 0.35, apex: 1.2 });
     expect(s.mainGame).toBe("valorant");
   });
+  it("moves the main game to the saved game when the main game has no sensitivity", () => {
+    const st = memoryStorage();
+    saveLocal(st, { ...at("2026-10-01T00:00:00.000Z"), mainGame: "apex" });
+    saveSensToLocal(st, "valorant", 800, 0.35, new Date("2026-10-03T00:00:00.000Z"));
+    expect(loadLocal(st)?.mainGame).toBe("valorant");
+    expect(loadDirty(st)).toContain("mainGame");
+  });
   it("refuses values that would make the settings invalid", () => {
     const st = memoryStorage();
     expect(saveSensToLocal(st, "valorant", 800, 999)).toBeNull();
