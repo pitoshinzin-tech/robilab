@@ -31,7 +31,7 @@ export function SensitivityClient({ initial = null }: { initial?: Initial }) {
     <div className="grid gap-5">
       <label className="grid gap-1 text-sm">
         いま遊んでいるゲーム
-        <select value={gameId} onChange={(e) => setGameId(e.target.value)} className="h-12 rounded-xl border border-white/15 bg-[#151a33] px-3 text-base">
+        <select value={gameId} onChange={(e) => setGameId(e.target.value)} className="h-12 rounded-xl border border-white/15 bg-[var(--rl-card)] px-3 text-base">
           {SENS_GAMES.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
         </select>
       </label>
@@ -39,14 +39,14 @@ export function SensitivityClient({ initial = null }: { initial?: Initial }) {
       <div className="grid grid-cols-2 gap-3">
         <label className="grid gap-1 text-sm">
           マウスの DPI
-          <input inputMode="decimal" value={dpiText} onChange={(e) => setDpiText(e.target.value)} className="h-12 rounded-xl border border-white/15 bg-[#151a33] px-3 text-base" />
+          <input inputMode="decimal" value={dpiText} onChange={(e) => setDpiText(e.target.value)} className="h-12 rounded-xl border border-white/15 bg-[var(--rl-card)] px-3 text-base" />
         </label>
         <label className="grid gap-1 text-sm">
           ゲーム内の感度
-          <input inputMode="decimal" value={sensText} onChange={(e) => setSensText(e.target.value)} className="h-12 rounded-xl border border-white/15 bg-[#151a33] px-3 text-base" />
+          <input inputMode="decimal" value={sensText} onChange={(e) => setSensText(e.target.value)} className="h-12 rounded-xl border border-white/15 bg-[var(--rl-card)] px-3 text-base" />
         </label>
       </div>
-      {error && <p role="alert" className="text-sm text-[var(--rl-magenta)]">{error}</p>}
+      {error && <p role="alert" className="text-sm text-[var(--rl-danger)]">{error}</p>}
       {!error && dpi !== null && sens !== null && (
         <div className="grid gap-1">
           <button type="button"

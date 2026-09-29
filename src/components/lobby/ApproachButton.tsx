@@ -9,10 +9,10 @@ export function ApproachButton({ id }: { id: string }) {
   return (
     <div className="grid gap-2">
       <button type="button" disabled={pending || done} onClick={() => start(async () => setMsg(await sendApproachAction(id)))}
-        className="h-12 rounded-full bg-[var(--rl-magenta)] font-bold text-white disabled:opacity-50">
+        className="h-12 rounded-full bg-[var(--rl-accent)] font-bold text-[var(--rl-on-accent)] disabled:opacity-50">
         {done ? "声をかけました" : "一緒にやりたい!"}
       </button>
-      {msg.error && <p role="alert" className="text-sm text-[var(--rl-magenta)]">{msg.error}</p>}
+      {msg.error && <p role="alert" className="text-sm text-[var(--rl-danger)]">{msg.error}</p>}
       {msg.ok && <p className="text-sm text-[var(--rl-lime)]">{msg.ok}</p>}
     </div>
   );

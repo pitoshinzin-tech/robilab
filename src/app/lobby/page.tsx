@@ -28,7 +28,7 @@ export default async function LobbyPage({ searchParams }: Props) {
       <main className="mx-auto grid max-w-md gap-4 px-4 py-10 text-center">
         <h1 className="text-2xl font-bold">仲間を探す</h1>
         <p className="text-sm text-[var(--rl-muted)]">Discord でログインして、一緒に遊ぶ人を見つけよう。18歳以上の方が対象です。</p>
-        {sp.login === "failed" && <p role="alert" className="text-sm text-[var(--rl-magenta)]">ログインできませんでした。もう一度お試しください。</p>}
+        {sp.login === "failed" && <p role="alert" className="text-sm text-[var(--rl-danger)]">ログインできませんでした。もう一度お試しください。</p>}
         <div><LoginButton next="/lobby" /></div>
       </main>
     );
@@ -50,11 +50,11 @@ export default async function LobbyPage({ searchParams }: Props) {
       </div>
       {sp.reported && <p className="mb-3 text-sm text-[var(--rl-lime)]">通報を受け付けました。ご協力ありがとうございます。</p>}
       <form className="mb-4 grid grid-cols-3 gap-2 text-sm">
-        <select name="game" defaultValue={sp.game ?? ""} className="rounded bg-[#151a33] px-2 py-2">
+        <select name="game" defaultValue={sp.game ?? ""} className="rounded bg-[var(--rl-card)] px-2 py-2">
           <option value="">全ゲーム</option>
           {GAMES.map((g) => <option key={g.id} value={g.id}>{g.shortName}</option>)}
         </select>
-        <select name="slot" defaultValue={sp.slot ?? ""} className="rounded bg-[#151a33] px-2 py-2">
+        <select name="slot" defaultValue={sp.slot ?? ""} className="rounded bg-[var(--rl-card)] px-2 py-2">
           <option value="">全時間帯</option>
           {TIME_SLOTS.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
         </select>

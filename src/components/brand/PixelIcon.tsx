@@ -20,7 +20,7 @@ export function PixelIcon({ code, size = 56 }: { code: string; size?: number }) 
   }
   const color = ACCENT[getType(code)?.accent ?? "cyan"];
   return (
-    <svg viewBox="0 0 8 8" width={size} height={size} className="rl-pixel rounded-xl bg-[#151a33] p-1" aria-hidden>
+    <svg viewBox="0 0 8 8" width={size} height={size} className="rl-pixel rounded-xl bg-[var(--rl-card)] p-1" aria-hidden>
       <g fill={color}>
         <rect x="2" y="0" width="4" height="1" /><rect x="1" y="1" width="6" height="1" />
         <rect x="1" y="2" width="1" height="2" /><rect x="6" y="2" width="1" height="2" />

@@ -19,7 +19,7 @@ export function BlockButton({ id }: { id: string }) {
         className="text-sm text-[var(--rl-muted)] underline">
         ブロックする
       </button>
-      {error && <p role="alert" className="text-sm text-[var(--rl-magenta)]">{error}</p>}
+      {error && <p role="alert" className="text-sm text-[var(--rl-danger)]">{error}</p>}
     </div>
   );
 }

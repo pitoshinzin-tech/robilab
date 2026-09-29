@@ -74,12 +74,12 @@ export function ProfileForm({ mode, action, initial }: Props) {
       {mode === "register" && (
         <label className="grid gap-1 text-sm">
           生年月日(公開されません。年齢の確認だけに使います)
-          <input type="date" name="birthdate" required className="h-12 rounded-xl border border-white/15 bg-[#151a33] px-3" />
+          <input type="date" name="birthdate" required className="h-12 rounded-xl border border-white/15 bg-[var(--rl-card)] px-3" />
         </label>
       )}
       <label className="grid gap-1 text-sm">
         ニックネーム(20文字まで)
-        <input name="nickname" maxLength={20} required defaultValue={initial?.nickname} className="h-12 rounded-xl border border-white/15 bg-[#151a33] px-3" />
+        <input name="nickname" maxLength={20} required defaultValue={initial?.nickname} className="h-12 rounded-xl border border-white/15 bg-[var(--rl-card)] px-3" />
       </label>
       <fieldset className="grid gap-2 text-sm">
         <legend className="mb-1">遊ぶゲーム(1つ以上)とランク帯</legend>
@@ -99,7 +99,7 @@ export function ProfileForm({ mode, action, initial }: Props) {
               <select
                 name={`rank-${g.id}`}
                 defaultValue={initial?.games?.find((x) => x.id === g.id)?.rank ?? "unranked"}
-                className="w-full rounded bg-[#151a33] px-2 py-1"
+                className="w-full rounded bg-[var(--rl-card)] px-2 py-1"
               >
                 {RANK_BANDS.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
               </select>
@@ -122,7 +122,7 @@ export function ProfileForm({ mode, action, initial }: Props) {
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="voiceOk" defaultChecked={initial?.voice_ok} />ボイスチャット OK</label>
       <label className="grid gap-1 text-sm">
         ひとこと(50文字まで)
-        <input name="bio" maxLength={50} defaultValue={initial?.bio} className="h-12 rounded-xl border border-white/15 bg-[#151a33] px-3" />
+        <input name="bio" maxLength={50} defaultValue={initial?.bio} className="h-12 rounded-xl border border-white/15 bg-[var(--rl-card)] px-3" />
       </label>
       <input type="hidden" name="typeCode" value={diag?.code ?? initial?.type_code ?? ""} />
       <input type="hidden" name="axes" value={diag?.axes ?? (initial?.axes ? JSON.stringify(initial.axes) : "")} />
@@ -135,10 +135,10 @@ export function ProfileForm({ mode, action, initial }: Props) {
           <span><a href="/terms" target="_blank" rel="noopener" className="underline">利用規約</a>と<a href="/privacy" target="_blank" rel="noopener" className="underline">プライバシーポリシー</a>に同意します(18歳以上であることを含みます)</span>
         </label>
       )}
-      {clientError && <p role="alert" className="text-sm text-[var(--rl-magenta)]">{clientError}</p>}
-      {state.error && <p role="alert" className="text-sm text-[var(--rl-magenta)]">{state.error}</p>}
+      {clientError && <p role="alert" className="text-sm text-[var(--rl-danger)]">{clientError}</p>}
+      {state.error && <p role="alert" className="text-sm text-[var(--rl-danger)]">{state.error}</p>}
       {state.ok && <p className="text-sm text-[var(--rl-lime)]">{state.ok}</p>}
-      <button disabled={pending} className="h-12 rounded-full bg-[var(--rl-cyan)] font-bold text-[#0a0c16] disabled:opacity-50">
+      <button disabled={pending} className="h-12 rounded-full bg-[var(--rl-accent)] font-bold text-[var(--rl-on-accent)] disabled:opacity-50">
         {mode === "register" ? "登録してロビーに入る" : "保存する"}
       </button>
     </form>

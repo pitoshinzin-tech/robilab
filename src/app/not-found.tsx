@@ -5,7 +5,7 @@ export default function NotFound() {
     <main className="mx-auto max-w-md px-4 py-16 text-center">
       <p className="font-[family-name:var(--font-display)] text-5xl text-[var(--rl-magenta)]">404</p>
       <p className="mt-4">ページが見つかりませんでした。</p>
-      <Link href="/diagnosis" className="mt-6 inline-block rounded-full bg-[var(--rl-cyan)] px-6 py-3 font-bold text-[#0a0c16]">診断してみる</Link>
+      <Link href="/diagnosis" className="mt-6 inline-block rounded-full bg-[var(--rl-accent)] px-6 py-3 font-bold text-[var(--rl-on-accent)]">診断してみる</Link>
     </main>
   );
 }

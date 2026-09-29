@@ -29,7 +29,7 @@ export function InboxList({ rows }: { rows: InboxRow[] }) {
                 <p className="text-sm">「一緒にやりたい!」が届きました</p>
                 {done[r.approach_id] ? <p className="mt-2 text-sm text-[var(--rl-lime)]">{done[r.approach_id]}</p> : (
                   <div className="mt-3 flex gap-3">
-                    <button disabled={pending} onClick={() => respond(r.approach_id, true)} className="h-10 flex-1 rounded-full bg-[var(--rl-cyan)] font-bold text-[#0a0c16]">OK</button>
+                    <button disabled={pending} onClick={() => respond(r.approach_id, true)} className="h-10 flex-1 rounded-full bg-[var(--rl-accent)] font-bold text-[var(--rl-on-accent)]">OK</button>
                     <button disabled={pending} onClick={() => respond(r.approach_id, false)} className="h-10 flex-1 rounded-full bg-white/10">今回はパス</button>
                   </div>
                 )}
@@ -49,7 +49,7 @@ export function InboxList({ rows }: { rows: InboxRow[] }) {
                   <div className="font-bold">{r.nickname}</div>
                   {profileUrl && (
                     <a href={profileUrl} target="_blank" rel="noopener noreferrer"
-                      className="mt-2 inline-flex h-10 items-center rounded-full bg-[var(--rl-cyan)] px-4 text-sm font-bold text-[#0a0c16]">
+                      className="mt-2 inline-flex h-10 items-center rounded-full bg-[var(--rl-accent)] px-4 text-sm font-bold text-[var(--rl-on-accent)]">
                       Discord のプロフィールを開く
                     </a>
                   )}

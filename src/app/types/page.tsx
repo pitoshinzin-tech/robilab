@@ -23,7 +23,7 @@ export default function TypesPage() {
           </li>
         ))}
       </ul>
-      <Link href="/diagnosis" className="mt-8 inline-block rounded-full bg-[var(--rl-cyan)] px-6 py-3 font-bold text-[#0a0c16]">自分のタイプを診断する</Link>
+      <Link href="/diagnosis" className="mt-8 inline-block rounded-full bg-[var(--rl-accent)] px-6 py-3 font-bold text-[var(--rl-on-accent)]">自分のタイプを診断する</Link>
     </main>
   );
 }
