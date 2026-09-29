@@ -10,6 +10,7 @@ import { toPublicCardData } from "@/lib/card-view";
 import { PixelIcon } from "@/components/brand/PixelIcon";
 import { NumberField } from "./NumberField";
 import { ItemPicker } from "./ItemPicker";
+import { CrosshairEditor } from "./CrosshairEditor";
 import { CardPreview } from "./CardPreview";
 import { SyncPanel } from "./SyncPanel";
 import { useMySettings } from "./useMySettings";
@@ -105,6 +106,8 @@ export function MySettingsEditor() {
       </section>
 
       <FavoriteGames initial={draft.favoriteGames} error={errors.favoriteGames} onChange={(favoriteGames) => update({ favoriteGames })} />
+
+      <CrosshairEditor value={draft.crosshair} onChange={(crosshair) => update({ crosshair })} />
 
       <section className={box}>
         <h2 className="font-bold">名刺の表示名</h2>
