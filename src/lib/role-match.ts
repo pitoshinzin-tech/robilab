@@ -23,5 +23,5 @@ export function rankGames(user: Axes, games: Game[] = GAMES): GameRank[] {
       return { game, best: roles[0], roles, index };
     })
     .sort((x, y) => y.best.score - x.best.score || x.index - y.index)
-    .map(({ index: _index, ...rest }) => rest);
+    .map(({ game, best, roles }) => ({ game, best, roles }));
 }

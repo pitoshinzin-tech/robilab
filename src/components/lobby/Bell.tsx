@@ -6,29 +6,33 @@ import { createSupabaseBrowser } from "@/lib/supabase/client";
 
 const INBOX_SEEN_EVENT = "robilab:inbox-seen";
 
+/** 未読数を取る。未ログイン・エラーなら null、Supabase 未設定なら "skip" */
+async function fetchUnread(): Promise<number | null | "skip"> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return "skip";
+  const supabase = createSupabaseBrowser();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await supabase.rpc("unread_count");
+  if (error) return null;
+  return typeof data === "number" ? data : 0;
+}
+
 export function Bell() {
   const pathname = usePathname();
   const [count, setCount] = useState(0);
   const [visible, setVisible] = useState(false);
   const mounted = useRef(true);
 
-  const refresh = useCallback(async () => {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
-    const supabase = createSupabaseBrowser();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!mounted.current) return;
-    if (!user) {
-      setVisible(false);
-      return;
-    }
-    const { data, error } = await supabase.rpc("unread_count");
-    if (!mounted.current) return;
-    if (error) {
-      setVisible(false);
-      return;
-    }
-    setVisible(true);
-    setCount(typeof data === "number" ? data : 0);
+  const refresh = useCallback(() => {
+    fetchUnread().then((result) => {
+      if (!mounted.current || result === "skip") return;
+      if (result === null) {
+        setVisible(false);
+        return;
+      }
+      setVisible(true);
+      setCount(result);
+    });
   }, []);
 
   useEffect(() => {

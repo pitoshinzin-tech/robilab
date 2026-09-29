@@ -1,10 +1,21 @@
 "use client";
-import { startTransition, useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useMemo, useState, useSyncExternalStore } from "react";
 import { GAMES } from "@/data/games";
 import { TIME_SLOTS, PLATFORMS, RANK_BANDS } from "@/data/lobby-options";
 import type { Candidate } from "@/lib/lobby-types";
 
 type Result = { error?: string; ok?: string };
+type Diag = { code: string; axes: string };
+
+const DIAG_KEY = "robilab:lastDiagnosis";
+const noSubscribe = () => () => {};
+function readDiagRaw(): string | null {
+  try {
+    return sessionStorage.getItem(DIAG_KEY);
+  } catch {
+    return null;
+  }
+}
 type Props = {
   mode: "register" | "edit";
   action: (prev: Result, form: FormData) => Promise<Result>;
@@ -13,16 +24,17 @@ type Props = {
 
 export function ProfileForm({ mode, action, initial }: Props) {
   const [state, formAction, pending] = useActionState(action, {});
-  const [diag, setDiag] = useState<{ code: string; axes: string } | null>(null);
-  const [clientError, setClientError] = useState<string | null>(null);
-
-  // 診断結果(sessionStorage に保存したもの)があれば自動で入れる
-  useEffect(() => {
+  // 診断結果(sessionStorage に保存したもの)があれば自動で入れる。サーバーでの描画時は null
+  const diagRaw = useSyncExternalStore(noSubscribe, readDiagRaw, () => null);
+  const diag = useMemo<Diag | null>(() => {
+    if (!diagRaw) return null;
     try {
-      const raw = sessionStorage.getItem("robilab:lastDiagnosis");
-      if (raw) setDiag(JSON.parse(raw));
-    } catch {}
-  }, []);
+      return JSON.parse(diagRaw) as Diag;
+    } catch {
+      return null;
+    }
+  }, [diagRaw]);
+  const [clientError, setClientError] = useState<string | null>(null);
 
   const [checkedGames, setCheckedGames] = useState<Set<string>>(
     () => new Set((initial?.games ?? []).map((g) => g.id)),
