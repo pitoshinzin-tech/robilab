@@ -8,6 +8,9 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "ロビラボ ゲーマータイプ診断の結果";
 
+// 16タイプ以外のコードは、その場で画像を作らずに 404 にする
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return ALL_TYPE_CODES.map((code) => ({ code }));
 }
@@ -42,6 +45,7 @@ export default async function OgImage({ params }: { params: Promise<{ code: stri
         </div>
       </div>
     ),
-    { ...size, fonts: font ? [{ name: "ZenKaku", data: font, weight: 700, style: "normal" }] : [] },
+    // フォントが取れなかったときは fonts を渡さず、標準のフォントで描く(空の配列だと描画に失敗する)
+    { ...size, ...(font ? { fonts: [{ name: "ZenKaku", data: font, weight: 700, style: "normal" as const }] } : {}) },
   );
 }

@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 書き出し用の補助スクリプト(ER 図の生成など。アプリには含まれない)
+    "export/**",
   ]),
 ]);
 

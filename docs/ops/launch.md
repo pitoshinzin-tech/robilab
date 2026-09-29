@@ -19,6 +19,7 @@
    - [ ] `supabase/migrations/20261001000500_discord_link.sql`(成立相手の Discord プロフィールリンク)
    - [ ] `supabase/migrations/20261001000600_rejoin_guard.sql`(退会・再登録の悪用対策)
    - [ ] `supabase/migrations/20261001000700_perf.sql`(インデックスと RLS ポリシーの性能改善)
+   - [ ] `supabase/migrations/20261001000800_hardening3.sql`(選択肢の検証、NG ワードのすり抜け対策、同時声かけ、BAN の状態同期)
    - 以降に追加した migration があれば、それも。dev と本番の `list_migrations` を見比べて、差がないことを確認する
 3. `feat/v0.1-part2` を `master` にマージする → Vercel が自動で本番に反映する
 4. 本番で動作確認(Claude はブラウザで、本人はスマホで)

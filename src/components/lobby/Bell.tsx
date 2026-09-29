@@ -43,7 +43,7 @@ export function Bell() {
     refresh();
   }, [pathname, refresh]);
 
-  // /lobby/inbox で mark_inbox_seen が走った直後に 0 へ更新する
+  // /lobby/inbox で既読化(markInboxSeenAction)が終わった直後に 0 へ更新する
   useEffect(() => {
     const onSeen = () => refresh();
     window.addEventListener(INBOX_SEEN_EVENT, onSeen);

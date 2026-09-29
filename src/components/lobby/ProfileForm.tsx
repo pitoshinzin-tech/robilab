@@ -120,7 +120,7 @@ export function ProfileForm({ mode, action, initial }: Props) {
       {mode === "register" && (
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" name="agree" required />
-          <span><a href="/terms" target="_blank" className="underline">利用規約</a>と<a href="/privacy" target="_blank" className="underline">プライバシーポリシー</a>に同意します(18歳以上であることを含みます)</span>
+          <span><a href="/terms" target="_blank" rel="noopener" className="underline">利用規約</a>と<a href="/privacy" target="_blank" rel="noopener" className="underline">プライバシーポリシー</a>に同意します(18歳以上であることを含みます)</span>
         </label>
       )}
       {clientError && <p role="alert" className="text-sm text-[var(--rl-magenta)]">{clientError}</p>}

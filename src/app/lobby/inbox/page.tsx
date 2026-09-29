@@ -19,7 +19,6 @@ export default async function InboxPage() {
   if (me.status !== "active") return <AccountStatusNotice status={me.status} />;
 
   const data = assertNoRpcError(await supabase.rpc("my_inbox"));
-  await supabase.rpc("mark_inbox_seen");
   return (
     <main className="mx-auto max-w-md px-4 py-6">
       <InboxSeenPing />

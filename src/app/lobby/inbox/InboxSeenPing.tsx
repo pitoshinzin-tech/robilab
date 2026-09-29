@@ -1,15 +1,17 @@
 "use client";
 import { useEffect } from "react";
+import { markInboxSeenAction } from "@/app/lobby/actions";
 
 /**
- * /lobby/inbox がマウントされたら Bell に「既読になった」ことを知らせる。
- * サーバー側の mark_inbox_seen はページ描画前に完了しているが、
- * Bell(クライアントコンポーネント)は自分の usePathname 変化でも再取得するため、
- * このイベントは念のための二重の合図として使う。
+ * /lobby/inbox がマウントされたら既読にし、Bell に「既読になった」ことを知らせる。
+ * 既読化はページの描画(GET)ではなく、ここからのサーバーアクション(POST)で行う。
+ * GET で状態を変えると、別サイトからのリンクを開いただけで未読が消えてしまうため。
  */
 export function InboxSeenPing() {
   useEffect(() => {
-    window.dispatchEvent(new Event("robilab:inbox-seen"));
+    markInboxSeenAction()
+      .catch(() => {})
+      .finally(() => window.dispatchEvent(new Event("robilab:inbox-seen")));
   }, []);
   return null;
 }

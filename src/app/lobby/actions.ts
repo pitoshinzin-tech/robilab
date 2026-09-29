@@ -76,6 +76,12 @@ export async function reportAction(id: string, reason: string, detail: string): 
   redirect("/lobby?reported=1");
 }
 
+/** 通知ページを開いたときに、ブラウザ側から呼ぶ(GET の描画中に状態を変えないため) */
+export async function markInboxSeenAction(): Promise<void> {
+  const supabase = await createSupabaseServer();
+  await supabase.rpc("mark_inbox_seen");
+}
+
 export async function deleteMeAction(): Promise<Result> {
   const supabase = await createSupabaseServer();
   const { error } = await supabase.rpc("delete_me");

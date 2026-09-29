@@ -362,3 +362,46 @@ describe("diagnosis_results constraints", () => {
     expect(tooBig).not.toBeNull();
   });
 });
+
+describe("hardening3", () => {
+  const profile = (nickname: string, games: unknown = [{ id: "valorant" }]) => ({
+    p_nickname: nickname, p_type_code: null, p_axes: null, p_games: games, p_platforms: ["pc"],
+    p_voice_ok: false, p_time_slots: ["weekday-night"], p_bio: "",
+  });
+
+  it("rejects game ids that are not in the option list", async () => {
+    const a = await makeUser();
+    expect(errorCode((await a.client!.rpc("update_profile", profile("x", [{ id: "discord-gg-abc" }]))).error)).toBe("INVALID_INPUT");
+    expect(errorCode((await a.client!.rpc("update_profile", profile("x", [{ id: "valorant", rank: "free-text" }]))).error)).toBe("INVALID_INPUT");
+    expect(errorCode((await a.client!.rpc("update_profile", profile("x", [{ id: "valorant" }, { id: "valorant" }]))).error)).toBe("INVALID_INPUT");
+    expect((await a.client!.rpc("update_profile", profile("x", [{ id: "apex", rank: "upper" }]))).error).toBeNull();
+  });
+
+  it("catches NG words split by spaces, symbols, or zero-width characters", async () => {
+    const a = await makeUser();
+    const zeroWidthSpace = String.fromCharCode(0x200b);
+    for (const nick of ["d i s c o r d . g g", `line${zeroWidthSpace}交換`,"ｄｉｓｃｏｒｄ．ｇｇ", "id・交換"]) {
+      expect(errorCode((await a.client!.rpc("update_profile", profile(nick))).error), nick).toBe("NG_WORD");
+    }
+    expect((await a.client!.rpc("update_profile", profile("オンラインで遊ぼう"))).error).toBeNull();
+  });
+
+  it("adding a Discord id to the ban list also bans the matching account", async () => {
+    const a = await makeUser({ signIn: false });
+    const { data: pi } = await admin.from("private_info").select("discord_user_id").eq("user_id", a.id).single();
+    expect((await admin.from("banned_discord_ids").insert({ discord_user_id: pi!.discord_user_id })).error).toBeNull();
+    try {
+      const { data: p } = await admin.from("profiles").select("status").eq("id", a.id).single();
+      expect(p?.status).toBe("banned");
+    } finally {
+      await admin.from("banned_discord_ids").delete().eq("discord_user_id", pi!.discord_user_id);
+    }
+  });
+
+  it("simultaneous approaches in both directions end in a match", async () => {
+    const a = await makeUser();
+    const b = await makeUser();
+    const [ra, rb] = await Promise.all([a.client!.rpc("send_approach", { p_to: b.id }), b.client!.rpc("send_approach", { p_to: a.id })]);
+    expect([ra.data, rb.data].sort()).toEqual(["matched", "sent"]);
+  });
+});
