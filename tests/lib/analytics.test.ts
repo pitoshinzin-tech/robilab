@@ -12,14 +12,14 @@ describe("recordDiagnosis", () => {
     await recordDiagnosis("ARCH", axes, fetchMock as unknown as typeof fetch);
     expect(fetchMock).not.toHaveBeenCalled();
   });
-  it("posts to the diagnosis_results table", async () => {
+  it("calls the record_diagnosis function", async () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://x.supabase.co");
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon");
     const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 201 }));
     await recordDiagnosis("ARCH", axes, fetchMock as unknown as typeof fetch);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://x.supabase.co/rest/v1/diagnosis_results",
-      expect.objectContaining({ method: "POST" }),
+      "https://x.supabase.co/rest/v1/rpc/record_diagnosis",
+      expect.objectContaining({ method: "POST", body: JSON.stringify({ p_type_code: "ARCH", p_axes: axes }) }),
     );
   });
   it("never throws on network errors", async () => {

@@ -1,3 +1,4 @@
+import { createClient } from "@supabase/supabase-js";
 import { describe, it, expect, afterAll } from "vitest";
 import { admin, makeUser, cleanup, birthdateYearsAgo, errorCode, trackForCleanup } from "./helpers";
 
@@ -360,6 +361,43 @@ describe("diagnosis_results constraints", () => {
     const big = { pad: "x".repeat(1000) };
     const { error: tooBig } = await admin.from("diagnosis_results").insert({ type_code: "ARCH", axes: big });
     expect(tooBig).not.toBeNull();
+  });
+
+  const anonClient = () => createClient(process.env.TEST_SUPABASE_URL!, process.env.TEST_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
+  const archAxes = { attack: 0.33, instinct: 0.33, team: 0.33, heat: 0.33 };
+  const recentCount = async () =>
+    (await admin.from("diagnosis_results").select("id", { count: "exact", head: true }).gt("created_at", new Date(Date.now() - 60_000).toISOString())).count ?? 0;
+
+  it("anonymous visitors can record only through record_diagnosis, not by direct insert", async () => {
+    const anon = anonClient();
+    expect((await anon.from("diagnosis_results").insert({ type_code: "ARCH", axes: archAxes })).error).not.toBeNull();
+    const before = await recentCount();
+    expect((await anon.rpc("record_diagnosis", { p_type_code: "ARCH", p_axes: archAxes })).error).toBeNull();
+    expect(await recentCount()).toBe(before + 1);
+  });
+
+  it("record_diagnosis rejects a type code that does not match the axes, and malformed axes", async () => {
+    const anon = anonClient();
+    expect(errorCode((await anon.rpc("record_diagnosis", { p_type_code: "GBLZ", p_axes: archAxes })).error)).toBe("INVALID_INPUT");
+    expect(errorCode((await anon.rpc("record_diagnosis", { p_type_code: "ARCH", p_axes: { ...archAxes, attack: 3 } })).error)).toBe("INVALID_INPUT");
+    expect(errorCode((await anon.rpc("record_diagnosis", { p_type_code: "ARCH", p_axes: { attack: 1 } })).error)).toBe("INVALID_INPUT");
+  });
+
+  it("record_diagnosis silently drops records above 60 per minute site-wide", async () => {
+    const fill = Math.max(0, 60 - (await recentCount()));
+    const { data: filler, error } = await admin
+      .from("diagnosis_results")
+      .insert(Array.from({ length: fill }, () => ({ type_code: "ARCH", axes: archAxes })))
+      .select("id");
+    expect(error).toBeNull();
+    try {
+      const before = await recentCount();
+      expect((await anonClient().rpc("record_diagnosis", { p_type_code: "ARCH", p_axes: archAxes })).error).toBeNull();
+      expect(await recentCount()).toBe(before);
+    } finally {
+      const ids = (filler ?? []).map((r) => r.id);
+      if (ids.length) await admin.from("diagnosis_results").delete().in("id", ids);
+    }
   });
 });
 

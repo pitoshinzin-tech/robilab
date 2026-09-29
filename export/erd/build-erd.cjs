@@ -13,7 +13,7 @@ const ACCESS = {
   own: { color: "#2f6fde", label: "本人の行だけ読める(RLS)。書き込みは関数経由" },
   rpc: { color: "#7b4fd6", label: "直接は読み書き不可。関数(RPC)経由だけ" },
   ops: { color: "#c46a1a", label: "運営だけ(ダッシュボード / 関数の内部で使用)" },
-  anon: { color: "#1f9d6b", label: "だれでも書き込みだけできる(読めない)" },
+  anon: { color: "#1f9d6b", label: "だれでも関数経由で記録だけできる(件数上限あり・読めない)" },
   auth: { color: "#5b6270", label: "Supabase Auth が管理" },
 };
 
@@ -73,7 +73,7 @@ let out = [];
 out.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${FONT}">`);
 out.push(`<g id="background"><rect width="${W}" height="${H}" fill="#f7f8fb"/></g>`);
 out.push(`<g id="title"><text x="40" y="52" font-size="28" font-weight="700" fill="#1b1f2a">ロビラボ データベース ER 図</text>` +
-  `<text x="40" y="82" font-size="15" fill="#5b6270">Supabase public スキーマ(dev: robilab-dev で確認、migration 20261001000600 まで)</text></g>`);
+  `<text x="40" y="82" font-size="15" fill="#5b6270">Supabase public スキーマ(dev: robilab-dev で確認、migration 20261001001000 まで)</text></g>`);
 
 // 領域の背景
 out.push(`<g id="areas">`);

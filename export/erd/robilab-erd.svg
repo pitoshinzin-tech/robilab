@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 1130" width="1640" height="1130" font-family="'Yu Gothic UI', 'Meiryo', sans-serif">
 <g id="background"><rect width="1640" height="1130" fill="#f7f8fb"/></g>
-<g id="title"><text x="40" y="52" font-size="28" font-weight="700" fill="#1b1f2a">ロビラボ データベース ER 図</text><text x="40" y="82" font-size="15" fill="#5b6270">Supabase public スキーマ(dev: robilab-dev で確認、migration 20261001000600 まで)</text></g>
+<g id="title"><text x="40" y="52" font-size="28" font-weight="700" fill="#1b1f2a">ロビラボ データベース ER 図</text><text x="40" y="82" font-size="15" fill="#5b6270">Supabase public スキーマ(dev: robilab-dev で確認、migration 20261001001000 まで)</text></g>
 <g id="areas">
 <rect x="20" y="96" width="1200" height="772" rx="14" fill="none" stroke="#c9cedb" stroke-dasharray="6 5"/>
 <text x="36" y="858" font-size="13" fill="#7a8190">マッチング(Discord ログインが必要)</text>
@@ -253,7 +253,7 @@
 <rect x="40" y="944" width="16" height="16" rx="3" fill="#2f6fde"/><text x="64" y="957" font-size="13" fill="#333a48">本人の行だけ読める(RLS)。書き込みは関数経由</text>
 <rect x="600" y="944" width="16" height="16" rx="3" fill="#7b4fd6"/><text x="624" y="957" font-size="13" fill="#333a48">直接は読み書き不可。関数(RPC)経由だけ</text>
 <rect x="40" y="970" width="16" height="16" rx="3" fill="#c46a1a"/><text x="64" y="983" font-size="13" fill="#333a48">運営だけ(ダッシュボード / 関数の内部で使用)</text>
-<rect x="600" y="970" width="16" height="16" rx="3" fill="#1f9d6b"/><text x="624" y="983" font-size="13" fill="#333a48">だれでも書き込みだけできる(読めない)</text>
+<rect x="600" y="970" width="16" height="16" rx="3" fill="#1f9d6b"/><text x="624" y="983" font-size="13" fill="#333a48">だれでも関数経由で記録だけできる(件数上限あり・読めない)</text>
 <rect x="40" y="996" width="16" height="16" rx="3" fill="#5b6270"/><text x="64" y="1009" font-size="13" fill="#333a48">Supabase Auth が管理</text>
 <rect x="1160" y="944" width="24" height="15" rx="3" fill="#e2b714"/><text x="1190" y="956" font-size="13" fill="#333a48">主キー</text>
 <rect x="1250" y="944" width="24" height="15" rx="3" fill="#4a5263"/><text x="1280" y="956" font-size="13" fill="#333a48">外部キー</text>
