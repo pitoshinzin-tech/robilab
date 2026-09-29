@@ -22,7 +22,8 @@ export async function renderCardImage(view: CardView): Promise<ImageResponse> {
     ...view.favoriteGames,
     "好きなゲーム 未登録",
   ];
-  const font = await loadOgFont(lines.join(""));
+  // 使う文字だけを、重複なし・並べ替えて渡す(入力した文の並びがフォント取得の URL に残らないように)
+  const font = await loadOgFont([...new Set(lines.join(""))].sort().join(""));
   return new ImageResponse(
     (
       <div style={{ width: "100%", height: "100%", display: "flex", padding: 56, gap: 48, color: "#eaf6ff", fontFamily: "ZenKaku",

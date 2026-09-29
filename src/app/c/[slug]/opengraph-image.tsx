@@ -11,5 +11,10 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const { slug } = await params;
   const card = await fetchPublicCard(slug);
   if (!card) notFound();
-  return renderCardImage(buildCardView(card));
+  const res = await renderCardImage(buildCardView(card));
+  // 公開をやめたり内容を変えたりしたら、すぐ反映されるようにする(ImageResponse の既定は 1 年の immutable)。検索にも載せない
+  const headers = new Headers(res.headers);
+  headers.set("Cache-Control", "public, max-age=0, must-revalidate");
+  headers.set("X-Robots-Tag", "noindex");
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
 }
