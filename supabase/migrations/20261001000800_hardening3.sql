@@ -56,7 +56,7 @@ language sql immutable set search_path = public as $$
   select regexp_replace(
     lower(normalize(coalesce(p_text, ''), NFKC)),
     -- 空白・記号、ソフトハイフン、ゼロ幅文字、双方向制御、異体字セレクタ、全角の句読点・中黒
-    '[[:space:][:punct:]­͏؜ᅟᅠ឴឵᠋-᠎​-‏‪-‮⁠-⁯　-〿・︀-️﻿･ㅤ]',
+    '[[:space:][:punct:]\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180E\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3000-\u303F\u30FB\uFE00-\uFE0F\uFEFF\uFF65\u3164]',
     '', 'g')
 $$;
 revoke all on function public._ng_normalize from public, anon, authenticated;

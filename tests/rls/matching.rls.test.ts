@@ -404,4 +404,15 @@ describe("hardening3", () => {
     const [ra, rb] = await Promise.all([a.client!.rpc("send_approach", { p_to: b.id }), b.client!.rpc("send_approach", { p_to: a.id })]);
     expect([ra.data, rb.data].sort()).toEqual(["matched", "sent"]);
   });
+
+  it("accepts only the four diagnosis axes with values between -1 and 1", async () => {
+    const a = await makeUser();
+    const withAxes = (axes: unknown) => ({ ...profile("x"), p_axes: axes });
+    const ok = { attack: 0.33, instinct: -1, team: 1, heat: 0 };
+    expect((await a.client!.rpc("update_profile", withAxes(ok))).error).toBeNull();
+    expect((await a.client!.rpc("update_profile", withAxes(null))).error).toBeNull();
+    for (const bad of [{ ...ok, attack: 5 }, { ...ok, heat: "0.5" }, { attack: 0.3, instinct: 0.3, team: 0.3 }, { ...ok, extra: 0 }]) {
+      expect(errorCode((await a.client!.rpc("update_profile", withAxes(bad))).error), JSON.stringify(bad)).toBe("INVALID_INPUT");
+    }
+  });
 });

@@ -77,6 +77,18 @@ select * from blocks where blocker_id = '<target_id>' and blocked_id = '<reporte
    update reports set status = 'closed' where target_discord_id = '<target_discord_id>';
    ```
 
+※ `banned_discord_ids` に追加すると、その Discord のアカウントは自動で `status = 'banned'` になる(パターン A の手順1は、念のための二重の操作)。
+
+### BAN を解除する(誤 BAN だった場合など)
+
+`banned_discord_ids` から消しても、アカウントの status は自動では戻らない。次の2つを両方行う:
+
+```sql
+delete from banned_discord_ids where discord_user_id = '<discord_user_id>';
+update profiles set status = 'active'
+  where id = (select user_id from private_info where discord_user_id = '<discord_user_id>');
+```
+
 ## 未成年が関わる通報
 
 1. **最優先で確認する** — この通報は他の確認よりも優先度が高い
