@@ -28,6 +28,10 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
   const trace = useRef<TraceState>(initialTrace());
   const trail = useRef<Point[]>([]);
   const countdownEnd = useRef(0);
+  // ロック要求の状態:first = unadjustedMovement つき(失敗しても通常の要求に続く)、second = 通常の要求、final = 要求が済んだ後
+  const attempt = useRef<"first" | "second" | "final">("final");
+  const starting = useRef(false);
+  const mounted = useRef(true);
   const strokes = useMemo(() => char.strokes.map((d) => toStroke(parsePath(d))), [char]);
 
   const dispatch = (e: AimEvent): AimPhase => {
@@ -42,6 +46,13 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
     latest.current = { dispatch, onFinish, onAbort };
   });
 
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
   // ポインターロックの出入りとマウスの動き
   useEffect(() => {
     const el = canvas.current!;
@@ -50,9 +61,20 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
       view.current = applyMouse(view.current, e.movementX, e.movementY, degPerCount);
     };
     const onLockChange = () => {
-      if (document.pointerLockElement !== el && latest.current.dispatch("lost") === "aborted") latest.current.onAbort();
+      if (document.pointerLockElement === el) {
+        // ロックが取れたので、1 回目の失敗で出たエラーは消す
+        setError(null);
+      } else if (latest.current.dispatch("lost") === "aborted") {
+        latest.current.onAbort();
+      }
     };
-    const onLockError = () => setError(UNSUPPORTED);
+    const onLockError = () => {
+      // 1 回目(unadjustedMovement つき)の失敗は、通常の要求に続くので無視する
+      if (attempt.current === "first") return;
+      setError(UNSUPPORTED);
+      // promise を返さない古いブラウザで、始まったあとにロックが失敗したときは中断にする
+      if (latest.current.dispatch("lost") === "aborted") latest.current.onAbort();
+    };
     document.addEventListener("mousemove", onMove);
     document.addEventListener("pointerlockchange", onLockChange);
     document.addEventListener("pointerlockerror", onLockError);
@@ -169,22 +191,32 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
   }, [crosshair, strokes]);
 
   const start = async () => {
-    if (phaseRef.current !== "idle") return;
+    if (phaseRef.current !== "idle" || starting.current) return;
+    starting.current = true;
     setError(null);
     const el = canvas.current!;
     view.current = { yaw: 0, pitch: 0 };
     trace.current = initialTrace();
     trail.current = [];
+    attempt.current = "first";
+    let locked = true;
     try {
       // 生の移動量(OS の加速なし)を優先する
       await (el.requestPointerLock as (o?: { unadjustedMovement?: boolean }) => Promise<void> | void)({ unadjustedMovement: true });
     } catch {
+      attempt.current = "second";
       try {
         await (el.requestPointerLock as () => Promise<void> | void)();
       } catch {
-        setError(UNSUPPORTED);
-        return;
+        locked = false;
       }
+    }
+    attempt.current = "final";
+    starting.current = false;
+    if (!mounted.current) return;
+    if (!locked) {
+      setError(UNSUPPORTED);
+      return;
     }
     countdownEnd.current = performance.now() + COUNTDOWN_MS;
     dispatch("start");
