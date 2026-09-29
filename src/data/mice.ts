@@ -1,6 +1,7 @@
 /**
  * マウスの大きさ・重さ(メーカー公式の製品ページの数字。価格は載せない)。
  * id は src/data/devices.ts と同じ。メーカー名・製品名は devices.ts を使う。
+ * 重さは、標準の電池を入れた状態の公式の数字(電池を使うマウスは電池込み)。
  * 増やすときは devices.ts とこのファイルの両方に足す(tests/data/mice.test.ts が確かめる)。
  */
 export type MouseSpec = {
@@ -197,7 +198,7 @@ export const MICE: MouseSpec[] = [
     checkedAt: "2026-09-29",
   },
   {
-    id: "steelseries-aerox-3",
+    id: "steelseries-aerox-3-wireless",
     lengthMm: 120.55,
     widthMm: 67.03,
     heightMm: 37.98,
@@ -208,7 +209,7 @@ export const MICE: MouseSpec[] = [
     checkedAt: "2026-09-29",
   },
   {
-    id: "steelseries-rival-3",
+    id: "steelseries-rival-3-wireless",
     lengthMm: 120.6,
     widthMm: 67,
     heightMm: 37.9,
@@ -257,5 +258,7 @@ export function mouseById(id: string): MouseSpec | undefined {
  * 外したもの: finalmouse-ultralightx — 公式は S/M/L の3サイズで、幅は「グリップ幅」表記(いちばん広いところではない)。devices.ts にサイズの区別がない
  * 外したもの: lamzu-atlantis-mini — 初代(49g)の公式ページが現在ない。現行の Mini 4K/Pro のページにも大きさの数字が文字で載っていない
  * 外したもの: vaxee-xe — 公式の製品ページに大きさ・重さの説明文がない(画像のみ)
+ * 外したもの: steelseries-aerox-3 — 有線の旧モデルは公式ページが見つからない
+ * 外したもの: steelseries-rival-3 — 有線の旧モデルは公式ページが見つからない
  * 外したもの: glorious-model-o-2-wireless — 公式ページに長さ・幅・高さの数字がない(重さ 68g のみ)
  */
