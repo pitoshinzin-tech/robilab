@@ -9,7 +9,7 @@ export function DeleteAccount() {
     <div className="grid gap-2">
       <button type="button" disabled={pending}
         onClick={() => {
-          if (confirm("退会すると、プロフィールと声かけの記録がすべて消えます。よろしいですか?")) {
+          if (confirm("退会すると、プロフィールと声かけの記録がすべて消えます。退会から7日間は、同じ Discord アカウントで再登録できません。よろしいですか?")) {
             start(async () => {
               const res = await deleteMeAction();
               if (res?.error) setError(res.error);

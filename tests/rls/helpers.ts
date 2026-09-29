@@ -21,7 +21,7 @@ export function birthdateYearsAgo(years: number, dayOffset = 0): string {
  * Supabase Auth の IP ごとのサインイン回数制限に当たらないようにする。
  */
 export async function makeUser(
-  opts: { birthdate?: string; register?: boolean; nickname?: string; signIn?: boolean } = {},
+  opts: { birthdate?: string; register?: boolean; nickname?: string; signIn?: boolean; discordId?: string } = {},
 ): Promise<TestUser> {
   const email = `rls-${crypto.randomUUID()}@example.test`;
   const password = `pw-${crypto.randomUUID()}`;
@@ -31,7 +31,7 @@ export async function makeUser(
   created.push(id);
   if (opts.register !== false) {
     const { error: e } = await admin.rpc("_register_profile", {
-      p_uid: id, p_discord_id: `d-${id}`, p_discord_name: `name-${id.slice(0, 6)}`,
+      p_uid: id, p_discord_id: opts.discordId ?? `d-${id}`, p_discord_name: `name-${id.slice(0, 6)}`,
       p_birthdate: opts.birthdate ?? birthdateYearsAgo(25), p_nickname: opts.nickname ?? "テスト",
       p_type_code: "ARCH", p_axes: { attack: 0.3, instinct: 0.3, team: 0.3, heat: 0.3 },
       p_games: [{ id: "valorant" }], p_platforms: ["pc"], p_voice_ok: true, p_time_slots: ["weekday-night"], p_bio: "",

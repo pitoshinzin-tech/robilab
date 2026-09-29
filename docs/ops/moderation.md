@@ -28,6 +28,15 @@
 update profiles set status = 'suspended' where id = '<reporter_id>';
 ```
 
+通報者が退会していて reporter_id が NULL の場合も、`reporter_discord_id` が残っている。その Discord アカウントを BAN すれば再登録を防げる:
+
+```sql
+insert into banned_discord_ids (discord_user_id, note)
+  values ('<reporter_discord_id>', '嫌がらせ目的の通報');
+```
+
+※ 退会した Discord ID は `left_discord_ids` に記録され、退会から7日間は再登録できない。退会された人へのブロックは `carried_blocks` に引き継がれ、再登録時に自動で戻る。
+
 **報復通報の確認:** 通報された人(target)が、通報した人(reporter)を先にブロックしていないかを確認する:
 
 ```sql
@@ -146,12 +155,12 @@ order by created_at desc;
 
 ```sql
 select
-  reporter_id,
+  reporter_discord_id,
   count(*) as report_count
 from public.reports
-where reporter_id = '<reporter_id>'
+where reporter_discord_id = '<reporter_discord_id>'
   and created_at >= public.jst_day_start(now())
-group by reporter_id;
+group by reporter_discord_id;
 ```
 
 ### suspended 状態のユーザーを確認

@@ -213,6 +213,61 @@ describe("delete_me", () => {
   });
 });
 
+describe("re-registration after delete_me", () => {
+  /** 退会した Discord ID の再登録待ち期間(7日)を過ぎたことにする */
+  async function expireCooldown(discordId: string) {
+    const { error } = await admin
+      .from("left_discord_ids")
+      .update({ left_at: new Date(Date.now() - 8 * 86400 * 1000).toISOString() })
+      .eq("discord_user_id", discordId);
+    expect(error).toBeNull();
+  }
+
+  it("the same Discord account cannot re-register within 7 days of leaving", async () => {
+    const discordId = `d-rejoin-${crypto.randomUUID()}`;
+    const a = await makeUser({ discordId });
+    expect((await a.client!.rpc("delete_me")).error).toBeNull();
+    await expect(makeUser({ discordId, signIn: false })).rejects.toThrow(/REJOIN_COOLDOWN/);
+    await expireCooldown(discordId);
+    await expect(makeUser({ discordId, signIn: false })).resolves.toBeTruthy();
+    const { data } = await admin.from("left_discord_ids").select("discord_user_id").eq("discord_user_id", discordId).maybeSingle();
+    expect(data).toBeNull();
+  });
+
+  it("the report limit and reporter attribution survive delete_me and re-registration", async () => {
+    const discordId = `d-rejoin-${crypto.randomUUID()}`;
+    const a = await makeUser({ discordId });
+    const targets = await Promise.all(Array.from({ length: 6 }, () => makeUser({ signIn: false })));
+    for (let i = 0; i < 5; i++) {
+      expect((await a.client!.rpc("report_user", { p_id: targets[i].id, p_reason: "spam", p_detail: "" })).error).toBeNull();
+    }
+    expect((await a.client!.rpc("delete_me")).error).toBeNull();
+    const { data: rows } = await admin.from("reports").select("reporter_id, reporter_discord_id").in("target_id", targets.slice(0, 5).map((t) => t.id));
+    expect(rows).toHaveLength(5);
+    expect(rows!.every((r) => r.reporter_id === null && r.reporter_discord_id === discordId)).toBe(true);
+
+    await expireCooldown(discordId);
+    const a2 = await makeUser({ discordId });
+    expect(errorCode((await a2.client!.rpc("report_user", { p_id: targets[5].id, p_reason: "spam", p_detail: "" })).error)).toBe(
+      "REPORT_LIMIT",
+    );
+  });
+
+  it("a block against a user who leaves is restored when they re-register", async () => {
+    const discordId = `d-rejoin-${crypto.randomUUID()}`;
+    const a = await makeUser({ discordId });
+    const victim = await makeUser();
+    expect((await victim.client!.rpc("block_user", { p_id: a.id })).error).toBeNull();
+    expect((await a.client!.rpc("delete_me")).error).toBeNull();
+
+    await expireCooldown(discordId);
+    const a2 = await makeUser({ discordId, signIn: false });
+    const { data: block } = await admin.from("blocks").select("blocker_id").eq("blocker_id", victim.id).eq("blocked_id", a2.id).maybeSingle();
+    expect(block?.blocker_id).toBe(victim.id);
+    expect(((await victim.client!.rpc("get_profile", { p_id: a2.id })).data as unknown[]).length).toBe(0);
+  });
+});
+
 describe("report abuse", () => {
   it("cannot report someone outside shared visibility with no approach history", async () => {
     const a = await makeUser();

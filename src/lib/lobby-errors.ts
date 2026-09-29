@@ -2,6 +2,7 @@ const MESSAGES: Record<string, string> = {
   NOT_LOGGED_IN: "ログインが切れました。もう一度ログインしてください。",
   NO_DISCORD: "Discord でログインしてください。",
   BANNED: "このアカウントはご利用いただけません。",
+  REJOIN_COOLDOWN: "退会から7日間は、同じ Discord アカウントで再登録できません。しばらくしてからお試しください。",
   UNDER_AGE: "マッチングは18歳以上の方が対象です(15〜17歳の方向けの枠は12月ごろ開放予定です)。",
   ALREADY_REGISTERED: "すでに登録済みです。",
   NG_WORD: "ニックネームかひとことに、使えない言葉が含まれています。",
