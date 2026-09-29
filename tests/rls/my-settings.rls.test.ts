@@ -1,0 +1,86 @@
+import { describe, it, expect, afterAll } from "vitest";
+import { createClient } from "@supabase/supabase-js";
+import { admin, makeUser, cleanup, errorCode } from "./helpers";
+import { emptyMySettings } from "@/lib/my-settings";
+
+afterAll(cleanup);
+
+const anon = () => createClient(process.env.TEST_SUPABASE_URL!, process.env.TEST_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
+const sample = () => ({
+  ...emptyMySettings(new Date("2026-10-01T00:00:00.000Z")),
+  typeCode: "ARCH",
+  dpi: 800,
+  mainGame: "valorant",
+  sens: { valorant: 0.35 },
+  hand: { lengthCm: 18.5, widthCm: 9, grip: "claw" },
+  devices: { mouse: { id: "logicool-g-pro-x-superlight-2" }, pad: { name: "布パッド" }, keyboard: null, headset: null },
+  favoriteGames: [{ id: "valorant" }],
+  cardName: "ロビ太",
+});
+
+describe("my_settings", () => {
+  it("saves your own settings, replaces updatedAt with server time, and nobody else can read them", async () => {
+    const a = await makeUser({ register: false });
+    const b = await makeUser({ register: false });
+    const { data, error } = await a.client!.rpc("save_my_settings", { p_data: sample() });
+    expect(error).toBeNull();
+    expect((data as { updatedAt: string }).updatedAt).not.toBe("2026-10-01T00:00:00.000Z");
+    expect((await a.client!.from("my_settings").select("user_id")).data).toHaveLength(1);
+    expect((await b.client!.from("my_settings").select("user_id")).data).toHaveLength(0);
+    expect((await anon().from("my_settings").select("user_id")).data ?? []).toHaveLength(0);
+  });
+
+  it("rejects out-of-range values, unknown keys, and NG words", async () => {
+    const a = await makeUser({ register: false });
+    const bad = [
+      { ...sample(), dpi: 10 },
+      { ...sample(), sens: { valorant: 99 } },
+      { ...sample(), hand: { lengthCm: 40, widthCm: 9, grip: "claw" } },
+      { ...sample(), favoriteGames: Array.from({ length: 7 }, (_, i) => ({ name: `g${i}` })) },
+      { ...sample(), extra: true },
+      { ...sample(), devices: { ...sample().devices, mouse: { name: " 空白 " } } },
+      // 種類の違う値(オブジェクトの代わりに文字列や配列)でも、落ちずに INVALID_INPUT になる
+      { ...sample(), devices: "mouse" },
+      { ...sample(), devices: { ...sample().devices, mouse: "G PRO" } },
+      { ...sample(), hand: [] },
+      { ...sample(), sens: [0.35] },
+      { ...sample(), favoriteGames: { id: "valorant" } },
+      { ...sample(), axes: "ARCH" },
+    ];
+    for (const p of bad) expect(errorCode((await a.client!.rpc("save_my_settings", { p_data: p })).error), JSON.stringify(p)).toBe("INVALID_INPUT");
+    const ng = { ...sample(), cardName: "discord.gg/xx" };
+    expect(errorCode((await a.client!.rpc("save_my_settings", { p_data: ng })).error)).toBe("NG_WORD");
+  });
+
+  it("anonymous visitors cannot save", async () => {
+    expect((await anon().rpc("save_my_settings", { p_data: sample() })).error).not.toBeNull();
+  });
+
+  it("public card returns only the whitelisted fields, and turning public off kills the old slug", async () => {
+    const a = await makeUser({ register: false });
+    expect(errorCode((await a.client!.rpc("set_card_public", { p_public: true })).error)).toBe("NOT_FOUND");
+    await a.client!.rpc("save_my_settings", { p_data: sample() });
+    const slug1 = (await a.client!.rpc("set_card_public", { p_public: true })).data as string;
+    expect(slug1).toMatch(/^[A-Za-z0-9]{10}$/);
+    const card = (await anon().rpc("get_public_card", { p_slug: slug1 })).data as Record<string, unknown>;
+    expect(Object.keys(card).sort()).toEqual(["cardName", "devices", "dpi", "favoriteGames", "grip", "mainGame", "mainSens", "typeCode"]);
+    expect(card.mainSens).toBe(0.35);
+    expect(JSON.stringify(card)).not.toContain("lengthCm");
+    await a.client!.rpc("set_card_public", { p_public: false });
+    expect((await anon().rpc("get_public_card", { p_slug: slug1 })).data).toBeNull();
+    const slug2 = (await a.client!.rpc("set_card_public", { p_public: true })).data as string;
+    expect(slug2).not.toBe(slug1);
+    expect((await anon().rpc("get_public_card", { p_slug: slug1 })).data).toBeNull();
+    expect((await anon().rpc("get_public_card", { p_slug: "not a slug" })).data).toBeNull();
+  });
+
+  it("delete_my_settings and account deletion both remove the row", async () => {
+    const a = await makeUser({ register: false });
+    await a.client!.rpc("save_my_settings", { p_data: sample() });
+    expect((await a.client!.rpc("delete_my_settings")).error).toBeNull();
+    expect((await admin.from("my_settings").select("user_id").eq("user_id", a.id)).data).toHaveLength(0);
+    await a.client!.rpc("save_my_settings", { p_data: sample() });
+    expect((await a.client!.rpc("delete_me")).error).toBeNull();
+    expect((await admin.from("my_settings").select("user_id").eq("user_id", a.id)).data).toHaveLength(0);
+  });
+});
