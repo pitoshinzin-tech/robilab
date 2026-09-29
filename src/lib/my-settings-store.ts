@@ -127,6 +127,18 @@ function updateLocal(
   return r.value;
 }
 
+/**
+ * この端末にマイ設定がないときだけ、サーバーの設定(読み込み時に v1→v2 に直したもの)をこの端末に入れる。
+ * 入れたら、この端末の変更の印は消す(サーバーの内容をそのまま使うため)。入れたときだけ true。
+ */
+export function adoptServerIfLocalEmpty(storage: SettingsStorage | null, serverRaw: unknown): boolean {
+  const server = parseMySettings(serverRaw);
+  if (!server || loadLocal(storage)) return false;
+  if (!saveLocal(storage, server)) return false;
+  clearDirty(storage);
+  return true;
+}
+
 /** 診断が終わったときに、タイプと4軸の値をマイ設定に入れる。 */
 export function applyDiagnosisToLocal(storage: SettingsStorage | null, typeCode: string, axes: Axes, now: Date = new Date()) {
   return updateLocal(storage, (s) => ({ next: { ...s, typeCode, axes }, keys: ["typeCode", "axes"] }), now);

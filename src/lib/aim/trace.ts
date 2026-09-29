@@ -26,6 +26,7 @@ export function initialTrace(): TraceState {
 export function stepTrace(s: TraceState, strokes: Stroke[], p: Point, now: number): TraceState {
   if (s.phase === "done") return s;
   const st = strokes[s.stroke];
+  if (!st) return s; // お題が変わって画の番号が範囲外になったときに落ちないように
   if (s.phase === "await-start") {
     const a = st.points[0];
     if (Math.hypot(p.x - a.x, p.y - a.y) > START_RADIUS) return s;

@@ -90,3 +90,12 @@ describe("computeScore", () => {
     expect(computeScore(50, 1000, 1)).toBe(5000);
   });
 });
+
+describe("stepTrace guard", () => {
+  it("returns the state unchanged when the stroke index is past the end (the character changed)", () => {
+    for (const phase of ["await-start", "tracing"] as const) {
+      const s = { ...initialTrace(), stroke: 5, phase };
+      expect(stepTrace(s, strokes, { x: 10, y: 50 }, 1000)).toBe(s);
+    }
+  });
+});

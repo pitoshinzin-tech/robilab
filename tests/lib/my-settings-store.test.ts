@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { emptyMySettings, type MySettings } from "@/lib/my-settings";
 import {
   MY_SETTINGS_KEY, MY_SETTINGS_DIRTY_KEY, loadLocal, saveLocal, clearLocal, pickNewer, applyDiagnosisToLocal, saveSensToLocal,
-  loadDirty, markDirty, clearDirty, mergeForSync, type SettingsStorage,
+  loadDirty, markDirty, clearDirty, mergeForSync, adoptServerIfLocalEmpty, type SettingsStorage,
 } from "@/lib/my-settings-store";
 
 function memoryStorage(initial: Record<string, string> = {}): SettingsStorage & { data: Record<string, string> } {
@@ -172,5 +172,40 @@ describe("mergeForSync", () => {
     // 範囲外の DPI など、組み合わせた結果が保存できない形になる例
     const local = { ...at("2026-10-05T00:00:00.000Z"), dpi: 999999 } as MySettings;
     expect(mergeForSync(local, server, ["dpi"])).toEqual({ result: server, push: false });
+  });
+});
+
+describe("adoptServerIfLocalEmpty", () => {
+  it("copies the server settings into an empty device and clears stale dirty marks", () => {
+    const st = memoryStorage({ [MY_SETTINGS_DIRTY_KEY]: JSON.stringify(["sens"]) });
+    const server = { ...at("2026-10-01T00:00:00.000Z"), dpi: 800, mainGame: "valorant", sens: { valorant: 0.35, apex: 1.2 } };
+    expect(adoptServerIfLocalEmpty(st, server)).toBe(true);
+    expect(loadLocal(st)).toEqual(server);
+    expect(loadDirty(st)).toEqual([]);
+  });
+  it("upgrades a v1 server row to v2 on the way in", () => {
+    const st = memoryStorage();
+    const v1: Record<string, unknown> = { ...at("2026-10-01T00:00:00.000Z"), version: 1 };
+    delete v1.crosshair;
+    expect(adoptServerIfLocalEmpty(st, v1)).toBe(true);
+    const got = loadLocal(st);
+    expect(got?.version).toBe(2);
+    expect(got?.crosshair).toBeDefined();
+  });
+  it("never overwrites settings already on this device", () => {
+    const local = { ...at("2026-09-01T00:00:00.000Z"), dpi: 400 };
+    const st = memoryStorage();
+    saveLocal(st, local);
+    markDirty(st, ["dpi"]);
+    expect(adoptServerIfLocalEmpty(st, { ...at("2026-10-01T00:00:00.000Z"), dpi: 1600 })).toBe(false);
+    expect(loadLocal(st)).toEqual(local);
+    expect(loadDirty(st)).toEqual(["dpi"]);
+  });
+  it("does nothing for a missing or invalid server row, or without storage", () => {
+    const st = memoryStorage();
+    expect(adoptServerIfLocalEmpty(st, null)).toBe(false);
+    expect(adoptServerIfLocalEmpty(st, { version: 1 })).toBe(false);
+    expect(st.data[MY_SETTINGS_KEY]).toBeUndefined();
+    expect(adoptServerIfLocalEmpty(null, at("2026-10-01T00:00:00.000Z"))).toBe(false);
   });
 });

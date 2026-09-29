@@ -7,7 +7,7 @@ import { jstDate } from "@/lib/aim/daily";
 import { degreesPerCount } from "@/lib/aim/view";
 import { aimErrorMessage } from "@/lib/aim/share";
 import { CROSSHAIR_DEFAULT } from "@/lib/crosshair";
-import { browserStorage, loadLocal } from "@/lib/my-settings-store";
+import { adoptServerIfLocalEmpty, browserStorage, loadLocal } from "@/lib/my-settings-store";
 import { useIsClient } from "@/lib/use-is-client";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { errorCodeOf } from "@/lib/lobby-errors";
@@ -44,7 +44,20 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
     let cancelled = false;
-    createSupabaseBrowser().auth.getUser().then(({ data }) => { if (!cancelled) setLoggedIn(Boolean(data.user)); });
+    (async () => {
+      const supabase = createSupabaseBrowser();
+      const { data } = await supabase.auth.getUser();
+      if (cancelled) return;
+      setLoggedIn(Boolean(data.user));
+      if (!data.user) return;
+      // この端末にマイ設定がなければ、サーバーの設定を使う(新しい端末で感度を聞き直さず、ほかのゲームの感度も消さない)
+      // サーバーへは何も送らない(全体の同期は /my がする)
+      const storage = browserStorage();
+      if (loadLocal(storage)) return;
+      const { data: row, error } = await supabase.from("my_settings").select("data").maybeSingle();
+      if (cancelled || error) return;
+      if (adoptServerIfLocalEmpty(storage, row?.data ?? null)) setSettingsRev((n) => n + 1);
+    })();
     return () => { cancelled = true; };
   }, []);
 
@@ -103,7 +116,7 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
           <AimResult glyph={char.glyph} strokes={char.strokes.length} {...result} sendMessage={sendMessage} canResend={canResend} sending={sending}
             onResend={() => void submit(result)} onRetry={retry} />
         ) : (
-          <AimGame key={round} char={char} degPerCount={deg} crosshair={crosshair}
+          <AimGame key={`${date}:${char.id}:${round}`} char={char} degPerCount={deg} crosshair={crosshair}
             onFinish={(r) => { setResult(r); void submit(r); }}
             onAbort={() => setRound((n) => n + 1)} />
         )}
