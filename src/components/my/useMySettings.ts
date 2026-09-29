@@ -10,6 +10,9 @@ export type SyncStatus = "local" | "memory" | "saving" | "synced" | "server-erro
 export function serverErrorMessage(code: string | undefined): string {
   if (code === "NG_WORD") return "デバイス名・ゲーム名・表示名に使えない言葉が含まれています。直すまでサーバーには保存されません。";
   if (code === "NOT_FOUND") return "先に設定を保存してから公開してください。";
+  if (code === "NOT_ACTIVE") return "アカウントが利用停止中のため、マイ設定の保存と名刺の公開はできません。";
+  if (code === "BANNED") return "このアカウントではマイ設定の保存と名刺の公開をご利用いただけません。";
+  if (code === "CARD_LOCKED") return "この名刺は運営の判断により公開できません。";
   if (code === "INVALID_INPUT") return "入力内容を確認してください。";
   return "サーバーに保存できませんでした。この端末には保存されています。";
 }

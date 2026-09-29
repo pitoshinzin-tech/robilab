@@ -1,4 +1,4 @@
-import { buildCardView, parseCardRequest } from "@/lib/card-view";
+import { buildCardView, contentLengthTooLarge, parseCardRequest } from "@/lib/card-view";
 import { renderCardImage } from "@/components/card/CardImage";
 
 /**
@@ -6,6 +6,7 @@ import { renderCardImage } from "@/components/card/CardImage";
  * URL だけで呼べる GET は用意しない(他人に見せる手段にしない)。
  */
 export async function POST(request: Request) {
+  if (contentLengthTooLarge(request.headers.get("content-length"))) return new Response("Payload Too Large", { status: 413 });
   const data = parseCardRequest(await request.text());
   if (!data) return new Response("Bad Request", { status: 400 });
   try {

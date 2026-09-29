@@ -51,7 +51,7 @@ const tables = [
   { id: "diagnosis", name: "diagnosis_results", sub: "診断結果の匿名記録", x: 1290, y: 650, w: 310, access: "anon",
     cols: [["id", "uuid", "PK"], ["type_code", "text(16タイプ)", ""], ["axes", "jsonb(〜512B)", ""], ["created_at", "timestamptz", ""]] },
   { id: "my_settings", name: "my_settings", sub: "マイ設定(1人1件)", x: 400, y: 880, w: 340, access: "own",
-    cols: [["user_id", "uuid", "PK FK"], ["data", "jsonb(〜4KB)", ""], ["updated_at", "timestamptz", ""], ["public_slug", "text?(10文字)", "UQ"]] },
+    cols: [["user_id", "uuid", "PK FK"], ["data", "jsonb(〜4KB)", ""], ["updated_at", "timestamptz", ""], ["public_slug", "text?(10文字)", "UQ"], ["card_locked", "boolean(運営の公開禁止)", ""]] },
 ];
 const T = Object.fromEntries(tables.map((t) => [t.id, t]));
 const rowY = (t, col) => t.y + HEAD + t.cols.findIndex((c) => c[0] === col) * ROW + ROW / 2;
@@ -76,7 +76,7 @@ let out = [];
 out.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${FONT}">`);
 out.push(`<g id="background"><rect width="${W}" height="${H}" fill="#f7f8fb"/></g>`);
 out.push(`<g id="title"><text x="40" y="52" font-size="28" font-weight="700" fill="#1b1f2a">ロビラボ データベース ER 図</text>` +
-  `<text x="40" y="82" font-size="15" fill="#5b6270">Supabase public スキーマ(dev: robilab-dev で確認、migration 20261001001100 まで)</text></g>`);
+  `<text x="40" y="82" font-size="15" fill="#5b6270">Supabase public スキーマ(dev: robilab-dev で確認、migration 20261001001200 まで)</text></g>`);
 
 // 領域の背景
 out.push(`<g id="areas">`);

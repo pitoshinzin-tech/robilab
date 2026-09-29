@@ -101,6 +101,12 @@ export function buildCardView(d: PublicCardData): CardView {
   };
 }
 
+/** Content-Length で上限を超えると分かる本文は、読み込む前に断る(数字でなければ本文の検査に任せる)。 */
+export function contentLengthTooLarge(value: string | null): boolean {
+  if (value === null || !/^[0-9]+$/.test(value)) return false;
+  return Number(value) > CARD_REQUEST_MAX_BYTES;
+}
+
 /** POST /api/card-image の本文を読む。壊れていれば null(400 にする)。 */
 export function parseCardRequest(body: string): PublicCardData | null {
   if (new TextEncoder().encode(body).length > CARD_REQUEST_MAX_BYTES) return null;

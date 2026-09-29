@@ -11,4 +11,10 @@ describe("serverErrorMessage", () => {
   it("asks to save first when publishing without a saved row", () => {
     expect(serverErrorMessage("NOT_FOUND")).toContain("先に設定を保存してから公開してください");
   });
+
+  it("explains moderation blocks", () => {
+    expect(serverErrorMessage("NOT_ACTIVE")).toContain("利用停止中");
+    expect(serverErrorMessage("BANNED")).toContain("ご利用いただけません");
+    expect(serverErrorMessage("CARD_LOCKED")).toContain("公開できません");
+  });
 });

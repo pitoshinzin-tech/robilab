@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 1310" width="1640" height="1310" font-family="'Yu Gothic UI', 'Meiryo', sans-serif">
 <g id="background"><rect width="1640" height="1310" fill="#f7f8fb"/></g>
-<g id="title"><text x="40" y="52" font-size="28" font-weight="700" fill="#1b1f2a">ロビラボ データベース ER 図</text><text x="40" y="82" font-size="15" fill="#5b6270">Supabase public スキーマ(dev: robilab-dev で確認、migration 20261001001100 まで)</text></g>
+<g id="title"><text x="40" y="52" font-size="28" font-weight="700" fill="#1b1f2a">ロビラボ データベース ER 図</text><text x="40" y="82" font-size="15" fill="#5b6270">Supabase public スキーマ(dev: robilab-dev で確認、migration 20261001001200 まで)</text></g>
 <g id="areas">
 <rect x="20" y="96" width="1200" height="772" rx="14" fill="none" stroke="#c9cedb" stroke-dasharray="6 5"/>
 <text x="36" y="858" font-size="13" fill="#7a8190">マッチング(Discord ログインが必要)</text>
@@ -249,7 +249,7 @@
 <text x="1590" y="794" font-size="11" fill="#6b7280" text-anchor="end">timestamptz</text>
 </g>
 <g id="table-my_settings">
-<rect x="400" y="880" width="340" height="152" rx="8" fill="#ffffff" stroke="#2f6fde" stroke-width="1.5"/>
+<rect x="400" y="880" width="340" height="178" rx="8" fill="#ffffff" stroke="#2f6fde" stroke-width="1.5"/>
 <path d="M400,888 a8,8 0 0 1 8,-8 h324 a8,8 0 0 1 8,8 v40 h-340 z" fill="#2f6fde"/>
 <text x="412" y="901" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">my_settings</text>
 <text x="412" y="920" font-size="12" fill="#eef1f7">マイ設定(1人1件)</text>
@@ -266,6 +266,8 @@
 <rect x="408" y="1012" width="24" height="15" rx="3" fill="#7a8190"/><text x="420" y="1023.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">UQ</text>
 <text x="492" y="1024" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">public_slug</text>
 <text x="730" y="1024" font-size="11" fill="#6b7280" text-anchor="end">text?(10文字)</text>
+<text x="492" y="1050" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">card_locked</text>
+<text x="730" y="1050" font-size="11" fill="#6b7280" text-anchor="end">boolean(運営の公開禁止)</text>
 </g>
 </g>
 <g id="legend"><rect x="20" y="1080" width="1600" height="210" rx="12" fill="#ffffff" stroke="#d7dbe5"/>

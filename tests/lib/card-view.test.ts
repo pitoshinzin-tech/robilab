@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { emptyMySettings } from "@/lib/my-settings";
-import { toPublicCardData, validatePublicCardData, buildCardView, parseCardRequest, CARD_REQUEST_MAX_BYTES } from "@/lib/card-view";
+import { toPublicCardData, validatePublicCardData, buildCardView, parseCardRequest, CARD_REQUEST_MAX_BYTES, contentLengthTooLarge } from "@/lib/card-view";
 
 const settings = () => ({
   ...emptyMySettings(new Date("2026-10-01T00:00:00.000Z")),
@@ -62,5 +62,14 @@ describe("parseCardRequest", () => {
     expect(parseCardRequest(JSON.stringify({ ...toPublicCardData(settings()), mainSens: 0 }))).toBeNull();
     expect(parseCardRequest(JSON.stringify({ ...toPublicCardData(settings()), mainSens: -1 }))).toBeNull();
     expect(parseCardRequest(JSON.stringify({ ...toPublicCardData(settings()), mainGame: "valorant", mainSens: 99 }))).toBeNull();
+  });
+});
+
+describe("contentLengthTooLarge", () => {
+  it("rejects declared bodies over the limit before reading them", () => {
+    expect(contentLengthTooLarge(String(CARD_REQUEST_MAX_BYTES + 1))).toBe(true);
+    expect(contentLengthTooLarge(String(CARD_REQUEST_MAX_BYTES))).toBe(false);
+    expect(contentLengthTooLarge(null)).toBe(false);
+    expect(contentLengthTooLarge("abc")).toBe(false);
   });
 });

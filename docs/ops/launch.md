@@ -23,6 +23,8 @@
    - [ ] `supabase/migrations/20261001000900_hardening4.sql`(axes の検証、NG ワードの除去文字の追加)
    - [ ] `supabase/migrations/20261001001000_diagnosis_rpc.sql`(診断の匿名記録を関数経由にし、件数の上限を付ける。**適用した瞬間から、今の本番アプリ(計画1)の診断記録は保存されなくなる**。診断結果の表示は止まらないが、記録が抜けるので、適用したらすぐ手順3に進む)
    - [ ] `supabase/migrations/20261001001100_my_settings.sql`(マイ設定の表と関数。マイ設定を公開するときだけ必要)
+   - [ ] `supabase/migrations/20261001001200_my_settings_moderation.sql`(利用停止・BAN と名刺の公開をつなぐ。上の 1100 とセット)
+   - [ ] **Vercel の Firewall にルールを1つ足す**(マイ設定を公開するとき):パスが `/api/card-image` のリクエストを、IP ごとに1分20回まで(超えたら 429)。Vercel ダッシュボード → プロジェクト → Firewall → Custom Rules → Rate Limit
    - 以降に追加した migration があれば、それも。dev と本番の `list_migrations` を見比べて、差がないことを確認する
    - 適用後、Supabase の SQL エディタで `select public._ng_normalize('テスト');` がエラーにならないこと、アドバイザー(security)に新しい警告が出ていないことを確認する
    - 今の本番アプリ(計画1)はマッチング機能を使っていないので、手順2と3の間に古いアプリが新しい DB を使って困ることはない。マッチング機能を使うアプリが本番にある状態で DB を変えるときは、手順2と3の間に動作確認を1回入れる

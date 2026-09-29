@@ -84,3 +84,54 @@ describe("my_settings", () => {
     expect((await admin.from("my_settings").select("user_id").eq("user_id", a.id)).data).toHaveLength(0);
   });
 });
+
+describe("my_settings moderation", () => {
+  async function publish(user: { client: ReturnType<typeof anon> | null }) {
+    expect((await user.client!.rpc("save_my_settings", { p_data: sample() })).error).toBeNull();
+    const { data, error } = await user.client!.rpc("set_card_public", { p_public: true });
+    expect(error).toBeNull();
+    return data as string;
+  }
+
+  it("a suspended lobby user cannot save or publish, and their public card disappears until reinstated", async () => {
+    const a = await makeUser();
+    const slug = await publish(a);
+    await admin.from("profiles").update({ status: "suspended" }).eq("id", a.id);
+    try {
+      expect((await anon().rpc("get_public_card", { p_slug: slug })).data).toBeNull();
+      expect(errorCode((await a.client!.rpc("save_my_settings", { p_data: sample() })).error)).toBe("NOT_ACTIVE");
+      expect(errorCode((await a.client!.rpc("set_card_public", { p_public: true })).error)).toBe("NOT_ACTIVE");
+      // 公開をやめることと、設定を消すことはいつでもできる
+      expect((await a.client!.rpc("set_card_public", { p_public: false })).error).toBeNull();
+    } finally {
+      await admin.from("profiles").update({ status: "active" }).eq("id", a.id);
+    }
+    const slug2 = (await a.client!.rpc("set_card_public", { p_public: true })).data as string;
+    expect((await anon().rpc("get_public_card", { p_slug: slug2 })).data).not.toBeNull();
+  });
+
+  it("a banned Discord account cannot save or publish, and its card is hidden", async () => {
+    const a = await makeUser();
+    const slug = await publish(a);
+    const { data: pi } = await admin.from("private_info").select("discord_user_id").eq("user_id", a.id).single();
+    await admin.from("banned_discord_ids").insert({ discord_user_id: pi!.discord_user_id });
+    try {
+      expect((await anon().rpc("get_public_card", { p_slug: slug })).data).toBeNull();
+      expect(errorCode((await a.client!.rpc("save_my_settings", { p_data: sample() })).error)).toBe("BANNED");
+    } finally {
+      await admin.from("banned_discord_ids").delete().eq("discord_user_id", pi!.discord_user_id);
+      await admin.from("profiles").update({ status: "active" }).eq("id", a.id);
+    }
+  });
+
+  it("an operator card lock hides the card and blocks republishing, but saving still works", async () => {
+    const a = await makeUser({ register: false });
+    const slug = await publish(a);
+    expect((await admin.from("my_settings").update({ card_locked: true, public_slug: null }).eq("user_id", a.id)).error).toBeNull();
+    expect((await anon().rpc("get_public_card", { p_slug: slug })).data).toBeNull();
+    expect(errorCode((await a.client!.rpc("set_card_public", { p_public: true })).error)).toBe("CARD_LOCKED");
+    expect((await a.client!.rpc("save_my_settings", { p_data: sample() })).error).toBeNull();
+    const { data: row } = await admin.from("my_settings").select("card_locked, public_slug").eq("user_id", a.id).single();
+    expect(row).toEqual({ card_locked: true, public_slug: null });
+  });
+});

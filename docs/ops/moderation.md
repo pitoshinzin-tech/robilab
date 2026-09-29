@@ -131,11 +131,15 @@ insert into ng_words (word) values ('援助') on conflict do nothing;
 
 ## 問題のある名刺カードを非公開にする
 
-公開 URL(`/c/<slug>`)の内容に問題がある場合は、SQL エディタで次を実行する。URL はすぐに使えなくなる。
+公開 URL(`/c/<slug>`)の内容に問題がある場合は、SQL エディタで次を実行する。URL はすぐに使えなくなり、本人は公開し直せなくなる(マイ設定の保存はできる)。
 
 ```sql
-update my_settings set public_slug = null where public_slug = '<slug>';
+update my_settings set card_locked = true, public_slug = null where public_slug = '<slug>';
 ```
+
+公開禁止を解く場合は `update my_settings set card_locked = false where user_id = '<user_id>';`(本人がもう一度公開をオンにすると、新しい URL で公開される)。
+
+※ ロビーで利用停止(suspended)・BAN(banned、または BAN 一覧の Discord)になった人は、自動でマイ設定の保存・名刺の公開ができなくなり、公開中の名刺も表示されなくなる。停止を解除すれば、公開中だった名刺はまた表示される。
 
 内容そのものを消す場合は、`delete from my_settings where public_slug = '<slug>';` を使う。
 
