@@ -49,21 +49,37 @@ describe("stepTrace", () => {
     expect(s.phase).toBe("await-start");
   });
   it("loitering on the line does not inflate accuracy", () => {
-    // Run A: perfect trace
-    const pointsA = along(10, 100, 30);
-    const sA = run(pointsA);
-    const rA = traceResult(sA)!;
-    expect(rA.accuracy).toBe(100);
-
-    // Run B: same but with 60 loitering frames at (10.5, 50) after start
-    const pointsB = [
-      { x: 10, y: 50 },
-      ...Array(60).fill({ x: 10.5, y: 50 }),
-      ...along(10, 100, 30).slice(1)
+    // Run C: trace with some off-line frames (y=60, dist 10 > tolerance 6)
+    const pointsC = [
+      { x: 10, y: 50 }, // start
+      ...along(10, 40, 10), // 11 points advancing along line
+      ...along(40, 44, 4, 10), // 5 points off-line
+      ...along(44, 100, 28) // 29 points back on line
     ];
-    const sB = run(pointsB);
-    const rB = traceResult(sB)!;
-    expect(rB.accuracy).toBe(100);
+    const sC = run(pointsC);
+    expect(sC.phase).toBe("done");
+    const rC = traceResult(sC)!;
+    expect(rC.accuracy).toBeLessThan(100);
+
+    // Run D: same as C but insert 60 neutral frames at start point {10,50}
+    // immediately after the first start frame. These frames are within tolerance
+    // (distance 0 from start point (10,50)) but do not advance (t stays 0).
+    // With the fix, neutral frames are not counted, so accuracy should equal run C.
+    // With old counting, D would have 60 extra in-tolerance frames → higher accuracy (regression).
+    const pointsD = [
+      { x: 10, y: 50 }, // start
+      ...Array(60).fill({ x: 10, y: 50 }), // 60 neutral frames at start point: within tolerance, no progress
+      ...along(10, 40, 10).slice(1), // skip first point to avoid re-entering
+      ...along(40, 44, 4, 10),
+      ...along(44, 100, 28)
+    ];
+    const sD = run(pointsD);
+    expect(sD.phase).toBe("done");
+    const rD = traceResult(sD)!;
+
+    // Both should have same accuracy; old code would give D higher accuracy (regression)
+    expect(rD.accuracy).toBe(rC.accuracy);
+    expect(rD.accuracy).toBeLessThan(100);
   });
 });
 
