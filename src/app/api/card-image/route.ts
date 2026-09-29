@@ -8,7 +8,11 @@ import { renderCardImage } from "@/components/card/CardImage";
 export async function POST(request: Request) {
   const data = parseCardRequest(await request.text());
   if (!data) return new Response("Bad Request", { status: 400 });
-  const image = await renderCardImage(buildCardView(data));
-  image.headers.set("Cache-Control", "no-store");
-  return image;
+  try {
+    const image = await renderCardImage(buildCardView(data));
+    image.headers.set("Cache-Control", "no-store");
+    return image;
+  } catch {
+    return new Response("画像を作れませんでした。", { status: 500 });
+  }
 }

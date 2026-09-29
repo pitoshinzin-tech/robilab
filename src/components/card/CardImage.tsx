@@ -8,10 +8,12 @@ const ACCENT = { cyan: "#39F3FF", magenta: "#FF4FD8", purple: "#7B61FF", lime: "
 /** 名刺カード(1200×630)。見た目の最終調整は本人が行う前提の叩き台。 */
 export async function renderCardImage(view: CardView): Promise<ImageResponse> {
   const accent = ACCENT[view.accent];
+  const typeCode = view.typeCode ?? "????";
+  const typeName = view.typeName ?? "タイプ未診断";
   const lines = [
     "ロビラボ マイ設定",
-    view.typeCode ?? "",
-    view.typeName ?? "",
+    typeCode,
+    typeName,
     view.cardName ?? "",
     view.main ? `${view.main.gameName} 感度 ${view.main.sens} / ${view.main.dpi} DPI` : "",
     view.main ? `eDPI ${view.main.edpi} ・ 振り向き ${view.main.cm360} cm` : "",
@@ -38,8 +40,8 @@ export async function renderCardImage(view: CardView): Promise<ImageResponse> {
               <g fill="#FF4FD8"><rect x="2" y="2" width="1" height="1" /><rect x="5" y="2" width="1" height="1" /></g>
             </svg>
           </div>
-          <div style={{ fontSize: 64, color: "#FF4FD8", letterSpacing: 8, marginTop: 20 }}>{view.typeCode ?? "????"}</div>
-          <div style={{ fontSize: 26 }}>{view.typeName ?? "タイプ未診断"}</div>
+          <div style={{ fontSize: 64, color: "#FF4FD8", letterSpacing: 8, marginTop: 20 }}>{typeCode}</div>
+          <div style={{ fontSize: 26 }}>{typeName}</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
           <div style={{ fontSize: 22, opacity: 0.7, textShadow: "2px 0 0 #FF4FD8, -2px 0 0 #39F3FF" }}>ロビラボ マイ設定</div>
