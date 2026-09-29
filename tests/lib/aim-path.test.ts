@@ -33,3 +33,17 @@ describe("closestOnStroke", () => {
     expect(toStroke(parsePath("M0,0L3,4L3,10")).length).toBeCloseTo(11);
   });
 });
+
+describe("parsePath robustness", () => {
+  const finite = (pts: { x: number; y: number }[]) => pts.every((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
+  it("does not hang on numbers after Z, and every point is finite", () => {
+    const pts = parsePath("M0,0 L10,0 Z 5 5 L3,3");
+    expect(finite(pts)).toBe(true);
+    expect(pts.at(-1)).toEqual({ x: 3, y: 3 });
+  });
+  it("drops NaN points from a truncated command", () => {
+    const pts = parsePath("M0,0 L10");
+    expect(pts.length).toBeGreaterThan(0);
+    expect(finite(pts)).toBe(true);
+  });
+});

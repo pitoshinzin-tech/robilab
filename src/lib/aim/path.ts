@@ -72,13 +72,15 @@ export function parsePath(d: string): Point[] {
         cur = start;
         pts.push(cur);
         lastCtrl = null;
+        cmd = ""; // Z のあとの数字は読み飛ばす(同じ Z を繰り返して止まらないように)
         break;
       }
       default:
         i++; // 知らない記号は読み飛ばす
     }
   }
-  return pts;
+  // 途中で切れたコマンドなどで NaN になった点は捨てる
+  return pts.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
 }
 
 export function toStroke(points: Point[]): Stroke {

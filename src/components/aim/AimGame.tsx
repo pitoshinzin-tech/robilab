@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AimChar } from "@/lib/aim/daily";
 import { applyMouse, aimPoint, projectPoint, type Point, type View } from "@/lib/aim/view";
-import { parsePath, toStroke } from "@/lib/aim/path";
+import { closestOnStroke, parsePath, toStroke } from "@/lib/aim/path";
 import { initialTrace, stepTrace, traceResult, START_RADIUS, TOLERANCE, type TraceState } from "@/lib/aim/trace";
 import { reduceAim, canStepTrace, type AimPhase, type AimEvent } from "@/lib/aim/game-state";
 import { drawCrosshair, type Crosshair } from "@/lib/crosshair";
@@ -11,7 +11,7 @@ type Result = { accuracy: number; timeMs: number; perStroke: number[] };
 type Props = { char: AimChar; degPerCount: number; crosshair: Crosshair; onFinish: (r: Result) => void; onAbort: () => void };
 
 const COUNTDOWN_MS = 3000;
-const UNSUPPORTED = "このブラウザでは遊べません。Chrome / Edge / Firefox をお使いください。";
+const UNSUPPORTED = "マウスを固定できませんでした。少し待ってから、もう一度クリックしてください(Chrome / Edge / Firefox で遊べます)。";
 
 /** CSS の役割の色を読む(Canvas では var() が使えないため)。 */
 function roleColor(name: string, fallback: string): string {
@@ -26,7 +26,8 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
   const phaseRef = useRef<AimPhase>("idle");
   const view = useRef<View>({ yaw: 0, pitch: 0 });
   const trace = useRef<TraceState>(initialTrace());
-  const trail = useRef<Point[]>([]);
+  // なぞった軌跡(画ごとに分ける。画と画のあいだを線でつながないため)
+  const trail = useRef<Point[][]>([]);
   const countdownEnd = useRef(0);
   // ロック要求の状態:first = unadjustedMovement つき(失敗しても通常の要求に続く)、second = 通常の要求、final = 要求が済んだ後
   const attempt = useRef<"first" | "second" | "final">("final");
@@ -115,7 +116,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
       // 視点が板の後ろ側に回っているフレームは判定を進めない
       if (phaseRef.current === "playing" && canStepTrace(v)) {
         trace.current = stepTrace(trace.current, strokes, p, now);
-        if (trace.current.phase === "tracing") trail.current.push(p);
+        if (trace.current.phase === "tracing") (trail.current[trace.current.stroke] ??= []).push(p);
         if (trace.current.phase === "done") {
           const r = traceResult(trace.current);
           latest.current.dispatch("done");
@@ -144,15 +145,18 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
       // なぞった軌跡
       ctx.strokeStyle = colors.trail;
       ctx.lineWidth = 2;
-      ctx.beginPath();
-      let pen = false;
-      for (const q of trail.current) {
-        const sp = projectPoint(q, v, w, h);
-        if (!sp) { pen = false; continue; }
-        if (pen) ctx.lineTo(sp.x, sp.y); else ctx.moveTo(sp.x, sp.y);
-        pen = true;
+      for (const seg of trail.current) {
+        if (!seg) continue;
+        let pen = false;
+        ctx.beginPath();
+        for (const q of seg) {
+          const sp = projectPoint(q, v, w, h);
+          if (!sp) { pen = false; continue; }
+          if (pen) ctx.lineTo(sp.x, sp.y); else ctx.moveTo(sp.x, sp.y);
+          pen = true;
+        }
+        ctx.stroke();
       }
-      ctx.stroke();
       // 次の画の始点の丸
       if (t.phase === "await-start" && ph !== "idle" && strokes[t.stroke]) {
         const p0 = strokes[t.stroke].points[0];
@@ -166,9 +170,9 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
           ctx.stroke();
         }
       }
-      // 外れているときは中央を赤く縁取る
-      if (t.phase === "tracing" && strokes[t.stroke]) {
-        const off = Math.min(...strokes[t.stroke].points.map((q) => Math.hypot(q.x - p.x, q.y - p.y))) > TOLERANCE;
+      // 外れているときは中央を赤く縁取る(判定と同じく線分までの距離で見る。判定を止めている角度では出さない)
+      if (t.phase === "tracing" && strokes[t.stroke] && canStepTrace(v)) {
+        const off = closestOnStroke(strokes[t.stroke], p).dist > TOLERANCE;
         if (off) {
           ctx.strokeStyle = colors.miss;
           ctx.lineWidth = 2;
