@@ -1,0 +1,267 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 1130" width="1640" height="1130" font-family="'Yu Gothic UI', 'Meiryo', sans-serif">
+<g id="background"><rect width="1640" height="1130" fill="#f7f8fb"/></g>
+<g id="title"><text x="40" y="52" font-size="28" font-weight="700" fill="#1b1f2a">ロビラボ データベース ER 図</text><text x="40" y="82" font-size="15" fill="#5b6270">Supabase public スキーマ(dev: robilab-dev で確認、migration 20261001000600 まで)</text></g>
+<g id="areas">
+<rect x="20" y="96" width="1200" height="772" rx="14" fill="none" stroke="#c9cedb" stroke-dasharray="6 5"/>
+<text x="36" y="858" font-size="13" fill="#7a8190">マッチング(Discord ログインが必要)</text>
+<rect x="1270" y="96" width="350" height="478" rx="14" fill="none" stroke="#c9cedb" stroke-dasharray="6 5"/>
+<text x="1286" y="564" font-size="13" fill="#7a8190">運営用(アプリの画面からは見えない)</text>
+<rect x="1270" y="636" width="350" height="200" rx="14" fill="none" stroke="#c9cedb" stroke-dasharray="6 5"/>
+<text x="1286" y="828" font-size="13" fill="#7a8190">診断(ログイン不要・個人情報なし)</text>
+</g>
+<g id="relations" fill="none" stroke-width="1.6">
+<g id="rel-profiles-id"><path d="M400,171 C340,171 370,171 310,171" stroke="#4a5263"/><circle cx="310" cy="171" r="3.5" fill="#4a5263"/><text x="394" y="166" font-size="11" fill="#4a5263" text-anchor="end">1</text><text x="316" y="166" font-size="11" fill="#4a5263" text-anchor="start">1</text></g>
+<g id="rel-private_info-user_id"><path d="M40,391 C-8,391 -8,171 40,171" stroke="#4a5263"/><circle cx="40" cy="171" r="3.5" fill="#4a5263"/><text x="34" y="386" font-size="11" fill="#4a5263" text-anchor="end">1</text><text x="34" y="166" font-size="11" fill="#4a5263" text-anchor="end">1</text></g>
+<g id="rel-approaches-from_id"><path d="M400,667 C338,667 338,171 400,171" stroke="#4a5263"/><circle cx="400" cy="171" r="3.5" fill="#4a5263"/><text x="394" y="662" font-size="11" fill="#4a5263" text-anchor="end">N</text><text x="394" y="166" font-size="11" fill="#4a5263" text-anchor="end">1</text></g>
+<g id="rel-approaches-to_id"><path d="M400,693 C366,693 366,171 400,171" stroke="#4a5263"/><circle cx="400" cy="171" r="3.5" fill="#4a5263"/><text x="394" y="688" font-size="11" fill="#4a5263" text-anchor="end">N</text><text x="394" y="166" font-size="11" fill="#4a5263" text-anchor="end">1</text></g>
+<g id="rel-blocks-blocker_id"><path d="M860,171 C800,171 800,171 740,171" stroke="#4a5263"/><circle cx="740" cy="171" r="3.5" fill="#4a5263"/><text x="854" y="166" font-size="11" fill="#4a5263" text-anchor="end">N</text><text x="746" y="166" font-size="11" fill="#4a5263" text-anchor="start">1</text></g>
+<g id="rel-blocks-blocked_id"><path d="M860,197 C800,197 800,171 740,171" stroke="#4a5263"/><circle cx="740" cy="171" r="3.5" fill="#4a5263"/><text x="854" y="192" font-size="11" fill="#4a5263" text-anchor="end">N</text><text x="746" y="166" font-size="11" fill="#4a5263" text-anchor="start">1</text></g>
+<g id="rel-carried_blocks-blocker_id"><path d="M860,361 C800,361 800,171 740,171" stroke="#4a5263"/><circle cx="740" cy="171" r="3.5" fill="#4a5263"/><text x="854" y="356" font-size="11" fill="#4a5263" text-anchor="end">N</text><text x="746" y="166" font-size="11" fill="#4a5263" text-anchor="start">1</text></g>
+<g id="rel-reports-reporter_id"><path d="M860,577 C800,577 800,171 740,171" stroke="#c46a1a" stroke-dasharray="7 4"/><circle cx="740" cy="171" r="3.5" fill="#c46a1a"/><text x="854" y="572" font-size="11" fill="#c46a1a" text-anchor="end">N</text><text x="746" y="166" font-size="11" fill="#c46a1a" text-anchor="start">1</text></g>
+<g id="rel-reports-target_id"><path d="M860,629 C800,629 800,171 740,171" stroke="#c46a1a" stroke-dasharray="7 4"/><circle cx="740" cy="171" r="3.5" fill="#c46a1a"/><text x="854" y="624" font-size="11" fill="#c46a1a" text-anchor="end">N</text><text x="746" y="166" font-size="11" fill="#c46a1a" text-anchor="start">1</text></g>
+</g>
+<g id="tables">
+<g id="table-auth-users">
+<rect x="40" y="110" width="270" height="100" rx="8" fill="#ffffff" stroke="#5b6270" stroke-width="1.5" stroke-dasharray="5 4"/>
+<path d="M40,118 a8,8 0 0 1 8,-8 h254 a8,8 0 0 1 8,8 v40 h-270 z" fill="#5b6270"/>
+<text x="52" y="131" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">auth.users</text>
+<text x="52" y="150" font-size="12" fill="#eef1f7">ログインアカウント</text>
+<rect x="48" y="164" width="24" height="15" rx="3" fill="#e2b714"/><text x="60" y="175.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<text x="132" y="176" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">id</text>
+<text x="300" y="176" font-size="11" fill="#6b7280" text-anchor="end">uuid</text>
+<rect x="41" y="184" width="268" height="26" fill="#f3f5f9"/>
+<text x="132" y="202" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">…</text>
+<text x="300" y="202" font-size="11" fill="#6b7280" text-anchor="end">Supabase が管理</text>
+</g>
+<g id="table-private_info">
+<rect x="40" y="330" width="300" height="178" rx="8" fill="#ffffff" stroke="#2f6fde" stroke-width="1.5"/>
+<path d="M40,338 a8,8 0 0 1 8,-8 h284 a8,8 0 0 1 8,8 v40 h-300 z" fill="#2f6fde"/>
+<text x="52" y="351" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">private_info</text>
+<text x="52" y="370" font-size="12" fill="#eef1f7">非公開の情報</text>
+<rect x="48" y="384" width="24" height="15" rx="3" fill="#e2b714"/><text x="60" y="395.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<rect x="75" y="384" width="24" height="15" rx="3" fill="#4a5263"/><text x="87" y="395.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">FK</text>
+<text x="132" y="396" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">user_id</text>
+<text x="330" y="396" font-size="11" fill="#6b7280" text-anchor="end">uuid</text>
+<rect x="41" y="404" width="298" height="26" fill="#f3f5f9"/>
+<rect x="48" y="410" width="24" height="15" rx="3" fill="#7a8190"/><text x="60" y="421.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">UQ</text>
+<rect x="75" y="410" width="50" height="15" rx="3" fill="#5865f2"/><text x="100" y="421.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">Discord</text>
+<text x="132" y="422" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">discord_user_id</text>
+<text x="330" y="422" font-size="11" fill="#6b7280" text-anchor="end">text</text>
+<text x="132" y="448" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">discord_username</text>
+<text x="330" y="448" font-size="11" fill="#6b7280" text-anchor="end">text</text>
+<rect x="41" y="456" width="298" height="26" fill="#f3f5f9"/>
+<text x="132" y="474" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">birthdate</text>
+<text x="330" y="474" font-size="11" fill="#6b7280" text-anchor="end">date(変更不可)</text>
+<text x="132" y="500" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">created_at</text>
+<text x="330" y="500" font-size="11" fill="#6b7280" text-anchor="end">timestamptz</text>
+</g>
+<g id="table-profiles">
+<rect x="400" y="110" width="340" height="386" rx="8" fill="#ffffff" stroke="#2f6fde" stroke-width="1.5"/>
+<path d="M400,118 a8,8 0 0 1 8,-8 h324 a8,8 0 0 1 8,8 v40 h-340 z" fill="#2f6fde"/>
+<text x="412" y="131" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">profiles</text>
+<text x="412" y="150" font-size="12" fill="#eef1f7">公開プロフィール</text>
+<rect x="408" y="164" width="24" height="15" rx="3" fill="#e2b714"/><text x="420" y="175.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<rect x="435" y="164" width="24" height="15" rx="3" fill="#4a5263"/><text x="447" y="175.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">FK</text>
+<text x="492" y="176" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">id</text>
+<text x="730" y="176" font-size="11" fill="#6b7280" text-anchor="end">uuid</text>
+<rect x="401" y="184" width="338" height="26" fill="#f3f5f9"/>
+<text x="492" y="202" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">nickname</text>
+<text x="730" y="202" font-size="11" fill="#6b7280" text-anchor="end">text(1〜20字)</text>
+<text x="492" y="228" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">type_code</text>
+<text x="730" y="228" font-size="11" fill="#6b7280" text-anchor="end">text?</text>
+<rect x="401" y="236" width="338" height="26" fill="#f3f5f9"/>
+<text x="492" y="254" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">axes</text>
+<text x="730" y="254" font-size="11" fill="#6b7280" text-anchor="end">jsonb?</text>
+<text x="492" y="280" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">games</text>
+<text x="730" y="280" font-size="11" fill="#6b7280" text-anchor="end">jsonb</text>
+<rect x="401" y="288" width="338" height="26" fill="#f3f5f9"/>
+<text x="492" y="306" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">platforms</text>
+<text x="730" y="306" font-size="11" fill="#6b7280" text-anchor="end">text[]</text>
+<text x="492" y="332" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">voice_ok</text>
+<text x="730" y="332" font-size="11" fill="#6b7280" text-anchor="end">boolean</text>
+<rect x="401" y="340" width="338" height="26" fill="#f3f5f9"/>
+<text x="492" y="358" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">time_slots</text>
+<text x="730" y="358" font-size="11" fill="#6b7280" text-anchor="end">text[]</text>
+<text x="492" y="384" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">bio</text>
+<text x="730" y="384" font-size="11" fill="#6b7280" text-anchor="end">text(〜50字)</text>
+<rect x="401" y="392" width="338" height="26" fill="#f3f5f9"/>
+<text x="492" y="410" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">age_group</text>
+<text x="730" y="410" font-size="11" fill="#6b7280" text-anchor="end">adult | teen</text>
+<text x="492" y="436" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">status</text>
+<text x="730" y="436" font-size="11" fill="#6b7280" text-anchor="end">active | suspended | banned</text>
+<rect x="401" y="444" width="338" height="26" fill="#f3f5f9"/>
+<text x="492" y="462" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">created_at</text>
+<text x="730" y="462" font-size="11" fill="#6b7280" text-anchor="end">timestamptz</text>
+<text x="492" y="488" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">updated_at</text>
+<text x="730" y="488" font-size="11" fill="#6b7280" text-anchor="end">timestamptz</text>
+</g>
+<g id="table-approaches">
+<rect x="400" y="580" width="340" height="256" rx="8" fill="#ffffff" stroke="#7b4fd6" stroke-width="1.5"/>
+<path d="M400,588 a8,8 0 0 1 8,-8 h324 a8,8 0 0 1 8,8 v40 h-340 z" fill="#7b4fd6"/>
+<text x="412" y="601" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">approaches</text>
+<text x="412" y="620" font-size="12" fill="#eef1f7">声かけ</text>
+<rect x="408" y="634" width="24" height="15" rx="3" fill="#e2b714"/><text x="420" y="645.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<text x="492" y="646" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">id</text>
+<text x="730" y="646" font-size="11" fill="#6b7280" text-anchor="end">uuid</text>
+<rect x="401" y="654" width="338" height="26" fill="#f3f5f9"/>
+<rect x="408" y="660" width="24" height="15" rx="3" fill="#4a5263"/><text x="420" y="671.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">FK</text>
+<text x="492" y="672" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">from_id</text>
+<text x="730" y="672" font-size="11" fill="#6b7280" text-anchor="end">uuid</text>
+<rect x="408" y="686" width="24" height="15" rx="3" fill="#4a5263"/><text x="420" y="697.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">FK</text>
+<text x="492" y="698" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">to_id</text>
+<text x="730" y="698" font-size="11" fill="#6b7280" text-anchor="end">uuid</text>
+<rect x="401" y="706" width="338" height="26" fill="#f3f5f9"/>
+<text x="492" y="724" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">status</text>
+<text x="730" y="724" font-size="11" fill="#6b7280" text-anchor="end">pending | accepted | passed | expired</text>
+<text x="492" y="750" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">created_at</text>
+<text x="730" y="750" font-size="11" fill="#6b7280" text-anchor="end">timestamptz</text>
+<rect x="401" y="758" width="338" height="26" fill="#f3f5f9"/>
+<text x="492" y="776" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">responded_at</text>
+<text x="730" y="776" font-size="11" fill="#6b7280" text-anchor="end">timestamptz?</text>
+<text x="492" y="802" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">seen_by_to</text>
+<text x="730" y="802" font-size="11" fill="#6b7280" text-anchor="end">boolean</text>
+<rect x="401" y="810" width="338" height="26" fill="#f3f5f9"/>
+<text x="492" y="828" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">seen_by_from</text>
+<text x="730" y="828" font-size="11" fill="#6b7280" text-anchor="end">boolean</text>
+</g>
+<g id="table-blocks">
+<rect x="860" y="110" width="300" height="126" rx="8" fill="#ffffff" stroke="#2f6fde" stroke-width="1.5"/>
+<path d="M860,118 a8,8 0 0 1 8,-8 h284 a8,8 0 0 1 8,8 v40 h-300 z" fill="#2f6fde"/>
+<text x="872" y="131" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">blocks</text>
+<text x="872" y="150" font-size="12" fill="#eef1f7">ブロック</text>
+<rect x="868" y="164" width="24" height="15" rx="3" fill="#e2b714"/><text x="880" y="175.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<rect x="895" y="164" width="24" height="15" rx="3" fill="#4a5263"/><text x="907" y="175.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">FK</text>
+<text x="952" y="176" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">blocker_id</text>
+<text x="1150" y="176" font-size="11" fill="#6b7280" text-anchor="end">uuid</text>
+<rect x="861" y="184" width="298" height="26" fill="#f3f5f9"/>
+<rect x="868" y="190" width="24" height="15" rx="3" fill="#e2b714"/><text x="880" y="201.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<rect x="895" y="190" width="24" height="15" rx="3" fill="#4a5263"/><text x="907" y="201.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">FK</text>
+<text x="952" y="202" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">blocked_id</text>
+<text x="1150" y="202" font-size="11" fill="#6b7280" text-anchor="end">uuid</text>
+<text x="952" y="228" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">created_at</text>
+<text x="1150" y="228" font-size="11" fill="#6b7280" text-anchor="end">timestamptz</text>
+</g>
+<g id="table-carried_blocks">
+<rect x="860" y="300" width="300" height="126" rx="8" fill="#ffffff" stroke="#c46a1a" stroke-width="1.5"/>
+<path d="M860,308 a8,8 0 0 1 8,-8 h284 a8,8 0 0 1 8,8 v40 h-300 z" fill="#c46a1a"/>
+<text x="872" y="321" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">carried_blocks</text>
+<text x="872" y="340" font-size="12" fill="#eef1f7">退会した人へのブロック(引き継ぎ)</text>
+<rect x="868" y="354" width="24" height="15" rx="3" fill="#e2b714"/><text x="880" y="365.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<rect x="895" y="354" width="24" height="15" rx="3" fill="#4a5263"/><text x="907" y="365.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">FK</text>
+<text x="952" y="366" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">blocker_id</text>
+<text x="1150" y="366" font-size="11" fill="#6b7280" text-anchor="end">uuid</text>
+<rect x="861" y="374" width="298" height="26" fill="#f3f5f9"/>
+<rect x="868" y="380" width="24" height="15" rx="3" fill="#e2b714"/><text x="880" y="391.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<rect x="895" y="380" width="50" height="15" rx="3" fill="#5865f2"/><text x="920" y="391.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">Discord</text>
+<text x="952" y="392" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">blocked_discord_id</text>
+<text x="1150" y="392" font-size="11" fill="#6b7280" text-anchor="end">text</text>
+<text x="952" y="418" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">created_at</text>
+<text x="1150" y="418" font-size="11" fill="#6b7280" text-anchor="end">timestamptz</text>
+</g>
+<g id="table-reports">
+<rect x="860" y="490" width="340" height="282" rx="8" fill="#ffffff" stroke="#c46a1a" stroke-width="1.5"/>
+<path d="M860,498 a8,8 0 0 1 8,-8 h324 a8,8 0 0 1 8,8 v40 h-340 z" fill="#c46a1a"/>
+<text x="872" y="511" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">reports</text>
+<text x="872" y="530" font-size="12" fill="#eef1f7">通報</text>
+<rect x="868" y="544" width="24" height="15" rx="3" fill="#e2b714"/><text x="880" y="555.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<text x="952" y="556" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">id</text>
+<text x="1190" y="556" font-size="11" fill="#6b7280" text-anchor="end">uuid</text>
+<rect x="861" y="564" width="338" height="26" fill="#f3f5f9"/>
+<rect x="868" y="570" width="24" height="15" rx="3" fill="#4a5263"/><text x="880" y="581.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">FK</text>
+<rect x="895" y="570" width="24" height="15" rx="3" fill="#7a8190"/><text x="907" y="581.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">UQ</text>
+<text x="952" y="582" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">reporter_id</text>
+<text x="1190" y="582" font-size="11" fill="#6b7280" text-anchor="end">uuid?</text>
+<rect x="868" y="596" width="50" height="15" rx="3" fill="#5865f2"/><text x="893" y="607.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">Discord</text>
+<text x="952" y="608" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">reporter_discord_id</text>
+<text x="1190" y="608" font-size="11" fill="#6b7280" text-anchor="end">text?</text>
+<rect x="861" y="616" width="338" height="26" fill="#f3f5f9"/>
+<rect x="868" y="622" width="24" height="15" rx="3" fill="#4a5263"/><text x="880" y="633.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">FK</text>
+<rect x="895" y="622" width="24" height="15" rx="3" fill="#7a8190"/><text x="907" y="633.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">UQ</text>
+<text x="952" y="634" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">target_id</text>
+<text x="1190" y="634" font-size="11" fill="#6b7280" text-anchor="end">uuid?</text>
+<rect x="868" y="648" width="50" height="15" rx="3" fill="#5865f2"/><text x="893" y="659.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">Discord</text>
+<text x="952" y="660" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">target_discord_id</text>
+<text x="1190" y="660" font-size="11" fill="#6b7280" text-anchor="end">text?</text>
+<rect x="861" y="668" width="338" height="26" fill="#f3f5f9"/>
+<text x="952" y="686" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">reason</text>
+<text x="1190" y="686" font-size="11" fill="#6b7280" text-anchor="end">5種類(年齢詐称・嫌がらせ など)</text>
+<text x="952" y="712" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">detail</text>
+<text x="1190" y="712" font-size="11" fill="#6b7280" text-anchor="end">text(〜200字)</text>
+<rect x="861" y="720" width="338" height="26" fill="#f3f5f9"/>
+<text x="952" y="738" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">status</text>
+<text x="1190" y="738" font-size="11" fill="#6b7280" text-anchor="end">open | closed</text>
+<text x="952" y="764" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">created_at</text>
+<text x="1190" y="764" font-size="11" fill="#6b7280" text-anchor="end">timestamptz</text>
+</g>
+<g id="table-banned_discord_ids">
+<rect x="1290" y="110" width="310" height="126" rx="8" fill="#ffffff" stroke="#c46a1a" stroke-width="1.5"/>
+<path d="M1290,118 a8,8 0 0 1 8,-8 h294 a8,8 0 0 1 8,8 v40 h-310 z" fill="#c46a1a"/>
+<text x="1302" y="131" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">banned_discord_ids</text>
+<text x="1302" y="150" font-size="12" fill="#eef1f7">BAN した Discord</text>
+<rect x="1298" y="164" width="24" height="15" rx="3" fill="#e2b714"/><text x="1310" y="175.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<rect x="1325" y="164" width="50" height="15" rx="3" fill="#5865f2"/><text x="1350" y="175.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">Discord</text>
+<text x="1382" y="176" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">discord_user_id</text>
+<text x="1590" y="176" font-size="11" fill="#6b7280" text-anchor="end">text</text>
+<rect x="1291" y="184" width="308" height="26" fill="#f3f5f9"/>
+<text x="1382" y="202" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">banned_at</text>
+<text x="1590" y="202" font-size="11" fill="#6b7280" text-anchor="end">timestamptz</text>
+<text x="1382" y="228" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">note</text>
+<text x="1590" y="228" font-size="11" fill="#6b7280" text-anchor="end">text?</text>
+</g>
+<g id="table-left_discord_ids">
+<rect x="1290" y="300" width="310" height="100" rx="8" fill="#ffffff" stroke="#c46a1a" stroke-width="1.5"/>
+<path d="M1290,308 a8,8 0 0 1 8,-8 h294 a8,8 0 0 1 8,8 v40 h-310 z" fill="#c46a1a"/>
+<text x="1302" y="321" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">left_discord_ids</text>
+<text x="1302" y="340" font-size="12" fill="#eef1f7">退会した Discord(7日間再登録不可)</text>
+<rect x="1298" y="354" width="24" height="15" rx="3" fill="#e2b714"/><text x="1310" y="365.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<rect x="1325" y="354" width="50" height="15" rx="3" fill="#5865f2"/><text x="1350" y="365.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">Discord</text>
+<text x="1382" y="366" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">discord_user_id</text>
+<text x="1590" y="366" font-size="11" fill="#6b7280" text-anchor="end">text</text>
+<rect x="1291" y="374" width="308" height="26" fill="#f3f5f9"/>
+<text x="1382" y="392" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">left_at</text>
+<text x="1590" y="392" font-size="11" fill="#6b7280" text-anchor="end">timestamptz</text>
+</g>
+<g id="table-ng_words">
+<rect x="1290" y="460" width="310" height="74" rx="8" fill="#ffffff" stroke="#c46a1a" stroke-width="1.5"/>
+<path d="M1290,468 a8,8 0 0 1 8,-8 h294 a8,8 0 0 1 8,8 v40 h-310 z" fill="#c46a1a"/>
+<text x="1302" y="481" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">ng_words</text>
+<text x="1302" y="500" font-size="12" fill="#eef1f7">NG ワード</text>
+<rect x="1298" y="514" width="24" height="15" rx="3" fill="#e2b714"/><text x="1310" y="525.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<text x="1382" y="526" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">word</text>
+<text x="1590" y="526" font-size="11" fill="#6b7280" text-anchor="end">text</text>
+</g>
+<g id="table-diagnosis_results">
+<rect x="1290" y="650" width="310" height="152" rx="8" fill="#ffffff" stroke="#1f9d6b" stroke-width="1.5"/>
+<path d="M1290,658 a8,8 0 0 1 8,-8 h294 a8,8 0 0 1 8,8 v40 h-310 z" fill="#1f9d6b"/>
+<text x="1302" y="671" font-size="15" font-weight="700" fill="#fff" font-family="'Consolas', 'MS Gothic', monospace">diagnosis_results</text>
+<text x="1302" y="690" font-size="12" fill="#eef1f7">診断結果の匿名記録</text>
+<rect x="1298" y="704" width="24" height="15" rx="3" fill="#e2b714"/><text x="1310" y="715.5" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">PK</text>
+<text x="1382" y="716" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">id</text>
+<text x="1590" y="716" font-size="11" fill="#6b7280" text-anchor="end">uuid</text>
+<rect x="1291" y="724" width="308" height="26" fill="#f3f5f9"/>
+<text x="1382" y="742" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">type_code</text>
+<text x="1590" y="742" font-size="11" fill="#6b7280" text-anchor="end">text(16タイプ)</text>
+<text x="1382" y="768" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">axes</text>
+<text x="1590" y="768" font-size="11" fill="#6b7280" text-anchor="end">jsonb(〜512B)</text>
+<rect x="1291" y="776" width="308" height="26" fill="#f3f5f9"/>
+<text x="1382" y="794" font-size="13" fill="#1b1f2a" font-family="'Consolas', 'MS Gothic', monospace">created_at</text>
+<text x="1590" y="794" font-size="11" fill="#6b7280" text-anchor="end">timestamptz</text>
+</g>
+</g>
+<g id="legend"><rect x="20" y="900" width="1600" height="210" rx="12" fill="#ffffff" stroke="#d7dbe5"/>
+<text x="40" y="930" font-size="15" font-weight="700" fill="#1b1f2a">凡例</text>
+<rect x="40" y="944" width="16" height="16" rx="3" fill="#2f6fde"/><text x="64" y="957" font-size="13" fill="#333a48">本人の行だけ読める(RLS)。書き込みは関数経由</text>
+<rect x="600" y="944" width="16" height="16" rx="3" fill="#7b4fd6"/><text x="624" y="957" font-size="13" fill="#333a48">直接は読み書き不可。関数(RPC)経由だけ</text>
+<rect x="40" y="970" width="16" height="16" rx="3" fill="#c46a1a"/><text x="64" y="983" font-size="13" fill="#333a48">運営だけ(ダッシュボード / 関数の内部で使用)</text>
+<rect x="600" y="970" width="16" height="16" rx="3" fill="#1f9d6b"/><text x="624" y="983" font-size="13" fill="#333a48">だれでも書き込みだけできる(読めない)</text>
+<rect x="40" y="996" width="16" height="16" rx="3" fill="#5b6270"/><text x="64" y="1009" font-size="13" fill="#333a48">Supabase Auth が管理</text>
+<rect x="1160" y="944" width="24" height="15" rx="3" fill="#e2b714"/><text x="1190" y="956" font-size="13" fill="#333a48">主キー</text>
+<rect x="1250" y="944" width="24" height="15" rx="3" fill="#4a5263"/><text x="1280" y="956" font-size="13" fill="#333a48">外部キー</text>
+<rect x="1356" y="944" width="24" height="15" rx="3" fill="#7a8190"/><text x="1386" y="956" font-size="13" fill="#333a48">一意</text>
+<rect x="1160" y="970" width="50" height="15" rx="3" fill="#5865f2"/><text x="1216" y="982" font-size="13" fill="#333a48">Discord ID の値でつながる(外部キーではない)</text>
+<path d="M40,1044 h60" stroke="#4a5263" stroke-width="1.6"/><text x="110" y="1048" font-size="13" fill="#333a48">親が消えると一緒に消える(ON DELETE CASCADE)</text>
+<path d="M520,1044 h60" stroke="#c46a1a" stroke-width="1.6" stroke-dasharray="7 4"/><text x="590" y="1048" font-size="13" fill="#333a48">親が消えると空欄になる(ON DELETE SET NULL)。通報は証跡として残る</text>
+<text x="40" y="1080" font-size="13" fill="#333a48">N / 1 = 多対一。profiles と private_info は auth.users と 1 対 1。「?」は空欄(NULL)を許す列。</text>
+<text x="40" y="1102" font-size="13" fill="#333a48">Discord ID の値でつながる列:private_info.discord_user_id = reports.reporter_discord_id / target_discord_id = carried_blocks.blocked_discord_id = banned_discord_ids / left_discord_ids.discord_user_id</text>
+</g>
+</svg>
