@@ -2,7 +2,7 @@ import { getType } from "@/data/types";
 import { getSensGame } from "@/data/sensitivity";
 import { deviceOptions } from "@/data/devices";
 import { gameOptions } from "@/data/popular-games";
-import { cm360, edpi } from "@/lib/sensitivity";
+import { cm360, edpi, DPI_MIN, DPI_MAX } from "@/lib/sensitivity";
 import { itemLabel } from "@/lib/item-ref";
 import {
   DEVICE_SLOTS, GRIPS, MY_SETTINGS_LIMITS, TYPE_CODE_RE, isValidItemRef,
@@ -51,7 +51,6 @@ export function toPublicCardData(s: MySettings): PublicCardData {
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
-const numOrNull = (v: unknown) => v === null || (typeof v === "number" && Number.isFinite(v));
 
 export function validatePublicCardData(v: unknown): v is PublicCardData {
   if (!isObj(v)) return false;
@@ -60,8 +59,13 @@ export function validatePublicCardData(v: unknown): v is PublicCardData {
   if (v.typeCode !== null && !(typeof v.typeCode === "string" && TYPE_CODE_RE.test(v.typeCode))) return false;
   if (v.cardName !== null && !isValidItemRef({ name: v.cardName })) return false;
   if (typeof v.cardName === "string" && [...v.cardName].length > MY_SETTINGS_LIMITS.cardNameMax) return false;
-  if (!numOrNull(v.dpi) || !numOrNull(v.mainSens)) return false;
+  if (v.dpi !== null && !(typeof v.dpi === "number" && Number.isInteger(v.dpi) && v.dpi >= DPI_MIN && v.dpi <= DPI_MAX)) return false;
+  if (v.mainSens !== null && !(typeof v.mainSens === "number" && Number.isFinite(v.mainSens) && v.mainSens > 0)) return false;
   if (v.mainGame !== null && !(typeof v.mainGame === "string" && getSensGame(v.mainGame))) return false;
+  if (v.mainGame !== null && v.mainSens !== null) {
+    const game = getSensGame(v.mainGame);
+    if (!game || v.mainSens < game.min || v.mainSens > game.max) return false;
+  }
   if (v.grip !== null && !GRIPS.includes(v.grip as Grip)) return false;
   const d = v.devices;
   if (!isObj(d) || Object.keys(d).length !== 4 || !DEVICE_SLOTS.every((s) => s in d && (d[s] === null || isValidItemRef(d[s])))) return false;
@@ -99,7 +103,7 @@ export function buildCardView(d: PublicCardData): CardView {
 
 /** POST /api/card-image の本文を読む。壊れていれば null(400 にする)。 */
 export function parseCardRequest(body: string): PublicCardData | null {
-  if (body.length > CARD_REQUEST_MAX_BYTES) return null;
+  if (new TextEncoder().encode(body).length > CARD_REQUEST_MAX_BYTES) return null;
   try {
     const v: unknown = JSON.parse(body);
     return validatePublicCardData(v) ? v : null;

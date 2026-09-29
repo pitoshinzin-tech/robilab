@@ -53,4 +53,14 @@ describe("parseCardRequest", () => {
     expect(parseCardRequest(JSON.stringify({ ...toPublicCardData(settings()), cardName: "x".repeat(21) }))).toBeNull();
     expect(parseCardRequest("null")).toBeNull();
   });
+  it("returns null for invalid dpi values", () => {
+    expect(parseCardRequest(JSON.stringify({ ...toPublicCardData(settings()), dpi: 0 }))).toBeNull();
+    expect(parseCardRequest(JSON.stringify({ ...toPublicCardData(settings()), dpi: 12.5 }))).toBeNull();
+    expect(parseCardRequest(JSON.stringify({ ...toPublicCardData(settings()), dpi: 70000 }))).toBeNull();
+  });
+  it("returns null for invalid mainSens values", () => {
+    expect(parseCardRequest(JSON.stringify({ ...toPublicCardData(settings()), mainSens: 0 }))).toBeNull();
+    expect(parseCardRequest(JSON.stringify({ ...toPublicCardData(settings()), mainSens: -1 }))).toBeNull();
+    expect(parseCardRequest(JSON.stringify({ ...toPublicCardData(settings()), mainGame: "valorant", mainSens: 99 }))).toBeNull();
+  });
 });
