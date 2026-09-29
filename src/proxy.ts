@@ -7,4 +7,4 @@ export function proxy(request: NextRequest) {
   return updateSession(request);
 }
 
-export const config = { matcher: ["/lobby/:path*", "/auth/:path*"] };
+export const config = { matcher: ["/lobby/:path*", "/auth/:path*", "/my"] };
