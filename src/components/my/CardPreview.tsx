@@ -34,9 +34,9 @@ export function CardPreview({ data }: { data: PublicCardData | null }) {
       ) : (
         <div className="aspect-[1200/630] w-full rounded-xl bg-white/5" />
       )}
-      {failed && <p role="alert" className="text-sm text-[var(--rl-magenta)]">画像を作れませんでした。</p>}
+      {failed && <p role="alert" className="text-sm text-[var(--rl-danger)]">画像を作れませんでした。</p>}
       {url && (
-        <a href={url} download="robilab-my-card.png" className="justify-self-start rounded-full bg-[var(--rl-cyan)] px-6 py-3 font-bold text-[#0a0c16]">
+        <a href={url} download="robilab-my-card.png" className="justify-self-start rounded-full bg-[var(--rl-accent)] px-6 py-3 font-bold text-[var(--rl-on-accent)]">
           画像を保存
         </a>
       )}

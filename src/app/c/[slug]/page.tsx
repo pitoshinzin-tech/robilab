@@ -28,7 +28,7 @@ export default async function PublicCardPage({ params }: Props) {
       <h1 className="text-2xl font-bold">{view.cardName ?? "ゲーマー"}のマイ設定</h1>
       {/* eslint-disable-next-line @next/next/no-img-element -- 動的な OG 画像をそのまま見せる */}
       <img src={`/c/${slug}/opengraph-image`} alt="名刺カード" width={1200} height={630} className="w-full rounded-xl border border-[var(--rl-border)]" />
-      <Link href="/my" className="justify-self-start rounded-full bg-[var(--rl-magenta)] px-6 py-3 font-bold text-[#0a0c16]">自分も作る</Link>
+      <Link href="/my" className="justify-self-start rounded-full bg-[var(--rl-accent)] px-6 py-3 font-bold text-[var(--rl-on-accent)]">自分も作る</Link>
     </main>
   );
 }

@@ -52,7 +52,7 @@ export function SyncPanel({ loggedIn, slug, status, serverError, canPublish, has
           {pageUrl && (
             <div className="grid gap-2">
               <a href={pageUrl} className="break-all text-[var(--rl-cyan)] underline">{pageUrl}</a>
-              <a href={buildXShareUrl("わたしのゲーム設定 #ロビラボ", pageUrl)} target="_blank" rel="noopener" className="justify-self-start rounded-full bg-[var(--rl-cyan)] px-6 py-3 font-bold text-[#0a0c16]">
+              <a href={buildXShareUrl("わたしのゲーム設定 #ロビラボ", pageUrl)} target="_blank" rel="noopener" className="justify-self-start rounded-full bg-[var(--rl-accent)] px-6 py-3 font-bold text-[var(--rl-on-accent)]">
                 X でシェア
               </a>
             </div>

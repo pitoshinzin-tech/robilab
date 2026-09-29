@@ -24,11 +24,11 @@ export function NumberField({ label, value, onValue, error, suffix }: Props) {
             setParseError(false);
             onValue(n);
           }}
-          className="h-12 w-full rounded-xl border border-white/15 bg-[#151a33] px-3 text-base"
+          className="h-12 w-full rounded-xl border border-white/15 bg-[var(--rl-card)] px-3 text-base"
         />
         {suffix && <span className="text-[var(--rl-muted)]">{suffix}</span>}
       </span>
-      {(parseError || error) && <span role="alert" className="text-xs text-[var(--rl-magenta)]">{parseError ? "数字で入力してください。" : error}</span>}
+      {(parseError || error) && <span role="alert" className="text-xs text-[var(--rl-danger)]">{parseError ? "数字で入力してください。" : error}</span>}
     </label>
   );
 }

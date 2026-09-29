@@ -35,7 +35,7 @@ function FavoriteGames({ initial, error, onChange }: { initial: ItemRef[]; error
             onChange(next.filter((x): x is ItemRef => x !== null));
           }} />
       ))}
-      {error && <p role="alert" className="text-xs text-[var(--rl-magenta)]">{error}</p>}
+      {error && <p role="alert" className="text-xs text-[var(--rl-danger)]">{error}</p>}
     </section>
   );
 }
@@ -53,7 +53,7 @@ export function MySettingsEditor() {
         {type ? (
           <div className="flex items-center gap-3"><PixelIcon code={type.code} /><div><b>{type.code}</b> {type.name}</div></div>
         ) : (
-          <Link href="/diagnosis" className="justify-self-start rounded-full bg-[var(--rl-magenta)] px-5 py-2 font-bold text-[#0a0c16]">診断する(約1分半)</Link>
+          <Link href="/diagnosis" className="justify-self-start rounded-full bg-[var(--rl-accent)] px-5 py-2 font-bold text-[var(--rl-on-accent)]">診断する(約1分半)</Link>
         )}
       </section>
 
@@ -63,7 +63,7 @@ export function MySettingsEditor() {
         <label className="grid gap-1 text-sm">
           メインのゲーム
           <select value={draft.mainGame ?? ""} onChange={(e) => update({ mainGame: e.target.value || null })}
-            className="h-12 rounded-xl border border-white/15 bg-[#151a33] px-3 text-base">
+            className="h-12 rounded-xl border border-white/15 bg-[var(--rl-card)] px-3 text-base">
             <option value="">選ばない</option>
             {SENS_GAMES.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
           </select>
@@ -88,7 +88,7 @@ export function MySettingsEditor() {
           {GRIPS.map((g) => (
             <button key={g} type="button" role="radio" aria-checked={draft.hand.grip === g}
               onClick={() => update({ hand: { ...draft.hand, grip: draft.hand.grip === g ? null : g } })}
-              className={`h-10 flex-1 rounded-full ${draft.hand.grip === g ? "bg-[var(--rl-cyan)] text-[#0a0c16]" : "bg-white/10"}`}>
+              className={`h-10 flex-1 rounded-full ${draft.hand.grip === g ? "bg-[var(--rl-accent)] text-[var(--rl-on-accent)]" : "bg-white/10"}`}>
               {GRIP_LABEL[g]}
             </button>
           ))}
@@ -111,8 +111,8 @@ export function MySettingsEditor() {
         <label className="grid gap-1 text-sm">
           カードに出す名前({MY_SETTINGS_LIMITS.cardNameMax}字まで)
           <input defaultValue={draft.cardName ?? ""} onChange={(e) => update({ cardName: normalizeText(e.target.value) })}
-            className="h-12 rounded-xl border border-white/15 bg-[#151a33] px-3 text-base" />
-          {errors.cardName && <span role="alert" className="text-xs text-[var(--rl-magenta)]">{errors.cardName}</span>}
+            className="h-12 rounded-xl border border-white/15 bg-[var(--rl-card)] px-3 text-base" />
+          {errors.cardName && <span role="alert" className="text-xs text-[var(--rl-danger)]">{errors.cardName}</span>}
         </label>
       </section>
       </div>

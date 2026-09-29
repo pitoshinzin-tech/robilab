@@ -22,12 +22,12 @@ export function ItemPicker({ label, listId, options, value, onValue, error }: Pr
           const hit = options.find((o) => o.label === t);
           onValue(hit ? { id: hit.id } : { name: t });
         }}
-        className="h-12 rounded-xl border border-white/15 bg-[#151a33] px-3 text-base"
+        className="h-12 rounded-xl border border-white/15 bg-[var(--rl-card)] px-3 text-base"
       />
       <datalist id={listId}>
         {options.map((o) => <option key={o.id} value={o.label} />)}
       </datalist>
-      {error && <span role="alert" className="text-xs text-[var(--rl-magenta)]">{error}</span>}
+      {error && <span role="alert" className="text-xs text-[var(--rl-danger)]">{error}</span>}
     </label>
   );
 }
