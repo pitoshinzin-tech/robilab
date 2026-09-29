@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { emptyMySettings, type MySettings } from "@/lib/my-settings";
 import {
-  MY_SETTINGS_KEY, loadLocal, saveLocal, clearLocal, pickNewer, applyDiagnosisToLocal, saveSensToLocal, type SettingsStorage,
+  MY_SETTINGS_KEY, MY_SETTINGS_DIRTY_KEY, loadLocal, saveLocal, clearLocal, pickNewer, applyDiagnosisToLocal, saveSensToLocal,
+  loadDirty, markDirty, clearDirty, mergeForSync, type SettingsStorage,
 } from "@/lib/my-settings-store";
 
 function memoryStorage(initial: Record<string, string> = {}): SettingsStorage & { data: Record<string, string> } {
@@ -76,5 +77,93 @@ describe("applyDiagnosisToLocal / saveSensToLocal", () => {
     const st = memoryStorage();
     expect(saveSensToLocal(st, "valorant", 800, 999)).toBeNull();
     expect(loadLocal(st)).toBeNull();
+  });
+});
+
+describe("dirty keys", () => {
+  it("round-trips, merges without duplicates, and clears", () => {
+    const st = memoryStorage();
+    expect(loadDirty(st)).toEqual([]);
+    markDirty(st, ["typeCode", "axes"]);
+    markDirty(st, ["axes", "dpi"]);
+    expect(loadDirty(st).sort()).toEqual(["axes", "dpi", "typeCode"]);
+    clearDirty(st);
+    expect(loadDirty(st)).toEqual([]);
+  });
+  it("ignores unknown keys and tolerates broken JSON, null and throwing storage", () => {
+    expect(loadDirty(memoryStorage({ [MY_SETTINGS_DIRTY_KEY]: "{broken" }))).toEqual([]);
+    expect(loadDirty(memoryStorage({ [MY_SETTINGS_DIRTY_KEY]: JSON.stringify({ a: 1 }) }))).toEqual([]);
+    expect(loadDirty(memoryStorage({ [MY_SETTINGS_DIRTY_KEY]: JSON.stringify(["dpi", "version", "updatedAt", "evil", 3]) }))).toEqual(["dpi"]);
+    const broken = memoryStorage({ [MY_SETTINGS_DIRTY_KEY]: "{broken" });
+    markDirty(broken, ["dpi"]);
+    expect(loadDirty(broken)).toEqual(["dpi"]);
+    expect(loadDirty(null)).toEqual([]);
+    expect(() => { markDirty(null, ["dpi"]); clearDirty(null); }).not.toThrow();
+    const throwing: SettingsStorage = {
+      getItem: () => { throw new Error("x"); }, setItem: () => { throw new Error("x"); }, removeItem: () => { throw new Error("x"); },
+    };
+    expect(loadDirty(throwing)).toEqual([]);
+    expect(() => { markDirty(throwing, ["dpi"]); clearDirty(throwing); }).not.toThrow();
+  });
+  it("marks the keys changed by the diagnosis and the sensitivity tool", () => {
+    const st = memoryStorage();
+    applyDiagnosisToLocal(st, "ARCH", { attack: 0.33, instinct: 0.33, team: 0.33, heat: 0.33 });
+    expect(loadDirty(st).sort()).toEqual(["axes", "typeCode"]);
+    clearDirty(st);
+    saveSensToLocal(st, "valorant", 800, 0.35);
+    expect(loadDirty(st).sort()).toEqual(["dpi", "mainGame", "sens"]);
+    clearDirty(st);
+    saveSensToLocal(st, "apex", 800, 1.2);
+    expect(loadDirty(st).sort()).toEqual(["dpi", "sens"]);
+  });
+  it("does not mark anything when the change is refused", () => {
+    const st = memoryStorage();
+    saveSensToLocal(st, "valorant", 800, 999);
+    expect(loadDirty(st)).toEqual([]);
+  });
+});
+
+describe("mergeForSync", () => {
+  const axes = { attack: 0.33, instinct: 0.33, team: 0.33, heat: 0.33 };
+  const server: MySettings = {
+    ...at("2026-10-01T00:00:00.000Z"),
+    typeCode: "GBLZ",
+    dpi: 1600,
+    mainGame: "valorant",
+    sens: { valorant: 0.2 },
+    devices: { mouse: { name: "My Mouse" }, pad: null, keyboard: null, headset: null },
+  };
+  it("keeps the server fields and takes only the dirty fields from a new device", () => {
+    const local: MySettings = { ...at("2026-10-05T00:00:00.000Z"), typeCode: "ARCH", axes };
+    const { result, push } = mergeForSync(local, server, ["typeCode", "axes"]);
+    expect(push).toBe(true);
+    expect(result?.typeCode).toBe("ARCH");
+    expect(result?.axes).toEqual(axes);
+    expect(result?.dpi).toBe(1600);
+    expect(result?.sens).toEqual({ valorant: 0.2 });
+    expect(result?.mainGame).toBe("valorant");
+    expect(result?.devices.mouse).toEqual({ name: "My Mouse" });
+    expect(result?.updatedAt).toBe("2026-10-05T00:00:00.000Z");
+  });
+  it("uses the newer updatedAt of the two", () => {
+    const local: MySettings = { ...at("2026-09-01T00:00:00.000Z"), typeCode: "ARCH" };
+    expect(mergeForSync(local, server, ["typeCode"]).result?.updatedAt).toBe("2026-10-01T00:00:00.000Z");
+  });
+  it("adopts the server entirely when nothing is dirty", () => {
+    const local: MySettings = { ...at("2026-10-05T00:00:00.000Z"), typeCode: "ARCH", dpi: 400 };
+    expect(mergeForSync(local, server, [])).toEqual({ result: server, push: false });
+  });
+  it("pushes local when the server has nothing", () => {
+    const local: MySettings = { ...at("2026-10-05T00:00:00.000Z"), typeCode: "ARCH" };
+    expect(mergeForSync(local, null, [])).toEqual({ result: local, push: true });
+    expect(mergeForSync(null, null, [])).toEqual({ result: null, push: false });
+  });
+  it("adopts the server without pushing when local is missing", () => {
+    expect(mergeForSync(null, server, ["dpi"])).toEqual({ result: server, push: false });
+  });
+  it("falls back to the server when the merged result is invalid", () => {
+    // 範囲外の DPI など、組み合わせた結果が保存できない形になる例
+    const local = { ...at("2026-10-05T00:00:00.000Z"), dpi: 999999 } as MySettings;
+    expect(mergeForSync(local, server, ["dpi"])).toEqual({ result: server, push: false });
   });
 });
