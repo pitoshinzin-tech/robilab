@@ -22,7 +22,7 @@ export default function Error({
         <button
           type="button"
           onClick={() => reset()}
-          className="h-12 rounded-full bg-[var(--rl-cyan)] px-6 font-bold text-[#0a0c16]"
+          className="h-12 rounded-full bg-[var(--rl-accent)] px-6 font-bold text-[var(--rl-on-accent)]"
         >
           もう一度試す
         </button>

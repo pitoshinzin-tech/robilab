@@ -19,7 +19,7 @@ export function DeleteAccount() {
         className="text-sm text-[var(--rl-muted)] underline">
         退会する
       </button>
-      {error && <p role="alert" className="text-sm text-[var(--rl-magenta)]">{error}</p>}
+      {error && <p role="alert" className="text-sm text-[var(--rl-danger)]">{error}</p>}
     </div>
   );
 }
