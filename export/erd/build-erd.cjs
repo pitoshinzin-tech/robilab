@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const W = 1640, H = 1130;
+const W = 1640, H = 1310;
 const ROW = 26, HEAD = 48;
 const FONT = "'Yu Gothic UI', 'Meiryo', sans-serif";
 const MONO = "'Consolas', 'MS Gothic', monospace";
@@ -50,6 +50,8 @@ const tables = [
     cols: [["word", "text", "PK"]] },
   { id: "diagnosis", name: "diagnosis_results", sub: "診断結果の匿名記録", x: 1290, y: 650, w: 310, access: "anon",
     cols: [["id", "uuid", "PK"], ["type_code", "text(16タイプ)", ""], ["axes", "jsonb(〜512B)", ""], ["created_at", "timestamptz", ""]] },
+  { id: "my_settings", name: "my_settings", sub: "マイ設定(1人1件)", x: 400, y: 880, w: 340, access: "own",
+    cols: [["user_id", "uuid", "PK FK"], ["data", "jsonb(〜4KB)", ""], ["updated_at", "timestamptz", ""], ["public_slug", "text?(10文字)", "UQ"]] },
 ];
 const T = Object.fromEntries(tables.map((t) => [t.id, t]));
 const rowY = (t, col) => t.y + HEAD + t.cols.findIndex((c) => c[0] === col) * ROW + ROW / 2;
@@ -59,6 +61,7 @@ const height = (t) => HEAD + t.cols.length * ROW;
 const rels = [
   ["profiles", "id", "auth_users", "id", "CASCADE", "1:1"],
   ["private_info", "user_id", "auth_users", "id", "CASCADE", "1:1"],
+  ["my_settings", "user_id", "auth_users", "id", "CASCADE", "1:1"],
   ["approaches", "from_id", "profiles", "id", "CASCADE"],
   ["approaches", "to_id", "profiles", "id", "CASCADE"],
   ["blocks", "blocker_id", "profiles", "id", "CASCADE"],
@@ -73,7 +76,7 @@ let out = [];
 out.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${FONT}">`);
 out.push(`<g id="background"><rect width="${W}" height="${H}" fill="#f7f8fb"/></g>`);
 out.push(`<g id="title"><text x="40" y="52" font-size="28" font-weight="700" fill="#1b1f2a">ロビラボ データベース ER 図</text>` +
-  `<text x="40" y="82" font-size="15" fill="#5b6270">Supabase public スキーマ(dev: robilab-dev で確認、migration 20261001001000 まで)</text></g>`);
+  `<text x="40" y="82" font-size="15" fill="#5b6270">Supabase public スキーマ(dev: robilab-dev で確認、migration 20261001001100 まで)</text></g>`);
 
 // 領域の背景
 out.push(`<g id="areas">`);
@@ -140,7 +143,7 @@ for (const t of tables) {
 out.push(`</g>`);
 
 // 凡例
-const ly = 900;
+const ly = 1080;
 out.push(`<g id="legend"><rect x="20" y="${ly}" width="${W - 40}" height="${H - ly - 20}" rx="12" fill="#ffffff" stroke="#d7dbe5"/>`);
 out.push(`<text x="40" y="${ly + 30}" font-size="15" font-weight="700" fill="#1b1f2a">凡例</text>`);
 Object.values(ACCESS).forEach((a, i) => {
@@ -154,7 +157,7 @@ out.push(`<rect x="${lx + 196}" y="${ly + 44}" width="24" height="15" rx="3" fil
 out.push(`<rect x="${lx}" y="${ly + 70}" width="50" height="15" rx="3" fill="#5865f2"/><text x="${lx + 56}" y="${ly + 82}" font-size="13" fill="#333a48">Discord ID の値でつながる(外部キーではない)</text>`);
 out.push(`<path d="M40,${ly + 144} h60" stroke="#4a5263" stroke-width="1.6"/><text x="110" y="${ly + 148}" font-size="13" fill="#333a48">親が消えると一緒に消える(ON DELETE CASCADE)</text>`);
 out.push(`<path d="M520,${ly + 144} h60" stroke="#c46a1a" stroke-width="1.6" stroke-dasharray="7 4"/><text x="590" y="${ly + 148}" font-size="13" fill="#333a48">親が消えると空欄になる(ON DELETE SET NULL)。通報は証跡として残る</text>`);
-out.push(`<text x="40" y="${ly + 180}" font-size="13" fill="#333a48">N / 1 = 多対一。profiles と private_info は auth.users と 1 対 1。「?」は空欄(NULL)を許す列。</text>`);
+out.push(`<text x="40" y="${ly + 180}" font-size="13" fill="#333a48">N / 1 = 多対一。profiles・private_info・my_settings は auth.users と 1 対 1。「?」は空欄(NULL)を許す列。</text>`);
 out.push(`<text x="40" y="${ly + 202}" font-size="13" fill="#333a48">Discord ID の値でつながる列:private_info.discord_user_id = reports.reporter_discord_id / target_discord_id = carried_blocks.blocked_discord_id = banned_discord_ids / left_discord_ids.discord_user_id</text>`);
 out.push(`</g>`);
 out.push(`</svg>`);

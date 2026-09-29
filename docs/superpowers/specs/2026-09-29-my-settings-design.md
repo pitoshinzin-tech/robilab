@@ -65,7 +65,7 @@ type MySettingsV1 = {
   updatedAt: string; // ISO 8601
   typeCode: string | null; // ^[AG][RB][CL][HZ]$
   axes: { attack: number; instinct: number; team: number; heat: number } | null; // 各 -1〜1
-  dpi: number | null; // 100〜32000 の整数
+  dpi: number | null; // 50〜64000 の整数(感度計算ツールの DPI_MIN / DPI_MAX と同じ)
   mainGame: string | null; // SENS_GAMES の id
   sens: Record<string, number>; // SENS_GAMES の id → 各ゲームの min〜max
   hand: { lengthCm: number | null; widthCm: number | null; grip: "palm" | "claw" | "fingertip" | null };

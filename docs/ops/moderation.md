@@ -129,6 +129,16 @@ insert into ng_words (word) values ('出会い目的') on conflict do nothing;
 insert into ng_words (word) values ('援助') on conflict do nothing;
 ```
 
+## 問題のある名刺カードを非公開にする
+
+公開 URL(`/c/<slug>`)の内容に問題がある場合は、SQL エディタで次を実行する。URL はすぐに使えなくなる。
+
+```sql
+update my_settings set public_slug = null where public_slug = '<slug>';
+```
+
+内容そのものを消す場合は、`delete from my_settings where public_slug = '<slug>';` を使う。
+
 ## よく使う確認用 SQL
 
 ### open の通報を一覧表示(新しい順)
