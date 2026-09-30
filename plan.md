@@ -139,7 +139,7 @@
 - [x] マイ設定:実装済み(ブランチ feat/my-settings、公開待ち)。設計書 [docs/superpowers/specs/2026-09-29-my-settings-design.md](docs/superpowers/specs/2026-09-29-my-settings-design.md)
 - [x] エイム練習「今日の文字」:実装済み(ブランチ feat/aim-daily、公開待ち)。設計書 [docs/superpowers/specs/2026-09-29-aim-daily-design.md](docs/superpowers/specs/2026-09-29-aim-daily-design.md)
 - [x] マウス探し:実装済み(ブランチ feat/mouse-finder、公開待ち)。設計書 [docs/superpowers/specs/2026-09-29-mouse-finder-design.md](docs/superpowers/specs/2026-09-29-mouse-finder-design.md)
-- [ ] プロ設定:設計書作成済み(D40、ブランチ feat/pro-settings、本人の確認待ち)
+- [ ] プロ設定:計算と画面は実装済み。データ待ち(一次情報が文字で見つからず保留。データが入るまでページとヘッダーのリンクは出さない)(D40、ブランチ feat/pro-settings)
 
 ### v0.2(11月、GAG の時期なので本人の作業は少なめ)
 - [ ] デイリーエイム(PC)
@@ -240,3 +240,4 @@
 | 2026-09-30 | 本人の確認:今日の文字のランキングの名前は名刺公開者のみ(承認)、お題60字と初期値(視野角103°・文字の幅40°・許容範囲6・開始日2026-11-01)はそのまま、G305/G304 の重さは電池込み 99g。残る確認:実際のプレイの手応え、マウス探しの係数(特に幅)とデータの数字。次は公開後の機能の4つ目「プロ設定」の設計 |
 | 2026-09-30 | プロ設定のブレインストーミングを開始(目的・データの集め方・対象4ゲーム・A 案を決定)。設計 1/4 を提示したところで中断。続きは設計 1/4 の確認から |
 | 2026-09-30 | プロ設定の設計 1/4〜4/4 を本人が承認し、設計書を作成(D40)。ブランチ `feat/pro-settings` を `feat/mouse-finder` から作成 |
+| 2026-09-30 | プロ設定:計算と画面は実装済み。データ待ち(一次情報が文字で見つからず保留。データが入るまでページとヘッダーのリンクは出さない) |

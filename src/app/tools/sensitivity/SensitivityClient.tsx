@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { SENS_GAMES, getSensGame } from "@/data/sensitivity";
+import { NearPros } from "@/components/pros/NearPros";
 import { parseNumber } from "@/lib/parse-number";
 import { edpi, cm360, convertSens, validateInput, isInGameRange } from "@/lib/sensitivity";
 
@@ -82,6 +83,7 @@ export function SensitivityClient({ initial = null }: { initial?: Initial }) {
               ))}
             </ul>
           </div>
+          <NearPros cm={results.cm} gameId={gameId} />
         </div>
       )}
     </div>
