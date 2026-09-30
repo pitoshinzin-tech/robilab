@@ -62,7 +62,7 @@ insert into public.aim_chars (idx, char_id, glyph, strokes) values
   (50, 'u68ee', '森', 12),
   (51, 'u4f11', '休', 6),
   (52, 'u590f', '夏', 10),
-  (53, 'u60aa', '悪', 11),
+  (53, 'u91ce', '野', 11),
   (54, 'u7acb', '立', 5),
   (55, 'u5f31', '弱', 10),
   (56, 'u9060', '遠', 13),

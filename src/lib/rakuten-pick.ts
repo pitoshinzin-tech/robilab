@@ -74,6 +74,7 @@ function matchesModel(text: string, name: string): boolean {
  * 条件に合う候補のうち、レビュー数がいちばん多いものを返す。なければ null。
  * - 商品名にメーカー名と、製品名の語がすべて入っている
  * - アクセサリーなどの語が入っていない
+ * - レビュー 0 件の商品は店名に「公式」があるときだけ、Amazon の ASIN 形式の商品コードは除く
  * - siblings(同じメーカーの、名前がこのマウスの名前を含む別のマウス。例:PRO X SUPERLIGHT に対する PRO X SUPERLIGHT 2)に当たる商品は除く
  */
 export function pickRakutenItem(candidates: RakutenCandidate[], brand: string, name: string, siblings: string[] = []): RakutenCandidate | null {
@@ -94,6 +95,10 @@ export function pickRakutenItem(candidates: RakutenCandidate[], brand: string, n
     if (VARIANT_WORDS.some((w) => !own.has(w) && hasWord(text, w))) continue;
     // 別のマウスとのセット(「&」「＆」「セット」)も除く
     if (/[&＆]|&amp;|セット/.test(raw)) continue;
+    // Amazon の ASIN(shop:B0xxxxxxxx)がそのまま商品コードの出品は、転売の可能性が高いので除く
+    if (/^B0[A-Z0-9]{8}$/i.test(c.itemCode.split(":").pop() ?? "")) continue;
+    // レビューが 0 件の商品は、店名に「公式」があるときだけ認める
+    if (!(c.reviewCount > 0) && !c.shopName.includes("公式")) continue;
     if (!best || c.reviewCount > best.reviewCount) best = c;
   }
   return best;

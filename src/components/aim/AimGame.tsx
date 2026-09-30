@@ -13,9 +13,9 @@ type Props = { char: AimChar; degPerCount: number; crosshair: Crosshair; onFinis
 const COUNTDOWN_MS = 3000;
 const UNSUPPORTED = "マウスを固定できませんでした。少し待ってから、もう一度クリックしてください(Chrome / Edge / Firefox で遊べます)。";
 
-/** 全画面から戻す(全画面でなければ何もしない。失敗しても遊びには影響しないので無視する)。 */
-function leaveFullscreen() {
-  if (typeof document === "undefined" || !document.fullscreenElement) return;
+/** 全画面から戻す(全画面になっているのが el 自身でなければ何もしない。失敗しても遊びには影響しないので無視する)。 */
+function leaveFullscreen(el: Element | null) {
+  if (typeof document === "undefined" || !el || document.fullscreenElement !== el) return;
   try {
     void document.exitFullscreen().catch(() => {});
   } catch {
@@ -62,13 +62,14 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
 
   useEffect(() => {
     mounted.current = true;
-    const onFsChange = () => setFullscreen(document.fullscreenElement === stage.current);
+    const st = stage.current;
+    const onFsChange = () => setFullscreen(document.fullscreenElement === st);
     document.addEventListener("fullscreenchange", onFsChange);
     return () => {
       mounted.current = false;
       document.removeEventListener("fullscreenchange", onFsChange);
       // アンマウントのときは全画面から戻す
-      leaveFullscreen();
+      leaveFullscreen(st);
     };
   }, []);
 
@@ -85,7 +86,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
         setError(null);
       } else if (latest.current.dispatch("lost") === "aborted") {
         // Esc ならブラウザが全画面も抜けているが、念のため戻す。全画面だけが外れた場合は中断しない(ここには来ない)
-        leaveFullscreen();
+        leaveFullscreen(stage.current);
         latest.current.onAbort();
       }
     };
@@ -95,7 +96,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
       setError(UNSUPPORTED);
       // promise を返さない古いブラウザで、始まったあとにロックが失敗したときは中断にする
       if (latest.current.dispatch("lost") === "aborted") {
-        leaveFullscreen();
+        leaveFullscreen(stage.current);
         latest.current.onAbort();
       }
     };
@@ -144,7 +145,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
           const r = traceResult(trace.current);
           latest.current.dispatch("done");
           document.exitPointerLock();
-          leaveFullscreen();
+          leaveFullscreen(stage.current);
           if (r) latest.current.onFinish(r);
         }
       }
@@ -249,7 +250,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
     starting.current = false;
     if (!mounted.current) return;
     if (!locked) {
-      leaveFullscreen();
+      leaveFullscreen(stage.current);
       setError(UNSUPPORTED);
       return;
     }

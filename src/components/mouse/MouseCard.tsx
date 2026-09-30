@@ -14,10 +14,11 @@ export function MouseCard({ rank, item, brand, name, compare, links, imageUrl }:
   return (
     <li className={`grid gap-3 rounded-2xl border border-white/10 bg-[var(--rl-card)] p-4 ${image ? "sm:grid-cols-[8rem_minmax(0,1fr)] sm:items-start sm:gap-4" : ""}`}>
       {image && (
-        <a href={links.rakuten} target="_blank" rel="sponsored noopener noreferrer" className="justify-self-center sm:justify-self-start">
+        <a href={links.rakuten} target="_blank" rel="sponsored noopener noreferrer" className="relative justify-self-center sm:justify-self-start">
           {/* eslint-disable-next-line @next/next/no-img-element -- 楽天の画像サーバーの画像をそのまま出す(next/image の最適化は通さない) */}
           <img src={image} alt={`${brand} ${name}(楽天市場の商品画像)`} width={300} height={300} loading="lazy"
             className="h-32 w-32 rounded-xl bg-white object-contain" />
+          {links.rakutenPr && <span className="absolute left-1 top-1 rounded bg-black/60 px-1 text-[10px] text-white">PR</span>}
         </a>
       )}
       <div className="grid min-w-0 gap-3">

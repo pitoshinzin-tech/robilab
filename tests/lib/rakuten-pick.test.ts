@@ -11,6 +11,13 @@ const c = (itemName: string, reviewCount: number, itemCode = itemName): RakutenC
 });
 
 describe("pickRakutenItem", () => {
+  it("skips 0-review items unless the shop is official, and Amazon-ASIN item codes", () => {
+    const shop = (itemName: string, reviewCount: number, itemCode: string, shopName: string): RakutenCandidate => ({ ...c(itemName, reviewCount, itemCode), shopName });
+    expect(pickRakutenItem([shop("Razer Viper V3 Pro", 0, "s:a", "転売ショップ")], "Razer", "Viper V3 Pro")).toBeNull();
+    expect(pickRakutenItem([shop("Razer Viper V3 Pro", 0, "s:a", "Razer 公式ストア")], "Razer", "Viper V3 Pro")?.itemCode).toBe("s:a");
+    expect(pickRakutenItem([shop("Razer Viper V3 Pro", 99, "trend:b0ccgzfr44", "ショップ")], "Razer", "Viper V3 Pro")).toBeNull();
+    expect(pickRakutenItem([shop("Razer Viper V3 Pro", 99, "trend:B0CCGZFR44", "ショップ"), shop("Razer Viper V3 Pro", 3, "ok:viper", "ショップ")], "Razer", "Viper V3 Pro")?.itemCode).toBe("ok:viper");
+  });
   it("picks the most reviewed matching item", () => {
     const got = pickRakutenItem([c("Razer Viper V3 Pro 白", 10, "a"), c("【国内正規品】Razer Viper V3 Pro ゲーミングマウス", 50, "b"), c("Razer Viper V3 Pro", 20, "c")], "Razer", "Viper V3 Pro");
     expect(got?.itemCode).toBe("b");

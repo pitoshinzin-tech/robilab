@@ -57,8 +57,14 @@ async function search(keyword) {
     return { status: "接続できませんでした", items: null };
   }
   if (!res.ok) return { status: `HTTP ${res.status}`, items: null };
-  const body = await res.json();
-  return { status: "ok", items: (body.Items ?? []).map((x) => x.Item ?? x) };
+  let body;
+  try {
+    body = await res.json();
+  } catch {
+    // 中身(本文の一部)を出さない
+    return { status: "応答を読めませんでした", items: null };
+  }
+  return { status: "ok", items: (body?.Items ?? []).map((x) => x.Item ?? x) };
 }
 
 const results = [];

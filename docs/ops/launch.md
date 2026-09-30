@@ -72,3 +72,7 @@
 1. `node --env-file=.env.local --dns-result-order=ipv4first scripts/rakuten-mice.mjs`
 2. `docs/content/rakuten-mice-review.md` を開き、マウスごとに選ばれた商品・画像が合っているか目で確かめる(違うものは `src/data/mice-rakuten.ts` から消す)
 3. コミットする(`src/data/mice-rakuten.ts` と `docs/content/rakuten-mice-review.md`)
+
+## dev と本番の migration の違い
+
+dev の DB には、リポジトリにない dev 専用の migration の記録がある(`aim_daily_ranking_names`、名前で適用した `card_locks` / `aim_ranking_lazy_filter` / `my_settings_v2_shape_check`、`aim_chars_mixed_difficulty`)。dev で `db push` や差分の比較をしても、これらは本番とは関係ない。**本番には `supabase/migrations/` の 0500〜1500 のファイルだけを適用する**(1400 は 5〜14 画・60 字の版に直してあるので、そのまま新規に適用すればよい)。
