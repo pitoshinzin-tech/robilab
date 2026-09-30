@@ -5,8 +5,10 @@
 --     ロビーは 18 歳以上限定なので、未成年の可能性がある人は確認が終わるまで止める
 --   - どの理由でも、通報した人は相手をブロックする(通報した人の一覧からは消える)。これまでと同じ
 --   - それ以外の理由は、運営が毎日の確認で必要に応じて止める(docs/ops/moderation.md)
+--   - 年齢詐称でも、相手が先に通報した人をブロックしている/通報している(open)ときは止めない
+--     (ブロック・通報された人の仕返しの通報で止められないようにする。監査 run-10)
 --   - 退会(delete_me)は、これまでどおり open の通報があるあいだはできない(0600 のまま)
--- 0600 の report_user の定義をそのまま写し、利用停止の 1 行に理由の条件を足しただけ。
+-- 0600 の report_user の定義をそのまま写し、利用停止の 1 行に理由と仕返しでないことの条件を足しただけ。
 
 -- === report_user: 利用停止は age_fake のときだけ ===
 create or replace function public.report_user(p_id uuid, p_reason public.report_reason, p_detail text) returns void
@@ -46,8 +48,18 @@ begin
   end if;
   insert into public.reports (reporter_id, reporter_discord_id, target_id, target_discord_id, reason, detail)
     values (auth.uid(), v_me_discord_id, p_id, v_target_discord_id, p_reason, coalesce(p_detail, ''));
-  -- 年齢詐称(18 歳未満の疑い)だけは、運営の確認が終わるまで利用停止にする
-  if p_reason = 'age_fake' then
+  -- 年齢詐称(18 歳未満の疑い)だけは、運営の確認が終わるまで利用停止にする。
+  -- ただし、相手が先に自分をブロックしている、または相手が自分を通報していて確認待ち(open)のときは
+  -- 止めない(仕返しの通報で、ブロック・通報した人を止める悪用を防ぐ。監査 run-10)。
+  -- 通報そのものは記録するので、運営が毎日の確認で見る(docs/ops/moderation.md)。
+  if p_reason = 'age_fake'
+     and not exists (select 1 from public.blocks where blocker_id = p_id and blocked_id = auth.uid())
+     and not exists (
+       select 1 from public.reports
+       where status = 'open'
+         and (reporter_id = p_id or reporter_discord_id = v_target_discord_id)
+         and (target_id = auth.uid() or target_discord_id = v_me_discord_id)
+     ) then
     update public.profiles set status = 'suspended' where id = p_id and status = 'active';
   end if;
   perform public.block_user(p_id);

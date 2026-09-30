@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { extractFontUrl, isAllowedFontUrl, loadOgFont, OG_FONT_MAX_BYTES, readFontCapped } from "@/lib/og-font";
+import { extractFontUrl, isAllowedFontUrl, loadOgFont, OG_FONT_CSS_MAX_BYTES, OG_FONT_MAX_BYTES, readFontCapped } from "@/lib/og-font";
 
 // Google Fonts の css2 が返す形(User-Agent なしのサーバーからの取得では truetype)
 const CSS = `/* japanese */
@@ -81,6 +81,32 @@ describe("loadOgFont", () => {
     const font = await loadOgFont("あ");
     expect(font && [...new Uint8Array(font)]).toEqual([7, 8, 9]);
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("fetches the font file with redirect: \"error\" so no redirect target is contacted", async () => {
+    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>(async (input) =>
+      String(input).startsWith("https://fonts.googleapis.com/") ? new Response(CSS) : new Response(new Uint8Array([1])),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await loadOgFont("あ");
+    expect(fetchMock.mock.calls[1][1]?.redirect).toBe("error");
+  });
+
+  it("returns null when the font fetch fails because of a redirect", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).startsWith("https://fonts.googleapis.com/")) return new Response(CSS);
+      throw new TypeError("fetch failed: unexpected redirect");
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    expect(await loadOgFont("あ")).toBeNull();
+  });
+
+  it("does not fetch the font when the CSS response is too large", async () => {
+    const big = CSS + " ".repeat(OG_FONT_CSS_MAX_BYTES);
+    const fetchMock = vi.fn(async () => new Response(big));
+    vi.stubGlobal("fetch", fetchMock);
+    expect(await loadOgFont("あ")).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("falls back to null when the font is too large", async () => {

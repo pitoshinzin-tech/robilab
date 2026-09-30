@@ -22,10 +22,10 @@ function latestDefinition(name: string): { file: string; def: string } {
   return found;
 }
 
-/** `v_bad_chars text := '[' || chr(1) || '-' || ... || ']';` を JS の文字クラスに直す */
-function badCharsRegex(def: string): RegExp {
-  const m = def.match(/v_bad_chars text :=([\s\S]*?);/);
-  if (!m) throw new Error("v_bad_chars not found");
+/** `v_xxx text := '[' || chr(1) || '-' || ... || ']';` を JS の正規表現に直す */
+function chrRegex(def: string, name: string): RegExp {
+  const m = def.match(new RegExp(`${name} text :=([\\s\\S]*?);`));
+  if (!m) throw new Error(`${name} not found`);
   const expr = m[1].replace(/--[^\n]*/g, "");
   const parts = expr.split("||").map((s) => s.trim()).filter(Boolean);
   let cls = "";
@@ -41,7 +41,8 @@ function badCharsRegex(def: string): RegExp {
 
 describe("_validate_profile_input rejects control and bidi/format characters", () => {
   const { file, def } = latestDefinition("_validate_profile_input");
-  const re = badCharsRegex(def);
+  const re = chrRegex(def, "v_bad_chars");
+  const blank = chrRegex(def, "v_blank_only");
 
   it("the latest definition is in 1600 and still defines the function", () => {
     expect(file).toBe("20261001001600_profile_text_hardening.sql");
@@ -53,9 +54,23 @@ describe("_validate_profile_input rejects control and bidi/format characters", (
   it("covers U+202E and the other listed ranges", () => {
     const codes = [
       0x01, 0x09, 0x0a, 0x1f, 0x7f, 0x85, 0x9f,
-      0x200b, 0x200e, 0x200f, 0x202a, 0x202d, 0x202e, 0x2060, 0x2066, 0x2069, 0xfeff,
+      0x200b, 0x200c, 0x200e, 0x200f, 0x202a, 0x202d, 0x202e, 0x2060, 0x2066, 0x2069, 0xfeff,
+      // run-10 で足した見えない文字・区切り文字
+      0xad, 0x61c, 0x115f, 0x1160, 0x180e, 0x2028, 0x2029, 0x3164, 0xffa0,
     ];
     for (const c of codes) expect(re.test(String.fromCodePoint(c)), c.toString(16)).toBe(true);
+  });
+
+  it("does not reject U+200D (ZWJ) so ordinary emoji sequences are allowed", () => {
+    expect(re.test(String.fromCodePoint(0x200d))).toBe(false);
+    const family = [0x1f468, 0x200d, 0x1f469, 0x200d, 0x1f467].map((c) => String.fromCodePoint(c)).join("");
+    expect(re.test(`${family}ゲーム好き`)).toBe(false);
+  });
+
+  it("treats a nickname made only of spaces (including U+3000) as empty", () => {
+    expect(def).toMatch(/p_nickname is null or p_nickname ~ v_blank_only or char_length\(p_nickname\) > 20/);
+    for (const s of ["", " ", "\u3000", "\u3000 \u3000", "\u00a0", "\u2003\u202f\u205f"]) expect(blank.test(s), JSON.stringify(s)).toBe(true);
+    for (const s of ["a", "\u3000あ\u3000", " x "]) expect(blank.test(s), JSON.stringify(s)).toBe(false);
   });
 
   it("allows ordinary Japanese and ASCII text", () => {

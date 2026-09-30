@@ -2,6 +2,8 @@
 const TIMEOUT_MS = 15000;
 /** フォントファイルの大きさの上限(使う文字だけのサブセットなので、ふつうは数百 KB 以下) */
 export const OG_FONT_MAX_BYTES = 5 * 1024 * 1024;
+/** Google Fonts の CSS の大きさの上限(ふつうは数 KB) */
+export const OG_FONT_CSS_MAX_BYTES = 200 * 1024;
 const FONT_ORIGIN = "https://fonts.gstatic.com";
 
 /** Google Fonts の CSS から、フォントファイル(opentype / truetype)の URL を取り出す */
@@ -19,7 +21,7 @@ export function isAllowedFontUrl(url: string): boolean {
   }
 }
 
-/** フォントの応答を、上限のバイト数までだけ読む。超えたら null。 */
+/** 応答(フォント・CSS)を、上限のバイト数までだけ読む。超えたら null。 */
 export async function readFontCapped(res: Response, maxBytes: number = OG_FONT_MAX_BYTES): Promise<ArrayBuffer | null> {
   if (!res.ok) return null;
   const length = res.headers.get("content-length");
@@ -57,16 +59,18 @@ export async function readFontCapped(res: Response, maxBytes: number = OG_FONT_M
 /** Google Fonts から、使う文字だけのフォントを取得する(シェア画像の日本語用)。取れなければ null。 */
 export async function loadOgFont(text: string): Promise<ArrayBuffer | null> {
   try {
-    const css = await (
-      await fetch(`https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700&text=${encodeURIComponent(text)}`, {
-        cache: "force-cache",
-        signal: AbortSignal.timeout(TIMEOUT_MS),
-      })
-    ).text();
+    const cssRes = await fetch(`https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700&text=${encodeURIComponent(text)}`, {
+      cache: "force-cache",
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    const cssBytes = await readFontCapped(cssRes, OG_FONT_CSS_MAX_BYTES);
+    if (!cssBytes) return null;
+    const css = new TextDecoder().decode(cssBytes);
     const url = extractFontUrl(css);
     if (!url || !isAllowedFontUrl(url)) return null;
-    const res = await fetch(url, { cache: "force-cache", signal: AbortSignal.timeout(TIMEOUT_MS) });
-    // 転送されていても、最後に取った先が fonts.gstatic.com でなければ使わない
+    // 転送(リダイレクト)は追わない。転送先がどこであっても、そこへは接続しない
+    const res = await fetch(url, { cache: "force-cache", redirect: "error", signal: AbortSignal.timeout(TIMEOUT_MS) });
+    // 念のため、取った先が fonts.gstatic.com でなければ使わない
     if (res.url && !isAllowedFontUrl(res.url)) {
       await res.body?.cancel().catch(() => {});
       return null;

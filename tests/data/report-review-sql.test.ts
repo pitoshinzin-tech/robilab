@@ -36,9 +36,24 @@ describe("report_user (1700)", () => {
     const suspends = [...body.matchAll(/update public\.profiles set status = 'suspended'/g)];
     expect(suspends).toHaveLength(1);
     const guarded = body.match(
-      /if p_reason = 'age_fake' then\s+update public\.profiles set status = 'suspended' where id = p_id and status = 'active';\s+end if;/,
+      /if p_reason = 'age_fake'\s+and not exists[\s\S]*?then\s+update public\.profiles set status = 'suspended' where id = p_id and status = 'active';\s+end if;/,
     );
     expect(guarded).not.toBeNull();
+  });
+
+  it("does not suspend when the target has blocked or has an open report against the reporter (retaliation)", () => {
+    const cond = body.slice(body.indexOf("if p_reason = 'age_fake'"), body.indexOf("update public.profiles set status = 'suspended'"));
+    // 相手(p_id)が通報した人(auth.uid())をブロックしている
+    expect(cond).toMatch(/not exists \(select 1 from public\.blocks where blocker_id = p_id and blocked_id = auth\.uid\(\)\)/);
+    // 相手が通報した人を通報していて open(退会・再登録をはさんでも Discord ID で見る)
+    expect(cond).toMatch(/not exists \(\s*select 1 from public\.reports\s+where status = 'open'/);
+    expect(cond).toContain("(reporter_id = p_id or reporter_discord_id = v_target_discord_id)");
+    expect(cond).toContain("(target_id = auth.uid() or target_discord_id = v_me_discord_id)");
+  });
+
+  it("still records the report before deciding on suspension", () => {
+    expect(body.indexOf("insert into public.reports")).toBeGreaterThan(0);
+    expect(body.indexOf("insert into public.reports")).toBeLessThan(body.indexOf("if p_reason = 'age_fake'"));
   });
 
   it("still blocks the target for every reason (outside the age_fake branch)", () => {

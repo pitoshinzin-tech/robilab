@@ -1,5 +1,6 @@
 -- ロビーのプロフィール文字の強化(監査 run-9 の強化メモ 4)
---   1. _validate_profile_input:ニックネーム・自己紹介で、制御文字と向きを変える文字(U+202E など)を弾く
+--   1. _validate_profile_input:ニックネーム・自己紹介で、制御文字と見えない文字・向きを変える文字(U+202E など)を弾く。
+--      全角スペースなどの空白だけのニックネームも空とみなす(監査 run-10)
 --      (0900 の定義をそのまま写し、この検査だけを足したもの)
 --   2. BAN 一覧(banned_discord_ids)にある Discord ID のアカウントの status を一回だけ banned にそろえる
 --      (0800 のトリガーは、このあとの BAN の追加でしか動かないため)。何度流しても同じ結果になる
@@ -20,19 +21,37 @@ declare
   -- src/data/lobby-options.ts の PLATFORMS
   v_platforms text[] := array['pc', 'ps', 'switch', 'xbox', 'mobile'];
   -- 制御文字(U+0001-U+001F、U+007F-U+009F)と、見えない文字・向きを変える文字
-  -- (ゼロ幅・LRM/RLM U+200B-U+200F、埋め込み/上書き U+202A-U+202E、U+2060-U+2069、BOM U+FEFF)。
+  -- (ソフトハイフン U+00AD、アラビア文字の向き U+061C、ハングルの埋め草 U+115F/U+1160/U+3164/U+FFA0、
+  --  モンゴル文字の区切り U+180E、ゼロ幅スペース・ZWNJ U+200B-U+200C、LRM/RLM U+200E-U+200F、
+  --  行・段落の区切り U+2028-U+2029、埋め込み/上書き U+202A-U+202E、U+2060-U+2069、BOM U+FEFF)。
+  -- U+200D(ZWJ)は、ふつうの絵文字(家族・職業の絵文字など)の組み立てに使うので弾かない(監査 run-10)。
   -- U+0000 は Postgres の text に入らない(chr(0) はエラー)ので含めない。
   -- 文字のエスケープを途中のツールが別の文字に変えないよう、chr() で組み立てる。
   v_bad_chars text := '['
     || chr(1) || '-' || chr(31)          -- U+0001-U+001F
     || chr(127) || '-' || chr(159)       -- U+007F-U+009F
-    || chr(8203) || '-' || chr(8207)     -- U+200B-U+200F
+    || chr(173)                          -- U+00AD
+    || chr(1564)                         -- U+061C
+    || chr(4447) || '-' || chr(4448)     -- U+115F-U+1160
+    || chr(6158)                         -- U+180E
+    || chr(8203) || '-' || chr(8204)     -- U+200B-U+200C
+    || chr(8206) || '-' || chr(8207)     -- U+200E-U+200F
+    || chr(8232) || '-' || chr(8233)     -- U+2028-U+2029
     || chr(8234) || '-' || chr(8238)     -- U+202A-U+202E
     || chr(8288) || '-' || chr(8297)     -- U+2060-U+2069
+    || chr(12644)                        -- U+3164
     || chr(65279)                        -- U+FEFF
+    || chr(65440)                        -- U+FFA0
     || ']';
+  -- 空白だけのニックネームを空とみなすための空白の集まり(trim() は半角スペースしか落とさないため)
+  -- 半角スペース・NBSP U+00A0・U+1680・U+2000-U+200A・U+202F・U+205F・全角スペース U+3000
+  v_blank_only text := '^['
+    || chr(32) || chr(160) || chr(5760)
+    || chr(8192) || '-' || chr(8202)     -- U+2000-U+200A
+    || chr(8239) || chr(8287) || chr(12288)
+    || ']*$';
 begin
-  if p_nickname is null or char_length(trim(p_nickname)) = 0 or char_length(p_nickname) > 20 then raise exception 'INVALID_INPUT'; end if;
+  if p_nickname is null or p_nickname ~ v_blank_only or char_length(p_nickname) > 20 then raise exception 'INVALID_INPUT'; end if;
   if char_length(coalesce(p_bio, '')) > 50 then raise exception 'INVALID_INPUT'; end if;
   -- マイ設定(カード名・機材名の [[:cntrl:]])と同じく、制御文字や向きを変える文字は受け付けない
   if p_nickname ~ v_bad_chars or coalesce(p_bio, '') ~ v_bad_chars then raise exception 'INVALID_INPUT'; end if;

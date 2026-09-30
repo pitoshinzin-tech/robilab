@@ -149,13 +149,15 @@ describe("blocks and reports", () => {
     expect(((await a.client!.rpc("lobby_candidates")).data as { id: string }[]).some((r) => r.id === b.id)).toBe(false);
   });
 
-  it("a harassment report hides the target from the reporter only (no suspension); an age_fake report suspends", async () => {
+  it("a harassment report hides the target from the reporter only (no suspension); a retaliatory age_fake report does not suspend; an unrelated age_fake report suspends", async () => {
     const a = await makeUser();
     const b = await makeUser();
     const c = await makeUser();
     const statusOf = async (id: string) => (await admin.from("profiles").select("status").eq("id", id).single()).data?.status;
     const candidateIds = async (u: typeof a) => ((await u.client!.rpc("lobby_candidates")).data as { id: string }[]).map((r) => r.id);
 
+    // b から a へ声かけがあった(このあと a がブロックしても、b は声かけの履歴があるので a を通報できる)
+    expect((await b.client!.rpc("send_approach", { p_to: a.id })).error).toBeNull();
     // 迷惑行為の通報:相手は止まらず運営の確認待ち。通報した人からは見えなくなる(ブロック)
     expect((await a.client!.rpc("report_user", { p_id: b.id, p_reason: "harassment", p_detail: "テスト" })).error).toBeNull();
     expect(await statusOf(b.id)).toBe("active");
@@ -165,7 +167,13 @@ describe("blocks and reports", () => {
     expect(((await c.client!.rpc("get_profile", { p_id: b.id })).data as unknown[]).length).toBe(1);
     expect(errorCode((await a.client!.rpc("report_user", { p_id: b.id, p_reason: "spam", p_detail: "" })).error)).toBe("ALREADY_REPORTED");
 
-    // 年齢詐称の通報:確認が終わるまで利用停止。ほかの人からも見えず、声かけもできない
+    // 仕返しの年齢詐称の通報:a は b をブロックし、b を通報している(open)ので、b の通報では a は止まらない(記録はされる)
+    expect((await b.client!.rpc("report_user", { p_id: a.id, p_reason: "age_fake", p_detail: "" })).error).toBeNull();
+    expect(await statusOf(a.id)).toBe("active");
+    const { data: retaliation } = await admin.from("reports").select("status").eq("reporter_id", b.id).eq("target_id", a.id);
+    expect(retaliation).toEqual([{ status: "open" }]);
+
+    // 年齢詐称の通報(c とは何の関係もない a から):確認が終わるまで利用停止。ほかの人からも見えず、声かけもできない
     expect((await a.client!.rpc("report_user", { p_id: c.id, p_reason: "age_fake", p_detail: "" })).error).toBeNull();
     expect(await statusOf(c.id)).toBe("suspended");
     expect(await candidateIds(b)).not.toContain(c.id);
@@ -448,6 +456,15 @@ describe("hardening3", () => {
       expect(errorCode((await a.client!.rpc("update_profile", profile(nick))).error), JSON.stringify(nick)).toBe("INVALID_INPUT");
     }
     expect(errorCode((await a.client!.rpc("update_profile", { ...profile("x"), p_bio: `よろしく${rlo}` })).error)).toBe("INVALID_INPUT");
+    // run-10:ハングルの埋め草(U+3164)だけ・全角スペースだけのニックネームは空に見えるので弾く
+    const hangulFiller = String.fromCharCode(0x3164);
+    const ideographicSpace = String.fromCharCode(0x3000);
+    for (const nick of [hangulFiller.repeat(3), ideographicSpace.repeat(2)]) {
+      expect(errorCode((await a.client!.rpc("update_profile", profile(nick))).error), JSON.stringify(nick)).toBe("INVALID_INPUT");
+    }
+    // ZWJ(U+200D)でつないだふつうの絵文字は受け付ける
+    const familyEmoji = [0x1f468, 0x200d, 0x1f469, 0x200d, 0x1f467].map((c) => String.fromCodePoint(c)).join("");
+    expect((await a.client!.rpc("update_profile", profile(`${familyEmoji}ゲーマー`))).error).toBeNull();
     expect((await a.client!.rpc("update_profile", profile("オンラインで遊ぼう"))).error).toBeNull();
   });
 
