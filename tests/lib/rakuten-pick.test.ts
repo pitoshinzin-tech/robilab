@@ -67,3 +67,32 @@ describe("rakuten URLs", () => {
     expect(toRakutenItem({ ...c("x", 1), mediumImageUrls: [] }, "2026-09-30")).toBeNull();
   });
 });
+
+describe("pickRakutenItem: 別の型・中古・セットを除く", () => {
+  const c = (itemName: string, reviewCount = 10) => ({ itemCode: itemName, itemName, itemUrl: "https://item.rakuten.co.jp/a/b/", shopName: "s", reviewCount });
+  it("製品名にない型の語(HyperSpeed・AIR・Core・V2・eS)がある商品は選ばない", () => {
+    expect(pickRakutenItem([c("Razer DeathAdder V3 HyperSpeed ワイヤレス")], "Razer", "DeathAdder V3")).toBeNull();
+    expect(pickRakutenItem([c("CORSAIR M75 AIR WIRELESS")], "CORSAIR", "M75 WIRELESS")).toBeNull();
+    expect(pickRakutenItem([c("HyperX Pulsefire Haste 2 Core")], "HyperX", "Pulsefire Haste 2")).toBeNull();
+    expect(pickRakutenItem([c("ENDGAME GEAR OP1 8K V2")], "Endgame Gear", "OP1 8k")).toBeNull();
+    expect(pickRakutenItem([c("Pulsar Xlite V3 eS Medium")], "Pulsar", "Xlite v3 Medium")).toBeNull();
+    expect(pickRakutenItem([c("Pulsar X2 v2 Medium ワイヤレス")], "Pulsar", "X2 v2 Medium")?.itemName).toBe("Pulsar X2 v2 Medium ワイヤレス");
+  });
+  it("中古に近い品(極美品など)とセット品は選ばない", () => {
+    expect(pickRakutenItem([c("【極美品】Logicool G PRO X SUPERLIGHT")], "Logicool G", "PRO X SUPERLIGHT")).toBeNull();
+    expect(pickRakutenItem([c("Razer Cobra &amp; Viper Mini")], "Razer", "Viper Mini")).toBeNull();
+  });
+});
+
+describe("pickRakutenItem: 製品名はひと続きで、すぐ後に別の型の語が続かない", () => {
+  const c = (itemName: string) => ({ itemCode: itemName, itemName, itemUrl: "https://item.rakuten.co.jp/a/b/", shopName: "s", reviewCount: 1 });
+  it("数字が離れた場所(2年保証など)にあるだけでは当たらない", () => {
+    expect(pickRakutenItem([c("HyperX Pulsefire Hasteゲーマー向け 2年保証")], "HyperX", "Pulsefire Haste 2")).toBeNull();
+    expect(pickRakutenItem([c("HyperX Pulsefire Haste 2 ワイヤレス")], "HyperX", "Pulsefire Haste 2")).not.toBeNull();
+  });
+  it("すぐ後に 2C・Gen などが続く別の型には当たらない", () => {
+    expect(pickRakutenItem([c("Logicool G PRO X SUPERLIGHT 2C ワイヤレス")], "Logicool G", "PRO X SUPERLIGHT")).toBeNull();
+    expect(pickRakutenItem([c("SteelSeries Aerox 3 Wireless Gen 2")], "SteelSeries", "Aerox 3 Wireless")).toBeNull();
+    expect(pickRakutenItem([c("Logicool G ゲーミングマウス 有線 G502 HEROセンサー")], "Logicool G", "G502 HERO")).not.toBeNull();
+  });
+});

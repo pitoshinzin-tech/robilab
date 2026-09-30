@@ -17,7 +17,13 @@ export type RakutenCandidate = {
 };
 
 /** 商品名にあったら除く語(マウス本体ではない、または状態の悪い品) */
-export const ACCESSORY_WORDS = ["グリップテープ", "ソール", "スケート", "ケース", "カバー", "交換", "互換", "保護", "フィルム", "中古", "訳あり", "ジャンク"];
+export const ACCESSORY_WORDS = ["グリップテープ", "ソール", "スケート", "ケース", "カバー", "交換", "互換", "保護", "フィルム", "中古", "訳あり", "ジャンク", "美品", "アウトレット", "掘り出し", "展示品", "開封品"];
+
+/**
+ * 同じ名前の別の型・版を表す語。製品名に入っていないのに商品名にあれば、別の型なので除く
+ * (例:DeathAdder V3 に対する HyperSpeed、M75 WIRELESS に対する AIR、Haste 2 に対する Core、OP1 8k に対する V2、Xlite V3 に対する eS)
+ */
+export const VARIANT_WORDS = ["hyperspeed", "air", "core", "v2", "v3", "es", "se", "lite", "cobra", "mini", "max", "ultra", "elite", "origin", "pro", "plus", "dex"];
 
 /** メーカー名の言い換え(商品名にどれか 1 つあればよい) */
 const BRAND_ALIASES: Record<string, string[]> = {
@@ -48,8 +54,20 @@ function hasWord(text: string, word: string): boolean {
   return new RegExp(`(?<![a-z0-9])${escapeRe(word)}(?![a-z0-9])`).test(text);
 }
 
+/**
+ * 製品名の語が、ひと続きの並びとして入っているか(「Haste 2」が「Haste … 2年保証」に当たらないように)。
+ * 並びのすぐ後に短い英数字の語(2C・Gen・V2 など)が続くときは、別の型とみなして当てない。
+ */
 function matchesModel(text: string, name: string): boolean {
-  return modelTokens(name).every((t) => hasWord(text, t));
+  const tokens = modelTokens(name);
+  if (tokens.length === 0) return false;
+  const re = new RegExp(`(?<![a-z0-9])${tokens.map(escapeRe).join(String.raw`\s*`)}(?![a-z0-9])`, "g");
+  for (const m of text.matchAll(re)) {
+    const after = text.slice((m.index ?? 0) + m[0].length);
+    if (/^\s+[a-z0-9]{1,3}(?![a-z0-9])/.test(after)) continue;
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -73,6 +91,9 @@ export function pickRakutenItem(candidates: RakutenCandidate[], brand: string, n
     if (!matchesModel(text, name)) continue;
     if (ACCESSORY_WORDS.some((w) => raw.includes(w))) continue;
     if (longer.some((s) => matchesModel(text, s))) continue;
+    if (VARIANT_WORDS.some((w) => !own.has(w) && hasWord(text, w))) continue;
+    // 別のマウスとのセット(「&」「＆」「セット」)も除く
+    if (/[&＆]|&amp;|セット/.test(raw)) continue;
     if (!best || c.reviewCount > best.reviewCount) best = c;
   }
   return best;

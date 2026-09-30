@@ -2,11 +2,14 @@
 // src/data/mice-rakuten.ts と docs/content/rakuten-mice-review.md に書き出す。
 // 楽天アプリの許可 IP が本人の家の IPv4 だけなので、本人の PC で動かす(サイトの実行時には呼ばない)。
 //
-// 使い方: node --env-file=.env.local --dns-result-order=ipv4first scripts/rakuten-mice.mjs
+// 使い方(どちらか):
+//   node --env-file=.env.local --dns-result-order=ipv4first scripts/rakuten-mice.mjs
+//   node --dns-result-order=ipv4first scripts/rakuten-mice.mjs --config "<楽天ROOM 自動化の config.json のパス>"
 //
-// キー(RAKUTEN_APPLICATION_ID / RAKUTEN_ACCESS_KEY)は process.env から読むだけ。
+// キーは process.env(RAKUTEN_APPLICATION_ID / RAKUTEN_ACCESS_KEY)か、--config で渡した config.json の
+// 「楽天API.applicationId / accessKey」から、実行中にメモリへ読むだけ(どこにも書き写さない。本人のルール)。
 // キーの値やキーを含む URL は、ログ・ファイル・エラーメッセージに出さない。
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { DEVICES } from "../src/data/devices.ts";
 import { MICE } from "../src/data/mice.ts";
 import { pickRakutenItem, toRakutenItem } from "../src/lib/rakuten-pick.ts";
@@ -14,10 +17,22 @@ import { pickRakutenItem, toRakutenItem } from "../src/lib/rakuten-pick.ts";
 const ENDPOINT = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260401";
 const WAIT_MS = 1100; // 1 秒に 1 回まで
 
-const applicationId = process.env.RAKUTEN_APPLICATION_ID;
-const accessKey = process.env.RAKUTEN_ACCESS_KEY;
+function keysFromConfig() {
+  const i = process.argv.indexOf("--config");
+  if (i < 0 || !process.argv[i + 1]) return {};
+  try {
+    const api = JSON.parse(readFileSync(process.argv[i + 1], "utf8"))["楽天API"] ?? {};
+    return { applicationId: api.applicationId, accessKey: api.accessKey };
+  } catch {
+    console.error("--config の config.json を読めませんでした(パスを確かめてください)");
+    process.exit(1);
+  }
+}
+const fromConfig = keysFromConfig();
+const applicationId = fromConfig.applicationId || process.env.RAKUTEN_APPLICATION_ID;
+const accessKey = fromConfig.accessKey || process.env.RAKUTEN_ACCESS_KEY;
 if (!applicationId || !accessKey) {
-  console.error("RAKUTEN_APPLICATION_ID と RAKUTEN_ACCESS_KEY を .env.local に入れてください");
+  console.error("楽天のキーがありません(--config で config.json を渡すか、.env.local に RAKUTEN_APPLICATION_ID / RAKUTEN_ACCESS_KEY を入れる)");
   process.exit(1);
 }
 
@@ -52,7 +67,9 @@ for (const [i, m] of MICE.entries()) {
   const d = DEVICES.find((x) => x.id === m.id);
   if (!d) continue;
   if (i > 0) await sleep(WAIT_MS);
-  const { status, items } = await search(`${d.brand} ${d.name}`);
+  // 楽天の検索は 1 文字の語(G・X・2 など)があると 400 になるので、検索語からだけ外す(選ぶときの照合は元の名前のまま)
+  const keyword = `${d.brand} ${d.name}`.split(/\s+/).filter((w) => w.length >= 2).join(" ");
+  const { status, items } = await search(keyword);
   if (!items) {
     console.error(`${m.id}: ${status}`);
     errors.push(m.id);
