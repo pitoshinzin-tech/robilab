@@ -5,7 +5,7 @@
 ## 1. 公開前に必要な本人の作業(前から残っているもの)
 
 - [x] 規約・プライバシーポリシーに連絡先を入れる(robilab.contact@gmail.com、2026-09-30)
-- [ ] Discord アプリを作り、本番 Supabase の Discord ログインを設定する
+- [x] Discord アプリを作り、本番 Supabase の Discord ログインを設定する(2026-09-30。本番ドメインが決まったら URL Configuration を設定)
 - [ ] Vercel の本番の環境変数を入れる(`docs/ops/launch.md` の手順どおり)
 - [ ] 公開当日の手順(`docs/ops/launch.md`):本番 DB に migration 0500〜1500 を**先に**全部適用 → マージ → 本番反映 → 本人の確認
 
