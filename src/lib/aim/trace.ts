@@ -1,10 +1,13 @@
 import type { Point } from "./view";
 import { closestOnStroke, type Stroke } from "./path";
+import { AIM_TUNING } from "./tuning";
 
-export const TOLERANCE = 6;
-export const START_RADIUS = 8;
-export const COMPLETE = 0.95;
-export const MAX_STEP = 0.15;
+/** 線の中心からこの距離までが「線の上」(板の単位)。値は tuning.ts。 */
+export const EDGE = AIM_TUNING.edge;
+export const START_RADIUS = AIM_TUNING.startRadius;
+export const RESUME_RADIUS = AIM_TUNING.resumeRadius;
+export const COMPLETE = AIM_TUNING.complete;
+export const MAX_STEP = AIM_TUNING.maxStep;
 export const PAR_MS_PER_STROKE = 1500;
 
 export type TraceState = {
@@ -12,7 +15,9 @@ export type TraceState = {
   /** tracing は「今の画を書き始めた後」(筆を上げて止めている間も含む)。 */
   phase: "await-start" | "tracing" | "done";
   progress: number;
-  inTol: number;
+  /** 数えたフレームの点数(0〜1)の合計。 */
+  score: number;
+  /** 数えたフレームの数(進んだフレームと、外れたフレーム)。 */
   frames: number;
   perStroke: number[];
   startedAt: number | null;
@@ -25,7 +30,7 @@ export type TraceState = {
 
 export function initialTrace(): TraceState {
   return {
-    stroke: 0, phase: "await-start", progress: 0, inTol: 0, frames: 0, perStroke: [],
+    stroke: 0, phase: "await-start", progress: 0, score: 0, frames: 0, perStroke: [],
     startedAt: null, finishedAt: null, drawing: false, needRelease: false,
   };
 }
@@ -33,7 +38,12 @@ export function initialTrace(): TraceState {
 /** 画を止めている(筆を上げた)とき、p から書き直しを始めてよいか(今の進み具合の近くにいるか)。 */
 export function canResume(s: TraceState, st: Stroke, p: Point): boolean {
   const q = closestOnStroke(st, p);
-  return q.dist <= TOLERANCE && q.t - s.progress <= MAX_STEP;
+  return q.dist <= RESUME_RADIUS && q.t - s.progress <= MAX_STEP;
+}
+
+/** 線の中心からの距離 d のフレームの点数。中心で 1、EDGE で 0、外は 0。 */
+export function frameScore(d: number): number {
+  return Math.max(0, Math.min(1, 1 - d / EDGE));
 }
 
 /**
@@ -53,39 +63,38 @@ export function stepTrace(s: TraceState, strokes: Stroke[], p: Point, now: numbe
   if (s.phase === "await-start") {
     const a = st.points[0];
     if (Math.hypot(p.x - a.x, p.y - a.y) > START_RADIUS) return s;
-    return { ...s, phase: "tracing", drawing: true, progress: 0, inTol: 0, frames: 0, startedAt: s.startedAt ?? now };
+    return { ...s, phase: "tracing", drawing: true, progress: 0, score: 0, frames: 0, startedAt: s.startedAt ?? now };
   }
   if (!s.drawing) {
     // 止めている画の続き:進み具合の近くで筆を下ろしたときだけ再開する(このフレームから判定する)
     if (!canResume(s, st, p)) return s;
   }
   const q = closestOnStroke(st, p);
-  const within = q.dist <= TOLERANCE;
+  const within = q.dist <= EDGE;
   const progressed = q.t > s.progress && q.t - s.progress <= MAX_STEP;
 
   let frames = s.frames;
-  let inTol = s.inTol;
+  let score = s.score;
   let progress = s.progress;
 
   if (within && progressed) {
-    // advancing: within tolerance and progress increased → counts as good
+    // 線の上で進んだ:中心に近いほど高い点(中心 1 〜 EDGE で 0)
     frames += 1;
-    inTol += 1;
+    score += frameScore(q.dist);
     progress = q.t;
   } else if (!within) {
-    // off-line: outside tolerance → counts as bad
+    // 線の外:0 点のフレームとして数える
     frames += 1;
   }
-  // else: neutral (within tolerance but no progress) → not counted
-  // ニュートラルフレームを数えない理由: プレイヤーが線上に停止しているだけで
-  // 実際には進捗していない場合、精度計算に含めるべきではない
+  // それ以外(線の上だが進んでいない)は数えない。
+  // 線の上で止まっているだけのフレームで精度が上がったり下がったりしないように
 
-  const next = { ...s, frames, inTol, progress, drawing: true };
+  const next = { ...s, frames, score, progress, drawing: true };
   if (progress < COMPLETE) return next;
-  const perStroke = [...s.perStroke, next.inTol / next.frames];
+  const perStroke = [...s.perStroke, next.frames > 0 ? next.score / next.frames : 0];
   if (s.stroke + 1 >= strokes.length) return { ...next, perStroke, phase: "done", finishedAt: now, drawing: false };
   // 書き終えたら筆を上げたことにする。次の画は、いったん離してから始点の丸の中で押し直す
-  return { ...next, perStroke, stroke: s.stroke + 1, phase: "await-start", progress: 0, inTol: 0, frames: 0, drawing: false, needRelease: true };
+  return { ...next, perStroke, stroke: s.stroke + 1, phase: "await-start", progress: 0, score: 0, frames: 0, drawing: false, needRelease: true };
 }
 
 export function traceResult(s: TraceState): { accuracy: number; timeMs: number; perStroke: number[] } | null {

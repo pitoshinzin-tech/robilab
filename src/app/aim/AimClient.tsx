@@ -20,6 +20,8 @@ import { LoginButton } from "@/components/lobby/LoginButton";
 type Result = { accuracy: number; timeMs: number; perStroke: number[] };
 const noSubscribe = () => () => {};
 const finePointer = () => window.matchMedia("(pointer: fine)").matches;
+// ?debug=1 のときだけ、遊ぶ画面に診断を出す
+const debugParam = () => new URLSearchParams(window.location.search).get("debug") === "1";
 // 再送しても結果が変わらないエラー
 const NO_RETRY = ["NOT_LOGGED_IN", "WRONG_DATE", "WRONG_CHAR", "NOT_ACTIVE", "BANNED", "INVALID_INPUT"];
 
@@ -27,6 +29,7 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
   const router = useRouter();
   const isClient = useIsClient();
   const hasMouse = useSyncExternalStore(noSubscribe, finePointer, () => true);
+  const debug = useSyncExternalStore(noSubscribe, debugParam, () => false);
   const [settingsRev, setSettingsRev] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
   const [round, setRound] = useState(0);
@@ -116,7 +119,7 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
           <AimResult glyph={char.glyph} strokes={char.strokes.length} {...result} sendMessage={sendMessage} canResend={canResend} sending={sending}
             onResend={() => void submit(result)} onRetry={retry} />
         ) : (
-          <AimGame key={`${date}:${char.id}:${round}`} char={char} degPerCount={deg} crosshair={crosshair}
+          <AimGame key={`${date}:${char.id}:${round}`} char={char} degPerCount={deg} crosshair={crosshair} debug={debug}
             onFinish={(r) => { setResult(r); void submit(r); }}
             onAbort={() => setRound((n) => n + 1)} />
         )}

@@ -1,14 +1,21 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AimChar } from "@/lib/aim/daily";
-import { applyMouse, aimPoint, projectPoint, type Point, type View } from "@/lib/aim/view";
+import { applyMouse, aimPoint, projectPoint, KVG_SIZE, type Point, type View } from "@/lib/aim/view";
 import { closestOnStroke, parsePath, pointAtProgress, toStroke } from "@/lib/aim/path";
-import { initialTrace, stepTrace, traceResult, START_RADIUS, TOLERANCE, type TraceState } from "@/lib/aim/trace";
+import { initialTrace, stepTrace, traceResult, EDGE, RESUME_RADIUS, START_RADIUS, type TraceState } from "@/lib/aim/trace";
+import { createMoveFilter, filterMovement, pushTrailPoint } from "@/lib/aim/input";
+import { AIM_TUNING } from "@/lib/aim/tuning";
 import { reduceAim, reducePen, canStepTrace, type AimPhase, type AimEvent, type PenEvent } from "@/lib/aim/game-state";
 import { drawCrosshair, type Crosshair } from "@/lib/crosshair";
 
 type Result = { accuracy: number; timeMs: number; perStroke: number[] };
-type Props = { char: AimChar; degPerCount: number; crosshair: Crosshair; onFinish: (r: Result) => void; onAbort: () => void };
+type Props = {
+  char: AimChar; degPerCount: number; crosshair: Crosshair; onFinish: (r: Result) => void; onAbort: () => void;
+  /** true なら左上に診断(fps・捨てたマウスの飛び・直近 1 秒の最大の動き・生の移動量か)を出す(?debug=1)。 */
+  debug?: boolean;
+};
+type ScreenPoint = { x: number; y: number };
 
 const COUNTDOWN_MS = 3000;
 const UNSUPPORTED = "マウスを固定できませんでした。少し待ってから、もう一度クリックしてください(Chrome / Edge / Firefox で遊べます)。";
@@ -23,13 +30,36 @@ function leaveFullscreen(el: Element | null) {
   }
 }
 
+/**
+ * 画面の点を、点と点の中点を通る 2 次曲線でなめらかにつなぐ(折れ線のガタつきを抑える)。
+ * 点を 1 つずつ渡す。null はカメラの後ろなどで描けない点で、そこで線を切る。
+ */
+function smoothPath(ctx: CanvasRenderingContext2D) {
+  let prev: ScreenPoint | null = null;
+  let count = 0;
+  const end = () => {
+    if (prev && count > 1) ctx.lineTo(prev.x, prev.y);
+    prev = null;
+    count = 0;
+  };
+  const add = (sp: ScreenPoint | null) => {
+    if (!sp) { end(); return; }
+    if (!prev) { ctx.moveTo(sp.x, sp.y); prev = sp; count = 1; return; }
+    const mx = (prev.x + sp.x) / 2, my = (prev.y + sp.y) / 2;
+    if (count === 1) ctx.lineTo(mx, my); else ctx.quadraticCurveTo(prev.x, prev.y, mx, my);
+    prev = sp;
+    count += 1;
+  };
+  return { add, end };
+}
+
 /** CSS の役割の色を読む(Canvas では var() が使えないため)。 */
 function roleColor(name: string, fallback: string): string {
   if (typeof window === "undefined") return fallback;
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 }
 
-export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Props) {
+export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug = false }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
   // 全画面にする要素(canvas と開始ボタンを包む)
   const stage = useRef<HTMLDivElement>(null);
@@ -43,6 +73,12 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
   const trail = useRef<Point[][]>([]);
   // 左ボタンを押しているか(筆が下りているか)
   const pen = useRef(false);
+  // マウスの飛びを捨てるフィルター
+  const moveFilter = useRef(createMoveFilter());
+  // 生の移動量(unadjustedMovement)でロックできたか
+  const unadjusted = useRef(false);
+  // 診断(?debug=1)の数字。maxDelta は今の 1 秒、maxDeltaShown は直前の 1 秒の最大の動き
+  const diag = useRef({ frames: 0, fps: 0, since: 0, maxDelta: 0, maxDeltaShown: 0 });
   const countdownEnd = useRef(0);
   // ロック要求の状態:first = unadjustedMovement つき(失敗しても通常の要求に続く)、second = 通常の要求、final = 要求が済んだ後
   const attempt = useRef<"first" | "second" | "final">("final");
@@ -80,7 +116,12 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
     const el = canvas.current!;
     const onMove = (e: MouseEvent) => {
       if (document.pointerLockElement !== el) return;
-      view.current = applyMouse(view.current, e.movementX, e.movementY, degPerCount);
+      // 1 回の mousemove につき 1 回だけ視点に足す(描画は requestAnimationFrame の側で 1 フレームに 1 回)
+      const mag = Math.hypot(e.movementX, e.movementY);
+      if (mag > diag.current.maxDelta) diag.current.maxDelta = mag;
+      const m = filterMovement(moveFilter.current, e.movementX, e.movementY);
+      if (m.dx === 0 && m.dy === 0) return;
+      view.current = applyMouse(view.current, m.dx, m.dy, degPerCount);
     };
     const penEvent = (ev: PenEvent) => {
       pen.current = reducePen(pen.current, ev, phaseRef.current);
@@ -151,6 +192,8 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.fillStyle = colors.bg;
       ctx.fillRect(0, 0, w, h);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
       const v = view.current;
       const p = aimPoint(v);
       const ph = phaseRef.current;
@@ -162,7 +205,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
         if (trace.current.phase === "tracing" && trace.current.drawing) {
           // 筆を下ろし直したら新しい線にする
           if (!wasDrawing) trail.current.push([]);
-          trail.current[trail.current.length - 1].push(p);
+          pushTrailPoint(trail.current[trail.current.length - 1], p);
         }
         if (trace.current.phase === "done") {
           const r = traceResult(trace.current);
@@ -172,38 +215,38 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
           if (r) latest.current.onFinish(r);
         }
       }
-      // 線を描く
+      // 板の 1 単位が画面で何ピクセルか(板の中央で測る)。線の太さを板の単位で決めるため
+      const c0 = projectPoint({ x: KVG_SIZE / 2, y: KVG_SIZE / 2 }, v, w, h);
+      const c1 = projectPoint({ x: KVG_SIZE / 2 + 1, y: KVG_SIZE / 2 }, v, w, h);
+      const unitPx = c0 && c1 ? Math.hypot(c1.x - c0.x, c1.y - c0.y) : 0;
+      // 線を描く(太さは板の単位で AIM_TUNING.lineWidth)
       const t = trace.current;
-      strokes.forEach((s, i) => {
+      ctx.lineWidth = Math.max(1, AIM_TUNING.lineWidth * unitPx);
+      for (let i = 0; i < strokes.length; i++) {
         const isCur = i === t.stroke && t.phase !== "done";
-        ctx.lineWidth = isCur ? 6 : 4;
         ctx.strokeStyle = isCur ? colors.current : colors.pending;
         ctx.globalAlpha = i < t.stroke || t.phase === "done" ? 0.35 : 1;
         ctx.beginPath();
-        let pen = false;
-        for (const q of s.points) {
+        let down = false;
+        for (const q of strokes[i].points) {
           const sp = projectPoint(q, v, w, h);
-          if (!sp) { pen = false; continue; }
-          if (pen) ctx.lineTo(sp.x, sp.y); else ctx.moveTo(sp.x, sp.y);
-          pen = true;
-        }
-        ctx.stroke();
-      });
-      ctx.globalAlpha = 1;
-      // なぞった軌跡
-      ctx.strokeStyle = colors.trail;
-      ctx.lineWidth = 2;
-      for (const seg of trail.current) {
-        let pen = false;
-        ctx.beginPath();
-        for (const q of seg) {
-          const sp = projectPoint(q, v, w, h);
-          if (!sp) { pen = false; continue; }
-          if (pen) ctx.lineTo(sp.x, sp.y); else ctx.moveTo(sp.x, sp.y);
-          pen = true;
+          if (!sp) { down = false; continue; }
+          if (down) ctx.lineTo(sp.x, sp.y); else ctx.moveTo(sp.x, sp.y);
+          down = true;
         }
         ctx.stroke();
       }
+      ctx.globalAlpha = 1;
+      // なぞった軌跡(点と点の中点を通る曲線でなめらかに。全部の線を 1 回の stroke で描く)
+      ctx.strokeStyle = colors.trail;
+      ctx.lineWidth = Math.max(1.5, AIM_TUNING.trailWidth * unitPx);
+      ctx.beginPath();
+      const path = smoothPath(ctx);
+      for (const seg of trail.current) {
+        for (const q of seg) path.add(projectPoint(q, v, w, h));
+        path.end();
+      }
+      ctx.stroke();
       // 次の画の始点の丸
       if (t.phase === "await-start" && ph !== "idle" && strokes[t.stroke]) {
         const p0 = strokes[t.stroke].points[0];
@@ -217,14 +260,13 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
           ctx.stroke();
         }
       }
-      // 筆を上げて止めている画は、続きを書き始める位置(今の進み具合)を丸で示す
+      // 筆を上げて止めている画は、続きを書き始める位置(今の進み具合)を丸で示す(線より大きい丸)
       if (t.phase === "tracing" && !t.drawing && strokes[t.stroke]) {
-        const s0 = strokes[t.stroke];
-        const c = pointAtProgress(s0, t.progress);
+        const c = pointAtProgress(strokes[t.stroke], t.progress);
         const a = projectPoint(c, v, w, h);
-        const edge = projectPoint({ x: c.x + TOLERANCE, y: c.y }, v, w, h);
+        const edge = projectPoint({ x: c.x + RESUME_RADIUS, y: c.y }, v, w, h);
         if (a && edge) {
-          ctx.strokeStyle = colors.current;
+          ctx.strokeStyle = colors.text;
           ctx.lineWidth = 3;
           ctx.beginPath();
           ctx.arc(a.x, a.y, Math.abs(edge.x - a.x), 0, Math.PI * 2);
@@ -233,7 +275,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
       }
       // 外れているときは中央を赤く縁取る(判定と同じく線分までの距離で見る。筆を上げている間と判定を止めている角度では出さない)
       if (t.phase === "tracing" && t.drawing && strokes[t.stroke] && canStepTrace(v)) {
-        const off = closestOnStroke(strokes[t.stroke], p).dist > TOLERANCE;
+        const off = closestOnStroke(strokes[t.stroke], p).dist > EDGE;
         if (off) {
           ctx.strokeStyle = colors.miss;
           ctx.lineWidth = 2;
@@ -249,11 +291,39 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
         ctx.fillText(String(Math.max(1, Math.ceil((countdownEnd.current - now) / 1000))), w / 2, h / 2 - 60);
       }
       drawCrosshair(ctx, crosshair, Math.round(w / 2), Math.round(h / 2));
+      // 診断(?debug=1):fps と、直前の 1 秒の最大の動き
+      const d = diag.current;
+      d.frames += 1;
+      if (now - d.since >= 1000) {
+        d.fps = Math.round((d.frames * 1000) / Math.max(1, now - d.since));
+        d.frames = 0;
+        d.since = now;
+        d.maxDeltaShown = d.maxDelta;
+        d.maxDelta = 0;
+      }
+      if (debug) {
+        const lines = [
+          `fps ${d.fps}`,
+          `dropped ${moveFilter.current.dropped}`,
+          `max |delta| 1s ${Math.round(d.maxDeltaShown)}`,
+          `unadjustedMovement ${unadjusted.current ? "on" : "off"}`,
+        ];
+        ctx.font = "12px monospace";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.globalAlpha = 0.75;
+        ctx.fillStyle = colors.bg;
+        ctx.fillRect(8, 8, 220, lines.length * 16 + 8);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = colors.text;
+        for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], 12, 12 + i * 16);
+        ctx.textBaseline = "alphabetic";
+      }
       raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [crosshair, strokes]);
+  }, [crosshair, strokes, debug]);
 
   const start = async () => {
     if (phaseRef.current !== "idle" || starting.current) return;
@@ -264,6 +334,8 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
     trace.current = initialTrace();
     trail.current = [];
     pen.current = false;
+    moveFilter.current = createMoveFilter();
+    unadjusted.current = false;
     attempt.current = "first";
     // 全画面を先に要求し、完了は待たずにロックも同じクリックの中で要求する(失敗しても全画面なしで遊べる)
     try {
@@ -274,7 +346,10 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
     let locked = true;
     try {
       // 生の移動量(OS の加速なし)を優先する
-      await (el.requestPointerLock as (o?: { unadjustedMovement?: boolean }) => Promise<void> | void)({ unadjustedMovement: true });
+      const req = (el.requestPointerLock as (o?: { unadjustedMovement?: boolean }) => Promise<void> | void)({ unadjustedMovement: true });
+      await req;
+      // promise を返すブラウザで成功したときだけ、生の移動量が使えている
+      unadjusted.current = req instanceof Promise;
     } catch {
       attempt.current = "second";
       try {

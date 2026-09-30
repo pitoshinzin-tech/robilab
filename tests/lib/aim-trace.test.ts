@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { parsePath, toStroke } from "@/lib/aim/path";
-import { initialTrace, stepTrace, traceResult, computeScore, type TraceState } from "@/lib/aim/trace";
+import { initialTrace, stepTrace, traceResult, computeScore, frameScore, EDGE, type TraceState } from "@/lib/aim/trace";
 
 const line = toStroke(parsePath("M10,50L100,50"));
 const strokes = [line];
@@ -37,9 +37,9 @@ describe("stepTrace", () => {
     expect(s.progress).toBeCloseTo(40 / 90, 2);
   });
   it("frames outside the tolerance lower the accuracy but still progress only within it", () => {
-    const s = run([...along(10, 55, 15), ...along(55, 100, 15, 10)]); // 後半は 10 ずれ(許容 6 の外)
+    const s = run([...along(10, 55, 15), ...along(55, 100, 15, 10)]); // 後半は 10 ずれ(EDGE の外)
     expect(s.phase).toBe("tracing");
-    expect(s.frames).toBeGreaterThan(s.inTol);
+    expect(s.frames).toBeGreaterThan(s.score);
   });
   it("multi-stroke: waits for the next start circle", () => {
     const two = [line, toStroke(parsePath("M10,80L100,80"))];
@@ -49,7 +49,7 @@ describe("stepTrace", () => {
     expect(s.phase).toBe("await-start");
   });
   it("loitering on the line does not inflate accuracy", () => {
-    // Run C: trace with some off-line frames (y=60, dist 10 > tolerance 6)
+    // Run C: trace with some off-line frames (y=60, dist 10 > EDGE)
     const pointsC = [
       { x: 10, y: 50 }, // start
       ...along(10, 40, 10), // 11 points advancing along line
@@ -131,7 +131,7 @@ describe("stepTrace pen (クリックしている間だけ書ける)", () => {
     );
     expect(lifted.progress).toBe(mid.progress);
     expect(lifted.frames).toBe(mid.frames);
-    expect(lifted.inTol).toBe(mid.inTol);
+    expect(lifted.score).toBe(mid.score);
     expect(lifted.phase).toBe("tracing");
     expect(lifted.drawing).toBe(false);
   });
@@ -172,5 +172,59 @@ describe("stepTrace pen (クリックしている間だけ書ける)", () => {
     expect(s.phase).toBe("done");
     expect(traceResult(s)!.timeMs).toBe(s.finishedAt! - s.startedAt!);
     expect(s.startedAt).toBe(1000);
+  });
+});
+
+describe("graded accuracy (線の中心からの距離で点数が下がる)", () => {
+  it("frameScore: 中心 1、EDGE の半分 0.5、EDGE で 0、外は 0", () => {
+    expect(frameScore(0)).toBe(1);
+    expect(frameScore(EDGE / 2)).toBeCloseTo(0.5, 10);
+    expect(frameScore(EDGE)).toBe(0);
+    expect(frameScore(EDGE + 1)).toBe(0);
+  });
+  it("EDGE は線の太さの半分(3)+ 余白 0.5", () => {
+    expect(EDGE).toBe(3.5);
+  });
+  it("中心をなぞると 100%、EDGE の半分ずれてなぞると 50%", () => {
+    expect(traceResult(run(along(10, 100, 30)))!.accuracy).toBe(100);
+    const half = run(along(10, 100, 30, EDGE / 2));
+    expect(half.phase).toBe("done");
+    expect(traceResult(half)!.accuracy).toBeCloseTo(50, 5);
+  });
+  it("EDGE ちょうどでなぞると進むが 0%、EDGE の外では進まない", () => {
+    const edge = run(along(10, 100, 30, EDGE));
+    expect(edge.phase).toBe("done");
+    expect(traceResult(edge)!.accuracy).toBe(0);
+    const out = run(along(10, 100, 30, EDGE + 0.5));
+    expect(out.phase).toBe("tracing");
+    expect(out.progress).toBe(0);
+    expect(out.frames).toBe(30); // 始めたフレームのあとの 30 フレームはすべて外れ(0 点)として数える
+    expect(out.score).toBe(0);
+  });
+  it("画ごとの精度(perStroke)を平均する", () => {
+    const two = [line, toStroke(parsePath("M10,80L100,80"))];
+    let s = initialTrace();
+    let i = 0;
+    const step = (p: { x: number; y: number }, down: boolean) => (s = stepTrace(s, two, p, 1000 + 16 * i++, down));
+    along(10, 100, 30).forEach((p) => step(p, true));
+    step({ x: 10, y: 80 }, false);
+    along(10, 100, 30, 30 + EDGE / 2).forEach((p) => step(p, true));
+    expect(s.phase).toBe("done");
+    expect(s.perStroke[0]).toBe(1);
+    expect(s.perStroke[1]).toBeCloseTo(0.5, 5);
+    expect(traceResult(s)!.accuracy).toBeCloseTo(75, 5);
+  });
+  it("線の上で止まっているフレームは数えない(ずれていても)", () => {
+    const base = run(along(10, 40, 10, 1));
+    const loiter = run([...along(10, 40, 10, 1), ...Array.from({ length: 30 }, () => ({ x: 40, y: 52 }))]);
+    expect(loiter.frames).toBe(base.frames);
+    expect(loiter.score).toBe(base.score);
+  });
+  it("筆を上げているフレームは、線の外でも数えない", () => {
+    let s = run(along(10, 40, 10));
+    const before = { frames: s.frames, score: s.score };
+    for (let k = 0; k < 20; k++) s = stepTrace(s, strokes, { x: 40, y: 70 }, 2000 + k * 16, false);
+    expect(s.frames).toBe(before.frames);
+    expect(s.score).toBe(before.score);
   });
 });
