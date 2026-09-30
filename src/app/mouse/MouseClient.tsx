@@ -122,7 +122,7 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
             const rakuten = MICE_RAKUTEN[item.mouse.id];
             return (
               <MouseCard key={item.mouse.id} rank={rank} item={item} brand={d.brand} name={d.name}
-                reason={recommendReason({ ...hand, estimated }, target, item.mouse, currentMouse)}
+                reason={recommendReason({ ...hand, estimated }, target, item.mouse, null)}
                 compare={currentMouse ? compareWith(currentMouse, item.mouse) : null}
                 links={shopLinks(`${d.brand} ${d.name}`, item.mouse.officialUrl, undefined, rakuten?.itemUrl)}
                 imageUrl={rakuten?.imageUrl ?? null} />
