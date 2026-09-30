@@ -4,7 +4,8 @@
 
 ## 前日までに(本人)
 
-- [ ] `content/legal/terms.md` と `content/legal/privacy.md` の【公開前に本人が記入】(お問い合わせ先)を埋める
+- [x] `content/legal/terms.md` と `content/legal/privacy.md` のお問い合わせ先を埋める(robilab.contact@gmail.com、2026-09-30)
+- [ ] 公開日が決まったら、`content/legal/privacy.md` の「制定日:2026年10月【公開日】」を実際の日付にする
 - [ ] Discord アプリを作り、本番 Supabase(`robilab`)の Discord ログインを設定する
 - [ ] Supabase Auth の「Redirect URLs」を、本番の `https://<本番ドメイン>/auth/callback` だけにする(dev 用は dev プロジェクト側に)
 - [ ] Vercel の本番の環境変数を設定する
