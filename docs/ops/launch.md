@@ -31,7 +31,7 @@
    - [ ] `supabase/migrations/20261001001200_my_settings_moderation.sql`(利用停止・BAN と名刺の公開をつなぐ。上の 1100 とセット)
    - [ ] `supabase/migrations/20261001001300_my_settings_v2.sql`(マイ設定の拡張)
    - [ ] `supabase/migrations/20261001001400_aim_daily.sql`(今日の文字の表と関数。※ dev では 1400 のあとに、関数の中身が最終の 1400 と同じ dev 専用の記録 `aim_daily_ranking_names` を別に適用した。本番は 1300 と 1400 のファイルだけでよい)
-   - [ ] `supabase/migrations/20261001001500_card_locks.sql`(運営の公開禁止の印を別の表 `card_locks` にも残し、本人が設定を消して作り直しても印が戻るようにする。1200 のあと)
+   - [ ] `supabase/migrations/20261001001500_card_locks.sql`(運営の公開禁止の印を別の表 `card_locks` にも残し、本人が設定を消して作り直しても、退会して同じ Discord で登録し直しても印が戻るようにする。Discord ID 単位の `card_locked_discord_ids` も作る。1200 のあと)
    - [ ] **Vercel の Firewall にルールを1つ足す**(マイ設定を公開するとき):パスが `/api/card-image` のリクエストを、IP ごとに1分20回まで(超えたら 429)。Vercel ダッシュボード → プロジェクト → Firewall → Custom Rules → Rate Limit
    - [ ] **同じく Firewall に、パスが `/aim/opengraph-image` のリクエストを IP ごとに1分30回まで(超えたら 429)のルールを足す**(クエリを変えると CDN のキャッシュを通らず、毎回画像を描かせられるため)
    - 以降に追加した migration があれば、それも。dev と本番の `list_migrations` を見比べて、差がないことを確認する

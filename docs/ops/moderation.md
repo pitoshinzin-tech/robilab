@@ -137,17 +137,36 @@ insert into ng_words (word) values ('援助') on conflict do nothing;
 update my_settings set card_locked = true, public_slug = null where public_slug = '<slug>';
 ```
 
-公開禁止の印は `card_locks` にも自動で記録される。本人が「設定を消す」で行を消して保存し直しても、新しい行にまた印が付く。
+公開禁止の印は `card_locks` にも自動で記録される(そのときの Discord ID も `card_locks.discord_user_id` に残る)。本人が「設定を消す」で行を消して保存し直しても、新しい行にまた印が付く。
 
-公開禁止を解く場合は `update my_settings set card_locked = false where user_id = '<user_id>';`(`card_locks` の記録も自動で消える。本人がもう一度公開をオンにすると、新しい URL で公開される)。
+本人が退会(`delete_me`)すると `card_locks` の行は消えるが、その直前に Discord ID が `card_locked_discord_ids` に移る。同じ Discord で登録し直してマイ設定を保存すると、新しい行にまた印が付く(BAN・退会の記録と同じく、印は Discord ID でも残る)。
 
-マイ設定の行がない人(設定を消したあと、まだ保存していない人など)に印を付ける場合は、次を実行する。次に保存したときから公開禁止になる。
+公開禁止を解く場合は `update my_settings set card_locked = false where user_id = '<user_id>';`(`card_locks` と、その人の Discord ID の `card_locked_discord_ids` の記録も自動で消える。本人がもう一度公開をオンにすると、新しい URL で公開される)。
+
+マイ設定の行がない人(設定を消したあと、まだ保存していない人など)に印を付ける場合は、次を実行する。次に保存したときから公開禁止になる(Discord ID は自動で記録される)。
 
 ```sql
 insert into card_locks (user_id) values ('<user_id>') on conflict do nothing;
 ```
 
-その人の行がまだなく、印だけ外す場合は `delete from card_locks where user_id = '<user_id>';`。
+いまアカウントがない Discord ID(退会済みの人など)に印を付ける場合は、次を実行する。その Discord で登録してマイ設定を保存したときから公開禁止になる。
+
+```sql
+insert into card_locked_discord_ids (discord_user_id) values ('<discord_user_id>') on conflict do nothing;
+```
+
+その人の行がまだなく、印だけ外す場合は、両方の記録を消す。
+
+```sql
+delete from card_locks where user_id = '<user_id>';
+delete from card_locked_discord_ids where discord_user_id = '<discord_user_id>';
+```
+
+いま付いている印の一覧は `select * from card_locks;` と `select * from card_locked_discord_ids;` で見られる。
+
+注意:
+- SQL エディタ・service_role・ダッシュボードなど、`auth.uid()` が null になる操作はすべて「運営の操作」とみなされる。運営が `card_locks` の行を消しても、Discord ID の記録には移らない。
+- 運営がダッシュボードで公開禁止の人のアカウントを消す場合も、印は Discord ID に移らない。消したあとも印を残したいときは、先に `insert into card_locked_discord_ids (discord_user_id) select discord_user_id from card_locks where user_id = '<user_id>' on conflict do nothing;` を実行する。
 
 ※ ロビーで利用停止(suspended)・BAN(banned、または BAN 一覧の Discord)になった人は、自動でマイ設定の保存・名刺の公開ができなくなり、公開中の名刺も表示されなくなる。停止を解除すれば、公開中だった名刺はまた表示される。
 

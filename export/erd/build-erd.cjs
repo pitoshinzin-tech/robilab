@@ -58,7 +58,9 @@ const tables = [
     cols: [["play_date", "date", "PK"], ["user_id", "uuid", "PK FK"], ["char_id", "text", ""], ["accuracy", "numeric(0〜100)", ""],
       ["time_ms", "int", ""], ["score", "int(0〜10000)", ""], ["submitted_at", "timestamptz", ""]] },
   { id: "card_locks", name: "card_locks", sub: "運営の公開禁止の印(マイ設定を消しても残る)", x: 40, y: 1140, w: 320, access: "ops",
-    cols: [["user_id", "uuid", "PK FK"], ["locked_at", "timestamptz", ""]] },
+    cols: [["user_id", "uuid", "PK FK"], ["locked_at", "timestamptz", ""], ["discord_user_id", "text?", "D"]] },
+  { id: "card_locked_discord", name: "card_locked_discord_ids", sub: "公開禁止の Discord(退会しても残る)", x: 400, y: 1140, w: 340, access: "ops",
+    cols: [["discord_user_id", "text", "PK D"], ["locked_at", "timestamptz", ""]] },
 ];
 const T = Object.fromEntries(tables.map((t) => [t.id, t]));
 const rowY = (t, col) => t.y + HEAD + t.cols.findIndex((c) => c[0] === col) * ROW + ROW / 2;
@@ -167,7 +169,7 @@ out.push(`<rect x="${lx}" y="${ly + 70}" width="50" height="15" rx="3" fill="#58
 out.push(`<path d="M40,${ly + 144} h60" stroke="#4a5263" stroke-width="1.6"/><text x="110" y="${ly + 148}" font-size="13" fill="#333a48">親が消えると一緒に消える(ON DELETE CASCADE)</text>`);
 out.push(`<path d="M520,${ly + 144} h60" stroke="#c46a1a" stroke-width="1.6" stroke-dasharray="7 4"/><text x="590" y="${ly + 148}" font-size="13" fill="#333a48">親が消えると空欄になる(ON DELETE SET NULL)。通報は証跡として残る</text>`);
 out.push(`<text x="40" y="${ly + 180}" font-size="13" fill="#333a48">N / 1 = 多対一。profiles・private_info・my_settings・card_locks は auth.users と 1 対 1(aim_scores は 1 人につき 1 日 1 件)。「?」は空欄(NULL)を許す列。</text>`);
-out.push(`<text x="40" y="${ly + 202}" font-size="13" fill="#333a48">Discord ID の値でつながる列:private_info.discord_user_id = reports.reporter_discord_id / target_discord_id = carried_blocks.blocked_discord_id = banned_discord_ids / left_discord_ids.discord_user_id</text>`);
+out.push(`<text x="40" y="${ly + 202}" font-size="13" fill="#333a48">Discord ID の値でつながる列:private_info.discord_user_id = reports.reporter_discord_id / target_discord_id = carried_blocks.blocked_discord_id = banned_discord_ids / left_discord_ids / card_locked_discord_ids / card_locks.discord_user_id</text>`);
 out.push(`</g>`);
 out.push(`</svg>`);
 fs.writeFileSync(path.join(__dirname, "robilab-erd.svg"), out.join("\n"));

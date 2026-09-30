@@ -149,6 +149,39 @@ describe("my_settings moderation", () => {
     // 本人からは card_locks を読めない
     expect((await a.client!.from("card_locks").select("user_id")).error).not.toBeNull();
   });
+
+  it("a card lock survives deleting the account and signing up again with the same Discord account (audit run-8)", async () => {
+    const discordId = `d-lock-${crypto.randomUUID()}`;
+    const a = await makeUser({ discordId });
+    expect((await a.client!.rpc("save_my_settings", { p_data: sample() })).error).toBeNull();
+    expect((await admin.from("my_settings").update({ card_locked: true }).eq("user_id", a.id)).error).toBeNull();
+    const { data: lock } = await admin.from("card_locks").select("discord_user_id").eq("user_id", a.id).single();
+    expect(lock).toEqual({ discord_user_id: discordId });
+
+    expect((await a.client!.rpc("delete_me")).error).toBeNull();
+    expect((await admin.from("card_locks").select("user_id").eq("user_id", a.id)).data).toHaveLength(0);
+    expect((await admin.from("card_locked_discord_ids").select("discord_user_id").eq("discord_user_id", discordId)).data).toHaveLength(1);
+    // 退会後7日間の再登録待ちは別の仕組みなので、ここでは明けたことにする
+    await admin.from("left_discord_ids").delete().eq("discord_user_id", discordId);
+
+    try {
+      const b = await makeUser({ discordId });
+      expect((await b.client!.rpc("save_my_settings", { p_data: sample() })).error).toBeNull();
+      const { data: row } = await admin.from("my_settings").select("card_locked").eq("user_id", b.id).single();
+      expect(row).toEqual({ card_locked: true });
+      expect(errorCode((await b.client!.rpc("set_card_public", { p_public: true })).error)).toBe("CARD_LOCKED");
+      expect((await admin.from("card_locks").select("user_id").eq("user_id", b.id)).data).toHaveLength(1);
+      // 本人からは card_locked_discord_ids を読めない
+      expect((await b.client!.from("card_locked_discord_ids").select("discord_user_id")).error).not.toBeNull();
+
+      // 運営が印を外すと、Discord ID の記録も消える
+      expect((await admin.from("my_settings").update({ card_locked: false }).eq("user_id", b.id)).error).toBeNull();
+      expect((await admin.from("card_locks").select("user_id").eq("user_id", b.id)).data).toHaveLength(0);
+      expect((await admin.from("card_locked_discord_ids").select("discord_user_id").eq("discord_user_id", discordId)).data).toHaveLength(0);
+    } finally {
+      await admin.from("card_locked_discord_ids").delete().eq("discord_user_id", discordId);
+    }
+  });
 });
 
 describe("my_settings v2", () => {
