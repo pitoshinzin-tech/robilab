@@ -23,7 +23,7 @@
 - 監査 run-9(standard・全体):**confirmed 0 件、調べ残しなし**。公開してよい状態。レポートは `~/security-audit-skill/gamer-hub/run-9/REPORT.md`
 - 小さな強化は反映済み(鍵ファイルを Git に入れない設定、プロフィールの見えない文字・向きを変える文字の禁止 = migration 1600、カード画像の本文の上限、フォント取得先の限定、公開手順の補足)
 - [x] **決定済み(09-30、D42):通報では相手を止めず、運営の確認待ちにする(案③)**。例外は年齢詐称の通報で、確認が終わるまで自動で利用停止。通報した人が相手をブロックするのは同じ。migration 1700 を本番に適用し、毎日の通報の確認で必要なら運営が止める(`docs/ops/moderation.md`)
-- [ ] **確かめてほしい:Supabase の「manual identity linking」が無効のまま**か(本番のダッシュボード → Authentication → 設定)。有効だと、BAN などに使う Discord ID をユーザーが付け替えられる
+- [ ] **確かめてほしい:Supabase の「manual identity linking」が無効のまま**か(手順は launch.md の「前日までに」。本番ドメインは robilab.vercel.app に決定、2026-09-30)(本番のダッシュボード → Authentication → 設定)。有効だと、BAN などに使う Discord ID をユーザーが付け替えられる
 - 今日の文字の点数は、ブラウザから送る値を元にするので偽の満点を送れる(設計書で受け入れ済み。景品を付けるときは対策が必要)
 
 ## 2. 実際に触って確かめてほしいこと

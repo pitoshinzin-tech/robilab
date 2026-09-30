@@ -7,11 +7,11 @@
 - [x] `content/legal/terms.md` と `content/legal/privacy.md` のお問い合わせ先を埋める(robilab.contact@gmail.com、2026-09-30)
 - [ ] 公開日が決まったら、`content/legal/privacy.md` の「制定日:2026年10月【公開日】」を実際の日付にする
 - [x] Discord アプリを作り、本番 Supabase(`robilab`)の Discord ログインを設定する(2026-09-30)
-- [ ] **本番ドメインを決める**(独自ドメインを取るか、しばらく `robilab.vercel.app` のままにするか)。決めたら次の 3 つをそろえる
-  - Vercel → プロジェクト → Domains にドメインを足す(独自ドメインのとき)
-  - Vercel の `NEXT_PUBLIC_SITE_URL` を本番の URL にする
-  - Amazon アソシエイト →「アカウント設定」→「ウェブサイトとモバイルアプリの情報」に本番の URL を足す
-- [ ] Supabase Auth の「URL Configuration」:Site URL を本番の URL に、「Redirect URLs」を本番の `https://<本番ドメイン>/auth/callback` だけにする(dev 用は dev プロジェクト側に)
+- [x] **本番ドメインを決める** → しばらく **`https://robilab.vercel.app`** のまま(2026-09-30。独自ドメインに移すときは、下の 3 つと Supabase の URL をもう一度そろえる)
+  - [ ] Vercel の `NEXT_PUBLIC_SITE_URL` が `https://robilab.vercel.app` になっているか(9/27 に Secret で入れたので、念のため同じ値で上書きする。Type は Config)
+  - [ ] Amazon アソシエイト →「アカウント設定」→「ウェブサイトとモバイルアプリの情報」に `https://robilab.vercel.app` を足す
+- [ ] Supabase(本番)Auth の「URL Configuration」:Site URL を `https://robilab.vercel.app` に、「Redirect URLs」を `https://robilab.vercel.app/auth/callback` だけにする(dev 用は dev プロジェクト側に)
+- [ ] Supabase(本番)Auth の「Sign In / Providers」→「Allow manual linking」がオフになっているか(オンだと BAN などに使う Discord ID を付け替えられる。監査 run-9)
 - [ ] **Vercel を Pro プランにする**(無料の Hobby は商用利用が禁止。アフィリエイトのリンクを出すサイトは商用にあたる。D35)。本人の希望で、**すべて完成したあとに Claude から声をかけて進める**(2026-09-30)
 - [ ] Vercel の本番の環境変数を、正しい値で**上書き**する(9/27 に Secret で入れたため値を見て確かめられない。Type は「Config」にする)
   - `NEXT_PUBLIC_SUPABASE_URL=https://bncjzilfehkjftzraajd.supabase.co`
