@@ -7,6 +7,8 @@ import { CandidateCard } from "@/components/lobby/CandidateCard";
 import { ApproachButton } from "@/components/lobby/ApproachButton";
 import { BlockButton } from "@/components/lobby/BlockButton";
 import { ReportForm } from "@/components/lobby/ReportForm";
+import { AccountStatusNotice } from "@/components/lobby/AccountStatusNotice";
+import { isUuid } from "@/lib/uuid";
 import type { Candidate } from "@/lib/lobby-types";
 import type { Axes } from "@/data/axes";
 
@@ -14,14 +16,15 @@ type MyProfileRow = { status: "active" | "suspended" | "banned"; axes: Axes | nu
 
 export default async function ProfilePage({ params }: { params: Promise<{ profileId: string }> }) {
   const { profileId } = await params;
+  if (!isUuid(profileId)) notFound();
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/lobby");
-  const [meResult, profileResult] = await Promise.all([supabase.rpc("my_profile"), supabase.rpc("get_profile", { p_id: profileId })]);
-  const meRows = assertNoRpcError(meResult);
-  const data = assertNoRpcError(profileResult);
+  const meRows = assertNoRpcError(await supabase.rpc("my_profile"));
   const me = (meRows as MyProfileRow[] | null)?.[0];
   if (!me) redirect("/lobby/join");
+  if (me.status !== "active") return <AccountStatusNotice status={me.status} />;
+  const data = assertNoRpcError(await supabase.rpc("get_profile", { p_id: profileId }));
   const c = (data as Candidate[] | null)?.[0];
   if (!c) notFound();
   const match = me.axes && c.axes ? peopleScore(me.axes, c.axes) : null;

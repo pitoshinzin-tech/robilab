@@ -1,4 +1,5 @@
-import { buildCardView, contentLengthTooLarge, parseCardRequest } from "@/lib/card-view";
+import { buildCardView, CARD_REQUEST_MAX_BYTES, contentLengthTooLarge, parseCardRequest } from "@/lib/card-view";
+import { readBodyCapped } from "@/lib/read-body";
 import { renderCardImage } from "@/components/card/CardImage";
 
 /**
@@ -7,7 +8,14 @@ import { renderCardImage } from "@/components/card/CardImage";
  */
 export async function POST(request: Request) {
   if (contentLengthTooLarge(request.headers.get("content-length"))) return new Response("Payload Too Large", { status: 413 });
-  const data = parseCardRequest(await request.text());
+  let body: string | null;
+  try {
+    body = await readBodyCapped(request, CARD_REQUEST_MAX_BYTES);
+  } catch {
+    return new Response("Bad Request", { status: 400 });
+  }
+  if (body === null) return new Response("Payload Too Large", { status: 413 });
+  const data = parseCardRequest(body);
   if (!data) return new Response("Bad Request", { status: 400 });
   try {
     const image = await renderCardImage(buildCardView(data));

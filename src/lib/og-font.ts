@@ -1,9 +1,57 @@
 // ビルド時は16枚を同時に作るので、短すぎると失敗する。止まったままにならない程度の長さにする
 const TIMEOUT_MS = 15000;
+/** フォントファイルの大きさの上限(使う文字だけのサブセットなので、ふつうは数百 KB 以下) */
+export const OG_FONT_MAX_BYTES = 5 * 1024 * 1024;
+const FONT_ORIGIN = "https://fonts.gstatic.com";
 
 /** Google Fonts の CSS から、フォントファイル(opentype / truetype)の URL を取り出す */
 export function extractFontUrl(css: string): string | null {
   return css.match(/src: url\((.+?)\) format\('(opentype|truetype)'\)/)?.[1] ?? null;
+}
+
+/** フォントを取りに行ってよい URL か(https://fonts.gstatic.com/ のものだけ) */
+export function isAllowedFontUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.origin === FONT_ORIGIN && u.username === "" && u.password === "";
+  } catch {
+    return false;
+  }
+}
+
+/** フォントの応答を、上限のバイト数までだけ読む。超えたら null。 */
+export async function readFontCapped(res: Response, maxBytes: number = OG_FONT_MAX_BYTES): Promise<ArrayBuffer | null> {
+  if (!res.ok) return null;
+  const length = res.headers.get("content-length");
+  if (length !== null && /^[0-9]+$/.test(length) && Number(length) > maxBytes) {
+    await res.body?.cancel().catch(() => {});
+    return null;
+  }
+  if (!res.body) return new ArrayBuffer(0);
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        await reader.cancel().catch(() => {});
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const c of chunks) {
+    out.set(c, offset);
+    offset += c.byteLength;
+  }
+  return out.buffer;
 }
 
 /** Google Fonts から、使う文字だけのフォントを取得する(シェア画像の日本語用)。取れなければ null。 */
@@ -16,8 +64,14 @@ export async function loadOgFont(text: string): Promise<ArrayBuffer | null> {
       })
     ).text();
     const url = extractFontUrl(css);
-    if (!url) return null;
-    return await (await fetch(url, { cache: "force-cache", signal: AbortSignal.timeout(TIMEOUT_MS) })).arrayBuffer();
+    if (!url || !isAllowedFontUrl(url)) return null;
+    const res = await fetch(url, { cache: "force-cache", signal: AbortSignal.timeout(TIMEOUT_MS) });
+    // 転送されていても、最後に取った先が fonts.gstatic.com でなければ使わない
+    if (res.url && !isAllowedFontUrl(res.url)) {
+      await res.body?.cancel().catch(() => {});
+      return null;
+    }
+    return await readFontCapped(res);
   } catch {
     return null;
   }
