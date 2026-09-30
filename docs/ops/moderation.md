@@ -137,6 +137,12 @@ insert into ng_words (word) values ('援助') on conflict do nothing;
 update my_settings set card_locked = true, public_slug = null where public_slug = '<slug>';
 ```
 
+**印を付けるときは、必ず同じ update で `public_slug = null` も入れる**(user_id で指定するときも同じ)。公開 URL を残したまま印だけ付けると、本人がマイ設定を保存するたびに `CARD_LOCKED` で失敗する(公開中の URL が残っているため、保存が「公開」とみなされる)。
+
+```sql
+update my_settings set card_locked = true, public_slug = null where user_id = '<user_id>';
+```
+
 公開禁止の印は `card_locks` にも自動で記録される(そのときの Discord ID も `card_locks.discord_user_id` に残る)。本人が「設定を消す」で行を消して保存し直しても、新しい行にまた印が付く。
 
 本人が退会(`delete_me`)すると `card_locks` の行は消えるが、その直前に Discord ID が `card_locked_discord_ids` に移る。同じ Discord で登録し直してマイ設定を保存すると、新しい行にまた印が付く(BAN・退会の記録と同じく、印は Discord ID でも残る)。
@@ -180,7 +186,7 @@ delete from card_locked_discord_ids where discord_user_id = '<discord_user_id>';
 delete from aim_scores where play_date = '<日付>' and user_id = '<user_id>';
 ```
 
-利用停止・BAN 中の人は、ランキングに自動で表示されない。ランキングの名前は、名刺を公開している人だけ表示される。表示名に問題がある場合は、名刺と同じく `card_locked = true` にすると「名無しのゲーマー」になる。名刺を非公開にするだけでも名前は隠れ、「名無しのゲーマー」になる。
+利用停止・BAN 中の人は、ランキングに自動で表示されない。ランキングの名前は、名刺を公開している人だけ表示される。表示名に問題がある場合は、名刺と同じく `update my_settings set card_locked = true, public_slug = null where user_id = '<user_id>';` にすると「名無しのゲーマー」になる(`public_slug = null` を忘れない)。名刺を非公開にするだけでも名前は隠れ、「名無しのゲーマー」になる。
 
 ## プロ設定の掲載
 
