@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { PROS } from "@/data/pros";
+import { PROS, PROS_READY } from "@/data/pros";
 import { nearPros } from "@/lib/pro-match";
 import { ProCard } from "./ProCard";
 
 /** 感度計算の結果の下に出す「この感度に近いプロ」3 人。 */
 export function NearPros({ cm, gameId }: { cm: number; gameId: string }) {
+  if (!PROS_READY) return null;
   const list = nearPros(cm, gameId, PROS, 3);
   if (list.length === 0) return null;
   return (

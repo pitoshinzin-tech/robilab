@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PROS } from "@/data/pros";
+import { PROS_READY } from "@/data/pros";
 import { ProsClient } from "./ProsClient";
 
 const TITLE = "プロ設定(VALORANT・Apex・OW2・CS2 の感度)";
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function ProsPage() {
   // データが入るまでページは隠す(一次情報が見つかるまで、空の一覧を公開しない)
-  if (PROS.length === 0) notFound();
+  if (!PROS_READY) notFound();
   return (
     <main className="mx-auto grid max-w-4xl gap-6 px-4 py-6">
       <header>

@@ -27,3 +27,6 @@ export type ProSetting = {
 };
 
 export const PROS: ProSetting[] = [];
+
+/** 一覧を公開してよいか(データが入るまでページ・ヘッダーのリンクを隠す) */
+export const PROS_READY = PROS.length > 0;

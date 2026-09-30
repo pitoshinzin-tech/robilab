@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
-import { PROS } from "@/data/pros";
+import { PROS_READY } from "@/data/pros";
 import { Bell } from "@/components/lobby/Bell";
 
 export function SiteHeader() {
@@ -12,7 +12,7 @@ export function SiteHeader() {
         <Link href="/aim" className="whitespace-nowrap">今日の文字</Link>
         <Link href="/mouse" className="whitespace-nowrap">マウス探し</Link>
         {/* データが入るまでリンクを出さない(ページも非表示) */}
-        {PROS.length > 0 && <Link href="/pros" className="whitespace-nowrap">プロ設定</Link>}
+        {PROS_READY && <Link href="/pros" className="whitespace-nowrap">プロ設定</Link>}
         <Link href="/tools/sensitivity" className="whitespace-nowrap">感度計算</Link>
         <Link href="/my" className="whitespace-nowrap">マイ設定</Link>
         <Link href="/types" className="whitespace-nowrap">タイプ一覧</Link>
