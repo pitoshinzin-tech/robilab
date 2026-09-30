@@ -4,8 +4,11 @@ import type { ShopLinks } from "@/lib/shop-links";
 const SHAPE = { symmetric: "左右対称", right: "右手用" } as const;
 const CONNECTION = { wired: "有線", wireless: "無線" } as const;
 
-export function MouseCard({ rank, item, brand, name, compare, links, imageUrl }: {
-  rank: number; item: Ranked; brand: string; name: string; compare: string | null; links: ShopLinks;
+export function MouseCard({ rank, item, brand, name, reason, compare, links, imageUrl }: {
+  rank: number; item: Ranked; brand: string; name: string;
+  /** おすすめの理由(src/lib/mouse-reason.ts。手の情報と公式の数字だけから作る) */
+  reason: string;
+  compare: string | null; links: ShopLinks;
   /** 楽天の商品画像(スナップショットにあるときだけ。クリックで楽天の商品ページへ) */
   imageUrl?: string | null;
 }) {
@@ -29,7 +32,10 @@ export function MouseCard({ rank, item, brand, name, compare, links, imageUrl }:
           </div>
           <p className="shrink-0 text-right"><span className="text-2xl font-bold text-[var(--rl-highlight)]">{item.score}</span><span className="block text-xs text-[var(--rl-muted)]">合う度</span></p>
         </div>
-        <p className="text-sm">{item.reasons.join(" ・ ")}</p>
+        <div className="grid gap-1">
+          <p className="text-xs font-bold text-[var(--rl-muted)]">おすすめの理由</p>
+          <p className="text-sm text-[var(--rl-text)]">{reason}</p>
+        </div>
         <dl className="grid grid-cols-3 gap-x-3 gap-y-1 text-xs text-[var(--rl-muted)] sm:grid-cols-6">
           <div><dt>長さ</dt><dd className="text-[var(--rl-text)]">{m.lengthMm}mm</dd></div>
           <div><dt>幅</dt><dd className="text-[var(--rl-text)]">{m.widthMm}mm</dd></div>
