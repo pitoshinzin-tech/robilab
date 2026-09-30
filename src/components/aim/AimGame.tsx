@@ -13,6 +13,16 @@ type Props = { char: AimChar; degPerCount: number; crosshair: Crosshair; onFinis
 const COUNTDOWN_MS = 3000;
 const UNSUPPORTED = "マウスを固定できませんでした。少し待ってから、もう一度クリックしてください(Chrome / Edge / Firefox で遊べます)。";
 
+/** 全画面から戻す(全画面でなければ何もしない。失敗しても遊びには影響しないので無視する)。 */
+function leaveFullscreen() {
+  if (typeof document === "undefined" || !document.fullscreenElement) return;
+  try {
+    void document.exitFullscreen().catch(() => {});
+  } catch {
+    // 無視
+  }
+}
+
 /** CSS の役割の色を読む(Canvas では var() が使えないため)。 */
 function roleColor(name: string, fallback: string): string {
   if (typeof window === "undefined") return fallback;
@@ -21,6 +31,9 @@ function roleColor(name: string, fallback: string): string {
 
 export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
+  // 全画面にする要素(canvas と開始ボタンを包む)
+  const stage = useRef<HTMLDivElement>(null);
+  const [fullscreen, setFullscreen] = useState(false);
   const [phase, setPhase] = useState<AimPhase>("idle");
   const [error, setError] = useState<string | null>(null);
   const phaseRef = useRef<AimPhase>("idle");
@@ -49,8 +62,13 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
 
   useEffect(() => {
     mounted.current = true;
+    const onFsChange = () => setFullscreen(document.fullscreenElement === stage.current);
+    document.addEventListener("fullscreenchange", onFsChange);
     return () => {
       mounted.current = false;
+      document.removeEventListener("fullscreenchange", onFsChange);
+      // アンマウントのときは全画面から戻す
+      leaveFullscreen();
     };
   }, []);
 
@@ -66,6 +84,8 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
         // ロックが取れたので、1 回目の失敗で出たエラーは消す
         setError(null);
       } else if (latest.current.dispatch("lost") === "aborted") {
+        // Esc ならブラウザが全画面も抜けているが、念のため戻す。全画面だけが外れた場合は中断しない(ここには来ない)
+        leaveFullscreen();
         latest.current.onAbort();
       }
     };
@@ -74,7 +94,10 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
       if (attempt.current === "first") return;
       setError(UNSUPPORTED);
       // promise を返さない古いブラウザで、始まったあとにロックが失敗したときは中断にする
-      if (latest.current.dispatch("lost") === "aborted") latest.current.onAbort();
+      if (latest.current.dispatch("lost") === "aborted") {
+        leaveFullscreen();
+        latest.current.onAbort();
+      }
     };
     document.addEventListener("mousemove", onMove);
     document.addEventListener("pointerlockchange", onLockChange);
@@ -121,6 +144,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
           const r = traceResult(trace.current);
           latest.current.dispatch("done");
           document.exitPointerLock();
+          leaveFullscreen();
           if (r) latest.current.onFinish(r);
         }
       }
@@ -203,6 +227,12 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
     trace.current = initialTrace();
     trail.current = [];
     attempt.current = "first";
+    // 全画面を先に要求し、完了は待たずにロックも同じクリックの中で要求する(失敗しても全画面なしで遊べる)
+    try {
+      void stage.current?.requestFullscreen?.({ navigationUI: "hide" })?.catch(() => {});
+    } catch {
+      // 無視
+    }
     let locked = true;
     try {
       // 生の移動量(OS の加速なし)を優先する
@@ -219,6 +249,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
     starting.current = false;
     if (!mounted.current) return;
     if (!locked) {
+      leaveFullscreen();
       setError(UNSUPPORTED);
       return;
     }
@@ -228,8 +259,10 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
 
   return (
     <div className="grid gap-3">
-      <div className="relative">
-        <canvas ref={canvas} className="aspect-video w-full cursor-crosshair rounded-xl border border-[var(--rl-border)]" onClick={() => void start()} />
+      <div ref={stage} className={fullscreen ? "relative h-full w-full bg-[var(--rl-bg)]" : "relative"}>
+        <canvas ref={canvas}
+          className={`block w-full cursor-crosshair ${fullscreen ? "h-full" : "h-[min(70vh,640px)] rounded-xl border border-[var(--rl-border)]"}`}
+          onClick={() => void start()} />
         {phase === "idle" && (
           <button type="button" onClick={() => void start()}
             className="absolute inset-0 m-auto h-14 w-56 rounded-full bg-[var(--rl-accent)] font-bold text-[var(--rl-on-accent)]">
