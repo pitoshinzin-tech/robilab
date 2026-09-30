@@ -46,8 +46,8 @@
    - [ ] `supabase/migrations/20261001001300_my_settings_v2.sql`(マイ設定の拡張)
    - [ ] `supabase/migrations/20261001001400_aim_daily.sql`(今日の文字の表と関数。※ dev では 1400 のあとに、関数の中身が最終の 1400 と同じ dev 専用の記録 `aim_daily_ranking_names` を別に適用した。本番は 1300 と 1400 のファイルだけでよい)
    - [ ] `supabase/migrations/20261001001500_card_locks.sql`(運営の公開禁止の印を別の表 `card_locks` にも残し、本人が設定を消して作り直しても、退会して同じ Discord で登録し直しても印が戻るようにする。Discord ID 単位の `card_locked_discord_ids` も作る。1200 のあと)
-   - [ ] `supabase/migrations/20261001001600_profile_text_hardening.sql`(ロビーのニックネーム・自己紹介で制御文字・向きを変える文字(U+202E など)を弾く。**BAN 一覧にある Discord ID のアカウントの status を一回だけ banned にそろえる処理も入っている**(0800 のトリガーは、そのあとの BAN の追加でしか動かないため)。何度流しても同じ結果になる)
-   - [ ] `supabase/migrations/20261001001700_report_review.sql`(通報しても相手をすぐには利用停止にせず、運営の確認待ちにする。自動で止めるのは「年齢詐称」の通報だけ。通報した人が相手をブロックするのはこれまでどおり。**適用したら、毎日の通報の確認で運営が止める必要がある**(`docs/ops/moderation.md`))
+   - [ ] `supabase/migrations/20261001001600_profile_text_hardening.sql`(ロビーのニックネーム・自己紹介で制御文字・見えない文字・向きを変える文字(U+202E など)を弾き、全角スペースだけのニックネームも空とみなす。絵文字に使う U+200D(ZWJ)は通す。**BAN 一覧にある Discord ID のアカウントの status を一回だけ banned にそろえる処理も入っている**(0800 のトリガーは、そのあとの BAN の追加でしか動かないため)。何度流しても同じ結果になる)
+   - [ ] `supabase/migrations/20261001001700_report_review.sql`(通報しても相手をすぐには利用停止にせず、運営の確認待ちにする。自動で止めるのは「年齢詐称」の通報だけ(相手が先に通報した人をブロック・通報しているときは、仕返しを防ぐため止めない)。通報した人が相手をブロックするのはこれまでどおり。**適用したら、毎日の通報の確認で運営が止める必要がある**(`docs/ops/moderation.md`))
    - [ ] **0800/0900(と 1600)を適用したあと、今あるプロフィールが新しい検証に通るかを洗い出す**。次を SQL エディタで一度に実行し、出てきた行(id とエラー)を確かめる。0 行なら問題なし。行があれば、本人に直してもらうか運営が `nickname` / `bio` などを直す(残すと、その人は次のプロフィール更新で `INVALID_INPUT` / `NG_WORD` になる)
      ```sql
      create temp table if not exists profile_input_check (id uuid, error text);
@@ -64,6 +64,17 @@
        end loop;
      end $$;
      select * from profile_input_check;
+     ```
+   - [ ] **1600 を適用したあと一度だけ、監査 run-10 で新しく弾くようにした文字を含むプロフィールを洗い出す**(上の確認にも出るが、どの文字が理由かをすぐ見分けるため)。対象はソフトハイフン U+00AD・U+061C・ハングルの埋め草 U+115F/U+1160/U+3164/U+FFA0・U+180E・U+2028/U+2029 と、全角スペースなどの空白だけのニックネーム。0 行なら問題なし。行があれば、本人に直してもらうか運営が `nickname` / `bio` を直す(U+200D(ZWJ)は絵文字に使うので、1600 の最新版では弾かない)
+     ```sql
+     select id, nickname, bio,
+       nickname ~ ('^[' || chr(32) || chr(160) || chr(5760) || chr(8192) || '-' || chr(8202)
+                   || chr(8239) || chr(8287) || chr(12288) || ']*$') as blank_nickname
+     from public.profiles
+     where nickname ~ ('^[' || chr(32) || chr(160) || chr(5760) || chr(8192) || '-' || chr(8202)
+                       || chr(8239) || chr(8287) || chr(12288) || ']*$')
+        or (nickname || ' ' || coalesce(bio, '')) ~ ('[' || chr(173) || chr(1564) || chr(4447) || '-' || chr(4448)
+                       || chr(6158) || chr(8232) || '-' || chr(8233) || chr(12644) || chr(65440) || ']');
      ```
    - [ ] **Vercel の Firewall にルールを1つ足す**(マイ設定を公開するとき):パスが `/api/card-image` のリクエストを、IP ごとに1分20回まで(超えたら 429)。Vercel ダッシュボード → プロジェクト → Firewall → Custom Rules → Rate Limit
    - [ ] **同じく Firewall に、パスが `/aim/opengraph-image` のリクエストを IP ごとに1分30回まで(超えたら 429)のルールを足す**(クエリを変えると CDN のキャッシュを通らず、毎回画像を描かせられるため)

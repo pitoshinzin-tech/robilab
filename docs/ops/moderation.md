@@ -5,9 +5,12 @@
 **この毎日の確認が、いまの安全の中心です。** 通報が入っても、相手が自動で利用停止になるのは「年齢詐称」(`age_fake`)の通報だけ(migration 1700)。それ以外の理由(迷惑行為・出会い目的・勧誘・その他)は、通報した人からは見えなくなる(ブロック)が、**運営が止めるまで、ほかの人のロビーには出続ける**。問題があれば、下の「ケース0」で運営が止める。
 
 1. [Supabase Dashboard](https://supabase.com/dashboard/project/bncjzilfehkjftzraajd/sql/new) にアクセスする
-2. SQL エディタで「よく使う確認用 SQL」の「open の通報を一覧表示」を実行する
-3. 各通報について `nickname` と `detail` を確認する
-4. 対象ユーザーのプロフィールを確認し、判断する
+2. SQL エディタで「よく使う確認用 SQL」の「open の通報を一覧表示」を実行する(年齢詐称の通報が先頭に出る)
+3. **年齢詐称(`age_fake`)の通報から先に確認する**。相手は自動で止まっているので、早く判断して戻すか BAN する。あわせて「仕返しの通報を見つける」の SQL を実行し、仕返しの疑いがないかを見る
+4. 各通報について `nickname` と `detail` を確認する
+5. 対象ユーザーのプロフィールを確認し、判断する
+
+**目安:open の通報は、入ってから 3 日以内に確認を終えて closed にする。** 通報された人は、通報が open のあいだは退会できない(下の「退会できない条件」)。嘘の通報で、いつまでも退会できない状態にしないため。3 日を過ぎた open の通報は、「よく使う確認用 SQL」の「3 日を過ぎた open の通報」で確かめられる。
 
 ## 判断
 
@@ -49,13 +52,14 @@ insert into banned_discord_ids (discord_user_id, note)
 
 ※ 退会した Discord ID は `left_discord_ids` に記録され、退会から7日間は再登録できない。退会された人へのブロックは `carried_blocks` に引き継がれ、再登録時に自動で戻る。
 
-**報復通報の確認:** 通報された人(target)が、通報した人(reporter)を先にブロックしていないかを確認する:
+**報復通報の確認:** 通報された人(target)が、通報した人(reporter)を先にブロック・通報していないかを確認する(まとめて見るときは「よく使う確認用 SQL」の「仕返しの通報を見つける」):
 
 ```sql
 select * from blocks where blocker_id = '<target_id>' and blocked_id = '<reporter_id>';
+select * from reports where reporter_id = '<target_id>' and target_id = '<reporter_id>';
 ```
 
-先にブロックされていた場合は、報復通報の可能性があります。
+先にブロック・通報されていた場合は、報復通報の可能性があります。年齢詐称の通報でも、このときは相手は自動では止まらない(1700、監査 run-10)。
 
 ### ケース2: BAN する(年齢詐称、出会い目的、迷惑行為など)
 
@@ -224,7 +228,40 @@ select
 from public.reports r
 left join public.profiles p on r.target_id = p.id
 where r.status = 'open'
-order by r.created_at desc;
+order by (r.reason = 'age_fake') desc, r.created_at desc;
+```
+
+### 仕返しの通報を見つける
+
+open の通報のうち、通報された人(target)が、通報した人(reporter)を**先に**ブロック・通報していたものを表示する。`target_blocked_first` / `target_reported_first` が true の通報は、ブロック・通報された人の仕返しの可能性がある(年齢詐称でも、この場合は自動では止まっていない)。仕返しと判断したら「ケース1」で閉じ、繰り返すなら通報者を止める:
+
+```sql
+select
+  r.id, r.created_at, r.reason, r.detail, r.reporter_id, r.target_id,
+  exists (
+    select 1 from public.blocks b
+    where b.blocker_id = r.target_id and b.blocked_id = r.reporter_id and b.created_at <= r.created_at
+  ) as target_blocked_first,
+  exists (
+    select 1 from public.reports x
+    where (x.reporter_id = r.target_id or x.reporter_discord_id = r.target_discord_id)
+      and (x.target_id = r.reporter_id or x.target_discord_id = r.reporter_discord_id)
+      and x.created_at <= r.created_at
+  ) as target_reported_first
+from public.reports r
+where r.status = 'open'
+order by (r.reason = 'age_fake') desc, r.created_at;
+```
+
+### 3 日を過ぎた open の通報
+
+目安の 3 日を過ぎても確認が終わっていない通報。0 行になるようにする:
+
+```sql
+select id, created_at, reason, target_id, target_discord_id
+from public.reports
+where status = 'open' and created_at < now() - interval '3 days'
+order by created_at;
 ```
 
 ### 特定のユーザーの通報状況を確認
@@ -283,7 +320,7 @@ limit 20;
 - プロフィールの status が「active」以外(suspended, banned など)
 - open 状態の通報(reports where status = 'open')がある
 
-例: 通報された人は、利用停止になっていなくても(年齢詐称以外の通報)、その通報が closed になるまで退会できません(退会で証跡を消されないため)。年齢詐称の通報で suspended になった人は、通報が closed になり status が active に戻るまで退会できません。
+例: 通報された人は、利用停止になっていなくても(年齢詐称以外の通報)、その通報が closed になるまで退会できません(退会で証跡を消されないため)。**嘘の通報でも同じなので、open の通報は 3 日以内に確認を終える**(上の「毎日やること」)。年齢詐称の通報で suspended になった人は、通報が closed になり status が active に戻るまで退会できません。
 
 ### 通報の上限制限
 
@@ -293,11 +330,12 @@ limit 20;
 
 - **どの理由でも**:通報した人が相手をブロックする。通報した人と相手は、おたがいのロビーに出なくなる(ブロックは両方向に効く)。
 - **年齢詐称(`age_fake`)のときだけ**:相手は自動で suspended になり、だれのロビーにも出なくなる(ロビーは 18 歳以上限定のため)。運営が判断して active に戻すか BAN するまで、その状態が続く。
+  - **ただし、相手が通報した人を先にブロックしている、または相手が通報した人を通報していて open のときは、止めない**(通報は記録される)。ブロック・通報された人が、仕返しに「年齢詐称」を選んで相手を止めるのを防ぐため(監査 run-10)。運営は毎日の確認で、この通報も見る。
 - **それ以外の理由**:相手は止まらず、ほかの人のロビーには出続ける。**運営が毎日の確認で、必要なら「ケース0」で止める。**
 
 (1600 までは、どの理由でも 1 件の通報で自動停止していた。ブロックされた人がブロックした人を通報して止められたため、本人の決定で 1700 から変更した。plan.md D42)
 
 ---
 
-**最終確認日:** 2026-09-30  
+**最終確認日:** 2026-10-01  
 **ドキュメント作成者:** 運営(1人)
