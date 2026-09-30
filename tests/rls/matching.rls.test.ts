@@ -149,15 +149,28 @@ describe("blocks and reports", () => {
     expect(((await a.client!.rpc("lobby_candidates")).data as { id: string }[]).some((r) => r.id === b.id)).toBe(false);
   });
 
-  it("a reported user is suspended, hidden, and cannot send", async () => {
+  it("a harassment report hides the target from the reporter only (no suspension); an age_fake report suspends", async () => {
     const a = await makeUser();
     const b = await makeUser();
     const c = await makeUser();
-    await a.client!.rpc("report_user", { p_id: b.id, p_reason: "harassment", p_detail: "テスト" });
-    expect(((await c.client!.rpc("lobby_candidates")).data as { id: string }[]).some((r) => r.id === b.id)).toBe(false);
-    expect(((await c.client!.rpc("get_profile", { p_id: b.id })).data as unknown[]).length).toBe(0);
-    expect(errorCode((await b.client!.rpc("send_approach", { p_to: c.id })).error)).toBe("NOT_ACTIVE");
+    const statusOf = async (id: string) => (await admin.from("profiles").select("status").eq("id", id).single()).data?.status;
+    const candidateIds = async (u: typeof a) => ((await u.client!.rpc("lobby_candidates")).data as { id: string }[]).map((r) => r.id);
+
+    // 迷惑行為の通報:相手は止まらず運営の確認待ち。通報した人からは見えなくなる(ブロック)
+    expect((await a.client!.rpc("report_user", { p_id: b.id, p_reason: "harassment", p_detail: "テスト" })).error).toBeNull();
+    expect(await statusOf(b.id)).toBe("active");
+    expect(await candidateIds(a)).not.toContain(b.id);
+    expect(((await a.client!.rpc("get_profile", { p_id: b.id })).data as unknown[]).length).toBe(0);
+    expect(await candidateIds(c)).toContain(b.id);
+    expect(((await c.client!.rpc("get_profile", { p_id: b.id })).data as unknown[]).length).toBe(1);
     expect(errorCode((await a.client!.rpc("report_user", { p_id: b.id, p_reason: "spam", p_detail: "" })).error)).toBe("ALREADY_REPORTED");
+
+    // 年齢詐称の通報:確認が終わるまで利用停止。ほかの人からも見えず、声かけもできない
+    expect((await a.client!.rpc("report_user", { p_id: c.id, p_reason: "age_fake", p_detail: "" })).error).toBeNull();
+    expect(await statusOf(c.id)).toBe("suspended");
+    expect(await candidateIds(b)).not.toContain(c.id);
+    expect(((await b.client!.rpc("get_profile", { p_id: c.id })).data as unknown[]).length).toBe(0);
+    expect(errorCode((await c.client!.rpc("send_approach", { p_to: b.id })).error)).toBe("NOT_ACTIVE");
   });
 });
 
@@ -178,10 +191,11 @@ describe("lobby filters", () => {
 });
 
 describe("delete_me", () => {
-  it("a suspended (reported) user cannot delete their own account, and the report keeps the discord id", async () => {
+  it("a user with an open report cannot delete their account even while still active, and the report keeps the discord id", async () => {
     const a = await makeUser();
     const b = await makeUser();
     expect((await a.client!.rpc("report_user", { p_id: b.id, p_reason: "harassment", p_detail: "" })).error).toBeNull();
+    expect((await admin.from("profiles").select("status").eq("id", b.id).single()).data?.status).toBe("active");
     expect(errorCode((await b.client!.rpc("delete_me")).error)).toBe("NOT_ACTIVE");
     const { data: reportRow } = await admin
       .from("reports")
@@ -302,15 +316,14 @@ describe("report abuse", () => {
     const limitCount = results.filter((r) => errorCode(r.error) === "REPORT_LIMIT").length;
     expect(successCount).toBe(1);
     expect(limitCount).toBe(2);
-    const { count: suspendedCount } = await admin
-      .from("profiles")
+    const { count: reportCount } = await admin
+      .from("reports")
       .select("id", { count: "exact", head: true })
       .in(
-        "id",
+        "target_id",
         threeMore.map((t) => t.id),
-      )
-      .eq("status", "suspended");
-    expect(suspendedCount).toBe(1);
+      );
+    expect(reportCount).toBe(1);
   });
 });
 

@@ -85,7 +85,12 @@ export async function markInboxSeenAction(): Promise<void> {
 export async function deleteMeAction(): Promise<Result> {
   const supabase = await createSupabaseServer();
   const { error } = await supabase.rpc("delete_me");
-  if (error) return { error: lobbyErrorMessage(errorCodeOf(error)) };
+  if (error) {
+    const code = errorCodeOf(error);
+    // 利用停止中だけでなく、運営が確認中の通報があるときも NOT_ACTIVE になる(停止されていない人もいる)
+    if (code === "NOT_ACTIVE") return { error: "いまは退会の手続きができません。利用規約のお問い合わせ先までご連絡ください。" };
+    return { error: lobbyErrorMessage(code) };
+  }
   await supabase.auth.signOut();
   redirect("/");
 }

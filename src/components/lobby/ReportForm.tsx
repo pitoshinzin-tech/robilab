@@ -23,7 +23,7 @@ export function ReportForm({ id }: { id: string }) {
         {REASONS.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
       </select>
       <textarea value={detail} onChange={(e) => setDetail(e.target.value)} maxLength={200} placeholder="くわしい内容(任意・200文字まで)" className="rounded bg-[var(--rl-card)] p-2" />
-      <p className="text-xs text-[var(--rl-muted)]">通報すると、この人は運営が確認するまで表示されなくなり、あなたからもブロックされます。嫌がらせ目的の通報はご遠慮ください。</p>
+      <p className="text-xs text-[var(--rl-muted)]">通報すると、この人はあなたには表示されなくなり(ブロック)、運営が内容を確認します。年齢詐称の通報は、確認が終わるまで相手が利用停止になります。嫌がらせ目的の通報はご遠慮ください。</p>
       {error && <p role="alert" className="text-[var(--rl-danger)]">{error}</p>}
       <button type="button" disabled={pending} onClick={() => start(async () => setError((await reportAction(id, reason, detail)).error))}
         className="h-10 rounded-full bg-white/15 font-bold">通報を送る</button>
