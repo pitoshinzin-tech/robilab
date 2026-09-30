@@ -218,6 +218,12 @@ describe("saveHandToLocal", () => {
     expect(loadLocal(s)?.hand).toEqual({ lengthCm: 18.5, widthCm: null, grip: "claw" });
     expect(loadDirty(s)).toContain("hand");
   });
+  it("saves only the grip when the length is unknown (length stays null)", () => {
+    const s = memoryStorage();
+    const saved = saveHandToLocal(s, { lengthCm: null, widthCm: null, grip: "palm" });
+    expect(saved?.hand).toEqual({ lengthCm: null, widthCm: null, grip: "palm" });
+    expect(loadLocal(s)?.hand).toEqual({ lengthCm: null, widthCm: null, grip: "palm" });
+  });
   it("refuses values outside the limits", () => {
     const s = memoryStorage();
     expect(saveHandToLocal(s, { lengthCm: 30, widthCm: null, grip: "palm" })).toBeNull();

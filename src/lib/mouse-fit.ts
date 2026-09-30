@@ -106,8 +106,18 @@ export function compareWith(current: MouseSpec, m: MouseSpec): string {
   return "今のマウスより " + items.map(([label, d, unit]) => `${label} ${fmt(d, unit)}`).join("・");
 }
 
-/** マイ設定の手の情報から、計算に使える形にする(長さと持ち方が必要。幅はなくてよい)。 */
-export function handFrom(hand: MySettings["hand"] | null): Hand | null {
-  if (!hand || hand.lengthCm === null || hand.grip === null) return null;
-  return { lengthCm: hand.lengthCm, widthCm: hand.widthCm, grip: hand.grip };
+/** 手の長さが未入力のときに使う長さ(cm)。成人の手の長さのおおよその平均。測った値があればそちらを使う。 */
+export const DEFAULT_HAND_LENGTH_CM = 18;
+
+/**
+ * マイ設定の手の情報から、計算に使える形にする(持ち方が必要。幅・長さはなくてよい)。
+ * 長さが未入力なら平均(DEFAULT_HAND_LENGTH_CM)で補い、estimated を true にする。
+ */
+export function handFrom(hand: MySettings["hand"] | null): { hand: Hand; estimated: boolean } | null {
+  if (!hand || hand.grip === null) return null;
+  const estimated = hand.lengthCm === null;
+  return {
+    hand: { lengthCm: hand.lengthCm ?? DEFAULT_HAND_LENGTH_CM, widthCm: hand.widthCm, grip: hand.grip },
+    estimated,
+  };
 }

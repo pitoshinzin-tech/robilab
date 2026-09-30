@@ -32,8 +32,9 @@ export function HandSetup({ initial, onDone, onCancel }: {
       setError("手の長さ・幅は数字で入力してください。");
       return;
     }
-    if (hand.lengthCm === null || hand.lengthCm < L.handLengthMin || hand.lengthCm > L.handLengthMax) {
-      setError(`手の長さは ${L.handLengthMin}〜${L.handLengthMax}cm で入力してください。`);
+    // 長さは任意(空欄なら平均で計算する)。入っているときだけ範囲を確かめる
+    if (hand.lengthCm !== null && (hand.lengthCm < L.handLengthMin || hand.lengthCm > L.handLengthMax)) {
+      setError(`手の長さは ${L.handLengthMin}〜${L.handLengthMax}cm で入力してください(わからなければ空欄で大丈夫です)。`);
       return;
     }
     if (hand.widthCm !== null && (hand.widthCm < L.handWidthMin || hand.widthCm > L.handWidthMax)) {
@@ -53,10 +54,10 @@ export function HandSetup({ initial, onDone, onCancel }: {
   return (
     <section className="grid gap-4 rounded-2xl border border-[var(--rl-border)] bg-[var(--rl-surface)] p-4">
       <h2 className="font-bold">手の大きさと持ち方</h2>
-      <p className="text-sm text-[var(--rl-muted)]">入力はマイ設定に保存され、次からは自動で使われます。</p>
+      <p className="text-sm text-[var(--rl-muted)]">入力はマイ設定に保存され、次からは自動で使われます。測り方がわからなければ、持ち方だけでも探せます。</p>
       <HandGuide />
       <div className="grid grid-cols-2 gap-3">
-        <NumberField label="手の長さ" suffix="cm" value={hand.lengthCm} onValue={(lengthCm) => setHand((h) => ({ ...h, lengthCm }))}
+        <NumberField label="手の長さ(わからなければ空欄でOK)" suffix="cm" value={hand.lengthCm} onValue={(lengthCm) => setHand((h) => ({ ...h, lengthCm }))}
           onInvalid={(v) => setInvalid((s) => ({ ...s, length: v }))} />
         <NumberField label="手の幅(任意)" suffix="cm" value={hand.widthCm} onValue={(widthCm) => setHand((h) => ({ ...h, widthCm }))}
           onInvalid={(v) => setInvalid((s) => ({ ...s, width: v }))} />

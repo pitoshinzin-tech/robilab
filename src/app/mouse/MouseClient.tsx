@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { DEVICES } from "@/data/devices";
 import { MICE, mouseById } from "@/data/mice";
-import { applyFilter, compareWith, fitTarget, handFrom, NO_FILTER, rankMice, targetText, type MouseFilter } from "@/lib/mouse-fit";
+import { applyFilter, compareWith, DEFAULT_HAND_LENGTH_CM, fitTarget, handFrom, NO_FILTER, rankMice, targetText, type MouseFilter } from "@/lib/mouse-fit";
 import { shopLinks } from "@/lib/shop-links";
 import { buildMouseShareText } from "@/lib/mouse-share";
 import { buildXShareUrl } from "@/lib/share";
@@ -32,7 +32,9 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
   const settings = isClient ? loadLocal(browserStorage()) : null;
   void rev;
   const handRaw = memoryHand ?? settings?.hand ?? null;
-  const hand = handFrom(handRaw);
+  const handInfo = handFrom(handRaw);
+  const hand = handInfo?.hand ?? null;
+  const estimated = handInfo?.estimated ?? false;
 
   // ログインしていて、この端末にマイ設定がなければ、サーバーの設定を使う(/aim と同じ。サーバーへは送らない)
   useEffect(() => {
@@ -90,9 +92,10 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
     <div className="grid gap-5">
       <section className="grid gap-2 rounded-2xl border border-[var(--rl-border)] bg-[var(--rl-surface)] p-4">
         <p className="text-sm text-[var(--rl-muted)]">
-          {GRIP_INFO[hand.grip].label}・手の長さ {hand.lengthCm}cm{hand.widthCm !== null && `・幅 ${hand.widthCm}cm`}
+          {GRIP_INFO[hand.grip].label}・手の長さ:{estimated ? `未入力(平均 ${DEFAULT_HAND_LENGTH_CM}cm で計算)` : `${hand.lengthCm}cm`}{hand.widthCm !== null && `・幅 ${hand.widthCm}cm`}
         </p>
         <p className="text-lg font-bold">あなたの目安:<span className="text-[var(--rl-highlight)]">{targetText(target)}</span> くらいのマウス</p>
+        {estimated && <p className="text-xs text-[var(--rl-muted)]">手の長さを入れていないので、平均的な大きさ({DEFAULT_HAND_LENGTH_CM}cm)で出しています。測って入れると、あなたの手に合わせられます。下の「手の情報を変える」から入れられます。</p>}
         {hand.widthCm === null && <p className="text-xs text-[var(--rl-muted)]">手の幅も入れると精度が上がります。</p>}
         {notSaved && <p className="text-xs text-[var(--rl-danger)]">この端末には保存できませんでした(この画面を閉じると消えます)。</p>}
         <div className="flex flex-wrap gap-2">

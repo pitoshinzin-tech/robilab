@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { MouseSpec } from "@/data/mice";
 import {
-  applyFilter, compareWith, fitDistance, fitScore, fitTarget, handFrom, NO_FILTER, rankMice, targetText,
+  applyFilter, compareWith, DEFAULT_HAND_LENGTH_CM, fitDistance, fitScore, fitTarget, handFrom, NO_FILTER, rankMice, targetText,
 } from "@/lib/mouse-fit";
 
 const m = (id: string, lengthMm: number, widthMm: number, weightG: number, extra: Partial<MouseSpec> = {}): MouseSpec => ({
@@ -96,10 +96,23 @@ describe("compareWith", () => {
 });
 
 describe("handFrom", () => {
-  it("needs length and grip; width is optional", () => {
-    expect(handFrom({ lengthCm: 18.5, widthCm: null, grip: "claw" })).toEqual({ lengthCm: 18.5, widthCm: null, grip: "claw" });
-    expect(handFrom({ lengthCm: null, widthCm: 9, grip: "claw" })).toBeNull();
+  it("needs a grip; length and width are optional", () => {
+    expect(handFrom({ lengthCm: 18.5, widthCm: null, grip: "claw" })).toEqual({
+      hand: { lengthCm: 18.5, widthCm: null, grip: "claw" }, estimated: false,
+    });
     expect(handFrom({ lengthCm: 18.5, widthCm: 9, grip: null })).toBeNull();
+    expect(handFrom({ lengthCm: null, widthCm: null, grip: null })).toBeNull();
     expect(handFrom(null)).toBeNull();
+  });
+  it("assumes 18cm and marks it estimated when the length is unknown", () => {
+    const r = handFrom({ lengthCm: null, widthCm: null, grip: "palm" });
+    expect(r).toEqual({ hand: { lengthCm: DEFAULT_HAND_LENGTH_CM, widthCm: null, grip: "palm" }, estimated: true });
+    expect(DEFAULT_HAND_LENGTH_CM).toBe(18);
+    expect(fitTarget(r!.hand)).toEqual({ lengthMm: 115.2, widthMm: null });
+  });
+  it("keeps the entered width when only the length is unknown", () => {
+    expect(handFrom({ lengthCm: null, widthCm: 9, grip: "claw" })).toEqual({
+      hand: { lengthCm: 18, widthCm: 9, grip: "claw" }, estimated: true,
+    });
   });
 });
