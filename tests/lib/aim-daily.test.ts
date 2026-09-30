@@ -6,8 +6,7 @@ describe("aim chars data", () => {
   it("has 60 unique chars with parsable strokes inside the 109 box", () => {
     expect(AIM_CHARS).toHaveLength(60);
     expect(new Set(AIM_CHARS.map((c) => c.id)).size).toBe(60);
-    expect(AIM_CHARS[0]).toMatchObject({ id: "u4e00", glyph: "一" });
-    expect(AIM_CHARS[0].strokes).toHaveLength(1);
+    expect(new Set(AIM_CHARS.map((c) => c.glyph)).size).toBe(60);
     for (const c of AIM_CHARS) {
       expect(c.id).toBe(`u${c.glyph.codePointAt(0)!.toString(16)}`);
       for (const d of c.strokes) {
@@ -19,6 +18,20 @@ describe("aim chars data", () => {
         }
       }
     }
+  });
+  it("every char has 5 to 14 strokes", () => {
+    for (const c of AIM_CHARS) {
+      expect(c.strokes.length).toBeGreaterThanOrEqual(5);
+      expect(c.strokes.length).toBeLessThanOrEqual(14);
+    }
+  });
+  it("difficulty cycles easy(5-7) / medium(8-10) / hard(11-14) by idx % 3", () => {
+    const ranges = [[5, 7], [8, 10], [11, 14]];
+    AIM_CHARS.forEach((c, idx) => {
+      const [min, max] = ranges[idx % 3];
+      expect(c.strokes.length, c.glyph).toBeGreaterThanOrEqual(min);
+      expect(c.strokes.length, c.glyph).toBeLessThanOrEqual(max);
+    });
   });
 });
 
@@ -37,6 +50,6 @@ describe("aimIndexForDate", () => {
     expect(aimIndexForDate("2026-12-31", 60)).toBe(0);
   });
   it("aimCharForDate returns the char at that index", () => {
-    expect(aimCharForDate("2026-11-02").glyph).toBe("二");
+    expect(aimCharForDate("2026-11-02").glyph).toBe(AIM_CHARS[1].glyph);
   });
 });
