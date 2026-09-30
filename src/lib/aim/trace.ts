@@ -9,6 +9,7 @@ export const PAR_MS_PER_STROKE = 1500;
 
 export type TraceState = {
   stroke: number;
+  /** tracing は「今の画を書き始めた後」(筆を上げて止めている間も含む)。 */
   phase: "await-start" | "tracing" | "done";
   progress: number;
   inTol: number;
@@ -16,21 +17,47 @@ export type TraceState = {
   perStroke: number[];
   startedAt: number | null;
   finishedAt: number | null;
+  /** 筆が紙についていて、判定を進めているか。false の間は何も数えない。 */
+  drawing: boolean;
+  /** 画を書き終えた直後など、いったんクリックを離すまで筆を下ろさない。 */
+  needRelease: boolean;
 };
 
 export function initialTrace(): TraceState {
-  return { stroke: 0, phase: "await-start", progress: 0, inTol: 0, frames: 0, perStroke: [], startedAt: null, finishedAt: null };
+  return {
+    stroke: 0, phase: "await-start", progress: 0, inTol: 0, frames: 0, perStroke: [],
+    startedAt: null, finishedAt: null, drawing: false, needRelease: false,
+  };
 }
 
-/** 1フレームぶん進める。p はクロスヘアが指す板の点。 */
-export function stepTrace(s: TraceState, strokes: Stroke[], p: Point, now: number): TraceState {
+/** 画を止めている(筆を上げた)とき、p から書き直しを始めてよいか(今の進み具合の近くにいるか)。 */
+export function canResume(s: TraceState, st: Stroke, p: Point): boolean {
+  const q = closestOnStroke(st, p);
+  return q.dist <= TOLERANCE && q.t - s.progress <= MAX_STEP;
+}
+
+/**
+ * 1フレームぶん進める。p はクロスヘアが指す板の点、penDown はクリック(左ボタン)を押しているか。
+ * 筆を上げている間は進み具合も精度も変えない。画は始点の丸の中で筆を下ろすと始まり、
+ * 途中で離したら、今の進み具合の近くで筆を下ろすと続きから書ける。画を書き終えたら、次はクリックを離してから。
+ */
+export function stepTrace(s: TraceState, strokes: Stroke[], p: Point, now: number, penDown: boolean): TraceState {
   if (s.phase === "done") return s;
   const st = strokes[s.stroke];
   if (!st) return s; // お題が変わって画の番号が範囲外になったときに落ちないように
+  if (!penDown) {
+    if (!s.drawing && !s.needRelease) return s;
+    return { ...s, drawing: false, needRelease: false };
+  }
+  if (s.needRelease) return s;
   if (s.phase === "await-start") {
     const a = st.points[0];
     if (Math.hypot(p.x - a.x, p.y - a.y) > START_RADIUS) return s;
-    return { ...s, phase: "tracing", progress: 0, inTol: 0, frames: 0, startedAt: s.startedAt ?? now };
+    return { ...s, phase: "tracing", drawing: true, progress: 0, inTol: 0, frames: 0, startedAt: s.startedAt ?? now };
+  }
+  if (!s.drawing) {
+    // 止めている画の続き:進み具合の近くで筆を下ろしたときだけ再開する(このフレームから判定する)
+    if (!canResume(s, st, p)) return s;
   }
   const q = closestOnStroke(st, p);
   const within = q.dist <= TOLERANCE;
@@ -53,11 +80,12 @@ export function stepTrace(s: TraceState, strokes: Stroke[], p: Point, now: numbe
   // ニュートラルフレームを数えない理由: プレイヤーが線上に停止しているだけで
   // 実際には進捗していない場合、精度計算に含めるべきではない
 
-  const next = { ...s, frames, inTol, progress };
+  const next = { ...s, frames, inTol, progress, drawing: true };
   if (progress < COMPLETE) return next;
   const perStroke = [...s.perStroke, next.inTol / next.frames];
-  if (s.stroke + 1 >= strokes.length) return { ...next, perStroke, phase: "done", finishedAt: now };
-  return { ...next, perStroke, stroke: s.stroke + 1, phase: "await-start", progress: 0, inTol: 0, frames: 0 };
+  if (s.stroke + 1 >= strokes.length) return { ...next, perStroke, phase: "done", finishedAt: now, drawing: false };
+  // 書き終えたら筆を上げたことにする。次の画は、いったん離してから始点の丸の中で押し直す
+  return { ...next, perStroke, stroke: s.stroke + 1, phase: "await-start", progress: 0, inTol: 0, frames: 0, drawing: false, needRelease: true };
 }
 
 export function traceResult(s: TraceState): { accuracy: number; timeMs: number; perStroke: number[] } | null {

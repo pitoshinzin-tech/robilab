@@ -107,3 +107,19 @@ export function closestOnStroke(s: Stroke, p: Point): { dist: number; t: number 
   }
   return best;
 }
+
+/** 進み具合 t(0〜1)の位置にある線上の点。 */
+export function pointAtProgress(s: Stroke, t: number): Point {
+  if (s.points.length === 1 || s.length === 0) return s.points[0];
+  const target = Math.max(0, Math.min(1, t)) * s.length;
+  for (let k = 1; k < s.points.length; k++) {
+    if (s.cum[k] >= target) {
+      const seg = s.cum[k] - s.cum[k - 1];
+      const u = seg === 0 ? 0 : (target - s.cum[k - 1]) / seg;
+      const a = s.points[k - 1];
+      const b = s.points[k];
+      return { x: a.x + u * (b.x - a.x), y: a.y + u * (b.y - a.y) };
+    }
+  }
+  return s.points[s.points.length - 1];
+}

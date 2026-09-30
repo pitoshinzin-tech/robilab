@@ -2,9 +2,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AimChar } from "@/lib/aim/daily";
 import { applyMouse, aimPoint, projectPoint, type Point, type View } from "@/lib/aim/view";
-import { closestOnStroke, parsePath, toStroke } from "@/lib/aim/path";
+import { closestOnStroke, parsePath, pointAtProgress, toStroke } from "@/lib/aim/path";
 import { initialTrace, stepTrace, traceResult, START_RADIUS, TOLERANCE, type TraceState } from "@/lib/aim/trace";
-import { reduceAim, canStepTrace, type AimPhase, type AimEvent } from "@/lib/aim/game-state";
+import { reduceAim, reducePen, canStepTrace, type AimPhase, type AimEvent, type PenEvent } from "@/lib/aim/game-state";
 import { drawCrosshair, type Crosshair } from "@/lib/crosshair";
 
 type Result = { accuracy: number; timeMs: number; perStroke: number[] };
@@ -39,8 +39,10 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
   const phaseRef = useRef<AimPhase>("idle");
   const view = useRef<View>({ yaw: 0, pitch: 0 });
   const trace = useRef<TraceState>(initialTrace());
-  // なぞった軌跡(画ごとに分ける。画と画のあいだを線でつながないため)
+  // なぞった軌跡(筆を下ろしている間ごとに分ける。筆を上げたところを線でつながないため)
   const trail = useRef<Point[][]>([]);
+  // 左ボタンを押しているか(筆が下りているか)
+  const pen = useRef(false);
   const countdownEnd = useRef(0);
   // ロック要求の状態:first = unadjustedMovement つき(失敗しても通常の要求に続く)、second = 通常の要求、final = 要求が済んだ後
   const attempt = useRef<"first" | "second" | "final">("final");
@@ -80,7 +82,17 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
       if (document.pointerLockElement !== el) return;
       view.current = applyMouse(view.current, e.movementX, e.movementY, degPerCount);
     };
+    const penEvent = (ev: PenEvent) => {
+      pen.current = reducePen(pen.current, ev, phaseRef.current);
+    };
+    const onDown = (e: MouseEvent) => {
+      if (document.pointerLockElement !== el) return;
+      penEvent({ kind: "down", button: e.button });
+    };
+    const onUp = (e: MouseEvent) => penEvent({ kind: "up", button: e.button });
+    const onBlur = () => penEvent({ kind: "blur" });
     const onLockChange = () => {
+      if (document.pointerLockElement !== el) penEvent({ kind: "lost" });
       if (document.pointerLockElement === el) {
         // ロックが取れたので、1 回目の失敗で出たエラーは消す
         setError(null);
@@ -101,10 +113,16 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
       }
     };
     document.addEventListener("mousemove", onMove);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("mouseup", onUp);
+    window.addEventListener("blur", onBlur);
     document.addEventListener("pointerlockchange", onLockChange);
     document.addEventListener("pointerlockerror", onLockError);
     return () => {
       document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("mouseup", onUp);
+      window.removeEventListener("blur", onBlur);
       document.removeEventListener("pointerlockchange", onLockChange);
       document.removeEventListener("pointerlockerror", onLockError);
     };
@@ -139,8 +157,13 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
       if (ph === "countdown" && now >= countdownEnd.current) latest.current.dispatch("go");
       // 視点が板の後ろ側に回っているフレームは判定を進めない
       if (phaseRef.current === "playing" && canStepTrace(v)) {
-        trace.current = stepTrace(trace.current, strokes, p, now);
-        if (trace.current.phase === "tracing") (trail.current[trace.current.stroke] ??= []).push(p);
+        const wasDrawing = trace.current.drawing;
+        trace.current = stepTrace(trace.current, strokes, p, now, pen.current);
+        if (trace.current.phase === "tracing" && trace.current.drawing) {
+          // 筆を下ろし直したら新しい線にする
+          if (!wasDrawing) trail.current.push([]);
+          trail.current[trail.current.length - 1].push(p);
+        }
         if (trace.current.phase === "done") {
           const r = traceResult(trace.current);
           latest.current.dispatch("done");
@@ -171,7 +194,6 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
       ctx.strokeStyle = colors.trail;
       ctx.lineWidth = 2;
       for (const seg of trail.current) {
-        if (!seg) continue;
         let pen = false;
         ctx.beginPath();
         for (const q of seg) {
@@ -195,8 +217,22 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
           ctx.stroke();
         }
       }
-      // 外れているときは中央を赤く縁取る(判定と同じく線分までの距離で見る。判定を止めている角度では出さない)
-      if (t.phase === "tracing" && strokes[t.stroke] && canStepTrace(v)) {
+      // 筆を上げて止めている画は、続きを書き始める位置(今の進み具合)を丸で示す
+      if (t.phase === "tracing" && !t.drawing && strokes[t.stroke]) {
+        const s0 = strokes[t.stroke];
+        const c = pointAtProgress(s0, t.progress);
+        const a = projectPoint(c, v, w, h);
+        const edge = projectPoint({ x: c.x + TOLERANCE, y: c.y }, v, w, h);
+        if (a && edge) {
+          ctx.strokeStyle = colors.current;
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(a.x, a.y, Math.abs(edge.x - a.x), 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+      // 外れているときは中央を赤く縁取る(判定と同じく線分までの距離で見る。筆を上げている間と判定を止めている角度では出さない)
+      if (t.phase === "tracing" && t.drawing && strokes[t.stroke] && canStepTrace(v)) {
         const off = closestOnStroke(strokes[t.stroke], p).dist > TOLERANCE;
         if (off) {
           ctx.strokeStyle = colors.miss;
@@ -227,6 +263,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
     view.current = { yaw: 0, pitch: 0 };
     trace.current = initialTrace();
     trail.current = [];
+    pen.current = false;
     attempt.current = "first";
     // 全画面を先に要求し、完了は待たずにロックも同じクリックの中で要求する(失敗しても全画面なしで遊べる)
     try {
@@ -271,6 +308,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort }: Pro
           </button>
         )}
       </div>
+      <p className="text-sm">クリックしている間だけ筆が書けます。画と画の間はクリックを離して移動してください。</p>
       <p className="text-xs text-[var(--rl-muted)]">Esc で中断できます。OS のポインター速度やマウスの加速の設定によっては、ゲームと少しずれることがあります。</p>
       {error && <p role="alert" className="text-sm text-[var(--rl-danger)]">{error}</p>}
     </div>

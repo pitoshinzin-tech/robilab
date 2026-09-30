@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { parsePath, toStroke } from "@/lib/aim/path";
-import { initialTrace, stepTrace, traceResult, computeScore } from "@/lib/aim/trace";
+import { initialTrace, stepTrace, traceResult, computeScore, type TraceState } from "@/lib/aim/trace";
 
 const line = toStroke(parsePath("M10,50L100,50"));
 const strokes = [line];
 
 function run(points: { x: number; y: number }[], startAt = 1000, dt = 16) {
   let s = initialTrace();
-  points.forEach((p, i) => (s = stepTrace(s, strokes, p, startAt + i * dt)));
+  points.forEach((p, i) => (s = stepTrace(s, strokes, p, startAt + i * dt, true)));
   return s;
 }
 const along = (from: number, to: number, n: number, dy = 0) =>
@@ -44,7 +44,7 @@ describe("stepTrace", () => {
   it("multi-stroke: waits for the next start circle", () => {
     const two = [line, toStroke(parsePath("M10,80L100,80"))];
     let s = initialTrace();
-    along(10, 100, 30).forEach((p, i) => (s = stepTrace(s, two, p, i * 16)));
+    along(10, 100, 30).forEach((p, i) => (s = stepTrace(s, two, p, i * 16, true)));
     expect(s.stroke).toBe(1);
     expect(s.phase).toBe("await-start");
   });
@@ -95,7 +95,82 @@ describe("stepTrace guard", () => {
   it("returns the state unchanged when the stroke index is past the end (the character changed)", () => {
     for (const phase of ["await-start", "tracing"] as const) {
       const s = { ...initialTrace(), stroke: 5, phase };
-      expect(stepTrace(s, strokes, { x: 10, y: 50 }, 1000)).toBe(s);
+      expect(stepTrace(s, strokes, { x: 10, y: 50 }, 1000, true)).toBe(s);
     }
+  });
+});
+
+describe("stepTrace pen (クリックしている間だけ書ける)", () => {
+  type F = { x: number; y: number; down: boolean };
+  const feed = (frames: F[], strokesIn = strokes, s0: TraceState = initialTrace()) => {
+    let s = s0;
+    frames.forEach((f, i) => (s = stepTrace(s, strokesIn, { x: f.x, y: f.y }, 1000 + i * 16, f.down)));
+    return s;
+  };
+  const pts = (from: number, to: number, n: number, down: boolean, dy = 0): F[] =>
+    along(from, to, n, dy).map((p) => ({ ...p, down }));
+
+  it("筆を上げている間は、始点の丸の中でも画が始まらない", () => {
+    const s = feed([{ x: 10, y: 50, down: false }, { x: 12, y: 50, down: false }]);
+    expect(s.phase).toBe("await-start");
+    expect(s.startedAt).toBeNull();
+  });
+  it("始点の丸の外で押しても何も起きず、丸の中で押しているときに始まる", () => {
+    const outside = feed([{ x: 60, y: 50, down: true }]);
+    expect(outside.phase).toBe("await-start");
+    const inside = feed([{ x: 60, y: 50, down: true }, { x: 10, y: 50, down: true }]);
+    expect(inside.phase).toBe("tracing");
+    expect(inside.drawing).toBe(true);
+  });
+  it("筆を上げたフレームは進み具合も精度も変えない", () => {
+    const mid = feed(pts(10, 40, 10, true));
+    const lifted = feed(
+      [...pts(40, 100, 20, false), ...pts(40, 100, 20, false, 20), { x: 5, y: 5, down: false }],
+      strokes,
+      mid,
+    );
+    expect(lifted.progress).toBe(mid.progress);
+    expect(lifted.frames).toBe(mid.frames);
+    expect(lifted.inTol).toBe(mid.inTol);
+    expect(lifted.phase).toBe("tracing");
+    expect(lifted.drawing).toBe(false);
+  });
+  it("止めた画は、進み具合の近くで押したときだけ続きから書ける", () => {
+    const mid = feed([...pts(10, 40, 10, true), { x: 40, y: 50, down: false }]);
+    // 先の方(進み具合より MAX_STEP 以上先)で押しても再開しない
+    const far = feed([{ x: 90, y: 50, down: true }, { x: 95, y: 50, down: true }], strokes, mid);
+    expect(far.drawing).toBe(false);
+    expect(far.progress).toBe(mid.progress);
+    expect(far.frames).toBe(mid.frames);
+    // 線から離れたところで押しても再開しない
+    const off = feed([{ x: 40, y: 70, down: true }], strokes, mid);
+    expect(off.drawing).toBe(false);
+    expect(off.frames).toBe(mid.frames);
+    // 押したまま進み具合の近くに戻ると再開し、最後まで書ける
+    const resumed = feed([{ x: 40, y: 70, down: true }, ...pts(40, 100, 20, true)], strokes, mid);
+    expect(resumed.phase).toBe("done");
+    expect(traceResult(resumed)!.accuracy).toBe(100);
+  });
+  it("画を書き終えたら、押したままでは次の画が始まらず、押し直しが要る", () => {
+    const two = [line, toStroke(parsePath("M10,80L100,80"))];
+    const first = feed(pts(10, 100, 30, true), two);
+    expect(first.stroke).toBe(1);
+    expect(first.needRelease).toBe(true);
+    const held = feed([{ x: 10, y: 80, down: true }, { x: 11, y: 80, down: true }], two, first);
+    expect(held.phase).toBe("await-start");
+    const repressed = feed([{ x: 10, y: 80, down: false }, { x: 10, y: 80, down: true }], two, first);
+    expect(repressed.phase).toBe("tracing");
+    expect(repressed.stroke).toBe(1);
+  });
+  it("時間は最初の画を始めたときから数える(筆を上げていた時間も含む)", () => {
+    const s = feed([
+      { x: 10, y: 50, down: true },
+      ...pts(10, 40, 10, true).slice(1),
+      ...Array.from({ length: 10 }, () => ({ x: 40, y: 50, down: false })),
+      ...pts(40, 100, 20, true),
+    ]);
+    expect(s.phase).toBe("done");
+    expect(traceResult(s)!.timeMs).toBe(s.finishedAt! - s.startedAt!);
+    expect(s.startedAt).toBe(1000);
   });
 });

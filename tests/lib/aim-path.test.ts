@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parsePath, toStroke, closestOnStroke } from "@/lib/aim/path";
+import { parsePath, toStroke, closestOnStroke, pointAtProgress } from "@/lib/aim/path";
 
 describe("parsePath", () => {
   it("handles absolute/relative moves and lines", () => {
@@ -45,5 +45,15 @@ describe("parsePath robustness", () => {
     const pts = parsePath("M0,0 L10");
     expect(pts.length).toBeGreaterThan(0);
     expect(finite(pts)).toBe(true);
+  });
+});
+
+describe("pointAtProgress", () => {
+  it("進み具合の位置の点を返す(折れ線の長さで測る)", () => {
+    const s = toStroke(parsePath("M0,0L10,0L10,10"));
+    expect(pointAtProgress(s, 0)).toEqual({ x: 0, y: 0 });
+    expect(pointAtProgress(s, 0.25)).toEqual({ x: 5, y: 0 });
+    expect(pointAtProgress(s, 0.75)).toEqual({ x: 10, y: 5 });
+    expect(pointAtProgress(s, 1)).toEqual({ x: 10, y: 10 });
   });
 });
