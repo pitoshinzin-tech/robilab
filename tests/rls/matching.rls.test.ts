@@ -323,6 +323,14 @@ describe("input validation", () => {
       p_time_slots: ["weekday-night"], p_bio: "",
     });
     expect(errorCode(error)).toBe("INVALID_INPUT");
+    // 同じ(未登録の)ユーザーで、向きを変える文字(U+202E)を含むニックネームの登録も弾く
+    const { error: bidiError } = await admin.rpc("_register_profile", {
+      p_uid: a.id, p_discord_id: `d-${a.id}`, p_discord_name: "x", p_birthdate: birthdateYearsAgo(25),
+      p_nickname: `abc${String.fromCharCode(0x202e)}def`,
+      p_type_code: null, p_axes: null, p_games: [{ id: "valorant" }], p_platforms: [], p_voice_ok: false,
+      p_time_slots: ["weekday-night"], p_bio: "",
+    });
+    expect(errorCode(bidiError)).toBe("INVALID_INPUT");
   });
 
   it("rejects a game object missing an id", async () => {
@@ -418,9 +426,15 @@ describe("hardening3", () => {
   it("catches NG words split by spaces, symbols, or zero-width characters", async () => {
     const a = await makeUser();
     const zeroWidthSpace = String.fromCharCode(0x200b);
-    for (const nick of ["d i s c o r d . g g", `line${zeroWidthSpace}交換`,"ｄｉｓｃｏｒｄ．ｇｇ", "id・交換"]) {
+    for (const nick of ["d i s c o r d . g g", "ｄｉｓｃｏｒｄ．ｇｇ", "id・交換"]) {
       expect(errorCode((await a.client!.rpc("update_profile", profile(nick))).error), nick).toBe("NG_WORD");
     }
+    // 1600 から、ゼロ幅文字・向きを変える文字(U+202E)・制御文字は NG ワードの判定より前に INVALID_INPUT で弾く
+    const rlo = String.fromCharCode(0x202e);
+    for (const nick of [`line${zeroWidthSpace}交換`, `abc${rlo}def`, `a${String.fromCharCode(0x7)}b`]) {
+      expect(errorCode((await a.client!.rpc("update_profile", profile(nick))).error), JSON.stringify(nick)).toBe("INVALID_INPUT");
+    }
+    expect(errorCode((await a.client!.rpc("update_profile", { ...profile("x"), p_bio: `よろしく${rlo}` })).error)).toBe("INVALID_INPUT");
     expect((await a.client!.rpc("update_profile", profile("オンラインで遊ぼう"))).error).toBeNull();
   });
 
