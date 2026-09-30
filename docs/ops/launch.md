@@ -64,3 +64,11 @@
 
 - 通報の確認を毎日1回(`docs/ops/moderation.md`)
 - Vercel と Supabase のエラーログを数日見守る
+
+## 楽天の画像を更新するとき(本人の PC で。月 1 回くらい)
+
+楽天アプリの許可 IP が家の IPv4 だけなので、Vercel ではなく本人の PC で動かす。キーは `.env.local` の `RAKUTEN_APPLICATION_ID` と `RAKUTEN_ACCESS_KEY`。
+
+1. `node --env-file=.env.local --dns-result-order=ipv4first scripts/rakuten-mice.mjs`
+2. `docs/content/rakuten-mice-review.md` を開き、マウスごとに選ばれた商品・画像が合っているか目で確かめる(違うものは `src/data/mice-rakuten.ts` から消す)
+3. コミットする(`src/data/mice-rakuten.ts` と `docs/content/rakuten-mice-review.md`)

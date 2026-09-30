@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { DEVICES } from "@/data/devices";
 import { MICE, mouseById } from "@/data/mice";
+import { MICE_RAKUTEN } from "@/data/mice-rakuten";
 import { applyFilter, compareWith, DEFAULT_HAND_LENGTH_CM, fitTarget, handFrom, NO_FILTER, rankMice, targetText, type MouseFilter } from "@/lib/mouse-fit";
 import { shopLinks } from "@/lib/shop-links";
 import { buildMouseShareText } from "@/lib/mouse-share";
@@ -117,10 +118,12 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
             const d = device(item.mouse.id);
             if (!d) return null;
             const rank = ranked.indexOf(item) + 1;
+            const rakuten = MICE_RAKUTEN[item.mouse.id];
             return (
               <MouseCard key={item.mouse.id} rank={rank} item={item} brand={d.brand} name={d.name}
                 compare={currentMouse ? compareWith(currentMouse, item.mouse) : null}
-                links={shopLinks(`${d.brand} ${d.name}`, item.mouse.officialUrl)} />
+                links={shopLinks(`${d.brand} ${d.name}`, item.mouse.officialUrl, undefined, rakuten?.itemUrl)}
+                imageUrl={rakuten?.imageUrl ?? null} />
             );
           })}
         </ol>

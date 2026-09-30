@@ -16,7 +16,8 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' blob: data:",
+  // 楽天の商品画像(マウス探し。src/data/mice-rakuten.ts)
+  "img-src 'self' blob: data: https://thumbnail.image.rakuten.co.jp",
   "font-src 'self'",
   `connect-src 'self' ${supabaseOrigins()}${isDev ? " ws:" : ""}`,
   "object-src 'none'",
