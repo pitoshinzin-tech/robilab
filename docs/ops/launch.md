@@ -34,7 +34,7 @@
        (select count(*) from public.blocks) as blocks,
        (select count(*) from public.banned_discord_ids) as banned_discord_ids;
      ```
-   - **0500〜1600 のすべてを、アプリのマージ・本番反映(手順3)より前に適用し終えること**。順番を逆にすると、新しいアプリが呼ぶ関数や表が本番にまだないため、版 2 のマイ設定(クロスヘア)が保存できず、`/aim` のランキング取得・記録の送信(`get_aim_ranking` / `my_aim_rank` / `submit_aim_score`)も失敗する
+   - **0500〜1700 のすべてを、アプリのマージ・本番反映(手順3)より前に適用し終えること**。順番を逆にすると、新しいアプリが呼ぶ関数や表が本番にまだないため、版 2 のマイ設定(クロスヘア)が保存できず、`/aim` のランキング取得・記録の送信(`get_aim_ranking` / `my_aim_rank` / `submit_aim_score`)も失敗する
    - [ ] `supabase/migrations/20261001000500_discord_link.sql`(成立相手の Discord プロフィールリンク)
    - [ ] `supabase/migrations/20261001000600_rejoin_guard.sql`(退会・再登録の悪用対策)
    - [ ] `supabase/migrations/20261001000700_perf.sql`(インデックスと RLS ポリシーの性能改善)
@@ -47,6 +47,7 @@
    - [ ] `supabase/migrations/20261001001400_aim_daily.sql`(今日の文字の表と関数。※ dev では 1400 のあとに、関数の中身が最終の 1400 と同じ dev 専用の記録 `aim_daily_ranking_names` を別に適用した。本番は 1300 と 1400 のファイルだけでよい)
    - [ ] `supabase/migrations/20261001001500_card_locks.sql`(運営の公開禁止の印を別の表 `card_locks` にも残し、本人が設定を消して作り直しても、退会して同じ Discord で登録し直しても印が戻るようにする。Discord ID 単位の `card_locked_discord_ids` も作る。1200 のあと)
    - [ ] `supabase/migrations/20261001001600_profile_text_hardening.sql`(ロビーのニックネーム・自己紹介で制御文字・向きを変える文字(U+202E など)を弾く。**BAN 一覧にある Discord ID のアカウントの status を一回だけ banned にそろえる処理も入っている**(0800 のトリガーは、そのあとの BAN の追加でしか動かないため)。何度流しても同じ結果になる)
+   - [ ] `supabase/migrations/20261001001700_report_review.sql`(通報しても相手をすぐには利用停止にせず、運営の確認待ちにする。自動で止めるのは「年齢詐称」の通報だけ。通報した人が相手をブロックするのはこれまでどおり。**適用したら、毎日の通報の確認で運営が止める必要がある**(`docs/ops/moderation.md`))
    - [ ] **0800/0900(と 1600)を適用したあと、今あるプロフィールが新しい検証に通るかを洗い出す**。次を SQL エディタで一度に実行し、出てきた行(id とエラー)を確かめる。0 行なら問題なし。行があれば、本人に直してもらうか運営が `nickname` / `bio` などを直す(残すと、その人は次のプロフィール更新で `INVALID_INPUT` / `NG_WORD` になる)
      ```sql
      create temp table if not exists profile_input_check (id uuid, error text);
@@ -107,4 +108,4 @@
 
 ## dev と本番の migration の違い
 
-dev の DB には、リポジトリにない dev 専用の migration の記録がある(`aim_daily_ranking_names`、名前で適用した `card_locks` / `aim_ranking_lazy_filter` / `my_settings_v2_shape_check`、`aim_chars_mixed_difficulty`、`aim_chars_replace_53`、`card_locks_discord_carryover`)。dev で `db push` や差分の比較をしても、これらは本番とは関係ない。**本番には `supabase/migrations/` の 0500〜1600 のファイルだけを適用する**(1400 は 5〜14 画・60 字の版に直してあるので、そのまま新規に適用すればよい)。
+dev の DB には、リポジトリにない dev 専用の migration の記録がある(`aim_daily_ranking_names`、名前で適用した `card_locks` / `aim_ranking_lazy_filter` / `my_settings_v2_shape_check`、`aim_chars_mixed_difficulty`、`aim_chars_replace_53`、`card_locks_discord_carryover`)。dev で `db push` や差分の比較をしても、これらは本番とは関係ない。**本番には `supabase/migrations/` の 0500〜1700 のファイルだけを適用する**(1400 は 5〜14 画・60 字の版に直してあるので、そのまま新規に適用すればよい)。
