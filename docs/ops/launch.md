@@ -7,11 +7,17 @@
 - [x] `content/legal/terms.md` と `content/legal/privacy.md` のお問い合わせ先を埋める(robilab.contact@gmail.com、2026-09-30)
 - [ ] 公開日が決まったら、`content/legal/privacy.md` の「制定日:2026年10月【公開日】」を実際の日付にする
 - [x] Discord アプリを作り、本番 Supabase(`robilab`)の Discord ログインを設定する(2026-09-30)
-- [ ] Supabase Auth の「Redirect URLs」を、本番の `https://<本番ドメイン>/auth/callback` だけにする(dev 用は dev プロジェクト側に)
-- [ ] Vercel の本番の環境変数を設定する
+- [ ] **本番ドメインを決める**(独自ドメインを取るか、しばらく `robilab.vercel.app` のままにするか)。決めたら次の 3 つをそろえる
+  - Vercel → プロジェクト → Domains にドメインを足す(独自ドメインのとき)
+  - Vercel の `NEXT_PUBLIC_SITE_URL` を本番の URL にする
+  - Amazon アソシエイト →「アカウント設定」→「ウェブサイトとモバイルアプリの情報」に本番の URL を足す
+- [ ] Supabase Auth の「URL Configuration」:Site URL を本番の URL に、「Redirect URLs」を本番の `https://<本番ドメイン>/auth/callback` だけにする(dev 用は dev プロジェクト側に)
+- [ ] **Vercel を Pro プランにする**(無料の Hobby は商用利用が禁止。アフィリエイトのリンクを出すサイトは商用にあたる。D35)。本人の希望で、**すべて完成したあとに Claude から声をかけて進める**(2026-09-30)
+- [ ] Vercel の本番の環境変数を、正しい値で**上書き**する(9/27 に Secret で入れたため値を見て確かめられない。Type は「Config」にする)
   - `NEXT_PUBLIC_SUPABASE_URL=https://bncjzilfehkjftzraajd.supabase.co`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY=`(本番の publishable key)
-- [ ] (任意・アフィリエイトの審査が通ってから)マウス探しの成果報酬リンク用に、次の環境変数を入れて再デプロイする(組み立て時に埋め込まれるため、入れただけでは反映されない)。未設定なら普通の検索リンクになり、「PR」は出ない
+- [x] `NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG=devicepickup-22` を Vercel に追加(2026-09-30、Production と Preview)
+- [ ] (任意・楽天アフィリエイトの ID があれば)マウス探しの成果報酬リンク用に、次の環境変数を入れて再デプロイする(組み立て時に埋め込まれるため、入れただけでは反映されない)。未設定なら普通の検索リンクになり、「PR」は出ない
   - `NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG=`(Amazon アソシエイトのトラッキング ID。例 `xxxx-22`)
   - `NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID=`(楽天アフィリエイト ID。`xxxxxxxx.xxxxxxxx.xxxxxxxx.xxxxxxxx` の形)
 - [ ] 本番の NG ワード初期リストを確認する(`docs/ops/moderation.md` の「公開前の準備」)
@@ -44,7 +50,7 @@
      select pg_get_functiondef('public.save_my_settings(jsonb)'::regprocedure);
      ```
    - 今の本番アプリ(計画1)はマッチング機能を使っていないので、手順2と3の間に古いアプリが新しい DB を使って困ることはない。マッチング機能を使うアプリが本番にある状態で DB を変えるときは、手順2と3の間に動作確認を1回入れる
-3. `feat/v0.1-part2` を `master` にマージする → Vercel が自動で本番に反映する
+3. **`feat/polish-1` を `master` にマージする**(`feat/v0.1-part2` → `feat/my-settings` → `feat/aim-daily` → `feat/mouse-finder` → `feat/pro-settings` → `feat/polish-1` と積み重なっているので、これ 1 つで全部入る)→ Vercel が自動で本番に反映する(環境変数もこのとき埋め込まれる)
 4. 本番で動作確認(Claude はブラウザで、本人はスマホで)
    - [ ] 診断 → 結果 → X シェア
    - [ ] Discord ログイン → 登録 → ロビー表示(X のアプリ内ブラウザでも)
@@ -69,10 +75,10 @@
 
 楽天アプリの許可 IP が家の IPv4 だけなので、Vercel ではなく本人の PC で動かす。キーは `.env.local` の `RAKUTEN_APPLICATION_ID` と `RAKUTEN_ACCESS_KEY`。
 
-1. `node --env-file=.env.local --dns-result-order=ipv4first scripts/rakuten-mice.mjs`
+1. `node --dns-result-order=ipv4first scripts/rakuten-mice.mjs --config "<楽天ROOM 自動化フォルダの config.json のパス>"`(キーはその場で読むだけで、どこにも書き写さない)。`.env.local` にキーを入れた場合は `node --env-file=.env.local --dns-result-order=ipv4first scripts/rakuten-mice.mjs`
 2. `docs/content/rakuten-mice-review.md` を開き、マウスごとに選ばれた商品・画像が合っているか目で確かめる(違うものは `src/data/mice-rakuten.ts` から消す)
 3. コミットする(`src/data/mice-rakuten.ts` と `docs/content/rakuten-mice-review.md`)
 
 ## dev と本番の migration の違い
 
-dev の DB には、リポジトリにない dev 専用の migration の記録がある(`aim_daily_ranking_names`、名前で適用した `card_locks` / `aim_ranking_lazy_filter` / `my_settings_v2_shape_check`、`aim_chars_mixed_difficulty`)。dev で `db push` や差分の比較をしても、これらは本番とは関係ない。**本番には `supabase/migrations/` の 0500〜1500 のファイルだけを適用する**(1400 は 5〜14 画・60 字の版に直してあるので、そのまま新規に適用すればよい)。
+dev の DB には、リポジトリにない dev 専用の migration の記録がある(`aim_daily_ranking_names`、名前で適用した `card_locks` / `aim_ranking_lazy_filter` / `my_settings_v2_shape_check`、`aim_chars_mixed_difficulty`、`aim_chars_replace_53`、`card_locks_discord_carryover`)。dev で `db push` や差分の比較をしても、これらは本番とは関係ない。**本番には `supabase/migrations/` の 0500〜1500 のファイルだけを適用する**(1400 は 5〜14 画・60 字の版に直してあるので、そのまま新規に適用すればよい)。
