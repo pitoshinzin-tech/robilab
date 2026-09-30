@@ -9,6 +9,15 @@
 - [ ] Vercel の本番の環境変数を入れる(`docs/ops/launch.md` の手順どおり)
 - [ ] 公開当日の手順(`docs/ops/launch.md`):本番 DB に migration 0500〜1500 を**先に**全部適用 → マージ → 本番反映 → 本人の確認
 
+## 1.5 新しく決まったこと・あなたの作業(2026-09-30 午後)
+
+- [ ] Vercel に `NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG=devicepickup-22` を入れる(Amazon のリンクが成果報酬付きになる)
+- [ ] Amazon アソシエイトの「ウェブサイト情報」に、ロビラボの URL を足す(本番ドメインが決まってから)
+- [ ] 本番ドメインを決め、Supabase の URL Configuration(Site URL・Redirect URLs)を設定する
+- [ ] 楽天の商品(11 本)の一覧を見る:`docs/content/rakuten-mice-review.md`。月 1 回くらい、手元で `node --dns-result-order=ipv4first scripts/rakuten-mice.mjs --config "<楽天ROOM 自動化の config.json>"` を実行して更新(楽天アプリは家の回線からしか呼べないため)
+- [ ] 今日の文字のお題 60 字(5〜14 画、簡単・普通・複雑の順)。「悪」は「野」に入れ替え済み
+- 監査 run-7・run-8:confirmed 0 件。run-8 で見つかった「公開禁止の人が退会→同じ Discord で再登録すると印が外れる」は修正済み(Discord ID でも印を残す)
+
 ## 2. 実際に触って確かめてほしいこと
 
 - [ ] **今日の文字**(`/aim`):PC で遊んで、ゲームと同じ感度の手応えか。素早く線を払ったときに進み具合が止まらないか(1フレームで進める最大 0.15)

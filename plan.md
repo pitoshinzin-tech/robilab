@@ -246,3 +246,4 @@
 | 2026-09-30 | 本人の決定:プロ設定のデータはしばらく保留(非表示のまま)。規約・プライバシーポリシーのお問い合わせ先を robilab.contact@gmail.com(ロビラボ専用、本人が作成)に。公開準備を再開 |
 | 2026-09-30 | 仕上げ1(feat/polish-1、A〜D):`/aim` の全画面、今日の文字を 5〜14 画に(60 字、悪→野)、マウス探しを持ち方だけで(18cm 仮定)、楽天の商品画像(ローカルのスナップショット。G305・DeathAdder V3・X2 v2 Medium は検索リンクのまま)と Amazon のタグの方針(D41)。最終レビューの指摘を反映(応答が JSON でなくても落ちない、レビュー 0 件・ASIN 形式は選ばない、画像にも PR、全画面はゲーム自身のときだけ抜ける)。本人の確認待ち:全画面の手応え、新しい 60 字、`/mouse` の画像 |
 | 2026-09-30 | 監査 run-8 の `card_locks-user_id-cascade-delete_me-lock-reset` に対応(feat/polish-1):公開禁止の印が退会(`delete_me`)→ 同じ Discord で再登録で外れていた。1500 を直して、`card_locks.discord_user_id` と Discord ID 単位の `card_locked_discord_ids` を追加(退会時に移し、再登録して保存すると印が戻る。運営が外すと両方消える)。moderation.md・launch.md・ER 図を更新。1500 は本番未適用のまま |
+| 2026-09-30 | polish-1 の仕上げ:最終レビューの修正、楽天の商品をレビューのある 11 本に絞って取り直し、お題の「悪」を「野」に。監査 run-7(confirmed 0)、監査漏れだった範囲を run-8 で監査し、公開禁止の印が退会・再登録で外れる問題を修正(card_locked_discord_ids)。ER 図を更新 |
