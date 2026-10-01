@@ -2,10 +2,15 @@
 import { buildXShareUrl } from "@/lib/share";
 import { buildAimShareText } from "@/lib/aim/share";
 import { computeScore } from "@/lib/aim/trace";
+import { DiagCopyButton } from "@/components/aim/DiagCopyButton";
 
-type Props = { glyph: string; strokes: number; accuracy: number; timeMs: number; perStroke: number[]; sendMessage: string | null; canResend: boolean; sending: boolean; onResend: () => void; onRetry: () => void };
+type Props = {
+  glyph: string; strokes: number; accuracy: number; timeMs: number; perStroke: number[]; sendMessage: string | null; canResend: boolean; sending: boolean; onResend: () => void; onRetry: () => void;
+  /** ?debug=1 のときだけ:この回の診断の JSON(あれば「診断をコピー」を出す)。 */
+  diagnostics?: string | null;
+};
 
-export function AimResult({ glyph, strokes, accuracy, timeMs, perStroke, sendMessage, canResend, sending, onResend, onRetry }: Props) {
+export function AimResult({ glyph, strokes, accuracy, timeMs, perStroke, sendMessage, canResend, sending, onResend, onRetry, diagnostics = null }: Props) {
   const score = computeScore(accuracy, timeMs, strokes);
   const url = typeof window !== "undefined" ? `${window.location.origin}/aim` : "/aim";
   return (
@@ -19,6 +24,7 @@ export function AimResult({ glyph, strokes, accuracy, timeMs, perStroke, sendMes
         <a href={buildXShareUrl(buildAimShareText(glyph, score, accuracy, timeMs), url)} target="_blank" rel="noopener" className="rounded-full bg-white/10 px-6 py-3">X でシェア</a>
         {canResend && <button type="button" onClick={onResend} disabled={sending} className="rounded-full bg-white/10 px-6 py-3 disabled:opacity-50">{sending ? "送信中…" : "ランキングにもう一度送る"}</button>}
       </div>
+      {diagnostics && <div><DiagCopyButton text={diagnostics} /></div>}
     </section>
   );
 }

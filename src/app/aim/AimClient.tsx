@@ -44,6 +44,8 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
   const [historyRev, setHistoryRev] = useState(0);
   const [serverDays, setServerDays] = useState<AimDays | null>(null);
   const [serverError, setServerError] = useState(false);
+  // ?debug=1 のときだけ:直前の回(終わった・中断した)の診断の JSON
+  const [diagJson, setDiagJson] = useState<string | null>(null);
 
   const settings = isClient ? loadLocal(browserStorage()) : null;
   void settingsRev;
@@ -144,9 +146,10 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
       <div className="grid gap-4">
         {result ? (
           <AimResult glyph={char.glyph} strokes={char.strokes.length} {...result} sendMessage={sendMessage} canResend={canResend} sending={sending}
-            onResend={() => void submit(result)} onRetry={retry} />
+            onResend={() => void submit(result)} onRetry={retry} diagnostics={debug ? diagJson : null} />
         ) : (
           <AimGame key={`${date}:${char.id}:${round}`} char={char} degPerCount={deg} crosshair={crosshair} debug={debug}
+            onDiagnostics={setDiagJson} lastDiagnostics={debug ? diagJson : null}
             onFinish={(r) => {
               recordLocal(browserStorage(), date, { score: computeScore(r.accuracy, r.timeMs, char.strokes.length), accuracy: r.accuracy, timeMs: r.timeMs });
               setHistoryRev((n) => n + 1);

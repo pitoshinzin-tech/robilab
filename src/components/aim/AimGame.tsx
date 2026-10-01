@@ -4,17 +4,35 @@ import type { AimChar } from "@/lib/aim/daily";
 import { applyMouse, aimPoint, projectPoint, KVG_SIZE, type Point, type View } from "@/lib/aim/view";
 import { closestOnStroke, parsePath, pointAtProgress, toStroke } from "@/lib/aim/path";
 import { initialTrace, stepTrace, traceResult, EDGE, RESUME_RADIUS, START_RADIUS, type TraceState } from "@/lib/aim/trace";
-import { createMoveFilter, filterMovement, moveFilterOptions, pushTrailPoint } from "@/lib/aim/input";
+import { createMoveFilter, filterMovement, inSettle, moveFilterOptions, pushTrailPoint } from "@/lib/aim/input";
+import { addFpsSample, buildDiagReport, createFpsStats, fpsSummary, isNotable, pushRing, type ChangeKind, type DiagDecision, type DiagEntry } from "@/lib/aim/diag";
 import { AIM_TUNING } from "@/lib/aim/tuning";
 import { reduceAim, reducePen, canStepTrace, type AimPhase, type AimEvent, type PenEvent } from "@/lib/aim/game-state";
 import { drawCrosshair, type Crosshair } from "@/lib/crosshair";
+import { DiagCopyButton } from "@/components/aim/DiagCopyButton";
 
 type Result = { accuracy: number; timeMs: number; perStroke: number[] };
 type Props = {
   char: AimChar; degPerCount: number; crosshair: Crosshair; onFinish: (r: Result) => void; onAbort: () => void;
-  /** true なら左上に診断(fps・捨てたマウスの飛び・直近 1 秒の最大の動き・生の移動量か)を出す(?debug=1)。 */
+  /**
+   * true なら左上に診断(fps・捨てたマウスの飛び・直近 1 秒の最大の動き・生の移動量か など)を出し、
+   * 目立つ動きを記録する(?debug=1)。J キーで「ここで飛んだ」の印を付けられる。
+   */
   debug?: boolean;
+  /** debug のとき、終わった・中断したときに診断の JSON を渡す(結果画面と次の回の「診断をコピー」に使う)。 */
+  onDiagnostics?: (json: string) => void;
+  /** debug のとき、始める前の画面に「診断をコピー」で出す前の回の診断。 */
+  lastDiagnostics?: string | null;
 };
+
+/** 小数 1 桁に丸める(診断の数字を読みやすくする)。 */
+const r1 = (x: number) => Math.round(x * 10) / 10;
+
+/** エラーの name(なければ unknown)。ロックの 1 回目の失敗の理由を残す。 */
+function errorName(err: unknown): string {
+  if (err && typeof err === "object" && "name" in err && typeof err.name === "string") return err.name;
+  return "unknown";
+}
 type ScreenPoint = { x: number; y: number };
 
 const COUNTDOWN_MS = 3000;
@@ -59,7 +77,7 @@ function roleColor(name: string, fallback: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 }
 
-export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug = false }: Props) {
+export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug = false, onDiagnostics, lastDiagnostics = null }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
   // 全画面にする要素(canvas と開始ボタンを包む)
   const stage = useRef<HTMLDivElement>(null);
@@ -79,6 +97,15 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
   const unadjusted = useRef(false);
   // 診断(?debug=1)の数字。maxDelta は今の 1 秒、maxDeltaShown は直前の 1 秒の最大の動き
   const diag = useRef({ frames: 0, fps: 0, since: 0, maxDelta: 0, maxDeltaShown: 0 });
+  // 最後にロック・全画面・画面の大きさが変わった時刻(performance.now)と種類。この後 settleMs の間は動きを足さない
+  const lastChange = useRef<{ at: number | null; kind: ChangeKind | null }>({ at: null, kind: null });
+  // ロックの道筋(診断用):1 回目(生の移動量つき)の失敗の理由と、promise を返さない古いロックだったか
+  const lockInfo = useRef<{ firstFailure: string | null; legacy: boolean }>({ firstFailure: null, legacy: false });
+  // 診断の記録(?debug=1 のときだけ足す。settleSkipped だけはいつも数える)。startedAt はスタートのクリックの時刻
+  const rec = useRef({
+    startedAt: 0, log: [] as DiagEntry[], marks: [] as number[], settleSkipped: 0,
+    lastMoveTs: null as number | null, lastFrameAt: null as number | null, frameMs: null as number | null, fps: createFpsStats(),
+  });
   const countdownEnd = useRef(0);
   // ロック要求の状態:first = unadjustedMovement つき(失敗しても通常の要求に続く)、second = 通常の要求、final = 要求が済んだ後
   const attempt = useRef<"first" | "second" | "final">("final");
@@ -92,10 +119,38 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
     setPhase(next);
     return next;
   };
+  /** 診断(?debug=1)を JSON にする。ボタンや終わったときなど、描画の外でだけ呼ぶ。 */
+  const diagnosticsJson = (): string => {
+    const r = rec.current;
+    const report = buildDiagReport({
+      log: r.log,
+      marks: r.marks,
+      lock: { unadjusted: unadjusted.current, ...lockInfo.current },
+      fps: fpsSummary(r.fps),
+      dropped: moveFilter.current.dropped,
+      settleSkipped: r.settleSkipped,
+      degPerCount,
+      minCounts: moveFilterOptions(degPerCount).minCounts,
+      env: {
+        userAgent: navigator.userAgent,
+        devicePixelRatio: window.devicePixelRatio || 1,
+        screen: { width: window.screen.width, height: window.screen.height },
+        viewport: { width: window.innerWidth, height: window.innerHeight },
+      },
+    });
+    return JSON.stringify(report, null, 2);
+  };
+  /** 終わった・中断したときに、診断を console と親に渡す(debug でないときは何もしない)。 */
+  const emitDiagnostics = () => {
+    if (!debug) return;
+    const json = diagnosticsJson();
+    console.log("[今日の文字の診断]", json);
+    onDiagnostics?.(json);
+  };
   // コールバックと dispatch は effect の中で最新を読む(ref は effect 内でだけ更新・参照する)
-  const latest = useRef({ dispatch, onFinish, onAbort });
+  const latest = useRef({ dispatch, onFinish, onAbort, emitDiagnostics });
   useEffect(() => {
-    latest.current = { dispatch, onFinish, onAbort };
+    latest.current = { dispatch, onFinish, onAbort, emitDiagnostics };
   });
 
   useEffect(() => {
@@ -116,14 +171,51 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
     const el = canvas.current!;
     // 飛びを捨てる下限は角度で決める(感度からカウントに直す)
     const filterOpts = moveFilterOptions(degPerCount);
+    /** 目立つ動きを診断の記録に足す(debug のときだけ呼ぶ)。 */
+    const note = (dx: number, dy: number, mag: number, median: number | null, limit: number | null, decision: DiagDecision, gapMs: number | null, now: number) => {
+      if (!isNotable(mag, limit, decision)) return;
+      const r = rec.current;
+      const c = lastChange.current;
+      pushRing(r.log, {
+        kind: "move", t: r1(now - r.startedAt), dx, dy,
+        median: median === null ? null : r1(median), limit: limit === null ? null : r1(limit), decision,
+        gapMs: gapMs === null ? null : r1(gapMs), frameMs: r.frameMs === null ? null : r1(r.frameMs),
+        sinceChangeMs: c.at === null ? null : r1(now - c.at), change: c.kind,
+      });
+    };
     const onMove = (e: MouseEvent) => {
       if (document.pointerLockElement !== el) return;
       // 1 回の mousemove につき 1 回だけ視点に足す(描画は requestAnimationFrame の側で 1 フレームに 1 回)
       const mag = Math.hypot(e.movementX, e.movementY);
       if (mag > diag.current.maxDelta) diag.current.maxDelta = mag;
+      const now = performance.now();
+      const r = rec.current;
+      const gapMs = debug && r.lastMoveTs !== null ? e.timeStamp - r.lastMoveTs : null;
+      if (debug) r.lastMoveTs = e.timeStamp;
+      if (inSettle(now, lastChange.current.at, AIM_TUNING.settleMs)) {
+        // ロック・全画面・画面の大きさが変わった直後:動きを足さない(フィルターにも入れない)
+        if (mag > 0) r.settleSkipped += 1;
+        if (debug) note(e.movementX, e.movementY, mag, null, null, "settle-skip", gapMs, now);
+        return;
+      }
       const m = filterMovement(moveFilter.current, e.movementX, e.movementY, filterOpts);
+      if (debug) note(e.movementX, e.movementY, mag, m.median, m.limit, m.decision, gapMs, now);
       if (m.dx === 0 && m.dy === 0) return;
       view.current = applyMouse(view.current, m.dx, m.dy, degPerCount);
+    };
+    // ロック・全画面・画面の大きさが変わった時刻を覚える(この直後は動きを足さない)
+    const changed = (kind: ChangeKind) => {
+      lastChange.current = { at: performance.now(), kind };
+    };
+    const onFsInput = () => changed("fullscreen");
+    const onResize = () => changed("resize");
+    // 診断(?debug=1):J キーで「ここで飛んだ」の印を付ける(ゲームの操作にはキーを使っていない)
+    const onKey = (e: KeyboardEvent) => {
+      if (!debug || e.code !== "KeyJ" || e.repeat) return;
+      if (phaseRef.current !== "countdown" && phaseRef.current !== "playing") return;
+      const t = r1(performance.now() - rec.current.startedAt);
+      pushRing(rec.current.log, { kind: "mark", t });
+      pushRing(rec.current.marks, t);
     };
     const penEvent = (ev: PenEvent) => {
       pen.current = reducePen(pen.current, ev, phaseRef.current);
@@ -135,6 +227,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
     const onUp = (e: MouseEvent) => penEvent({ kind: "up", button: e.button });
     const onBlur = () => penEvent({ kind: "blur" });
     const onLockChange = () => {
+      changed("lock");
       if (document.pointerLockElement !== el) penEvent({ kind: "lost" });
       if (document.pointerLockElement === el) {
         // ロックが取れたので、1 回目の失敗で出たエラーは消す
@@ -142,6 +235,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
       } else if (latest.current.dispatch("lost") === "aborted") {
         // Esc ならブラウザが全画面も抜けているが、念のため戻す。全画面だけが外れた場合は中断しない(ここには来ない)
         leaveFullscreen(stage.current);
+        latest.current.emitDiagnostics();
         latest.current.onAbort();
       }
     };
@@ -152,6 +246,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
       // promise を返さない古いブラウザで、始まったあとにロックが失敗したときは中断にする
       if (latest.current.dispatch("lost") === "aborted") {
         leaveFullscreen(stage.current);
+        latest.current.emitDiagnostics();
         latest.current.onAbort();
       }
     };
@@ -161,6 +256,9 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
     window.addEventListener("blur", onBlur);
     document.addEventListener("pointerlockchange", onLockChange);
     document.addEventListener("pointerlockerror", onLockError);
+    document.addEventListener("fullscreenchange", onFsInput);
+    window.addEventListener("resize", onResize);
+    document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mousedown", onDown);
@@ -168,8 +266,11 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
       window.removeEventListener("blur", onBlur);
       document.removeEventListener("pointerlockchange", onLockChange);
       document.removeEventListener("pointerlockerror", onLockError);
+      document.removeEventListener("fullscreenchange", onFsInput);
+      window.removeEventListener("resize", onResize);
+      document.removeEventListener("keydown", onKey);
     };
-  }, [degPerCount]);
+  }, [degPerCount, debug]);
 
   // 描画と判定のループ
   useEffect(() => {
@@ -185,6 +286,12 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
     };
     let raf = 0;
     const frame = (now: number) => {
+      if (debug) {
+        // 診断:直前のフレームの長さ(次の mousemove の記録に付ける)
+        const r = rec.current;
+        r.frameMs = r.lastFrameAt === null ? null : now - r.lastFrameAt;
+        r.lastFrameAt = now;
+      }
       const dpr = window.devicePixelRatio || 1;
       const w = el.clientWidth, h = el.clientHeight;
       if (el.width !== Math.round(w * dpr) || el.height !== Math.round(h * dpr)) {
@@ -214,6 +321,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
           latest.current.dispatch("done");
           document.exitPointerLock();
           leaveFullscreen(stage.current);
+          latest.current.emitDiagnostics();
           if (r) latest.current.onFinish(r);
         }
       }
@@ -297,7 +405,10 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
       const d = diag.current;
       d.frames += 1;
       if (now - d.since >= 1000) {
+        // 最初の 1 秒(since が 0)は、表示を始めてからの長さが分からないので平均・最小に入れない
+        const measured = d.since > 0;
         d.fps = Math.round((d.frames * 1000) / Math.max(1, now - d.since));
+        if (debug && measured && (ph === "countdown" || ph === "playing")) addFpsSample(rec.current.fps, d.fps);
         d.frames = 0;
         d.since = now;
         d.maxDeltaShown = d.maxDelta;
@@ -309,6 +420,8 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
           `dropped ${moveFilter.current.dropped}`,
           `max |delta| 1s ${Math.round(d.maxDeltaShown)}`,
           `unadjustedMovement ${unadjusted.current ? "on" : "off"}`,
+          `settle-skip ${rec.current.settleSkipped}`,
+          `J (飛んだ印) ${rec.current.marks.length}`,
         ];
         ctx.font = "12px monospace";
         ctx.textAlign = "left";
@@ -338,6 +451,12 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
     pen.current = false;
     moveFilter.current = createMoveFilter();
     unadjusted.current = false;
+    lockInfo.current = { firstFailure: null, legacy: false };
+    lastChange.current = { at: null, kind: null };
+    rec.current = {
+      startedAt: performance.now(), log: [], marks: [], settleSkipped: 0,
+      lastMoveTs: null, lastFrameAt: null, frameMs: null, fps: createFpsStats(),
+    };
     attempt.current = "first";
     // 全画面を先に要求し、完了は待たずにロックも同じクリックの中で要求する(失敗しても全画面なしで遊べる)
     try {
@@ -352,7 +471,10 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
       await req;
       // promise を返すブラウザで成功したときだけ、生の移動量が使えている
       unadjusted.current = req instanceof Promise;
-    } catch {
+      lockInfo.current.legacy = !(req instanceof Promise);
+    } catch (err) {
+      // 診断のため、生の移動量でロックできなかった理由(NotSupportedError など)を残す
+      lockInfo.current.firstFailure = errorName(err);
       attempt.current = "second";
       try {
         await (el.requestPointerLock as () => Promise<void> | void)();
@@ -383,6 +505,12 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
             className="absolute inset-0 m-auto h-14 w-56 rounded-full bg-[var(--rl-accent)] font-bold text-[var(--rl-on-accent)]">
             クリックでスタート
           </button>
+        )}
+        {/* 診断(?debug=1):左上の表示の下に、前の回(中断も含む)の診断をコピーするボタン */}
+        {debug && phase === "idle" && lastDiagnostics && (
+          <div className="absolute left-2 top-40">
+            <DiagCopyButton text={lastDiagnostics} />
+          </div>
         )}
       </div>
       <p className="text-sm">クリックしている間だけ筆が書けます。画と画の間はクリックを離して移動してください。</p>
