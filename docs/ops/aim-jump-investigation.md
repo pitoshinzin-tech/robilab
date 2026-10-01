@@ -96,9 +96,9 @@
 データなしでも安全な対策(A〜C)と、1 回の報告で原因を決める診断(D)を入れた。ふだんの操作感(線の太さ・採点・手応え)は変えていない。
 
 - A(候補1):飛びを捨てない下限を「カウント」から「角度」に。`minCounts = max(15, 1.0° / 感度)`(VALORANT 0.4 なら約 36 カウント。前は 120)。値は `tuning.ts` の `outlierMinDeg` / `outlierMinCountsFloor`。
-- B(候補3):大きい動きが 2 回続いても、向きの cos が 0.5 以上・大きさの比が 3 倍以内のときだけ本物とみなす。そろわなければ 1 回目を捨て、2 回目を保留して次で判断。速い動きの途中でも、直前に通した動きの 4 倍を超える動きは保留(`outlierPairCos` / `outlierPairRatio` / `burstJumpFactor`)。
+- B(候補3):大きい動きが 2 回続いても、向きの cos が 0.5 以上・大きさの比が 3 倍以内のときだけ本物とみなす。そろわなければ 1 回目を捨て、2 回目を保留して次で判断(そろわないのが 2 回続いたら、2 回目は通す。捨てた動きも中央値には入れる)。速い動きの途中でも、直前に通した動きの 4 倍を超える動きは保留(`outlierPairCos` / `outlierPairRatio` / `burstJumpFactor`)。
 - C(候補5):ロック・全画面・画面の大きさが変わった後 150ms(`settleMs`)は、マウスの動きを足さない(フィルターにも入れない)。
-- D(診断、`?debug=1` のときだけ):目立つ動きを直近 30 件記録(時刻・dx/dy・中央値・limit・判断・イベント間隔・直前のフレームの長さ・最後の変化からの ms)。判断は `passed` / `burst-pass` / `held` / `pair-pass` / `dropped` / `dropped-held` / `settle-skip`。ロックの道筋(unadjustedMovement の on/off と、1 回目の失敗のエラー名)、J キーの「飛んだ印」、fps の平均・最小、UA・devicePixelRatio・画面の大きさ・感度も入る。名前や ID は入らない。
+- D(診断、`?debug=1` のときだけ):目立つ動きを直近 30 件記録(時刻・dx/dy・中央値・limit・判断・イベント間隔・直前のフレームの長さ・最後の変化からの ms)。判断は `passed` / `burst-pass` / `held` / `pair-pass` / `dropped` / `dropped-held` / `mismatch-pass` / `settle-skip`。ロックの道筋(unadjustedMovement の on/off と、1 回目の失敗のエラー名)、J キーの「飛んだ印」、fps の平均・最小、UA・devicePixelRatio・画面の大きさ・感度も入る。名前や ID は入らない。
 
 社長に試してもらう手順:
 

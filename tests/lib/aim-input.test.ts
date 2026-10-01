@@ -138,6 +138,43 @@ describe("filterMovement(2 回続いた大きい動きの見分け)", () => {
     expect(sx).toBe(100 + 150 + 200 + 400 + 900 + 1500 + 10);
     expect(f.dropped).toBe(0);
   });
+  it("大きさが 3 倍より違う大きい動きが交互に続いても、照準が止まりっぱなしにならない", () => {
+    const opts = moveFilterOptions(0.028);
+    const seq: [number, number][] = [[300, 0], [80, 0], [300, 0], [80, 0], [300, 0], [80, 0]];
+    const { sx, decisions } = feed([...steady(16, 5), ...seq], opts);
+    const fast = decisions.slice(16);
+    const passedCount = fast.filter((d) => d === "passed" || d === "burst-pass" || d === "pair-pass" || d === "mismatch-pass").length;
+    expect(passedCount).toBeGreaterThanOrEqual(seq.length / 2);
+    // 大きい動きの合計(1140)の半分以上は視点に届く
+    expect(sx - 80).toBeGreaterThanOrEqual(1140 / 2);
+    // 2 回続けてそろわなかったら、2 回目は通す
+    expect(fast[2]).toBe("mismatch-pass");
+  });
+  it("そろわない大きい動きは、捨てても中央値に入る(しきい値がついてくる)", () => {
+    const opts = moveFilterOptions(0.028);
+    const f = createMoveFilter();
+    for (let i = 0; i < 16; i++) filterMovement(f, 5, 0, opts);
+    filterMovement(f, 300, 0, opts);
+    const m = filterMovement(f, 80, 0, opts);
+    expect(m.decision).toBe("dropped-held");
+    expect(f.recent.at(-1)).toBe(80);
+  });
+  it("動きが 0 のイベントは、保留している動きを捨てない", () => {
+    const { f, sx, decisions } = feed([...steady(20, 5), [300, 0], [0, 0], [280, 0], ...steady(2, 5)]);
+    expect(decisions[21]).toBe("passed");
+    expect(decisions[22]).toBe("pair-pass");
+    expect(sx).toBe(100 + 300 + 280 + 10);
+    expect(f.dropped).toBe(0);
+  });
+  it("動きが 0 のイベントは、中央値・burst を変えない", () => {
+    const f = createMoveFilter();
+    for (let i = 0; i < 16; i++) filterMovement(f, 5, 0);
+    filterMovement(f, 200, 0);
+    filterMovement(f, 200, 0);
+    const before = { recent: [...f.recent], burst: f.burst, lastMag: f.lastMag };
+    filterMovement(f, 0, 0);
+    expect({ recent: f.recent, burst: f.burst, lastMag: f.lastMag }).toEqual(before);
+  });
   it("返す limit と median は、その動きを判断したときの値", () => {
     const f = createMoveFilter();
     for (let i = 0; i < 16; i++) filterMovement(f, 2, 0, moveFilterOptions(0.028));

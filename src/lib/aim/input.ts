@@ -14,6 +14,8 @@ export type MoveFilter = {
   burst: boolean;
   /** 直前に通した(0 でない)動きの大きさ。速い動きの途中の飛び(この burstJumpFactor 倍超)を見分ける。 */
   lastMag: number;
+  /** 続けて「そろわない大きい動き」で保留し直した回数(dropped-held が続いた数)。2 回目は通す。 */
+  mismatch: number;
   /** 捨てた回数。 */
   dropped: number;
 };
@@ -36,9 +38,10 @@ export type MoveFilterOptions = {
 /**
  * フィルターの判断。passed = そのまま通した、burst-pass = 速い動きの途中の大きい動きを通した、
  * held = 大きいので保留した、pair-pass = 保留していたぶんと合わせて通した、
- * dropped = 保留していたぶんを捨てて今の動きは通した、dropped-held = 保留していたぶんを捨てて今の動きを新しく保留した。
+ * dropped = 保留していたぶんを捨てて今の動きは通した、dropped-held = 保留していたぶんを捨てて今の動きを新しく保留した、
+ * mismatch-pass = そろわない大きい動きが 2 回続いたので、保留していたぶんは捨て、今の動きは通した(照準が止まりっぱなしにならないように)。
  */
-export type MoveDecision = "passed" | "burst-pass" | "held" | "pair-pass" | "dropped" | "dropped-held";
+export type MoveDecision = "passed" | "burst-pass" | "held" | "pair-pass" | "dropped" | "dropped-held" | "mismatch-pass";
 
 export type FilteredMove = {
   dx: number;
@@ -67,7 +70,7 @@ export function moveFilterOptions(degPerCount: number): MoveFilterOptions {
 const DEFAULT_OPTIONS: MoveFilterOptions = moveFilterOptions(0);
 
 export function createMoveFilter(): MoveFilter {
-  return { recent: [], held: null, burst: false, lastMag: 0, dropped: 0 };
+  return { recent: [], held: null, burst: false, lastMag: 0, mismatch: 0, dropped: 0 };
 }
 
 /**
@@ -104,6 +107,7 @@ function isPair(a: { dx: number; dy: number }, aMag: number, b: { dx: number; dy
 /** 通した動きを覚える。 */
 function pass(f: MoveFilter, mag: number, large: boolean, window: number) {
   f.burst = large;
+  f.mismatch = 0;
   if (mag > 0) f.lastMag = mag;
   remember(f, mag, window);
 }
@@ -114,6 +118,9 @@ function pass(f: MoveFilter, mag: number, large: boolean, window: number) {
  * 大きい動きが 1 回だけなら捨てる(次のイベントで判断するので、いったん保留して 0 を返す)。
  * 大きい動きが 2 回続き、2 回の向きと大きさがそろっていれば(cos が pairCos 以上、大きさの比が pairRatio 以内)、
  * 本物の速い動きとして保留していたぶんも合わせて返す。そろっていなければ 1 回目を捨て、2 回目を新しく保留する。
+ * そろわない大きい動きが 2 回続いたら(保留し直しが 2 回目になったら)、今の動きは通す(照準が止まりっぱなしにならないように)。
+ * そろわずに捨てた・保留した動きも中央値には入れる(本当に速く動かしているなら、しきい値がついてくる)。
+ * 動きが 0 のイベントは何も変えない(保留している動きも捨てない)。
  * 本物の速い動きの途中(burst)は大きい動きを保留しないが、直前に通した動きの burstJumpFactor 倍を超える動きは保留する。
  */
 export function filterMovement(f: MoveFilter, dx: number, dy: number, opts: MoveFilterOptions = DEFAULT_OPTIONS): FilteredMove {
@@ -122,6 +129,8 @@ export function filterMovement(f: MoveFilter, dx: number, dy: number, opts: Move
   const limit = Math.max(opts.minCounts, opts.factor * med);
   const large = mag > limit;
   const out = (rx: number, ry: number, decision: MoveDecision): FilteredMove => ({ dx: rx, dy: ry, decision, median: med, limit });
+  // 動きが 0 のイベント(ボタンだけ等)は、保留・中央値・burst を変えずにそのまま返す
+  if (mag === 0) return out(0, 0, "passed");
   if (f.held) {
     const held = f.held;
     const heldMag = Math.hypot(held.dx, held.dy);
@@ -135,9 +144,16 @@ export function filterMovement(f: MoveFilter, dx: number, dy: number, opts: Move
     // 保留していたぶんは 1 回きりの飛びとして捨てる
     f.dropped += 1;
     if (large) {
-      // 今の動きも大きいが、そろっていない:今の動きを新しく保留して、次で判断する
+      if (f.mismatch >= 1) {
+        // そろわない大きい動きが 2 回続いた:飛びが続くより、本当に速く動かしている見込みが高いので今の動きは通す
+        pass(f, mag, true, opts.window);
+        return out(dx, dy, "mismatch-pass");
+      }
+      // 今の動きも大きいが、そろっていない:今の動きを新しく保留して、次で判断する(中央値には入れる)
+      remember(f, mag, opts.window);
       f.held = { dx, dy };
       f.burst = false;
+      f.mismatch += 1;
       return out(0, 0, "dropped-held");
     }
     pass(f, mag, false, opts.window);
