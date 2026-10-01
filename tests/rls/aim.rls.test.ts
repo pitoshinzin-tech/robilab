@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { admin, makeUser, cleanup, errorCode } from "./helpers";
 import { aimCharForDate, jstDate } from "@/lib/aim/daily";
 import { emptyMySettings } from "@/lib/my-settings";
+import { addDays } from "@/lib/aim/history";
 
 afterAll(cleanup);
 const anon = () => createClient(process.env.TEST_SUPABASE_URL!, process.env.TEST_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
@@ -76,5 +77,43 @@ describe("get_aim_ranking", () => {
     } finally {
       await admin.from("profiles").update({ status: "active" }).eq("id", a.id);
     }
+  });
+});
+
+describe("my_aim_history", () => {
+  const row = (user_id: string, play_date: string, score: number) =>
+    ({ user_id, play_date, char_id: "u91ce", accuracy: 80, time_ms: 9000, score });
+
+  it("returns only the caller's rows with four columns, within 400 days up to today", async () => {
+    const a = await makeUser({ register: false });
+    const b = await makeUser({ register: false });
+    const t = today();
+    const { error } = await admin.from("aim_scores").insert([
+      row(a.id, t, 5000),
+      row(a.id, addDays(t, -1), 4000),
+      row(a.id, addDays(t, -400), 3000),
+      row(a.id, addDays(t, 1), 9999),
+      row(b.id, t, 7000),
+    ]);
+    expect(error).toBeNull();
+    const { data, error: e2 } = await a.client!.rpc("my_aim_history", { p_from: addDays(t, -1000) });
+    expect(e2).toBeNull();
+    const rows = data as Record<string, unknown>[];
+    expect(rows.map((r) => r.play_date)).toEqual([addDays(t, -1), t]);
+    expect(rows.map((r) => r.score)).toEqual([4000, 5000]);
+    expect(Object.keys(rows[0]).sort()).toEqual(["accuracy", "play_date", "score", "time_ms"]);
+  });
+
+  it("respects p_from inside the 400-day window", async () => {
+    const a = await makeUser({ register: false });
+    const t = today();
+    await admin.from("aim_scores").insert([row(a.id, t, 5000), row(a.id, addDays(t, -10), 4000)]);
+    const { data } = await a.client!.rpc("my_aim_history", { p_from: addDays(t, -5) });
+    expect((data as { play_date: string }[]).map((r) => r.play_date)).toEqual([t]);
+  });
+
+  it("cannot be called without logging in", async () => {
+    const { error } = await anon().rpc("my_aim_history", { p_from: today() });
+    expect(error).not.toBeNull();
   });
 });
