@@ -150,6 +150,17 @@ describe("filterMovement(2 回続いた大きい動きの見分け)", () => {
     // 2 回続けてそろわなかったら、2 回目は通す
     expect(fast[2]).toBe("mismatch-pass");
   });
+  it("そろわない 2 回目でも、保留していた動きの 4 倍を超える巨大な動きは通さない", () => {
+    const opts = moveFilterOptions(0.028);
+    const { sx, decisions } = feed([...steady(16, 5), [300, 0], [80, 0], [2000, 0], [5, 0]], opts);
+    expect(decisions[18]).toBe("dropped-held");
+    expect(sx - 80).toBeLessThan(200);
+  });
+  it("逆向きに振れる大きい動き(+ − +)は、まとまった飛びにならない", () => {
+    const opts = moveFilterOptions(0.028);
+    const { sx } = feed([...steady(16, 5), [400, 0], [-400, 0], [400, 0], [5, 0]], opts);
+    expect(Math.abs(sx - 80)).toBeLessThan(100);
+  });
   it("そろわない大きい動きは、捨てても中央値に入る(しきい値がついてくる)", () => {
     const opts = moveFilterOptions(0.028);
     const f = createMoveFilter();

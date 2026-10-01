@@ -119,6 +119,7 @@ function pass(f: MoveFilter, mag: number, large: boolean, window: number) {
  * 大きい動きが 2 回続き、2 回の向きと大きさがそろっていれば(cos が pairCos 以上、大きさの比が pairRatio 以内)、
  * 本物の速い動きとして保留していたぶんも合わせて返す。そろっていなければ 1 回目を捨て、2 回目を新しく保留する。
  * そろわない大きい動きが 2 回続いたら(保留し直しが 2 回目になったら)、今の動きは通す(照準が止まりっぱなしにならないように)。
+ * ただし今の動きが、保留していた動きの burstJumpFactor 倍を超えるときや、逆向き(cos < 0)のときは通さずに保留し直す。
  * そろわずに捨てた・保留した動きも中央値には入れる(本当に速く動かしているなら、しきい値がついてくる)。
  * 動きが 0 のイベントは何も変えない(保留している動きも捨てない)。
  * 本物の速い動きの途中(burst)は大きい動きを保留しないが、直前に通した動きの burstJumpFactor 倍を超える動きは保留する。
@@ -144,16 +145,20 @@ export function filterMovement(f: MoveFilter, dx: number, dy: number, opts: Move
     // 保留していたぶんは 1 回きりの飛びとして捨てる
     f.dropped += 1;
     if (large) {
-      if (f.mismatch >= 1) {
-        // そろわない大きい動きが 2 回続いた:飛びが続くより、本当に速く動かしている見込みが高いので今の動きは通す
+      // 保留していた動き(1 つ前のイベント)との向き。逆向きに振れる動き(+ − +)は飛びとみなす
+      const cos = (held.dx * dx + held.dy * dy) / (heldMag * mag);
+      if (f.mismatch >= 1 && mag <= opts.burstJumpFactor * heldMag && cos >= 0) {
+        // そろわない大きい動きが 2 回続いた:飛びが続くより、本当に速く動かしている見込みが高いので今の動きは通す。
+        // ただし 1 つ前の動きの burstJumpFactor 倍を超える巨大な動きや、逆向きに振れる動きは通さない
         pass(f, mag, true, opts.window);
         return out(dx, dy, "mismatch-pass");
       }
-      // 今の動きも大きいが、そろっていない:今の動きを新しく保留して、次で判断する(中央値には入れる)
+      // 今の動きも大きいが、そろっていない:今の動きを新しく保留して、次で判断する(中央値には入れる)。
+      // 続けて保留し直したことは 1 回と数える(次にそろえば mismatch-pass できる)
       remember(f, mag, opts.window);
       f.held = { dx, dy };
       f.burst = false;
-      f.mismatch += 1;
+      f.mismatch = 1;
       return out(0, 0, "dropped-held");
     }
     pass(f, mag, false, opts.window);
