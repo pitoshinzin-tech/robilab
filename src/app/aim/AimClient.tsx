@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { AimChar } from "@/lib/aim/daily";
 import { jstDate } from "@/lib/aim/daily";
+import { computeScore } from "@/lib/aim/trace";
+import { addDays, clearLocal, loadHistory, mergeHistory, recordLocal, serverRowsToDays, type AimDays, type AimHistoryRow } from "@/lib/aim/history";
 import { degreesPerCount } from "@/lib/aim/view";
 import { aimErrorMessage } from "@/lib/aim/share";
 import { CROSSHAIR_DEFAULT } from "@/lib/crosshair";
@@ -11,6 +13,7 @@ import { adoptServerIfLocalEmpty, browserStorage, loadLocal } from "@/lib/my-set
 import { useIsClient } from "@/lib/use-is-client";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { errorCodeOf } from "@/lib/lobby-errors";
+import { AimHistory } from "@/components/aim/AimHistory";
 import { AimGame } from "@/components/aim/AimGame";
 import { SensSetup } from "@/components/aim/SensSetup";
 import { AimResult } from "@/components/aim/AimResult";
@@ -38,11 +41,18 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
   const [canResend, setCanResend] = useState(false);
   const [sending, setSending] = useState(false);
   const [mine, setMine] = useState<{ rank: number; score: number } | null>(null);
+  const [historyRev, setHistoryRev] = useState(0);
+  const [serverDays, setServerDays] = useState<AimDays | null>(null);
+  const [serverError, setServerError] = useState(false);
 
   const settings = isClient ? loadLocal(browserStorage()) : null;
   void settingsRev;
   const deg = settings?.mainGame && settings.sens[settings.mainGame] ? degreesPerCount(settings.mainGame, settings.sens[settings.mainGame]) : null;
   const crosshair = settings?.crosshair ?? CROSSHAIR_DEFAULT;
+  void historyRev;
+  const localDays = isClient ? loadHistory(browserStorage()) : {};
+  // ログアウトしたらサーバーの記録は使わない(effect の中で setState しないよう、ここで外す)
+  const days = loggedIn && serverDays ? mergeHistory(localDays, serverDays) : localDays;
 
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
@@ -73,6 +83,22 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
   }, [loggedIn, date]);
   useEffect(() => { refreshMine(); }, [refreshMine]);
 
+  // 連続日数を 30 日より長く数えられるよう、400 日分を読む(グラフは直近 30 日だけ)
+  const refreshHistory = useCallback(() => {
+    if (!loggedIn) return;
+    createSupabaseBrowser().rpc("my_aim_history", { p_from: addDays(date, -399) }).then(({ data, error }) => {
+      if (error) {
+        // ログインが切れていたらブラウザの記録だけで出す(メッセージは出さない)
+        if (errorCodeOf(error) === "NOT_LOGGED_IN") { setServerDays(null); setServerError(false); }
+        else setServerError(true);
+        return;
+      }
+      setServerDays(serverRowsToDays(data as AimHistoryRow[] | null));
+      setServerError(false);
+    });
+  }, [loggedIn, date]);
+  useEffect(() => { refreshHistory(); }, [refreshHistory]);
+
   const sendingRef = useRef(false);
   const submit = useCallback(async (r: Result) => {
     if (!loggedIn || sendingRef.current) return;
@@ -95,12 +121,13 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
       setSendMessage(`ランキングに送りました(今日の自己ベスト ${Number(data).toLocaleString("ja-JP")} 点)。`);
       setCanResend(false);
       refreshMine();
+      refreshHistory();
       router.refresh();
     } finally {
       sendingRef.current = false;
       setSending(false);
     }
-  }, [loggedIn, date, char, refreshMine, router]);
+  }, [loggedIn, date, char, refreshMine, refreshHistory, router]);
 
   // 日付が変わっていたら、もう一度の前に新しい今日の文字を読み込む
   const retry = () => {
@@ -120,7 +147,12 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
             onResend={() => void submit(result)} onRetry={retry} />
         ) : (
           <AimGame key={`${date}:${char.id}:${round}`} char={char} degPerCount={deg} crosshair={crosshair} debug={debug}
-            onFinish={(r) => { setResult(r); void submit(r); }}
+            onFinish={(r) => {
+              recordLocal(browserStorage(), date, { score: computeScore(r.accuracy, r.timeMs, char.strokes.length), accuracy: r.accuracy, timeMs: r.timeMs });
+              setHistoryRev((n) => n + 1);
+              setResult(r);
+              void submit(r);
+            }}
             onAbort={() => setRound((n) => n + 1)} />
         )}
         <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -134,6 +166,11 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
   return (
     <>
       {play}
+      {isClient && (
+        <AimHistory days={days} today={date} loggedIn={loggedIn} serverError={loggedIn && serverError}
+          canClear={Object.keys(localDays).length > 0}
+          onClear={() => { clearLocal(browserStorage()); setHistoryRev((n) => n + 1); }} />
+      )}
       <Ranking rows={rows} mine={mine} loggedIn={loggedIn} />
     </>
   );
