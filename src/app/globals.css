@@ -208,6 +208,38 @@ body {
   }
 }
 
+/* 追補 S4:選んだときの Check を 120ms で線として引く(線の言葉) */
+.rl-draw-check {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: rl-draw 120ms var(--rl-ease-out) forwards;
+}
+@keyframes rl-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+/* 追補 6 章:読み込み中を、8px のマスが左から 1 段ずつ点く形で(明るさは変えない) */
+.rl-skeleton-pixel {
+  position: relative;
+  overflow: hidden;
+}
+.rl-skeleton-pixel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(90deg, var(--rl-line) 0 8px, transparent 8px 16px);
+  animation: rl-pixel-fill 1.6s steps(8, end) infinite;
+}
+@keyframes rl-pixel-fill {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,
@@ -218,6 +250,9 @@ body {
     scroll-behavior: auto !important;
   }
   .rl-skeleton {
+    animation: none !important;
+  }
+  .rl-skeleton-pixel::after {
     animation: none !important;
   }
 }

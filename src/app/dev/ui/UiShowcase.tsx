@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Share2 } from "lucide-react";
+import { Inbox, Share2 } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardLink, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
@@ -10,10 +10,20 @@ import { Badge, RankBadge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress";
 import { NumberField } from "@/components/my/NumberField";
+import { Chip, ChipGroup, CheckChip } from "@/components/ui/chip";
+import { SectionHeading } from "@/components/ui/section-heading";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { Skeleton, LoadingRegion } from "@/components/ui/skeleton";
+import { CopyButton } from "@/components/ui/copy-button";
+import { TypeIcon } from "@/components/brand/TypeIcon";
+import { TYPES } from "@/data/types";
 
 export function UiShowcase() {
   const [loading, setLoading] = useState(false);
   const [num, setNum] = useState<number | null>(800);
+  const [grip, setGrip] = useState<("palm" | "claw" | "fingertip")[]>(["palm"]);
+  const [multi, setMulti] = useState<string[]>([]);
   return (
     <main className="mx-auto grid w-full max-w-[1168px] gap-8 px-4 py-6 md:px-6">
       <h1 className="text-[32px] font-bold">部品の確認</h1>
@@ -65,6 +75,26 @@ export function UiShowcase() {
       <section className="flex flex-wrap items-center gap-3">
         <h2 className="w-full text-2xl font-bold">Badge</h2>
         <Badge variant="pr">PR</Badge><Badge variant="count">3</Badge><Badge variant="success">成立</Badge><Badge variant="code">ARCH</Badge><RankBadge rank={1} /><RankBadge rank={8} />
+      </section>
+      <section className="grid gap-3">
+        <SectionHeading title="Chip" description="1 つ選ぶ(矢印キーで移動)/いくつでも/フォーム" count={3} />
+        <ChipGroup label="持ち方" value={grip} onValueChange={setGrip}>
+          <Chip value="palm">かぶせ</Chip><Chip value="claw">つかみ</Chip><Chip value="fingertip">つまみ</Chip>
+        </ChipGroup>
+        <ChipGroup label="ゲーム" multiple allowEmpty value={multi} onValueChange={setMulti}>
+          <Chip value="valorant">VALORANT</Chip><Chip value="apex">Apex</Chip><Chip value="ow" disabled>OW(無効)</Chip>
+        </ChipGroup>
+        <div className="flex flex-wrap gap-2"><CheckChip name="voice" value="1">VC 可</CheckChip></div>
+      </section>
+      <section className="grid gap-3 md:grid-cols-2">
+        <EmptyState icon={Inbox} title="条件に合う人がまだいません" description="時間帯を増やすと見つかりやすくなります。" action={<Button>条件をゆるめる</Button>} />
+        <ErrorState message="通信状態を確認して、もう一度お試しください。" onRetry={() => {}} showHome />
+        <LoadingRegion className="grid gap-2"><Skeleton className="h-6 w-1/2" /><Skeleton className="h-24 w-full rounded-rl-md" /><Skeleton pixel className="h-8 w-full" /></LoadingRegion>
+        <div className="flex flex-wrap items-center gap-3"><CopyButton path="/aim" label="PC で遊ぶリンクをコピー" /></div>
+      </section>
+      <section className="flex flex-wrap gap-2">
+        {TYPES.map((t) => <TypeIcon key={t.code} code={t.code} size={64} />)}
+        <TypeIcon code="ARCH" size={160} labelled glow animate />
       </section>
     </main>
   );
