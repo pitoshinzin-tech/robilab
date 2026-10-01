@@ -1,19 +1,16 @@
-import * as React from "react"
-import { Input as InputPrimitive } from "@base-ui/react/input"
-import { cn } from "cn"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
-  return (
-    <InputPrimitive
-      type={type}
-      data-slot="input"
-      className={cn(
-        "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
-        className
-      )}
-      {...props}
-    />
-  )
+const fieldBase =
+  "w-full min-w-0 rounded-rl-sm border border-rl-line-strong bg-rl-surface px-3 text-base text-rl-text transition-colors duration-(--rl-dur-fast) ease-rl-out placeholder:text-rl-muted hover:border-rl-text/60 focus-visible:border-rl-text aria-invalid:border-rl-danger disabled:cursor-not-allowed disabled:opacity-45";
+
+/** 入力欄(高さ 48、文字 16px。iOS の拡大を防ぐ)。invalid で赤い枠と aria-invalid。 */
+function Input({ className, invalid, ...props }: React.ComponentProps<"input"> & { invalid?: boolean }) {
+  return <input data-slot="input" aria-invalid={invalid || undefined} className={cn(fieldBase, "h-12", className)} {...props} />;
 }
 
-export { Input }
+function Textarea({ className, invalid, ...props }: React.ComponentProps<"textarea"> & { invalid?: boolean }) {
+  return <textarea data-slot="textarea" aria-invalid={invalid || undefined} className={cn(fieldBase, "min-h-24 py-3", className)} {...props} />;
+}
+
+export { Input, Textarea, fieldBase };

@@ -1,6 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { parseNumber } from "@/lib/parse-number";
+import { Input } from "@/components/ui/input";
+import { Field, fieldDescribedBy } from "@/components/ui/field";
 
 type Props = {
   label: string;
@@ -8,21 +10,26 @@ type Props = {
   onValue: (n: number | null) => void;
   error?: string;
   suffix?: string;
+  hint?: string;
   /** 読めない文字のときに true、空欄か読めたときに false を知らせる(任意) */
   onInvalid?: (invalid: boolean) => void;
 };
 
 /** 数字の入力欄。全角や読めない文字はその場で注意し、保存には回さない。 */
-export function NumberField({ label, value, onValue, error, suffix, onInvalid }: Props) {
+export function NumberField({ label, value, onValue, error, suffix, hint, onInvalid }: Props) {
+  const id = useId();
   const [text, setText] = useState(value === null ? "" : String(value));
   const [parseError, setParseError] = useState(false);
+  const message = parseError ? "数字で入力してください。" : error;
   return (
-    <label className="grid gap-1 text-sm">
-      {label}
+    <Field id={id} label={label} hint={hint} error={message}>
       <span className="flex items-center gap-2">
-        <input
+        <Input
+          id={id}
           inputMode="decimal"
           value={text}
+          invalid={Boolean(message)}
+          aria-describedby={fieldDescribedBy(id, { hint: Boolean(hint), error: Boolean(message) })}
           onChange={(e) => {
             const t = e.target.value;
             setText(t);
@@ -33,11 +40,9 @@ export function NumberField({ label, value, onValue, error, suffix, onInvalid }:
             onInvalid?.(false);
             onValue(n);
           }}
-          className="h-12 w-full rounded-xl border border-white/15 bg-[var(--rl-card)] px-3 text-base"
         />
-        {suffix && <span className="text-[var(--rl-muted)]">{suffix}</span>}
+        {suffix && <span className="text-sm text-rl-muted">{suffix}</span>}
       </span>
-      {(parseError || error) && <span role="alert" className="text-xs text-[var(--rl-danger)]">{parseError ? "数字で入力してください。" : error}</span>}
-    </label>
+    </Field>
   );
 }

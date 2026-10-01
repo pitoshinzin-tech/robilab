@@ -1,19 +1,14 @@
-"use client"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-import * as React from "react"
-import { cn } from "cn"
-
-function Label({ className, ...props }: React.ComponentProps<"label">) {
+/** 欄の上の 14px 太字。必須は色でなく文字で示す。 */
+function Label({ className, required, children, ...props }: React.ComponentProps<"label"> & { required?: boolean }) {
   return (
-    <label
-      data-slot="label"
-      className={cn(
-        "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
-        className
-      )}
-      {...props}
-    />
-  )
+    <label data-slot="label" className={cn("flex flex-wrap items-center gap-2 text-sm font-bold text-rl-text", className)} {...props}>
+      {children}
+      {required && <span className="rounded-rl-sm border border-rl-line-strong px-2 text-xs font-bold text-rl-muted">必須</span>}
+    </label>
+  );
 }
 
-export { Label }
+export { Label };

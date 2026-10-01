@@ -1,102 +1,51 @@
-import * as React from "react"
-import { cn } from "cn"
+import * as React from "react";
+import Link from "next/link";
+import { cva, type VariantProps } from "class-variance-authority";
+import { ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-function Card({
-  className,
-  size = "default",
-  ...props
-}: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
+const cardVariants = cva("rounded-rl-md border bg-rl-surface p-4 text-rl-text md:p-6", {
+  variants: {
+    variant: {
+      default: "border-rl-line",
+      selected: "border-2 border-rl-selected bg-rl-selected-bg",
+      feature: "border-rl-line-strong",
+      danger: "border-rl-danger",
+    },
+  },
+  defaultVariants: { variant: "default" },
+});
+
+type CardProps = React.HTMLAttributes<HTMLElement> & VariantProps<typeof cardVariants> & { as?: "div" | "section" | "li" | "article" };
+
+/** カード。中にカードを入れない(区切りは border-rl-line の線)。 */
+function Card({ as: Tag = "div", variant, className, ...props }: CardProps) {
+  return <Tag data-slot="card" className={cn(cardVariants({ variant }), className)} {...props} />;
+}
+
+/** カード全体がリンク。ホバーで面が明るくなり、右の ChevronRight で押せると分かる。中にリンクやボタンを入れない。 */
+function CardLink({ className, children, ...props }: React.ComponentProps<typeof Link>) {
   return (
-    <div
+    <Link
       data-slot="card"
-      data-size={size}
       className={cn(
-        "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-xl bg-card py-(--card-spacing) text-sm text-card-foreground ring-1 ring-foreground/10 [--card-spacing:--spacing(4)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
-        className
+        "group flex min-w-0 cursor-pointer items-center gap-4 rounded-rl-md border border-rl-line bg-rl-surface p-4 text-rl-text transition-[background-color,border-color,transform] duration-(--rl-dur-fast) ease-rl-out hover:border-rl-line-strong hover:bg-rl-surface-2 active:translate-y-px md:p-6",
+        className,
       )}
       {...props}
-    />
-  )
+    >
+      <div className="min-w-0 flex-1">{children}</div>
+      <ChevronRight aria-hidden className="size-5 shrink-0 text-rl-muted transition-colors group-hover:text-rl-text" />
+    </Link>
+  );
 }
 
-function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="card-header"
-      className={cn(
-        "group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-xl px-(--card-spacing) has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-(--card-spacing)",
-        className
-      )}
-      {...props}
-    />
-  )
+function CardTitle({ className, ...props }: React.ComponentProps<"h3">) {
+  return <h3 className={cn("text-xl font-bold", className)} {...props} />;
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="card-title"
-      className={cn(
-        "font-heading text-base leading-snug font-medium group-data-[size=sm]/card:text-sm",
-        className
-      )}
-      {...props}
-    />
-  )
+function CardDescription({ className, ...props }: React.ComponentProps<"p">) {
+  return <p className={cn("text-sm text-rl-muted", className)} {...props} />;
 }
 
-function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="card-description"
-      className={cn("text-sm text-muted-foreground", className)}
-      {...props}
-    />
-  )
-}
-
-function CardAction({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="card-action"
-      className={cn(
-        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-function CardContent({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="card-content"
-      className={cn("px-(--card-spacing)", className)}
-      {...props}
-    />
-  )
-}
-
-function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="card-footer"
-      className={cn(
-        "flex items-center rounded-b-xl border-t bg-muted/50 p-(--card-spacing)",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-export {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardAction,
-  CardDescription,
-  CardContent,
-}
+export { Card, CardLink, CardTitle, CardDescription, cardVariants };
