@@ -256,3 +256,88 @@ body {
     animation: none !important;
   }
 }
+
+/* ===== 追補 S3:ページの切り替え(View Transitions。対応しないブラウザではふつうに切り替わる) ===== */
+:root {
+  --rl-vt-shift: 16px;
+}
+@media (min-width: 768px) {
+  :root {
+    --rl-vt-shift: 24px;
+  }
+}
+/* 遷移の間もクリックを下の本物のページへ通す(名前を付けた要素だけは遷移の間クリックを受けない) */
+::view-transition {
+  pointer-events: none;
+}
+/* 名前のない所(ページ全体)は動かさず、すぐ入れ替える。動くのは PageShell の中身と、名前を付けた要素だけ */
+::view-transition-old(root) {
+  display: none;
+}
+::view-transition-new(root) {
+  animation: none;
+}
+/* ふつうの移動:上から 4 段で消えて(120ms)、上から 4 段で出る(200ms) */
+::view-transition-old(.rl-scan) {
+  animation: rl-scan-out 120ms steps(4, end) both;
+}
+::view-transition-new(.rl-scan) {
+  animation: rl-scan-in 200ms steps(4, end) 120ms both;
+}
+/* 深く入る:中身が左へずれながら 4 段。戻るは逆 */
+::view-transition-old(.rl-forward) {
+  animation: rl-scan-out 120ms steps(4, end) both, rl-shift-to-left 120ms steps(4, end) both;
+}
+::view-transition-new(.rl-forward) {
+  animation: rl-scan-in 200ms steps(4, end) 120ms both, rl-shift-from-right 200ms steps(4, end) 120ms both;
+}
+::view-transition-old(.rl-back) {
+  animation: rl-scan-out 120ms steps(4, end) both, rl-shift-to-right 120ms steps(4, end) both;
+}
+::view-transition-new(.rl-back) {
+  animation: rl-scan-in 200ms steps(4, end) 120ms both, rl-shift-from-left 200ms steps(4, end) 120ms both;
+}
+@keyframes rl-scan-out {
+  from {
+    clip-path: inset(0 0 0 0);
+  }
+  to {
+    clip-path: inset(100% 0 0 0);
+  }
+}
+@keyframes rl-scan-in {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes rl-shift-to-left {
+  to {
+    transform: translateX(calc(var(--rl-vt-shift) * -1));
+  }
+}
+@keyframes rl-shift-from-right {
+  from {
+    transform: translateX(var(--rl-vt-shift));
+  }
+}
+@keyframes rl-shift-to-right {
+  to {
+    transform: translateX(var(--rl-vt-shift));
+  }
+}
+@keyframes rl-shift-from-left {
+  from {
+    transform: translateX(calc(var(--rl-vt-shift) * -1));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
