@@ -270,6 +270,20 @@ body {
 ::view-transition {
   pointer-events: none;
 }
+/* ヘッダーとタブバーは動かさない(古い方は消して、新しい方をそのまま上に置く) */
+::view-transition-group(site-header),
+::view-transition-group(tab-bar) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header),
+::view-transition-old(tab-bar) {
+  display: none;
+}
+::view-transition-new(site-header),
+::view-transition-new(tab-bar) {
+  animation: none;
+}
 /* 名前のない所(ページ全体)は動かさず、すぐ入れ替える。動くのは PageShell の中身と、名前を付けた要素だけ */
 ::view-transition-old(root) {
   display: none;

@@ -1,24 +1,31 @@
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
-import { PROS_READY } from "@/data/pros";
+import { VT_SITE_HEADER } from "@/lib/motion/vt-names";
 import { Bell } from "@/components/lobby/Bell";
+import { BrandMark } from "./BrandMark";
+import { HeaderNav } from "./HeaderNav";
 
+/**
+ * 上のヘッダー(固定しない)。プロ設定・感度計算・タイプ一覧はタブの中の SubNav へ移した。
+ * (追補 4-3・4-5)ロゴの組みは「カタカナ Zen Kaku 900 + ROBILAB Orbitron 600・字間 0.08em」。20px なので色ズレは付けない。
+ * (追補 S3)ページが切り替わる間は動かない。
+ */
 export function SiteHeader() {
   return (
-    <header className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
-      <Link href="/" className="rl-glitch shrink-0 whitespace-nowrap text-xl font-bold">{BRAND.name}</Link>
-      <nav className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-sm text-[var(--rl-muted)]">
-        <Link href="/diagnosis" className="whitespace-nowrap">診断</Link>
-        <Link href="/aim" className="whitespace-nowrap">今日の文字</Link>
-        <Link href="/mouse" className="whitespace-nowrap">マウス探し</Link>
-        {/* データが入るまでリンクを出さない(ページも非表示) */}
-        {PROS_READY && <Link href="/pros" className="whitespace-nowrap">プロ設定</Link>}
-        <Link href="/tools/sensitivity" className="whitespace-nowrap">感度計算</Link>
-        <Link href="/my" className="whitespace-nowrap">マイ設定</Link>
-        <Link href="/types" className="whitespace-nowrap">タイプ一覧</Link>
-        <Link href="/lobby" className="whitespace-nowrap">仲間</Link>
-        <Bell />
-      </nav>
+    <header className="border-b border-rl-line" style={{ viewTransitionName: VT_SITE_HEADER }}>
+      <div className="mx-auto flex h-14 w-full max-w-[1168px] items-center justify-between gap-4 px-4 md:h-16 md:px-6">
+        <Link href="/" className="flex min-h-11 shrink-0 items-center gap-2 rounded-rl-sm">
+          <BrandMark />
+          <span className="grid leading-none">
+            <span className="text-xl font-black">{BRAND.name}</span>
+            <span className="font-display text-xs font-semibold tracking-[0.08em] text-rl-muted">{BRAND.nameEn}</span>
+          </span>
+        </Link>
+        <HeaderNav />
+        <div className="flex shrink-0 items-center">
+          <Bell />
+        </div>
+      </div>
     </header>
   );
 }

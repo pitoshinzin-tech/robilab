@@ -2,7 +2,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Bell as BellIcon } from "lucide-react";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { Badge } from "@/components/ui/badge";
 
 const INBOX_SEEN_EVENT = "robilab:inbox-seen";
 
@@ -71,8 +73,9 @@ export function Bell() {
   if (!visible) return null;
   const label = count > 99 ? "99+" : String(count);
   return (
-    <Link href="/lobby/inbox" aria-label={`通知 ${count}件`} className="relative">
-      🔔{count > 0 && <span className="absolute -right-2 -top-2 rounded-full bg-[var(--rl-magenta)] px-1.5 text-[10px] font-bold text-white">{label}</span>}
+    <Link href="/lobby/inbox" aria-label={`通知 ${count}件`} className="relative inline-flex size-11 items-center justify-center rounded-rl-pill text-rl-muted hover:bg-rl-surface-2 hover:text-rl-text">
+      <BellIcon aria-hidden className="size-5" />
+      {count > 0 && <Badge variant="count" className="absolute right-0.5 top-0.5">{label}</Badge>}
     </Link>
   );
 }
