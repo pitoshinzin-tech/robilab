@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TYPES } from "@/data/types";
-import { PixelIcon } from "@/components/brand/PixelIcon";
+import { TypeIcon } from "@/components/brand/TypeIcon";
 
 export const metadata: Metadata = { title: "16のゲーマータイプ一覧" };
 
@@ -13,7 +13,7 @@ export default function TypesPage() {
         {TYPES.map((t) => (
           <li key={t.code}>
             <Link href={`/type/${t.code}`} className="flex items-center gap-3 rounded-xl border border-white/10 bg-[var(--rl-surface)] p-3">
-              <PixelIcon code={t.code} size={48} />
+              <TypeIcon code={t.code} size={48} />
               <div>
                 <div className="font-display text-sm text-[var(--rl-magenta)]">{t.code}</div>
                 <div className="font-bold">{t.name}</div>

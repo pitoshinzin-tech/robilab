@@ -8,7 +8,7 @@ import { rankGames } from "@/lib/role-match";
 import { buildShareText, buildXShareUrl } from "@/lib/share";
 import { getSiteUrl } from "@/lib/site-url";
 import { GlitchTitle } from "@/components/brand/GlitchTitle";
-import { PixelIcon } from "@/components/brand/PixelIcon";
+import { TypeIcon } from "@/components/brand/TypeIcon";
 import { AxisBars } from "@/components/result/AxisBars";
 import { GameRanking } from "@/components/result/GameRanking";
 import { AffiliateList } from "@/components/affiliate/AffiliateList";
@@ -51,7 +51,7 @@ export default async function TypePage({ params, searchParams }: Props) {
   return (
     <main className="mx-auto grid max-w-md gap-8 px-4 py-6">
       <section className="grid justify-items-center gap-3 text-center">
-        <PixelIcon code={type.code} size={120} />
+        <TypeIcon code={type.code} size={160} labelled glow />
         <p className="font-display text-3xl tracking-[.15em] text-[var(--rl-magenta)]">{type.code}</p>
         <GlitchTitle className="text-2xl">{type.name}</GlitchTitle>
         <p className="text-[var(--rl-cyan)]">「{type.catchcopy}」</p>

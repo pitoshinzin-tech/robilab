@@ -7,7 +7,7 @@ import { deviceOptions } from "@/data/devices";
 import { gameOptions } from "@/data/popular-games";
 import { DEVICE_SLOTS, GRIPS, MY_SETTINGS_LIMITS, normalizeText, type Grip, type ItemRef } from "@/lib/my-settings";
 import { toPublicCardData } from "@/lib/card-view";
-import { PixelIcon } from "@/components/brand/PixelIcon";
+import { TypeIcon } from "@/components/brand/TypeIcon";
 import { NumberField } from "./NumberField";
 import { ItemPicker } from "./ItemPicker";
 import { CrosshairEditor } from "./CrosshairEditor";
@@ -52,7 +52,7 @@ export function MySettingsEditor() {
       <section className={box}>
         <h2 className="font-bold">タイプ</h2>
         {type ? (
-          <div className="flex items-center gap-3"><PixelIcon code={type.code} /><div><b>{type.code}</b> {type.name}</div></div>
+          <div className="flex items-center gap-3"><TypeIcon code={type.code} size={48} /><div><b>{type.code}</b> {type.name}</div></div>
         ) : (
           <Link href="/diagnosis" className="justify-self-start rounded-full bg-[var(--rl-accent)] px-5 py-2 font-bold text-[var(--rl-on-accent)]">診断する(約1分半)</Link>
         )}

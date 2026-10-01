@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { TYPES } from "@/data/types";
 import { GlitchTitle } from "@/components/brand/GlitchTitle";
-import { PixelIcon } from "@/components/brand/PixelIcon";
+import { TypeIcon } from "@/components/brand/TypeIcon";
 
 const ENTRANCES = [
   { href: "/diagnosis", emoji: "🧪", title: "自分を知る", sub: "1分半のゲーマータイプ診断" },
@@ -32,7 +32,7 @@ export default function Home() {
         <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
           {TYPES.map((t) => (
             <Link key={t.code} href={`/type/${t.code}`} className="grid place-items-center gap-1 text-xs">
-              <PixelIcon code={t.code} size={48} />
+              <TypeIcon code={t.code} size={48} />
               <span className="font-display">{t.code}</span>
             </Link>
           ))}
