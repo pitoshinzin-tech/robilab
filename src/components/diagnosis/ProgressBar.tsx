@@ -10,7 +10,7 @@ export function ProgressBar({ current, total }: { current: number; total: number
       className="w-full"
     >
       <div className="mb-1 flex justify-between text-xs text-[var(--rl-muted)]">
-        <span className="font-[family-name:var(--font-display)]">Q{current}</span>
+        <span className="font-display">Q{current}</span>
         <span>{current} / {total}</span>
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">

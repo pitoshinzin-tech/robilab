@@ -52,7 +52,7 @@ export default async function TypePage({ params, searchParams }: Props) {
     <main className="mx-auto grid max-w-md gap-8 px-4 py-6">
       <section className="grid justify-items-center gap-3 text-center">
         <PixelIcon code={type.code} size={120} />
-        <p className="font-[family-name:var(--font-display)] text-3xl tracking-[.15em] text-[var(--rl-magenta)]">{type.code}</p>
+        <p className="font-display text-3xl tracking-[.15em] text-[var(--rl-magenta)]">{type.code}</p>
         <GlitchTitle className="text-2xl">{type.name}</GlitchTitle>
         <p className="text-[var(--rl-cyan)]">「{type.catchcopy}」</p>
         <ShareButton href={shareUrl} />

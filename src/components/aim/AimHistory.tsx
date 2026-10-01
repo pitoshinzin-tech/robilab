@@ -46,7 +46,7 @@ export function AimHistory({ days, today, loggedIn, serverError, canClear, onCle
         <>
           <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
             {streak > 0 && <span>🔥 <b className="text-[var(--rl-highlight)]">{streak}日連続</b></span>}
-            <span>最高 <b className="font-[family-name:var(--font-display)]">{fmt(best.day.score)}</b> 点({jpDate(best.date)})</span>
+            <span>最高 <b className="font-display">{fmt(best.day.score)}</b> 点({jpDate(best.date)})</span>
           </div>
           <Chart
             title="自己ベストの点数(直近30日)"

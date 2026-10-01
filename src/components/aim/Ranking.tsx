@@ -11,7 +11,7 @@ export function Ranking({ rows, mine, loggedIn = false }: { rows: RankingRow[]; 
           {rows.map((r) => (
             <li key={r.rank} className="flex justify-between rounded-lg bg-[var(--rl-card)] px-3 py-2">
               <span><b className="mr-2 text-[var(--rl-highlight)]">{r.rank}</b>{r.name}</span>
-              <span className="font-[family-name:var(--font-display)]">{r.score.toLocaleString("ja-JP")}</span>
+              <span className="font-display">{r.score.toLocaleString("ja-JP")}</span>
             </li>
           ))}
         </ol>

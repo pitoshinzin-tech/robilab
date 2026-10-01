@@ -15,7 +15,7 @@ export default function TypesPage() {
             <Link href={`/type/${t.code}`} className="flex items-center gap-3 rounded-xl border border-white/10 bg-[var(--rl-surface)] p-3">
               <PixelIcon code={t.code} size={48} />
               <div>
-                <div className="font-[family-name:var(--font-display)] text-sm text-[var(--rl-magenta)]">{t.code}</div>
+                <div className="font-display text-sm text-[var(--rl-magenta)]">{t.code}</div>
                 <div className="font-bold">{t.name}</div>
                 <div className="text-xs text-[var(--rl-muted)]">{t.catchcopy}</div>
               </div>

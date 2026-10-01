@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <main className="mx-auto max-w-5xl px-4">
       <section className="py-10">
-        <p className="mb-2 font-[family-name:var(--font-display)] text-xs tracking-[.2em] text-[var(--rl-cyan)]">{BRAND.tagline}</p>
+        <p className="mb-2 font-display text-xs tracking-[.2em] text-[var(--rl-cyan)]">{BRAND.tagline}</p>
         <GlitchTitle className="text-4xl">{BRAND.name}</GlitchTitle>
         <p className="mt-4 text-lg">今日はなにしに来た?</p>
       </section>
@@ -33,7 +33,7 @@ export default function Home() {
           {TYPES.map((t) => (
             <Link key={t.code} href={`/type/${t.code}`} className="grid place-items-center gap-1 text-xs">
               <PixelIcon code={t.code} size={48} />
-              <span className="font-[family-name:var(--font-display)]">{t.code}</span>
+              <span className="font-display">{t.code}</span>
             </Link>
           ))}
         </div>

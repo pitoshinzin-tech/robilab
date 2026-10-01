@@ -15,7 +15,7 @@ export function AimResult({ glyph, strokes, accuracy, timeMs, perStroke, sendMes
   const url = typeof window !== "undefined" ? `${window.location.origin}/aim` : "/aim";
   return (
     <section className="grid gap-3 rounded-xl border border-[var(--rl-border)] bg-[var(--rl-card)] p-4">
-      <div className="font-[family-name:var(--font-display)] text-4xl text-[var(--rl-highlight)]">{score.toLocaleString("ja-JP")} 点</div>
+      <div className="font-display text-4xl text-[var(--rl-highlight)]">{score.toLocaleString("ja-JP")} 点</div>
       <p className="text-sm">正確さ {accuracy.toFixed(1)}% ・ {(timeMs / 1000).toFixed(1)} 秒</p>
       <p className="text-xs text-[var(--rl-muted)]">画ごとの正確さ:{perStroke.map((x) => `${Math.round(x * 100)}%`).join(" / ")}</p>
       {sendMessage && <p role="status" className="text-sm">{sendMessage}</p>}

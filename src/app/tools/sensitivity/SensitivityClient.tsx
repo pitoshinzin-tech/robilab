@@ -63,11 +63,11 @@ export function SensitivityClient({ initial = null }: { initial?: Initial }) {
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-[var(--rl-border)] bg-[var(--rl-surface)] p-4">
               <div className="text-xs text-[var(--rl-muted)]">振り向き</div>
-              <div className="font-[family-name:var(--font-display)] text-2xl text-[var(--rl-cyan)]">{results.cm} cm</div>
+              <div className="font-display text-2xl text-[var(--rl-cyan)]">{results.cm} cm</div>
             </div>
             <div className="rounded-xl border border-[var(--rl-border)] bg-[var(--rl-surface)] p-4">
               <div className="text-xs text-[var(--rl-muted)]">eDPI</div>
-              <div className="font-[family-name:var(--font-display)] text-2xl text-[var(--rl-magenta)]">{results.edpi}</div>
+              <div className="font-display text-2xl text-[var(--rl-magenta)]">{results.edpi}</div>
             </div>
           </div>
           <div>
@@ -76,7 +76,7 @@ export function SensitivityClient({ initial = null }: { initial?: Initial }) {
               {results.others.map((o) => (
                 <li key={o.game.id} className="flex justify-between rounded-lg bg-white/5 px-4 py-3">
                   <span>{o.game.name}</span>
-                  <span className="font-[family-name:var(--font-display)]">
+                  <span className="font-display">
                     {isInGameRange(o.sens, o.game) ? o.sens : "範囲外"}
                   </span>
                 </li>
