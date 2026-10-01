@@ -4,7 +4,7 @@ import type { AimChar } from "@/lib/aim/daily";
 import { applyMouse, aimPoint, projectPoint, KVG_SIZE, type Point, type View } from "@/lib/aim/view";
 import { closestOnStroke, parsePath, pointAtProgress, toStroke } from "@/lib/aim/path";
 import { initialTrace, stepTrace, traceResult, EDGE, RESUME_RADIUS, START_RADIUS, type TraceState } from "@/lib/aim/trace";
-import { createMoveFilter, filterMovement, pushTrailPoint } from "@/lib/aim/input";
+import { createMoveFilter, filterMovement, moveFilterOptions, pushTrailPoint } from "@/lib/aim/input";
 import { AIM_TUNING } from "@/lib/aim/tuning";
 import { reduceAim, reducePen, canStepTrace, type AimPhase, type AimEvent, type PenEvent } from "@/lib/aim/game-state";
 import { drawCrosshair, type Crosshair } from "@/lib/crosshair";
@@ -114,12 +114,14 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
   // ポインターロックの出入りとマウスの動き
   useEffect(() => {
     const el = canvas.current!;
+    // 飛びを捨てる下限は角度で決める(感度からカウントに直す)
+    const filterOpts = moveFilterOptions(degPerCount);
     const onMove = (e: MouseEvent) => {
       if (document.pointerLockElement !== el) return;
       // 1 回の mousemove につき 1 回だけ視点に足す(描画は requestAnimationFrame の側で 1 フレームに 1 回)
       const mag = Math.hypot(e.movementX, e.movementY);
       if (mag > diag.current.maxDelta) diag.current.maxDelta = mag;
-      const m = filterMovement(moveFilter.current, e.movementX, e.movementY);
+      const m = filterMovement(moveFilter.current, e.movementX, e.movementY, filterOpts);
       if (m.dx === 0 && m.dy === 0) return;
       view.current = applyMouse(view.current, m.dx, m.dy, degPerCount);
     };
