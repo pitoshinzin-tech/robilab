@@ -10,9 +10,11 @@ export type TypeIconSize = 32 | 48 | 64 | 96 | 160 | 240;
  * 16 タイプのアイコン。本人のドット絵(public/types/CODE.png)があればそれを、なければ 4 軸から組み立てた仮の絵を出す。
  * labelled:1 つだけで出すとき true(読み上げに名前を出す)。名前の横に出すときは false(飾り)。
  * animate:診断から来たときだけ、ドットから組み上がる見せ場の動き。glow:結果の大きな絵だけ。
+ * dissolve:同じドットを 1 段明るい色でもう 1 回描き、親の .rl-dissolve-host のホバー・フォーカスで上から 4 段で塗り替える(動きの参考 025。
+ * ドットの外は光らない)。本人のドット絵(PNG)のときは付けない。
  */
-export function TypeIcon({ code, size = 48, labelled = false, animate = false, glow = false, className }: {
-  code: string; size?: TypeIconSize; labelled?: boolean; animate?: boolean; glow?: boolean; className?: string;
+export function TypeIcon({ code, size = 48, labelled = false, animate = false, glow = false, dissolve = false, className }: {
+  code: string; size?: TypeIconSize; labelled?: boolean; animate?: boolean; glow?: boolean; dissolve?: boolean; className?: string;
 }) {
   const type = getType(code);
   const name = type ? `${type.code} ${type.name}のアイコン` : "";
@@ -33,6 +35,15 @@ export function TypeIcon({ code, size = 48, labelled = false, animate = false, g
           ))}
         </g>
       ))}
+      {/* 塗り替えの重ね(data-row を付けない。S2 の 12 行の数に入れない)。目は地の色のまま */}
+      {dissolve && (
+        <g className="rl-dissolve-lit">
+          {rows?.flatMap((r) => r.cells.map((c) => {
+            const fill = spriteFill(c.role, heat);
+            return <rect key={`${c.role}-${c.x}-${c.y}`} x={c.x} y={c.y} width={c.w} height={c.h} style={{ fill: c.role === "eye" ? fill : `color-mix(in oklab, ${fill} 60%, var(--rl-text))` }} />;
+          }))}
+        </g>
+      )}
     </svg>
   );
 }

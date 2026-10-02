@@ -7,6 +7,7 @@ import { aimCharForDate, jstDate } from "@/lib/aim/daily";
 import { loadRanking } from "@/lib/aim/ranking";
 import { parsePath, toStroke } from "@/lib/aim/path";
 import { strokeSchedule } from "@/lib/motion/stroke-schedule";
+import { axisLegend } from "@/lib/type-axes";
 import { FLASK_16, PARTY_16, RULER_16 } from "@/lib/pixel-art";
 import { HeroKanji } from "@/components/brand/HeroKanji";
 import { TodayLabel } from "@/components/brand/TodayLabel";
@@ -69,7 +70,7 @@ export default async function Home() {
                 <NumUnit value={top.score.toLocaleString("ja-JP")} unit="点" className="text-rl-display-1" />
               </p>
             ) : (
-              <p className="text-sm text-rl-muted">今日の 1 位はまだいません。最初の記録がランキングの 1 位になります</p>
+              <p className="text-sm text-rl-muted [word-break:auto-phrase] text-balance">今日の 1 位はまだいません。最初の記録がランキングの 1 位になります</p>
             )}
             {/* PC は主ボタン 1 つ。スマホは押す形のボタンを漢字の下の「1 画なぞってみる」1 つにし、ここは文字のリンク 2 つだけ */}
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
@@ -146,12 +147,13 @@ export default async function Home() {
       <section aria-labelledby="types-heading" className="rl-dot-grid mt-rl-ma-md bg-rl-surface py-12">
         <div className={cn(inner, "grid gap-6")}>
           {/* 「タイプ一覧へ」は PC は見出しの右、スマホは名簿の下の左端(見出しの下に回って半端にずれないように) */}
-          <SectionHeading id="types-heading" title="16 のゲーマータイプ" action={<ButtonLink href="/types" variant="ghost" size="sm" className="hidden md:inline-flex">タイプ一覧へ</ButtonLink>} />
+          <SectionHeading id="types-heading" title="16 のゲーマータイプ" description={`4 文字は ${axisLegend()}`} action={<ButtonLink href="/types" variant="ghost" size="sm" className="hidden md:inline-flex">タイプ一覧へ</ButtonLink>} />
           {/* 見出しが「16 のゲーマータイプ」なので、名簿の名前は「タイプ」を外して短くする(読み上げは正式な名前) */}
           <TypeRoster
             showName
+            mobileName={false}
             className="gap-y-6"
-            items={TYPES.map((t) => ({ code: t.code, name: t.name.replace(/タイプ$/, ""), label: t.name, icon: <TypeIcon code={t.code} size={64} className="size-12 md:size-16" /> }))}
+            items={TYPES.map((t) => ({ code: t.code, name: t.name.replace(/タイプ$/, ""), label: t.name, icon: <TypeIcon code={t.code} size={64} dissolve className="size-12 md:size-16" /> }))}
           />
           <ButtonLink href="/types" variant="ghost" size="sm" className="justify-self-start px-0 md:hidden">タイプ一覧へ<ChevronRight aria-hidden /></ButtonLink>
         </div>

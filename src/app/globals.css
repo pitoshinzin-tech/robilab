@@ -301,11 +301,6 @@ body {
     clip-path: inset(0);
   }
 }
-/* 名簿のタイプの絵(色が多いので重ねは白の薄い光) */
-.rl-dissolve-tint {
-  background: rgba(255, 255, 255, 0.14);
-  mix-blend-mode: screen;
-}
 
 /* 動きの参考 012(Stroke-Draw):入口の行のホバー・フォーカスで、下の線が左から右へ引かれる(transform: scaleX だけ) */
 .rl-draw-line {
