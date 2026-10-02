@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
+import { cn } from "@/lib/utils";
 import { aimCharForDate, jstDate } from "@/lib/aim/daily";
 import { aimOgImagePath } from "@/lib/aim/share";
 import { loadRanking } from "@/lib/aim/ranking";
+import { MORPH_LINE, VT_TODAY_KANJI } from "@/lib/motion/vt-names";
+import { pageContainerClass } from "@/components/ui/page-shell";
+import { KanjiStrokes } from "@/components/brand/KanjiStrokes";
+import { TodayLabel } from "@/components/brand/TodayLabel";
+import { PixelArt } from "@/components/brand/PixelArt";
+import { FLAME_8 } from "@/lib/pixel-art";
 import { AimClient } from "./AimClient";
 
 export const dynamic = "force-dynamic";
@@ -24,16 +32,17 @@ export default async function AimPage() {
   const char = aimCharForDate(date);
   const rows = await loadRanking(date);
   return (
-    <main className="mx-auto grid max-w-3xl gap-6 px-4 py-6">
-      <header className="flex items-end gap-4">
-        <div className="text-7xl font-bold text-[var(--rl-highlight)]">{char.glyph}</div>
-        <div>
-          <h1 className="text-2xl font-bold">今日の文字</h1>
-          <p className="text-sm text-[var(--rl-muted)]">{date} ・ {char.strokes.length} 画 ・ 書き順どおりに線をなぞろう</p>
-        </div>
+    <main className={cn(pageContainerClass("wide"), "grid gap-8")}>
+      <header className="flex flex-wrap items-start gap-4 md:gap-6">
+        <ViewTransition name={VT_TODAY_KANJI} share={MORPH_LINE} default="none">
+          <KanjiStrokes strokes={char.strokes} className="size-(--rl-text-display-3)" />
+        </ViewTransition>
+        <TodayLabel as="h1" glyph={char.glyph} date={date} strokes={char.strokes.length} />
+        <p className="basis-full text-base md:basis-auto md:self-end">書き順どおりに線をなぞろう</p>
       </header>
-      <AimClient char={char} date={date} rows={rows} />
-      <p className="text-xs text-[var(--rl-muted)]">文字データ:<a href="https://kanjivg.tagaini.net/" className="underline" target="_blank" rel="noopener">KanjiVG</a>(© Ulrich Apel、CC BY-SA 3.0)</p>
+      {/* 連続日数の炎のドットはサーバーで描いて渡す(ドット絵のデータをブラウザの JS に入れない) */}
+      <AimClient char={char} date={date} rows={rows} streakIcon={<PixelArt grid={FLAME_8} size={16} />} />
+      <p className="text-xs text-rl-muted">文字データ:<a href="https://kanjivg.tagaini.net/" className="text-rl-accent underline" target="_blank" rel="noopener">KanjiVG</a>(© Ulrich Apel、CC BY-SA 3.0)</p>
     </main>
   );
 }

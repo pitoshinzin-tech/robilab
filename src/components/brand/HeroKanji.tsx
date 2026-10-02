@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, ViewTransition, type CSSProperties } from "react";
 import { PenLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { StrokeSlot } from "@/lib/motion/stroke-schedule";
 import { appendPoint, pointsToPath, toViewBox, type TracePoint } from "@/lib/motion/hero-trace";
+import { MORPH_LINE, VT_TODAY_KANJI } from "@/lib/motion/vt-names";
 import { KanjiStrokes } from "@/components/brand/KanjiStrokes";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
@@ -107,7 +108,10 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
     <div className={cn("grid justify-items-center gap-3", className)}>
       <div ref={box} className={cn("relative size-(--rl-text-hero)", fine && "cursor-crosshair", dragging && "select-none")} style={{ touchAction: capture ? "none" : "auto" }}
         onPointerMove={onMove} onPointerDown={onDown} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onLeave}>
-        <KanjiStrokes strokes={strokes} schedule={schedule} className="size-full" />
+        {/* 追補 S3:「今日の文字に挑戦」で /aim へ行くと、この漢字が /aim の見出しの漢字へ移る(共有の要素 today-kanji) */}
+        <ViewTransition name={VT_TODAY_KANJI} share={MORPH_LINE} default="none">
+          <KanjiStrokes strokes={strokes} schedule={schedule} className="size-full" />
+        </ViewTransition>
         <svg viewBox="0 0 109 109" aria-hidden className="pointer-events-none absolute inset-0 size-full overflow-visible">
           {trace.length > 1 && <path d={pointsToPath(trace)} fill="none" stroke="var(--rl-success)" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />}
           {fine && aim && (

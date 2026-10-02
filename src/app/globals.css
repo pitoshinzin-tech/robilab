@@ -452,6 +452,23 @@ body {
   }
 }
 
+/*
+ * 動きの参考 086(パタパタの表示板):ランキングが更新されて中身が入れ替わった行だけ、名前と点数がめくれて止まる。
+ * 送信のあとの読み込み直しのときだけ(人の操作に答える動き)。200ms・4 段(マスの言葉)、行ごとに 30ms ずつ。transform だけ。
+ */
+.rl-flap {
+  animation: rl-flap 200ms steps(4, end) backwards;
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+@keyframes rl-flap {
+  from {
+    transform: perspective(400px) rotateX(-90deg);
+  }
+  to {
+    transform: perspective(400px) rotateX(0deg);
+  }
+}
+
 /* 追補 S4:選んだときの Check を 120ms で線として引く(線の言葉) */
 .rl-draw-check {
   stroke-dasharray: 24;
@@ -497,6 +514,10 @@ body {
     animation: none !important;
   }
   .rl-skeleton-pixel::after {
+    animation: none !important;
+  }
+  /* 時間差(animation-delay)の間に行が消えて見えないよう、めくる動きは出さない */
+  .rl-flap {
     animation: none !important;
   }
   .rl-roster .rl-roster-item {

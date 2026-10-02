@@ -9,7 +9,10 @@ import { addFpsSample, buildDiagReport, createFpsStats, fpsSummary, isNotable, p
 import { AIM_TUNING } from "@/lib/aim/tuning";
 import { reduceAim, reducePen, canStepTrace, type AimPhase, type AimEvent, type PenEvent } from "@/lib/aim/game-state";
 import { drawCrosshair, type Crosshair } from "@/lib/crosshair";
+import { COUNTDOWN_MS, countdownDigit, display2Px } from "@/lib/aim/countdown";
+import { hudCoords } from "@/lib/aim/hud";
 import { DiagCopyButton } from "@/components/aim/DiagCopyButton";
+import { Button } from "@/components/ui/button";
 
 type Result = { accuracy: number; timeMs: number; perStroke: number[] };
 type Props = {
@@ -23,6 +26,8 @@ type Props = {
   onDiagnostics?: (json: string) => void;
   /** debug のとき、始める前の画面に「診断をコピー」で出す前の回の診断。 */
   lastDiagnostics?: string | null;
+  /** 追補 6 章:終わったとき、onFinish の直前に 1 回、なぞった線を渡す(結果の画面の重ねの図のため。表示だけ)。 */
+  onTrail?: (trail: Point[][]) => void;
 };
 
 /** 小数 1 桁に丸める(診断の数字を読みやすくする)。 */
@@ -35,7 +40,6 @@ function errorName(err: unknown): string {
 }
 type ScreenPoint = { x: number; y: number };
 
-const COUNTDOWN_MS = 3000;
 const UNSUPPORTED = "マウスを固定できませんでした。少し待ってから、もう一度クリックしてください(Chrome / Edge / Firefox で遊べます)。";
 
 /** 全画面から戻す(全画面になっているのが el 自身でなければ何もしない。失敗しても遊びには影響しないので無視する)。 */
@@ -77,7 +81,7 @@ function roleColor(name: string, fallback: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 }
 
-export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug = false, onDiagnostics, lastDiagnostics = null }: Props) {
+export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug = false, onDiagnostics, lastDiagnostics = null, onTrail }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
   // 全画面にする要素(canvas と開始ボタンを包む)
   const stage = useRef<HTMLDivElement>(null);
@@ -148,9 +152,9 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
     onDiagnostics?.(json);
   };
   // コールバックと dispatch は effect の中で最新を読む(ref は effect 内でだけ更新・参照する)
-  const latest = useRef({ dispatch, onFinish, onAbort, emitDiagnostics });
+  const latest = useRef({ dispatch, onFinish, onAbort, emitDiagnostics, onTrail });
   useEffect(() => {
-    latest.current = { dispatch, onFinish, onAbort, emitDiagnostics };
+    latest.current = { dispatch, onFinish, onAbort, emitDiagnostics, onTrail };
   });
 
   useEffect(() => {
@@ -280,11 +284,16 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
       bg: roleColor("--rl-bg", "#0a0c16"),
       pending: roleColor("--rl-secondary", "#7b61ff"),
       current: roleColor("--rl-accent", "#39f3ff"),
-      trail: roleColor("--rl-tertiary", "#b6ff3b"),
+      trail: roleColor("--rl-success", "#b6ff3b"),
       miss: roleColor("--rl-danger", "#ff6b6b"),
       text: roleColor("--rl-text", "#eaf6ff"),
+      muted: roleColor("--rl-muted", "#9fb3c8"),
     };
     let raf = 0;
+    // 追補 6 章:3・2・1 は Orbitron 900(next/font の変数から書体名を読む)
+    const orbitron = getComputedStyle(document.documentElement).getPropertyValue("--font-orbitron").trim() || "sans-serif";
+    // canvas は書体の読み込みを待たないので、先に読んでおく(読めなくても遊びには影響しない)
+    void document.fonts?.load(`900 72px ${orbitron}`).catch(() => {});
     const frame = (now: number) => {
       if (debug) {
         // 診断:直前のフレームの長さ(次の mousemove の記録に付ける)
@@ -322,6 +331,8 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
           document.exitPointerLock();
           leaveFullscreen(stage.current);
           latest.current.emitDiagnostics();
+          // 追補 6 章:なぞった線を結果の画面の重ねの図に渡す(表示だけ。サーバーへは送らない)
+          latest.current.onTrail?.(trail.current.map((seg) => seg.slice()));
           if (r) latest.current.onFinish(r);
         }
       }
@@ -395,12 +406,20 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
         }
       }
       if (ph === "countdown") {
+        // 追補 6 章:display-2 の大きさで、600ms ごとに数を置き換える(点滅させない)
         ctx.fillStyle = colors.text;
-        ctx.font = "bold 64px sans-serif";
+        ctx.font = `900 ${display2Px(window.innerWidth)}px ${orbitron}`;
         ctx.textAlign = "center";
-        ctx.fillText(String(Math.max(1, Math.ceil((countdownEnd.current - now) / 1000))), w / 2, h / 2 - 60);
+        ctx.fillText(String(countdownDigit(countdownEnd.current - now)), w / 2, h / 2 - 60);
       }
       drawCrosshair(ctx, crosshair, Math.round(w / 2), Math.round(h / 2));
+      // 動きの参考 061(HUD の照準):遊んでいる間だけ、照準の右下に今の座標(板の単位)を小さく出す。表示だけ
+      if (ph === "countdown" || ph === "playing") {
+        ctx.font = `500 14px ${orbitron}`;
+        ctx.textAlign = "left";
+        ctx.fillStyle = colors.muted;
+        ctx.fillText(hudCoords(p), Math.round(w / 2) + 28, Math.round(h / 2) + 36);
+      }
       // 診断(?debug=1):fps と、直前の 1 秒の最大の動き
       const d = diag.current;
       d.frames += 1;
@@ -496,15 +515,15 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
 
   return (
     <div className="grid gap-3">
-      <div ref={stage} className={fullscreen ? "relative h-full w-full bg-[var(--rl-bg)]" : "relative"}>
+      <div ref={stage} className={fullscreen ? "relative h-full w-full bg-rl-bg" : "relative"}>
         <canvas ref={canvas}
-          className={`block w-full cursor-crosshair ${fullscreen ? "h-full" : "h-[min(70vh,640px)] rounded-xl border border-[var(--rl-border)]"}`}
+          className={`block w-full cursor-crosshair ${fullscreen ? "h-full" : "h-[min(70vh,640px)] rounded-rl-md border border-rl-line"}`}
           onClick={() => void start()} />
         {phase === "idle" && (
-          <button type="button" onClick={() => void start()}
-            className="absolute inset-0 m-auto h-14 w-56 rounded-full bg-[var(--rl-accent)] font-bold text-[var(--rl-on-accent)]">
-            クリックでスタート
-          </button>
+          // .rl-lock(照準の印)が position: relative を持つので、真ん中に置くのは外の箱でする(箱は押せない。押すのはボタンと canvas)
+          <div className="pointer-events-none absolute inset-0 grid place-items-center">
+            <Button type="button" variant="primary" size="lg" onClick={() => void start()} className="pointer-events-auto w-56">クリックでスタート</Button>
+          </div>
         )}
         {/* 診断(?debug=1):左上の表示の下に、前の回(中断も含む)の診断をコピーするボタン */}
         {debug && phase === "idle" && lastDiagnostics && (
@@ -514,8 +533,8 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
         )}
       </div>
       <p className="text-sm">クリックしている間だけ筆が書けます。画と画の間はクリックを離して移動してください。</p>
-      <p className="text-xs text-[var(--rl-muted)]">Esc で中断できます。OS のポインター速度やマウスの加速の設定によっては、ゲームと少しずれることがあります。</p>
-      {error && <p role="alert" className="text-sm text-[var(--rl-danger)]">{error}</p>}
+      <p className="text-sm text-rl-muted">Esc で中断できます。OS のポインター速度やマウスの加速の設定によっては、ゲームと少しずれることがあります。</p>
+      {error && <p role="alert" className="text-sm text-rl-danger">{error}</p>}
     </div>
   );
 }

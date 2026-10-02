@@ -1,5 +1,8 @@
 import { bestDay, lastNDays, streakDays, type AimDays } from "@/lib/aim/history";
 import { buildChart, CHART_H, CHART_W } from "@/lib/aim/history-chart";
+import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 const DAYS = 30;
 const md = (date: string) => `${Number(date.slice(5, 7))}/${Number(date.slice(8, 10))}`;
@@ -12,21 +15,23 @@ function Chart({ title, label, values, max, from, to }: {
   const g = buildChart(values, max);
   return (
     <figure className="grid gap-1">
-      <figcaption className="text-xs text-[var(--rl-muted)]">{title}</figcaption>
-      <svg viewBox={`0 0 ${CHART_W} ${CHART_H}`} className="h-auto w-full rounded-lg bg-[var(--rl-card)]" role="img" aria-label={label}>
+      <figcaption className="text-sm text-rl-muted">{title}</figcaption>
+      <svg viewBox={`0 0 ${CHART_W} ${CHART_H}`} className="h-auto w-full rounded-lg bg-rl-surface" role="img" aria-label={label}>
         {g.lines.map((pts) => (
           <polyline key={pts} points={pts} fill="none" stroke="var(--rl-secondary)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
         ))}
         {g.dots.map((p) => <circle key={p.index} cx={p.x} cy={p.y} r={2.5} fill="var(--rl-secondary)" />)}
         {g.today && <circle cx={g.today.x} cy={g.today.y} r={4.5} fill="var(--rl-highlight)" />}
       </svg>
-      <div className="flex justify-between text-xs text-[var(--rl-muted)]"><span>{md(from)}</span><span>{md(to)}</span></div>
+      <div className="flex justify-between text-xs text-rl-muted"><span>{md(from)}</span><span>{md(to)}</span></div>
     </figure>
   );
 }
 
-export function AimHistory({ days, today, loggedIn, serverError, canClear, onClear }: {
+export function AimHistory({ days, today, loggedIn, serverError, canClear, onClear, streakIcon }: {
   days: AimDays; today: string; loggedIn: boolean; serverError: boolean; canClear: boolean; onClear: () => void;
+  /** 追補 6 章:連続日数の 8×8 の炎のドット(サーバーで描いて渡す。ドット絵のデータをブラウザの JS に入れないため) */
+  streakIcon?: ReactNode;
 }) {
   const slots = lastNDays(days, today, DAYS);
   const played = slots.filter((s) => s.day);
@@ -37,34 +42,28 @@ export function AimHistory({ days, today, loggedIn, serverError, canClear, onCle
   };
 
   return (
-    <section className="grid gap-3">
-      <h2 className="font-bold">あなたの記録</h2>
-      {serverError && <p className="text-xs text-[var(--rl-muted)]">サーバーの記録を読めませんでした</p>}
+    <section aria-labelledby="history-heading" className="grid gap-4">
+      <SectionHeading id="history-heading" title="あなたの記録" />
+      {serverError && <p className="text-sm text-rl-warning">サーバーの記録を読めませんでした(この端末の記録だけを出しています)</p>}
       {!best ? (
-        <p className="text-sm text-[var(--rl-muted)]">遊ぶと、ここに毎日の記録が残ります</p>
+        <p className="text-sm text-rl-muted">遊ぶと、ここに毎日の記録が残ります</p>
       ) : (
         <>
-          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
-            {streak > 0 && <span>🔥 <b className="text-[var(--rl-highlight)]">{streak}日連続</b></span>}
-            <span>最高 <b className="font-display">{fmt(best.day.score)}</b> 点({jpDate(best.date)})</span>
+          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 text-base">
+            {streak > 0 && <span className="inline-flex items-center gap-2 font-bold text-rl-highlight">{streakIcon}<span className="font-display tabular-nums">{streak}</span>日連続</span>}
+            <span>最高 <b className="font-display tabular-nums">{fmt(best.day.score)}</b> 点({jpDate(best.date)})</span>
           </div>
-          <Chart
-            title="自己ベストの点数(直近30日)"
-            label={`直近30日の自己ベストの点数。遊んだ日 ${played.length} 日、最高 ${fmt(Math.max(0, ...played.map((s) => s.day!.score)))} 点`}
-            values={slots.map((s) => s.day?.score ?? null)} max={10000} from={slots[0].date} to={today}
-          />
-          <Chart
-            title="正確さ(直近30日)"
-            label={`直近30日の正確さ。遊んだ日 ${played.length} 日、最高 ${Math.max(0, ...played.map((s) => s.day!.accuracy))}%`}
-            values={slots.map((s) => s.day?.accuracy ?? null)} max={100} from={slots[0].date} to={today}
-          />
+          <Chart title="自己ベストの点数(直近30日)" label={`直近30日の自己ベストの点数。遊んだ日 ${played.length} 日、最高 ${fmt(Math.max(0, ...played.map((s) => s.day!.score)))} 点`}
+            values={slots.map((s) => s.day?.score ?? null)} max={10000} from={slots[0].date} to={today} />
+          <Chart title="正確さ(直近30日)" label={`直近30日の正確さ。遊んだ日 ${played.length} 日、最高 ${Math.max(0, ...played.map((s) => s.day!.accuracy))}%`}
+            values={slots.map((s) => s.day?.accuracy ?? null)} max={100} from={slots[0].date} to={today} />
         </>
       )}
       {canClear && (
-        <p className="text-xs text-[var(--rl-muted)]">
-          <button type="button" onClick={clear} className="underline">この端末の記録を消す</button>
-          {loggedIn && <span className="ml-2">サーバーの記録は残ります(退会すると消えます)</span>}
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" variant="ghost" size="sm" onClick={clear}>この端末の記録を消す</Button>
+          {loggedIn && <span className="text-sm text-rl-muted">サーバーの記録は残ります(退会すると消えます)</span>}
+        </div>
       )}
     </section>
   );

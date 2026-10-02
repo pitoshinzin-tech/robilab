@@ -1,12 +1,12 @@
 "use client";
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import Link from "next/link";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import type { AimChar } from "@/lib/aim/daily";
 import { jstDate } from "@/lib/aim/daily";
 import { computeScore } from "@/lib/aim/trace";
 import { addDays, clearLocal, loadHistory, mergeHistory, recordLocal, serverRowsToDays, type AimDays, type AimHistoryRow } from "@/lib/aim/history";
 import { degreesPerCount } from "@/lib/aim/view";
+import type { Point } from "@/lib/aim/view";
 import { aimErrorMessage } from "@/lib/aim/share";
 import { CROSSHAIR_DEFAULT } from "@/lib/crosshair";
 import { adoptServerIfLocalEmpty, browserStorage, loadLocal } from "@/lib/my-settings-store";
@@ -19,6 +19,10 @@ import { SensSetup } from "@/components/aim/SensSetup";
 import { AimResult } from "@/components/aim/AimResult";
 import { Ranking, type RankingRow } from "@/components/aim/Ranking";
 import { LoginButton } from "@/components/lobby/LoginButton";
+import { ButtonLink } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { CopyButton } from "@/components/ui/copy-button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Result = { accuracy: number; timeMs: number; perStroke: number[] };
 const noSubscribe = () => () => {};
@@ -28,13 +32,15 @@ const debugParam = () => new URLSearchParams(window.location.search).get("debug"
 // 再送しても結果が変わらないエラー
 const NO_RETRY = ["NOT_LOGGED_IN", "WRONG_DATE", "WRONG_CHAR", "NOT_ACTIVE", "BANNED", "INVALID_INPUT"];
 
-export function AimClient({ char, date, rows }: { char: AimChar; date: string; rows: RankingRow[] }) {
+export function AimClient({ char, date, rows, streakIcon }: { char: AimChar; date: string; rows: RankingRow[]; streakIcon?: ReactNode }) {
   const router = useRouter();
   const isClient = useIsClient();
   const hasMouse = useSyncExternalStore(noSubscribe, finePointer, () => true);
   const debug = useSyncExternalStore(noSubscribe, debugParam, () => false);
   const [settingsRev, setSettingsRev] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
+  // 追補 6 章:なぞった線(結果の画面の重ねの図に使うだけ。サーバーへは送らない)
+  const [trail, setTrail] = useState<Point[][] | null>(null);
   const [round, setRound] = useState(0);
   const [loggedIn, setLoggedIn] = useState(false);
   const [sendMessage, setSendMessage] = useState<string | null>(null);
@@ -138,18 +144,24 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
   };
 
   let play;
-  if (!isClient) play = <div className="aspect-video w-full animate-pulse rounded-xl bg-white/5" />;
-  else if (!hasMouse) play = <p className="rounded-xl bg-[var(--rl-card)] p-4 text-sm">「今日の文字」は PC(マウス)で遊べます。スマホでは、今日の文字とランキングを見られます。{!loggedIn && <span className="mt-2 block text-xs text-[var(--rl-muted)]">ログインするとランキングに載ります</span>}</p>;
+  if (!isClient) play = <Skeleton className="aspect-video w-full rounded-rl-md" />;
+  else if (!hasMouse) play = (
+    <Card className="grid gap-3">
+      <p className="text-base">今日の文字は PC で遊べます(マウスの感度をそのまま使うため)。スマホでは、今日の文字とランキングを見られます。</p>
+      <div><CopyButton path="/aim" label="PC で開くリンクをコピー" /></div>
+      {!loggedIn && <p className="text-sm text-rl-muted">ログインするとランキングに載ります</p>}
+    </Card>
+  );
   else if (deg === null) play = <SensSetup onSaved={() => setSettingsRev((n) => n + 1)} initialGameId={settings?.mainGame} loggedIn={loggedIn} />;
   else {
     play = (
       <div className="grid gap-4">
         {result ? (
-          <AimResult glyph={char.glyph} strokes={char.strokes.length} {...result} sendMessage={sendMessage} canResend={canResend} sending={sending}
+          <AimResult glyph={char.glyph} strokes={char.strokes.length} strokePaths={char.strokes} trail={trail} {...result} sendMessage={sendMessage} canResend={canResend} sending={sending}
             onResend={() => void submit(result)} onRetry={retry} diagnostics={debug ? diagJson : null} />
         ) : (
           <AimGame key={`${date}:${char.id}:${round}`} char={char} degPerCount={deg} crosshair={crosshair} debug={debug}
-            onDiagnostics={setDiagJson} lastDiagnostics={debug ? diagJson : null}
+            onDiagnostics={setDiagJson} lastDiagnostics={debug ? diagJson : null} onTrail={setTrail}
             onFinish={(r) => {
               recordLocal(browserStorage(), date, { score: computeScore(r.accuracy, r.timeMs, char.strokes.length), accuracy: r.accuracy, timeMs: r.timeMs });
               setHistoryRev((n) => n + 1);
@@ -158,9 +170,9 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
             }}
             onAbort={() => setRound((n) => n + 1)} />
         )}
-        <div className="flex flex-wrap items-center gap-3 text-sm">
-          <Link href="/my" className="underline">クロスヘアと感度を変える(マイ設定)</Link>
-          {!loggedIn && <><span className="text-[var(--rl-muted)]">ログインするとランキングに載ります</span><LoginButton next="/aim" /></>}
+        <div className="flex flex-wrap items-center gap-3">
+          <ButtonLink href="/my" variant="ghost" size="sm">クロスヘアと感度を変える(マイ設定)</ButtonLink>
+          {!loggedIn && <><span className="text-sm text-rl-muted">ログインするとランキングに載ります</span><LoginButton next="/aim" /></>}
         </div>
       </div>
     );
@@ -171,7 +183,7 @@ export function AimClient({ char, date, rows }: { char: AimChar; date: string; r
       {play}
       {isClient && (
         <AimHistory days={days} today={date} loggedIn={loggedIn} serverError={loggedIn && serverError}
-          canClear={Object.keys(localDays).length > 0}
+          canClear={Object.keys(localDays).length > 0} streakIcon={streakIcon}
           onClear={() => { clearLocal(browserStorage()); setHistoryRev((n) => n + 1); }} />
       )}
       <Ranking rows={rows} mine={mine} loggedIn={loggedIn} />
