@@ -9,4 +9,5 @@
 | Task 7A の前(9a94711・Task 7 のあと) | 474.3 | +2.6 | Task 7 のトップ作り直しの分(見せ場ではない。`.next` を消してから測り直した値) |
 | Task 7A | 476.4 | +2.1 | 見せ場 S1。`HeroKanji`(照準・お試しの 1 画)と `hero-trace`。線を引くのは CSS なので JS は 0。`KanjiStrokes` の `cn` を `@/lib/utils` にそろえた(`cn` パッケージ本体の表 約 14KB がブラウザに入るのを防ぐ。入れたままだと +18.0KB) |
 | Task 7B | 478.8 | +2.4 | 見せ場 S5。内訳(`.next` を消して 1 つずつ測った値):`TypeRoster`(IntersectionObserver・軸の言葉)だけで合計 477.4(+1.0)。`PixelArt` `PixelStair` `TodayLabel` `TypeIcon` の `cn` を `@/lib/utils` にそろえた分が +1.4(チャンクの分け方が変わり、共通の部分が 2 つのチャンクに重なったため。合計の数字は増えるが、ページごとに読む JS は減る)。ページごとに読む JS(prerender の HTML が読む .js の gzip の合計):`/` 283.5 → 284.7(+1.2。うち名簿 +0.9)、`/my` 302.1 → 297.6(−4.5)、`/dev/ui` 342.7 → 338.2(−4.5)、そのほかのページ +0.3 |
+| Task 7B 直し 1 | 479.1 | +0.3 | 入場が済んだことをページごとに sessionStorage でおぼえる(戻ってきても再生しない)・ハイドレーションの時点の「見えている」を IntersectionObserver と同じ 2 割に(`src/lib/motion/roster-entrance.ts`)。`/` が読む JS 284.7 → 285.1(+0.4)。名簿の分は合わせて `/` で +1.3 |
 | Task 7A 直し 1 | 478.9 | +0.1 | `HeroKanji` の直し(照準の消し忘れ・離したときの最後の点・左ボタンだけ・お試しのあとスクロールを返す・PC でボタンを CSS で隠す)。Task 7A の分は合わせて +2.2 |

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { axisInitials, axisLine } from "@/lib/type-axes";
 import { REDUCED_MOTION_QUERY } from "@/lib/motion/use-reduced-motion";
+import { ROSTER_THRESHOLD, isMostlyVisible, rosterSeen } from "@/lib/motion/roster-entrance";
 import { useIsClient } from "@/lib/use-is-client";
 
 export type RosterItem = { code: string; name: string; icon: ReactNode };
@@ -11,7 +12,8 @@ export type RosterItem = { code: string; name: string; icon: ReactNode };
 /**
  * 追補 S5:16 タイプの名簿(箱なしの絵 + コード)。画面に入ったとき 1 回だけ 1 体ずつ現れる。サイトで「スクロールで動く」のはここだけ。
  * IntersectionObserver で 1 回だけ data-in を付けて外す(スクロールで戻っても再生しない)。
- * ハイドレーションの時点ですでに見えている名簿は動かさない(見えていたものが消えて組み直すちらつきを出さない)。
+ * 入場が済んだことはページごとに sessionStorage(とモジュールの変数)でおぼえ、別のページから戻ってきても再生しない。
+ * ハイドレーションの時点ですでに 2 割以上見えている名簿は動かさない(見えていたものが消えて組み直すちらつきを出さない)。
  * 絵(TypeIcon)はサーバーで作って icon で受け取る(16 タイプの文章をブラウザの JS に入れない)。
  */
 export function TypeRoster({ items, showName = false, className }: { items: readonly RosterItem[]; showName?: boolean; className?: string }) {
@@ -20,14 +22,22 @@ export function TypeRoster({ items, showName = false, className }: { items: read
   useLayoutEffect(() => {
     const el = list.current;
     if (!el || typeof IntersectionObserver === "undefined" || window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
-    const inView = el.getBoundingClientRect().top < window.innerHeight;
-    if (!clientMount && inView) return;
+    const seen = rosterSeen(window.location.pathname);
+    const session = () => window.sessionStorage;
+    // もう見た名簿(このセッションで入場が済んだ・戻ってきた)は、最初から並んだ形のまま
+    if (seen.has(session)) return;
+    // ハイドレーションの時点で 2 割以上見えている名簿は、動かさずに「見た」にする(しきい値は IntersectionObserver と同じ)
+    if (!clientMount && isMostlyVisible(el.getBoundingClientRect(), window.innerHeight)) {
+      seen.mark(session);
+      return;
+    }
     el.dataset.armed = "";
     const io = new IntersectionObserver((entries) => {
       if (!entries.some((e) => e.isIntersecting)) return;
       el.dataset.in = "";
+      seen.mark(session);
       io.disconnect();
-    }, { threshold: 0.2 });
+    }, { threshold: ROSTER_THRESHOLD });
     io.observe(el);
     return () => io.disconnect();
     // 最初の 1 回だけ(clientMount は最初の描画の値を使う)
@@ -43,7 +53,7 @@ export function TypeRoster({ items, showName = false, className }: { items: read
             <span className="font-display text-sm text-rl-highlight">{t.code}</span>
             {showName && <span className="text-center text-sm font-bold wrap-anywhere">{t.name}</span>}
             <span aria-hidden className="text-xs text-rl-muted pointer-fine:hidden">{axisInitials(t.code)}</span>
-            <span className="sr-only">{showName ? "" : t.name}({axisLine(t.code)})</span>
+            <span className="sr-only">{showName ? axisLine(t.code) : `${t.name}(${axisLine(t.code)})`}</span>
           </Link>
           <span aria-hidden className="rl-roster-axes pointer-events-none absolute inset-x-0 bottom-0 hidden h-8 items-center justify-center text-sm pointer-fine:flex">
             {axisLine(t.code)}
