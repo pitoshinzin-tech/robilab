@@ -310,3 +310,19 @@
 
 1. (P2)1440 でヒーローの下が約 300px 空く(ヒーローの中の空き 約 130px + 間・大 160px)。`src/app/page.tsx:49` の `lg:content-center` を `lg:content-end` にし、`lg:pb-8` を `lg:pb-rl-ma-sm` に。または `lg:min-h-[min(calc(100svh-88px),760px)]` を `680px` に下げる。合否には響かない。
 2. (社長)Lighthouse スマホ(Performance 90・Accessibility 100)と S1 の 10 秒の録画。
+
+---
+
+# 最終 2 回目(c3d5036)
+
+- 見たもの:`shots/final2/` の 375・1440(本番ビルド、CDP の端末の真似、全体、reduced-motion オン、横のはみ出しなし)。直しのコミット:A = f408f7d・9ecbf39・5f3a78e、B = bde9381・a3d024b・66fc3b2・966d6c5・1a35e82。
+
+| 観点 | 点 | 最終 1 回目 |
+|---|---|---|
+| Design | 8.5 | 8.5 |
+| Usability | 8.5(仮) | 8.5 |
+| Creativity | 8.5 | 8.5 |
+| Content | 8.5 | 8.5 |
+| **平均** | **8.50** | 8.50 |
+
+- 変わらず。**合格(Lighthouse で確定)**。残りは P2 のヒーローの下の空き(`src/app/page.tsx:49`)だけ。

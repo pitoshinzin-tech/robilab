@@ -90,3 +90,12 @@
 
 1. (P2)`src/app/types/page.tsx:25` の「16」を `text-rl-display-1 lg:text-rl-display-2`(結果の画面のコードとそろえる。①を厳しく満たす)。
 2. (P2)押した状態の写真(1 つ・2 つ選んだとき)と `role="status"` の読み上げの確かめ。
+
+---
+
+## 最終 2 回目(c3d5036)
+
+- 見たもの:`shots/final2/` の 375・1440(本番ビルド、CDP の端末の真似、全体、reduced-motion オン、横のはみ出しなし)。直しのコミット:A = f408f7d・9ecbf39・5f3a78e、B = bde9381・a3d024b・66fc3b2・966d6c5・1a35e82。
+
+- 直しの対象ではなく、写真も最終 1 回目と同じ形。Design 8.0・Usability 8.5・Creativity 8.5・Content 8.5、**平均 8.30。合格**。
+- 残り(P2):「16」を `lg:text-rl-display-2`(`src/app/types/page.tsx:25`。結果のコードとそろえる)。
