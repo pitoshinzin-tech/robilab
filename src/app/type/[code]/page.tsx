@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ChevronRight, FlaskConical, Share2, Users } from "lucide-react";
@@ -9,11 +10,13 @@ import { rankGames } from "@/lib/role-match";
 import { buildShareText, buildXShareUrl } from "@/lib/share";
 import { getSiteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
+import { MORPH_PIXEL, VT_TYPE_SPRITE } from "@/lib/motion/vt-names";
 import { GlitchTitle } from "@/components/brand/GlitchTitle";
 import { TypeIcon } from "@/components/brand/TypeIcon";
 import { AxisBars } from "@/components/result/AxisBars";
 import { GameRanking } from "@/components/result/GameRanking";
 import { SpriteReading } from "@/components/result/SpriteReading";
+import { ResultTypeIcon } from "@/components/result/ResultTypeIcon";
 import { AffiliateList } from "@/components/affiliate/AffiliateList";
 import { ButtonAnchor, ButtonLink } from "@/components/ui/button-link";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -61,12 +64,18 @@ export default async function TypePage({ params, searchParams }: Props) {
   const second = getType(type.secondMatch)!;
   const matches = [{ label: "ベスト", t: best }, { label: "次点", t: second }];
   const [keySentence, rest] = splitKeySentence(type.description);
+  // 追補 S2:直接開いたときは組み上がり、診断から来たときは診断のマスの画面がこの絵へ移る(type-sprite)
+  const bigIcon = (
+    <ResultTypeIcon>
+      <TypeIcon code={type.code} size={240} labelled glow className="size-40 lg:size-60" />
+    </ResultTypeIcon>
+  );
 
   return (
     <main className={cn(pageContainerClass("wide"), "grid gap-12")}>
       <section className="grid items-center gap-6 lg:grid-cols-12">
         <div className="lg:col-span-5">
-          <SpriteReading code={type.code} icon={<TypeIcon code={type.code} size={240} labelled glow animate={fromDiagnosis} className="size-40 lg:size-60" />} />
+          <SpriteReading code={type.code} icon={fromDiagnosis ? <ViewTransition name={VT_TYPE_SPRITE} share={MORPH_PIXEL} default="none">{bigIcon}</ViewTransition> : bigIcon} />
         </div>
         <div className="grid justify-items-center gap-3 text-center lg:col-span-7 lg:justify-items-start lg:text-left">
           {/* 動きの参考 082:コードだけ、開いたとき 1 回マスクの中からせり上がる(1 画面 1 か所) */}
