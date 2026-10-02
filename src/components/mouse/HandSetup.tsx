@@ -1,8 +1,13 @@
 "use client";
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { GRIPS, MY_SETTINGS_LIMITS, type Grip, type MySettings } from "@/lib/my-settings";
 import { browserStorage, saveHandToLocal } from "@/lib/my-settings-store";
 import { NumberField } from "@/components/my/NumberField";
+import { buttonVariants } from "@/components/ui/button-link";
+import { Card } from "@/components/ui/card";
+import { FieldError } from "@/components/ui/field";
+import { ChipButton, ChipButtonGroup } from "@/components/ui/chip-button";
 import { HandGuide } from "./HandGuide";
 import { GripFigure } from "./GripFigure";
 
@@ -52,36 +57,38 @@ export function HandSetup({ initial, onDone, onCancel }: {
   };
 
   return (
-    <section className="grid gap-4 rounded-2xl border border-[var(--rl-border)] bg-[var(--rl-surface)] p-4">
-      <h2 className="font-bold">手の大きさと持ち方</h2>
-      <p className="text-sm text-[var(--rl-muted)]">入力はマイ設定に保存され、次からは自動で使われます。測り方がわからなければ、持ち方だけでも探せます。</p>
-      <HandGuide />
+    <Card as="section" aria-labelledby="hand-setup" className="grid gap-4">
+      <h2 id="hand-setup" className="text-xl font-bold">手の大きさと持ち方</h2>
+      <p className="text-sm text-rl-muted">入力はマイ設定に保存され、次からは自動で使われます。測り方がわからなければ、持ち方だけでも探せます。</p>
+      <details className="group rounded-rl-sm border border-rl-line">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-4 text-sm font-bold [&::-webkit-details-marker]:hidden">
+          手の測り方を見る<ChevronDown aria-hidden className="size-5 transition-transform duration-(--rl-dur-base) group-open:rotate-180" />
+        </summary>
+        <div className="p-4 pt-0"><HandGuide /></div>
+      </details>
       <div className="grid grid-cols-2 gap-3">
         <NumberField label="手の長さ(わからなければ空欄でOK)" suffix="cm" value={hand.lengthCm} onValue={(lengthCm) => setHand((h) => ({ ...h, lengthCm }))}
           onInvalid={(v) => setInvalid((s) => ({ ...s, length: v }))} />
         <NumberField label="手の幅(任意)" suffix="cm" value={hand.widthCm} onValue={(widthCm) => setHand((h) => ({ ...h, widthCm }))}
           onInvalid={(v) => setInvalid((s) => ({ ...s, width: v }))} />
       </div>
-      <div className="grid gap-2" role="group" aria-label="持ち方">
-        {GRIPS.map((g) => (
-          <button key={g} type="button" aria-pressed={hand.grip === g}
-            onClick={() => setHand((h) => ({ ...h, grip: g }))}
-            className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left ${hand.grip === g ? "border-[var(--rl-secondary)] bg-[var(--rl-card)]" : "border-white/10 bg-white/5"}`}>
-            <GripFigure grip={g} />
-            <span className="grid">
-              <span className="font-bold">{GRIP_INFO[g].label}</span>
-              <span className="text-xs text-[var(--rl-muted)]">{GRIP_INFO[g].note}</span>
-            </span>
-          </button>
-        ))}
+      <div className="grid gap-2">
+        <p aria-hidden className="text-sm font-bold">持ち方</p>
+        <ChipButtonGroup label="持ち方" className="grid">
+          {GRIPS.map((g) => (
+            <ChipButton key={g} pressed={hand.grip === g} onClick={() => setHand((h) => ({ ...h, grip: g }))} className="h-auto w-full justify-start gap-3 py-3 text-left">
+              <GripFigure grip={g} />
+              <span className="grid">
+                <span className="text-base font-bold">{GRIP_INFO[g].label}</span>
+                <span className="text-sm font-medium text-rl-muted">{GRIP_INFO[g].note}</span>
+              </span>
+            </ChipButton>
+          ))}
+        </ChipButtonGroup>
       </div>
-      {error && <p role="alert" className="text-sm text-[var(--rl-danger)]">{error}</p>}
-      <button type="button" onClick={submit} className="h-12 rounded-full bg-[var(--rl-accent)] font-bold text-[var(--rl-on-accent)]">
-        合うマウスを見る
-      </button>
-      {onCancel && (
-        <button type="button" onClick={onCancel} className="h-10 rounded-full bg-white/10 text-sm">変えずに戻る</button>
-      )}
-    </section>
+      {error && <FieldError>{error}</FieldError>}
+      <button type="button" className={buttonVariants({ variant: "primary" })} onClick={submit}>合うマウスを見る</button>
+      {onCancel && <button type="button" className={buttonVariants({ variant: "ghost" })} onClick={onCancel}>変えずに戻る</button>}
+    </Card>
   );
 }

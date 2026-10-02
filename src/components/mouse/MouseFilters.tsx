@@ -1,5 +1,7 @@
 "use client";
 import type { MouseFilter } from "@/lib/mouse-fit";
+import { Card } from "@/components/ui/card";
+import { ChipButton, ChipButtonGroup } from "@/components/ui/chip-button";
 
 const GROUPS: { key: keyof MouseFilter; label: string; options: [string, string][] }[] = [
   { key: "weight", label: "重さ", options: [["all", "すべて"], ["le55", "〜55g"], ["le70", "〜70g"], ["gt70", "70g より重い"]] },
@@ -9,19 +11,18 @@ const GROUPS: { key: keyof MouseFilter; label: string; options: [string, string]
 
 export function MouseFilters({ value, onChange }: { value: MouseFilter; onChange: (f: MouseFilter) => void }) {
   return (
-    <div className="grid gap-2">
+    <Card as="section" aria-labelledby="mouse-filters" className="grid gap-4">
+      <h2 id="mouse-filters" className="text-xl font-bold">絞り込み</h2>
       {GROUPS.map((g) => (
-        <div key={g.key} className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label={g.label}>
-          <span className="w-10 text-[var(--rl-muted)]">{g.label}</span>
-          {g.options.map(([v, text]) => (
-            <button key={v} type="button" aria-pressed={value[g.key] === v}
-              onClick={() => onChange({ ...value, [g.key]: v } as MouseFilter)}
-              className={`rounded-full border px-3 py-1 ${value[g.key] === v ? "border-[var(--rl-secondary)] bg-[var(--rl-card)]" : "border-white/10"}`}>
-              {text}
-            </button>
-          ))}
+        <div key={g.key} className="grid gap-2">
+          <p aria-hidden className="text-sm font-bold text-rl-muted">{g.label}</p>
+          <ChipButtonGroup label={g.label}>
+            {g.options.map(([v, text]) => (
+              <ChipButton key={v} pressed={value[g.key] === v} onClick={() => onChange({ ...value, [g.key]: v } as MouseFilter)}>{text}</ChipButton>
+            ))}
+          </ChipButtonGroup>
         </div>
       ))}
-    </div>
+    </Card>
   );
 }

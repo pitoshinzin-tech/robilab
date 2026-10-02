@@ -14,7 +14,7 @@ export function HandGuide() {
           <line x1="190" y1="28" x2="190" y2="240" />
           <path d="M184 38 L190 28 L196 38 Z M184 230 L190 240 L196 230 Z" />
         </g>
-        <text x="200" y="140" fill="var(--rl-secondary)" fontSize="14" writingMode="vertical-rl">長さ</text>
+        <text x="200" y="140" fill="var(--rl-secondary-text)" fontSize="14" writingMode="vertical-rl">長さ</text>
         {/* 幅:4本の付け根 */}
         <g stroke="var(--rl-highlight)" strokeWidth="3" fill="var(--rl-highlight)">
           <line x1="80" y1="135" x2="170" y2="135" />
@@ -22,7 +22,7 @@ export function HandGuide() {
         </g>
         <text x="112" y="158" fill="var(--rl-highlight)" fontSize="14">幅</text>
       </svg>
-      <figcaption className="text-xs text-[var(--rl-muted)]">
+      <figcaption className="text-sm text-rl-muted">
         長さ:手首のしわから中指の先まで。幅:親指を除いた4本の指の付け根のいちばん広いところ。定規やメジャーで測ってください。
       </figcaption>
     </figure>

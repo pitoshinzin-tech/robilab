@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { SearchX, Share2, TriangleAlert } from "lucide-react";
 import { DEVICES } from "@/data/devices";
 import { MICE, mouseById } from "@/data/mice";
 import { MICE_RAKUTEN } from "@/data/mice-rakuten";
@@ -11,13 +12,33 @@ import { buildXShareUrl } from "@/lib/share";
 import { adoptServerIfLocalEmpty, browserStorage, loadLocal } from "@/lib/my-settings-store";
 import { emptyMySettings, type MySettings } from "@/lib/my-settings";
 import { useIsClient } from "@/lib/use-is-client";
+import { cn } from "@/lib/utils";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { HandSetup, GRIP_INFO } from "@/components/mouse/HandSetup";
 import { MouseCard } from "@/components/mouse/MouseCard";
 import { MouseFilters } from "@/components/mouse/MouseFilters";
+import { FitOverlay } from "@/components/mouse/FitOverlay";
+import { TopMouseRow } from "@/components/mouse/TopMouseRow";
+import { ButtonAnchor, buttonVariants } from "@/components/ui/button-link";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SectionHeading } from "@/components/ui/section-heading";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const FIRST = 10;
 const device = (id: string) => DEVICES.find((d) => d.id === id);
+const FIT_FIGURE_ID = "mouse-fit-figure";
+
+/** 「手と重ねる」を押したとき、重ね図が画面の外なら見える所まで送る(1 列のスマホ・タブレットで、押した結果が見えないのを防ぐ) */
+function revealFitFigure() {
+  const el = document.getElementById(FIT_FIGURE_ID);
+  if (!el) return;
+  const r = el.getBoundingClientRect();
+  if (r.top >= 0 && r.bottom <= window.innerHeight) return;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  el.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
+}
 
 export function MouseClient({ pageUrl }: { pageUrl: string }) {
   const isClient = useIsClient();
@@ -28,6 +49,8 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
   const [editing, setEditing] = useState(false);
   const [filter, setFilter] = useState<MouseFilter>(NO_FILTER);
   const [showAll, setShowAll] = useState(false);
+  // 追補 6 章:重ね図に出すマウス(なければ 1 位)
+  const [overlayId, setOverlayId] = useState<string | null>(null);
   // サーバーの設定を確かめ中か(Supabase を使う環境だけ。確かめ終わるまで入力画面を出さない)
   const [serverPending, setServerPending] = useState(() => Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL));
 
@@ -67,20 +90,15 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
   const currentRef = settings?.devices.mouse ?? null;
   const currentMouse = currentRef && "id" in currentRef ? mouseById(currentRef.id) ?? null : null;
 
-  if (!isClient) return <div className="h-40 rounded-2xl bg-white/5" />;
+  if (!isClient) return <Skeleton className="h-40 w-full rounded-rl-md" />;
   // この端末が空で、サーバーの設定を確かめ中のときだけ待つ(入力画面のちらつきを防ぐ)
-  if (!hand && !settings && serverPending) return <div className="h-40 rounded-2xl bg-white/5" aria-busy="true" />;
+  if (!hand && !settings && serverPending) return <Skeleton aria-busy="true" className="h-40 w-full rounded-rl-md" />;
 
   if (!hand || editing) {
     return (
       <HandSetup
         initial={handRaw ?? emptyMySettings().hand}
-        onDone={(h, saved) => {
-          setNotSaved(!saved);
-          setMemoryHand(saved ? null : h);
-          setEditing(false);
-          setRev((n) => n + 1);
-        }}
+        onDone={(h, saved) => { setNotSaved(!saved); setMemoryHand(saved ? null : h); setEditing(false); setRev((n) => n + 1); }}
         onCancel={hand ? () => setEditing(false) : undefined}
       />
     );
@@ -89,50 +107,69 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
   const target = fitTarget(hand);
   const top3 = ranked.slice(0, 3).map((r) => device(r.mouse.id)).filter((d) => d !== undefined);
   const shareUrl = buildXShareUrl(buildMouseShareText(top3.map((d) => ({ brand: d.brand, name: d.name }))), pageUrl);
+  // 追補 6 章:重ね図に出すマウス(選んでいなければ 1 位)
+  const overlay = ranked.find((r) => r.mouse.id === overlayId)?.mouse ?? ranked[0]?.mouse;
+  const overlayName = overlay ? (device(overlay.id)?.name ?? "") : "";
 
   return (
-    <div className="grid gap-5">
-      <section className="grid gap-2 rounded-2xl border border-[var(--rl-border)] bg-[var(--rl-surface)] p-4">
-        <p className="text-sm text-[var(--rl-muted)]">
-          {GRIP_INFO[hand.grip].label}・手の長さ:{estimated ? `未入力(平均 ${DEFAULT_HAND_LENGTH_CM}cm で計算)` : `${hand.lengthCm}cm`}{hand.widthCm !== null && `・幅 ${hand.widthCm}cm`}
-        </p>
-        <p className="text-lg font-bold">あなたの目安:<span className="text-[var(--rl-highlight)]">{targetText(target)}</span> くらいのマウス</p>
-        {estimated && <p className="text-xs text-[var(--rl-muted)]">手の長さを入れていないので、平均的な大きさ({DEFAULT_HAND_LENGTH_CM}cm)で出しています。測って入れると、あなたの手に合わせられます。下の「手の情報を変える」から入れられます。</p>}
-        {hand.widthCm === null && <p className="text-xs text-[var(--rl-muted)]">手の幅も入れると精度が上がります。</p>}
-        {notSaved && <p className="text-xs text-[var(--rl-danger)]">この端末には保存できませんでした(この画面を閉じると消えます)。</p>}
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => setEditing(true)} className="rounded-full bg-white/10 px-4 py-2 text-sm">手の情報を変える</button>
-          <a href={shareUrl} target="_blank" rel="noopener noreferrer" className="rounded-full bg-[var(--rl-accent)] px-4 py-2 text-sm font-bold text-[var(--rl-on-accent)]">TOP3 を X でシェア</a>
-        </div>
+    <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
+      {/* 左の列はスクロールしても残す。画面より高いときは列の中でスクロールできる(絞り込みが画面の下で切れないように) */}
+      <div className="grid gap-6 lg:sticky lg:top-6 lg:max-h-[calc(100svh-48px)] lg:overflow-y-auto">
+        <Card as="section" aria-labelledby="mouse-target" className="grid gap-3">
+          <h2 id="mouse-target" className="text-xl font-bold">あなたの目安</h2>
+          <p className="text-sm text-rl-muted">
+            {GRIP_INFO[hand.grip].label}・手の長さ:{estimated ? `未入力(平均 ${DEFAULT_HAND_LENGTH_CM}cm で計算)` : `${hand.lengthCm}cm`}{hand.widthCm !== null && `・幅 ${hand.widthCm}cm`}
+          </p>
+          <p className="text-base"><span className="font-bold text-rl-highlight">{targetText(target)}</span> くらいのマウス</p>
+          {/* 追補 6 章:実寸の重ね図(手の設定のすぐ横) */}
+          {overlay && (
+            <div id={FIT_FIGURE_ID} className="scroll-mt-6">
+              <FitOverlay handLengthCm={hand.lengthCm} handWidthCm={hand.widthCm} mouse={{ id: overlay.id, name: overlayName, lengthMm: overlay.lengthMm, widthMm: overlay.widthMm }} />
+            </div>
+          )}
+          {estimated && <p className="text-sm text-rl-muted">手の長さを入れていないので、平均的な大きさ({DEFAULT_HAND_LENGTH_CM}cm)で出しています。測って入れると、あなたの手に合わせられます。</p>}
+          {hand.widthCm === null && <p className="text-sm text-rl-muted">手の幅も入れると精度が上がります。</p>}
+          {notSaved && <p className="flex items-start gap-2 text-sm text-rl-warning"><TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />この端末には保存できませんでした(この画面を閉じると消えます)。</p>}
+          <button type="button" className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "justify-self-start")} onClick={() => setEditing(true)}>手の情報を変える</button>
+        </Card>
+        <MouseFilters value={filter} onChange={(f) => { setFilter(f); setShowAll(false); }} />
+      </div>
+
+      <section aria-labelledby="mouse-results" className="grid gap-4">
+        <SectionHeading id="mouse-results" title="あなたの手に近い順" count={filtered.length}
+          action={<ButtonAnchor href={shareUrl} target="_blank" rel="noopener noreferrer" variant="secondary" size="sm"><Share2 aria-hidden />TOP3 を X でシェア</ButtonAnchor>} />
+        <p className="flex flex-wrap items-center gap-2 text-sm text-rl-muted"><Badge variant="pr">PR</Badge>このリンクから買うと、ロビラボに紹介料が入ることがあります</p>
+        {filtered.length === 0 ? (
+          <EmptyState icon={SearchX} title="条件に合うマウスがありません" description="絞り込みを減らすと見つかります。"
+            action={<button type="button" className={buttonVariants({ variant: "secondary" })} onClick={() => setFilter(NO_FILTER)}>絞り込みを外す</button>} />
+        ) : (
+          <ol className="grid gap-4">
+            {shown.map((item) => {
+              const d = device(item.mouse.id);
+              if (!d) return null;
+              const rank = ranked.indexOf(item) + 1;
+              const rakuten = MICE_RAKUTEN[item.mouse.id];
+              const reason = recommendReason({ ...hand, estimated }, target, item.mouse, null);
+              const links = shopLinks(`${d.brand} ${d.name}`, item.mouse.officialUrl, undefined, rakuten?.itemUrl);
+              const compare = currentMouse ? compareWith(currentMouse, item.mouse) : null;
+              const overlaid = overlay?.id === item.mouse.id;
+              const onOverlay = () => { setOverlayId(item.mouse.id); requestAnimationFrame(revealFitFigure); };
+              // 追補 6 章:1 位は大きな行(主ボタンはここ)。2 位からは今のカード(店のボタンは二番手)
+              if (rank === 1) return <TopMouseRow key={item.mouse.id} item={item} brand={d.brand} name={d.name} reason={reason} links={links} compare={compare} overlaid={overlaid} onOverlay={onOverlay} />;
+              return (
+                <MouseCard key={item.mouse.id} rank={rank} primaryShop={false} item={item} brand={d.brand} name={d.name}
+                  reason={reason}
+                  compare={compare}
+                  links={links}
+                  imageUrl={rakuten?.imageUrl ?? null} overlaid={overlaid} onOverlay={onOverlay} />
+              );
+            })}
+          </ol>
+        )}
+        {!showAll && filtered.length > FIRST && (
+          <button type="button" className={cn(buttonVariants({ variant: "secondary" }), "justify-self-center")} onClick={() => setShowAll(true)}>もっと見る({filtered.length - FIRST} 件)</button>
+        )}
       </section>
-
-      <MouseFilters value={filter} onChange={(f) => { setFilter(f); setShowAll(false); }} />
-
-      {filtered.length === 0 ? (
-        <div className="grid gap-2 rounded-2xl bg-white/5 p-4 text-sm">
-          <p>条件に合うマウスがありません。条件を減らしてください。</p>
-          <button type="button" onClick={() => setFilter(NO_FILTER)} className="justify-self-start rounded-full bg-white/10 px-4 py-2">絞り込みを外す</button>
-        </div>
-      ) : (
-        <ol className="grid gap-3">
-          {shown.map((item) => {
-            const d = device(item.mouse.id);
-            if (!d) return null;
-            const rank = ranked.indexOf(item) + 1;
-            const rakuten = MICE_RAKUTEN[item.mouse.id];
-            return (
-              <MouseCard key={item.mouse.id} rank={rank} item={item} brand={d.brand} name={d.name}
-                reason={recommendReason({ ...hand, estimated }, target, item.mouse, null)}
-                compare={currentMouse ? compareWith(currentMouse, item.mouse) : null}
-                links={shopLinks(`${d.brand} ${d.name}`, item.mouse.officialUrl, undefined, rakuten?.itemUrl)}
-                imageUrl={rakuten?.imageUrl ?? null} />
-            );
-          })}
-        </ol>
-      )}
-      {!showAll && filtered.length > FIRST && (
-        <button type="button" onClick={() => setShowAll(true)} className="justify-self-center rounded-full bg-white/10 px-6 py-2 text-sm">もっと見る({filtered.length - FIRST} 件)</button>
-      )}
     </div>
   );
 }

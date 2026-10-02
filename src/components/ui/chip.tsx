@@ -3,13 +3,11 @@ import * as React from "react";
 import { Toggle } from "@base-ui/react/toggle";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { chipCheckClassName, chipClassName } from "./chip-button";
 
-/** 選ぶもの(チップ)の見た目。角丸はボタンと見分けるため sm。aria-pressed="true" で選んだ見た目(パープルの枠+チェック)。 */
-export const chipClassName =
-  "group/chip relative inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-rl-sm border-2 border-rl-line-strong bg-rl-surface-2 px-4 text-sm font-bold text-rl-text transition-[background-color,border-color,transform] duration-(--rl-dur-fast) ease-rl-out hover:border-rl-text/60 active:translate-y-px aria-pressed:border-rl-selected aria-pressed:bg-rl-selected-bg disabled:cursor-not-allowed disabled:opacity-45";
-
-// (追補 S4)選んだときにチェックが線で引かれる(rl-draw-check は globals.css)
-const checkClassName = "rl-draw-check hidden size-4 shrink-0 group-aria-pressed/chip:block";
+// 見た目のクラスは base-ui を読まない chip-button.tsx にある(/mouse などはそちらの ChipButton を使う)
+export { chipClassName };
+const checkClassName = chipCheckClassName;
 
 type ChipProps = Omit<React.ComponentProps<typeof Toggle>, "className"> & { className?: string };
 

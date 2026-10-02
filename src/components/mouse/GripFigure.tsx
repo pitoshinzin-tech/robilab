@@ -12,7 +12,7 @@ export function GripFigure({ grip }: { grip: Grip }) {
   return (
     <svg viewBox="0 0 64 48" aria-hidden="true" className="h-12 w-16 shrink-0">
       {/* マウス */}
-      <path d="M6 42 Q8 26 30 22 Q52 20 58 42 Z" fill="var(--rl-card)" stroke="var(--rl-muted)" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M6 42 Q8 26 30 22 Q52 20 58 42 Z" fill="var(--rl-surface)" stroke="var(--rl-muted)" strokeWidth="2" strokeLinejoin="round" />
       {/* 手 */}
       <path d={HAND[grip]} fill="none" stroke="var(--rl-secondary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>

@@ -491,6 +491,16 @@ body {
   opacity: 0.35;
 }
 
+/* 追補 6 章:重ね図のマウスを替えたとき、200ms で入れ替わる */
+.rl-fit-swap {
+  animation: rl-fit-swap 200ms var(--rl-ease-line) both;
+}
+@keyframes rl-fit-swap {
+  from {
+    opacity: 0;
+  }
+}
+
 /* 追補 S2・S3:共有の要素(絵はカクカク、線はなめらか。400ms 以下) */
 ::view-transition-group(.rl-morph-pixel) {
   animation-duration: 360ms;
