@@ -1,20 +1,34 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Bell as BellIcon, Check, Inbox, ShieldCheck, UserRound } from "lucide-react";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { assertNoRpcError } from "@/lib/lobby-errors";
 import { LoginButton } from "@/components/lobby/LoginButton";
 import { CandidateCard } from "@/components/lobby/CandidateCard";
 import { AccountStatusNotice } from "@/components/lobby/AccountStatusNotice";
+import { LobbyFilters } from "@/components/lobby/LobbyFilters";
+import { ButtonLink } from "@/components/ui/button-link";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageShell } from "@/components/ui/page-shell";
 import { sortAndFilter } from "@/lib/lobby-sort";
-import { GAMES } from "@/data/games";
-import { TIME_SLOTS } from "@/data/lobby-options";
 import type { Candidate } from "@/lib/lobby-types";
 import type { Axes } from "@/data/axes";
 
 export const metadata: Metadata = { title: "仲間を探す" };
 
 type Props = { searchParams: Promise<{ game?: string; slot?: string; voice?: string; login?: string; reported?: string }> };
+
+const STEPS = [
+  "Discord でログイン(18 歳以上)",
+  "気になる人に「一緒にやりたい!」を送る(1 日 10 人まで)",
+  "おたがいが OK したら Discord 名が見える",
+];
+const SAFETY = [
+  "Discord 名は、おたがいが OK するまでだれにも見えません",
+  "パスしても相手には伝わりません",
+  "ブロック・通報ができます",
+  "生年月日は公開しません",
+];
 
 type MyProfileRow = { status: "active" | "suspended" | "banned"; axes: Axes | null };
 
@@ -25,12 +39,43 @@ export default async function LobbyPage({ searchParams }: Props) {
 
   if (!user) {
     return (
-      <main className="mx-auto grid max-w-md gap-4 px-4 py-10 text-center">
-        <h1 className="text-2xl font-bold">仲間を探す</h1>
-        <p className="text-sm text-[var(--rl-muted)]">Discord でログインして、一緒に遊ぶ人を見つけよう。18歳以上の方が対象です。</p>
-        {sp.login === "failed" && <p role="alert" className="text-sm text-[var(--rl-danger)]">ログインできませんでした。もう一度お試しください。</p>}
-        <div><LoginButton next="/lobby" /></div>
-      </main>
+      <PageShell title="仲間を探す" description={<span className="block [word-break:auto-phrase] text-balance">Discord でログインして、一緒に遊ぶ人を見つけよう。</span>}>
+        <div className="grid gap-8">
+          {/*
+            追補 6 章:流れの 3 段を線でつないだ 3 つの点(待合室の掲示板)。点は 8px のマス、線は 2px。PC は横、スマホは縦。
+            線は段ごとに「自分の点 → 次の点」の 1 本(スマホ:点の中心 12px から、間 24px+次の点の中心 12px = 36px 下まで。
+            PC:点の中心 4px から、間 16px+次の点の中心 4px = 20px 右まで)。開いたとき 1 回だけ引かれる(rl-flow-*、動きの参考 012)。
+          */}
+          <ol aria-label="使い方の流れ" className="grid gap-6 md:grid-cols-3 md:gap-4">
+            {STEPS.map((s, i) => (
+              <li key={s} className="relative grid grid-cols-[8px_minmax(0,1fr)] gap-4 md:grid-cols-1 md:gap-3" style={{ "--i": i } as React.CSSProperties}>
+                {i < STEPS.length - 1 && (
+                  <span aria-hidden className="rl-flow-seg absolute top-3 -bottom-9 left-[3px] w-0.5 bg-rl-line-strong md:top-[3px] md:-right-5 md:bottom-auto md:left-1 md:h-0.5 md:w-auto" />
+                )}
+                <span aria-hidden className="rl-flow-dot relative mt-2 size-2 bg-rl-highlight md:mt-0" />
+                <span className="grid gap-1 text-base [word-break:auto-phrase]">
+                  <span className="font-display text-sm text-rl-highlight">{i + 1}</span>
+                  {s}
+                </span>
+              </li>
+            ))}
+          </ol>
+          {/* 箱(Card)にしない(追補 5-3:箱は押せる一覧・入力・プレイヤーの札だけ)。上の線で区切る */}
+          <section aria-labelledby="safety-heading" className="grid gap-3 border-t border-rl-line pt-6">
+            <h2 id="safety-heading" className="text-xl font-bold">安心して使うために</h2>
+            <ul className="grid gap-2">
+              {SAFETY.map((s) => (
+                <li key={s} className="flex items-start gap-2 text-sm">
+                  <ShieldCheck aria-hidden className="mt-0.5 size-4 shrink-0 text-rl-success" />
+                  <span className="min-w-0">{s}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+          {sp.login === "failed" && <p role="alert" className="text-sm text-rl-danger">ログインできませんでした。もう一度お試しください。</p>}
+          <LoginButton next="/lobby" size="lg" className="justify-self-start" />
+        </div>
+      </PageShell>
     );
   }
 
@@ -42,30 +87,45 @@ export default async function LobbyPage({ searchParams }: Props) {
   const data = assertNoRpcError(await supabase.rpc("lobby_candidates"));
   const rows = sortAndFilter({ axes: me.axes }, (data ?? []) as Candidate[], { game: sp.game, slot: sp.slot, voice: sp.voice === "1" });
 
+  const filtered = Boolean(sp.game || sp.slot || sp.voice === "1");
+
   return (
-    <main className="mx-auto max-w-md px-4 py-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">ロビー</h1>
-        <div className="flex gap-3 text-sm"><Link href="/lobby/inbox">🔔 通知</Link><Link href="/lobby/me">プロフィール</Link></div>
+    <PageShell
+      width="wide"
+      title="ロビー"
+      actions={
+        <>
+          {/* 件数は出さない(ヘッダーのベルが出す。設計書との読み替え 8) */}
+          <ButtonLink href="/lobby/inbox" variant="secondary" size="icon" aria-label="通知"><BellIcon aria-hidden /></ButtonLink>
+          <ButtonLink href="/lobby/me" variant="secondary" size="icon" aria-label="プロフィール"><UserRound aria-hidden /></ButtonLink>
+        </>
+      }
+    >
+      <div className="grid gap-6">
+        <div className="grid gap-4 md:max-w-[640px] lg:max-w-none">
+          {sp.reported && (
+            <p role="status" className="flex items-start gap-2 text-sm text-rl-success">
+              <Check aria-hidden className="mt-0.5 size-4 shrink-0" />
+              通報を受け付けました。ご協力ありがとうございます。
+            </p>
+          )}
+          <LobbyFilters game={sp.game} slot={sp.slot} voice={sp.voice === "1"} />
+        </div>
+        {rows.length === 0 ? (
+          filtered ? (
+            <EmptyState icon={Inbox} title="条件に合う人がまだいません" description="ゲームや時間帯を増やすと見つかりやすくなります。"
+              action={<ButtonLink href="/lobby" variant="secondary">条件をゆるめる</ButtonLink>} />
+          ) : (
+            // 絞り込みなしで 0 人のときは「ゆるめる」条件がないので、プロフィールへ案内する
+            <EmptyState icon={Inbox} title="ロビーにまだ人がいません" description="新しい人が入ると、ここに相性の順で出ます。"
+              action={<ButtonLink href="/lobby/me" variant="secondary">プロフィールを見直す</ButtonLink>} />
+          )
+        ) : (
+          <ul className="grid gap-4 lg:grid-cols-2">
+            {rows.map((r) => <li key={r.candidate.id} className="min-w-0"><CandidateCard c={r.candidate} match={r.match} /></li>)}
+          </ul>
+        )}
       </div>
-      {sp.reported && <p className="mb-3 text-sm text-[var(--rl-lime)]">通報を受け付けました。ご協力ありがとうございます。</p>}
-      <form className="mb-4 grid grid-cols-3 gap-2 text-sm">
-        <select name="game" defaultValue={sp.game ?? ""} className="rounded bg-[var(--rl-card)] px-2 py-2">
-          <option value="">全ゲーム</option>
-          {GAMES.map((g) => <option key={g.id} value={g.id}>{g.shortName}</option>)}
-        </select>
-        <select name="slot" defaultValue={sp.slot ?? ""} className="rounded bg-[var(--rl-card)] px-2 py-2">
-          <option value="">全時間帯</option>
-          {TIME_SLOTS.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
-        </select>
-        <label className="flex items-center gap-1"><input type="checkbox" name="voice" value="1" defaultChecked={sp.voice === "1"} />VC</label>
-        <button className="col-span-3 h-10 rounded-full bg-white/10">絞り込む</button>
-      </form>
-      {rows.length === 0 ? (
-        <p className="text-sm text-[var(--rl-muted)]">条件に合う人がまだいません。ゲームや時間帯を増やすと見つかりやすくなります。</p>
-      ) : (
-        <ul className="grid gap-3">{rows.map((r) => <li key={r.candidate.id}><CandidateCard c={r.candidate} match={r.match} /></li>)}</ul>
-      )}
-    </main>
+    </PageShell>
   );
 }

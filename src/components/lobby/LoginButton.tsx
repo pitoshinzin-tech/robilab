@@ -1,25 +1,50 @@
 "use client";
+import { useState } from "react";
+import { LoaderCircle } from "lucide-react";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { buttonVariants } from "@/components/ui/button-link";
+import { cn } from "@/lib/utils";
 
-/** Discord でログイン。variant="ghost" は案内の文の横に置く弱い形(/aim。主ボタンより目立たせない)。 */
-export function LoginButton({ next = "/lobby", variant = "discord" }: { next?: string; variant?: "discord" | "ghost" }) {
-  const login = () =>
-    createSupabaseBrowser().auth.signInWithOAuth({
-      provider: "discord",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`, scopes: "identify" },
-    });
-  // ghost は ui/button の ghost sm と同じ見た目(ここで ui/button を import すると、/my などのチャンクの分け方が変わって JS が増えるため、クラスだけ写す)
-  if (variant === "ghost") {
-    return (
-      <button type="button" onClick={() => void login()}
-        className="inline-flex h-11 cursor-pointer items-center rounded-rl-pill px-4 text-sm font-bold text-rl-muted underline-offset-4 transition-colors duration-(--rl-dur-fast) hover:text-rl-text hover:underline active:translate-y-px">
-        Discord でログイン
-      </button>
-    );
-  }
+/**
+ * Discord でログイン。押したら移動するまで押せない(2 回押しても 1 回だけ始める)。失敗したら押せる状態に戻す。
+ * variant="ghost" は案内の文の横に置く弱い形(/aim。主ボタンより目立たせない)。
+ * base-ui の Button(ui/button)は import しない:/aim・/my のチャンクの分け方が変わって JS が増えるため。
+ * 見た目は buttonVariants、loading の形は ui/button と同じ(元の文字を見えないまま残すので幅が変わらない)。
+ */
+export function LoginButton({ next = "/lobby", variant = "discord", size, className }: {
+  next?: string; variant?: "discord" | "ghost"; size?: "md" | "lg"; className?: string;
+}) {
+  const [pending, setPending] = useState(false);
+  const login = () => {
+    if (pending) return;
+    setPending(true);
+    createSupabaseBrowser()
+      .auth.signInWithOAuth({
+        provider: "discord",
+        options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`, scopes: "identify" },
+      })
+      .then(({ error }) => { if (error) setPending(false); }, () => setPending(false));
+  };
+  const label = "Discord でログイン";
   return (
-    <button type="button" onClick={login} className="rounded-full bg-[#5865F2] px-6 py-3 font-bold text-white">
-      Discord でログイン
+    <button
+      type="button"
+      onClick={login}
+      disabled={pending}
+      aria-busy={pending || undefined}
+      className={cn(buttonVariants({ variant, size: variant === "ghost" ? "sm" : (size ?? "md") }), className)}
+    >
+      {pending ? (
+        <>
+          <span aria-hidden className="invisible">{label}</span>
+          <span className="absolute inset-0 inline-flex items-center justify-center gap-2">
+            <LoaderCircle aria-hidden className="animate-spin motion-reduce:animate-none" />
+            Discord に移動中…
+          </span>
+        </>
+      ) : (
+        label
+      )}
     </button>
   );
 }

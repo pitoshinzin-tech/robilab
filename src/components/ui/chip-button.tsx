@@ -24,6 +24,26 @@ export function ChipButton({ pressed, className, children, ...props }: Omit<Reac
   );
 }
 
+/**
+ * フォームで送るチェックボックスのチップ(GET の絞り込み・プロフィールの選択)。中身は本物の <input type="checkbox">(Tab で線・Space で切り替え)。
+ * base-ui を読まないのでここに置く(chip.tsx からも同じものを出す)。
+ */
+export function CheckChip({ children, className, ...props }: Omit<React.ComponentProps<"input">, "type"> & { children: React.ReactNode; className?: string }) {
+  return (
+    <label
+      className={cn(
+        chipClassName,
+        "has-checked:border-rl-selected has-checked:bg-rl-selected-bg has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-rl-focus has-disabled:cursor-not-allowed has-disabled:opacity-45",
+        className,
+      )}
+    >
+      <input type="checkbox" className="peer sr-only" {...props} />
+      <Check aria-hidden className="rl-draw-check hidden size-4 shrink-0 peer-checked:block" />
+      {children}
+    </label>
+  );
+}
+
 const NEXT_KEYS = new Set(["ArrowRight", "ArrowDown"]);
 const PREV_KEYS = new Set(["ArrowLeft", "ArrowUp"]);
 
