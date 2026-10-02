@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchPublicCard } from "@/lib/public-card";
 import { buildCardView } from "@/lib/card-view";
+import { BRAND } from "@/lib/brand";
+import { ButtonLink } from "@/components/ui/button-link";
+import { PageShell } from "@/components/ui/page-shell";
+import { CardImageFrame } from "./CardImageFrame";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -24,11 +27,15 @@ export default async function PublicCardPage({ params }: Props) {
   if (!card) notFound();
   const view = buildCardView(card);
   return (
-    <main className="mx-auto grid max-w-2xl gap-5 px-4 py-6">
-      <h1 className="text-2xl font-bold">{view.cardName ?? "ゲーマー"}のマイ設定</h1>
-      {/* eslint-disable-next-line @next/next/no-img-element -- 動的な OG 画像をそのまま見せる */}
-      <img src={`/c/${slug}/opengraph-image`} alt="名刺カード" width={1200} height={630} className="w-full rounded-xl border border-[var(--rl-border)]" />
-      <Link href="/my" className="justify-self-start rounded-full bg-[var(--rl-accent)] px-6 py-3 font-bold text-[var(--rl-on-accent)]">自分も作る</Link>
-    </main>
+    <PageShell title={`${view.cardName ?? "ゲーマー"}のマイ設定`}>
+      <div className="grid gap-6">
+        <CardImageFrame slug={slug} />
+        <p className="text-base text-rl-muted [word-break:auto-phrase] text-balance">{BRAND.name}は、{BRAND.lead}です。</p>
+        <div className="flex flex-wrap gap-3">
+          <ButtonLink href="/my" variant="primary">自分の名刺をつくる</ButtonLink>
+          <ButtonLink href="/diagnosis" variant="secondary">タイプ診断をする</ButtonLink>
+        </div>
+      </div>
+    </PageShell>
   );
 }
