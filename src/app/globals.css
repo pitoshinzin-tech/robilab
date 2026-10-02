@@ -639,6 +639,34 @@ body {
     clip-path: inset(0 0 0 0);
   }
 }
+/*
+ * /my の埋まり具合:入力で新しく埋まったマスだけが、左から 1 マスずつ 2 段で点く(1 マス 40ms ずつずらす)。
+ * 開いたときは動かない(呼ぶ側が、入力のあとに増えたマスにだけ付ける)。
+ */
+.rl-cell-on {
+  animation: rl-cell-on 120ms steps(2, end) backwards;
+  animation-delay: calc(var(--rl-cell-i, 0) * 40ms);
+}
+@keyframes rl-cell-on {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* 追補 6 章:名刺のプレビューが、上から 2 段で書き換わる(120ms。下に前の画像があるので明るさは変わらない) */
+.rl-rewrite {
+  animation: rl-rewrite 120ms steps(2, end) backwards;
+}
+@keyframes rl-rewrite {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
 
 /*
  * 動きの参考 082(マスクの中から 1 行がせり上がる):結果のタイプのコードだけ(1 画面 1 か所)。診断から来たときだけ 1 回(S2 の芯)。
@@ -715,6 +743,8 @@ body {
   .rl-flap,
   .rl-bar-fill,
   .rl-meter-fill,
+  .rl-cell-on,
+  .rl-rewrite,
   .rl-mask-rise,
   .rl-marker::after {
     animation: none !important;

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { MySettingsClient } from "@/components/my/MySettingsClient";
+import { PageShell } from "@/components/ui/page-shell";
 
 export const metadata: Metadata = {
   title: "マイ設定",
@@ -8,10 +9,8 @@ export const metadata: Metadata = {
 
 export default function MyPage() {
   return (
-    <main className="mx-auto max-w-md px-4 py-6">
-      <h1 className="mb-2 text-2xl font-bold">マイ設定</h1>
-      <p className="mb-6 text-sm text-[var(--rl-muted)]">一度入れたら、感度計算などのツールが自動で使います。入力はその場で保存されます。</p>
+    <PageShell width="wide" title="マイ設定" description="一度入れたら、感度計算などのツールが自動で使います。入力はその場で保存されます。">
       <MySettingsClient />
-    </main>
+    </PageShell>
   );
 }
