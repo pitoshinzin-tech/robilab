@@ -1,0 +1,49 @@
+# UI の見直しで CEO が決めたこと(社長の確認用、2026-10-02)
+
+サブエージェント方式の実行中に、CEO が社長の代わりに決めたことの全部です。上から決めた順。各行の「—」の後ろは理由と、間違っていたときの損です。違うと思うものがあれば言ってください。戻せます。
+
+- Ruling: 計画の 18 タスクは社長の「どんどん進めて」「そのまま進めて」を、計画の確認と進め方(サブエージェント方式)の承認とみなして実行する — 社長は席にいて止められる — 間違いだった場合は、計画を見る前に作業が進む
+- Ruling P1 (T3/T4/T17): プロジェクトの `cn` に rl-sm/rl-md/rl-pill の角丸を足して、上書きが効くようにする(T3 で直す) — 部品ごとの上書きが黙って効かないのを防ぐ — 間違いなら cn の設定が 1 つ増えるだけ
+- Ruling P2 (T13): CopyButton は discord_username が null でないときだけ出し、`?? ""` は使わない — tsc を通し、空をコピーさせない — 小さい
+- Ruling P3 (T2/T18): src/data/type-icons.ts の PixelIcon の注記を TypeIcon に直す(T2 の Files に足す) — grep の確認が通るように — 小さい
+- Ruling P4 (T18): 矢印の検索は node の 1 行(または rg)で行う。Git Bash の grep "[←→]" は使わない — 誤検出のため — 小さい
+- Ruling P5 (T1/T2): .rl-assemble は animation-fill-mode: backwards にして、最後に clip-path を残さない — グローが切れないように — 小さい
+- Ruling P6 (T10/T12/T16): 書き直したファイルで使わなくなった import は消す — lint の警告を出さない — 小さい
+- Ruling P7 (T7): GlitchTitle は cn でクラスを合わせる(font-black が効くように) — 小さい
+- Ruling P8 (T3): Button の loading に min-w を付け、幅が変わらないようにする — 設計書 2-5 のとおり — 小さい
+- Ruling P9 (T14): 参加の手順は今のフォームの順(生年月日→プロフィール→規約)のまま。設計書の順は読み替えとして記録 — 動きを変えない — 設計書と表示順が違う
+- Ruling P10 (全体): タイトルの色ズレのノイズ(.rl-glitch)のシアンは D29 の例外として認める(押せる色の決まりの例外) — 社長が選んだブランドの表現 — 意味が少し弱まる
+- Ruling P11 (T14/T15/T16): カードの中にカードを入れない(中は枠なしの区切りにする)。退会などの危険の区切りは T14 で 1 つの部品にして T15 で使い回す — 設計書の決まりと重複の解消 — 小さい
+- Ruling P12 (T10/T13/T15): 文の中ではない単独のリンクは min-h-11 inline-flex items-center にする(文中のリンクは例外) — 44px の決まり — 小さい
+- Ruling P13 (T3): 使い道がまだない部品の形(select/progress の調整、NumberField の hint、Card selected、Badge success)はデザインシステムの部品として残し、/dev/ui に並べる — 後の画面で使う見込み — 使われないまま残る可能性
+- Ruling P14 (T8/T11/T12/T13): data-long-name の印は本番に残してよい(害がなく、はみ出しの確認に使う) — 小さい
+- Ruling P15 (T17): DATE_RE は [:：] にする — 全角のコロンも拾う — 小さい
+- Ruling P16 (T8): AimGame.tsx の text-[var(--rl-muted)] と text-[var(--rl-danger)] も T8 で役割のクラスに置き換える — 小さい
+- Ruling Q1: 社長の品質基準(Awwwards・Webby・FWA で賞)を受け、画面のタスク(Task 7〜17)ごとに、タスクのレビューのあと「品質の採点」を足す:コントローラーが 375/1440px の画面写真を撮り、採点役(opus)が Awwwards の 4 観点で 10 点満点を付ける。どれかが 8 点未満なら直す(最大 3 回)。アートディレクションの追加設計(設計書の付録)を Task 6 までに作り、Task 7 からの画面に渡す — 社長の基準に合わせるため — 時間とコストが増える
+- Ruling: Task 1 のブラウザ確認(Step 9)は Task 6 のあとにまとめて行う — 土台とナビがそろってから見るほうが無駄がない — 見つかった問題の直しが後になる
+- Ruling: 計画に追補の見せ場(6A・7A・7B・10A・17A・19)を足した版で Task 4 から進める。Task 2・3 の追補分は 6A に入れる。順番:4→5→6→6A→7→7A→7B→8→9→10→10A→11→12→13→14→15→16→17→17A→18→19 — 社長の品質基準 — 作業量が増える
+- Ruling: 速さのため、タスクのレビューは次のタスクの実装と並行で回す(実装者は 1 人ずつのまま) — レビューの指摘で直しが要るときは、次のタスクのあとで同じ実装者に戻す — 間違いだった場合は、直しが次のタスクの上に積まれる
+- Ruling: 6A の読み替え 2 点を認める(.font-display に既定 700 を付けて可変化で細くならないようにする / TypeIcon の rect の key を role-x にする) — 見た目を変えないため・React の警告を出さないため — 小さい
+- Ruling Q2: 品質の採点(Q1)は、画面の写真が撮れるとき(アプリの画面が表示されているとき)にまとめて行う。計画 9-3 の中間の採点(7B のあと・10A のあと)と Task 19 で回す。写真が撮れないあいだは実装を止めない — 社長の「どんどん進めて」 — 直しが後ろにずれる
+- Ruling: ブリーフどおり "cn" パッケージから cn を読んでいる部品(PixelArt・KanjiStrokes・TodayLabel・PixelStair)は、Task 18 の片付けで @/lib/utils にそろえる — 今は rl-* のクラスを重ねて渡していない — それまでに重ねて渡すと上書きが効かない
+- Ruling: "cn" パッケージの import は、client の部品から読まれるとブラウザに約 14KB 入るので、Task 18 を待たずに Task 7B で PixelArt・PixelStair・TodayLabel・TypeIcon を @/lib/utils にそろえる(7A で KanjiStrokes は済み) — JS の上限を守るため — 小さい
+- Ruling: 照準(レティクル)のシアンは「押せるもの」の例外として認める(なぞるお試しの操作に結びつく) — 追補 S1 の指定 — 意味が少し弱まる
+- Ruling: 社長が共有した MOTION LIBRARY は docs/design/motion-reference.md にまとめ、Task 8 以降の担当への指示に「参照する」と書く(コードは写さず考え方だけ) — 品質を上げるため — 動きを足しすぎると重くなる(上限は計画の決まりで守る)
+- Ruling: 社長の「取り入れられるものはどんどん」を受け、motion-reference.md の表を各画面の担当に必須の参考として渡し、表にない効果も concept(線・マス)に合えば担当の判断で足してよいことにする。上限(1 画面の自動の動き・JS の上限・reduced-motion)は守る
+- Ruling: 見せ場の JS 上限(合計 12KB)は見せ場のコードだけで数え、共通部品を使い始めた分は別に記録する — 部品は全画面で共有の費用で、見せ場の重さとは別物 — 全体の JS は Task 19 の Lighthouse で見る
+- Ruling: .rl-lock の position:relative を @layer components に入れ、Tailwind の absolute 等が勝つようにする(トップの直し 2 回目で一緒に直す) — 6A の minor が Task 8 で実害になった — 小さい
+- Ruling: chip.tsx の ChipGroup(ToggleGroup)と単体の Chip を別ファイルに分け、ToggleGroup を使わない画面で読まないようにする(aim の直しのあとに小さいタスクとして) — JS を減らすため — 小さい
+- Ruling: 見せ場の上限 12KB は、ページごとに増えた分(manifest)で数える。チャンクの重なりで合計だけ増える分は Task 19 で全体として見る — ページで実際に読む重さが利用者に効く — 合計の数字が大きく見える
+- Ruling: Task 10 の読み替えを認める(ButtonLink を base-ui を読まない button-link.tsx に分ける/074 の下線は background-size を 1 回だけ動かす/% はサーバーで 0% から数え上げ・読み上げは正しい数)。自動の動きの数・LCP は Task 19 の採点と計測で見る — ページの重さを減らすため — 合計の JS が増えて見える
+- Ruling: 10A の読み替えを認める(useAssemble を最初の値で固定・REVEAL_FALLBACK_MS 500 の保険・064 は入れない:600ms の枠と自動の動きの数のため) — 小さい
+- Ruling: /types の 2 択は base-ui の ToggleGroup をやめて <button aria-pressed> にする(矢印キーは使えないが Tab で足りる)/ 直接開いた結果ではゲームの順位の % も出さない / 直接開いた人の「もう一度診断する」は「診断する」 — 重さと「作った数字に見える」を避けるため — 矢印キーの操作がなくなる
+- Ruling: 絞り込みで 1 位が外れたら、絞り込んだ中の最上位を大きな行にし、重ね図もそれに合わせる(主ボタンが消えないように) — 収益の入口の主ボタンを守る — 小さい
+- Ruling: TypeIcon を next/image から <img loading=lazy> にした変更(083efa1)を認める — ドット絵が 0 枚でも next/image の約 4.5KB が各ページに入っていた — 画像の最適化はもともと unoptimized
+- Ruling: 絞り込みなしで 0 人のときの新しい文言(「ロビーにまだ人がいません」など)を認める — 「条件をゆるめる」が意味をなさないため — 文言は社長の確認リストに載せる
+- Ruling: I1 は例外として残す(ロビーの未ログインの画面で 1 回・840ms・reduced-motion で止まる・この画面の唯一の動き。社長の「取り入れられるものはどんどん」) — 決まりの趣旨(うるさくしない)は守れている — Task 19 の採点で多すぎれば外す
+- Ruling: Task 13 の読み替えを認める(.rl-draw-line は名前がぶつかるので rl-pair-line / 押すボタンは base-ui なしの PlainButton)
+- Ruling: rl-draw-check は「選び直したときだけ」線を引くよう共通の部品(chip-button.tsx / chip.tsx / CrosshairEditor)で直す(全画面に効く) — 開いたときの自動の動きをなくす — 小さい
+- Ruling: global-error.tsx は ErrorState を使わない最小の形にする(全ページの JS を約 1KB 減らす。めったに出ない画面なので見た目のクラスの二重持ちを許す) — 全ページに効く重さを優先 — クラスが 2 か所になる
+- Ruling: /c/[slug]/loading.tsx は消す(本当の 404 を返すほうが大事。読み込み中は CardImageFrame の中の Skeleton で足りる)。あわせて 404 の塗り替えの host を main 全体ではなく絵とボタンに — 計画の指定より HTTP の正しさを優先 — 名刺のページの最初の表示に Skeleton が出ない
+- Ruling: /type/[code] にも入る側の向きの ViewTransition を足す(PageShell と同じ enter/exit の扱い、loading.tsx は足さない) — 深く入る・戻るの向きをそろえる — 小さい
+- Ruling: 規約の 3 ページには Creativity と大きな文字の差を当てはめない(A、おすすめ)。制定日を足して合格の見込み — 規約は演出より読みやすさ — 社長の確認リストに載せる
