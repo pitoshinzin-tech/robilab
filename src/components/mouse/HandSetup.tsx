@@ -77,8 +77,8 @@ export function HandSetup({ initial, onDone, onCancel }: {
           </summary>
           <div className="p-4 pt-0"><HandGuide /></div>
         </details>
-        <div className="grid grid-cols-2 gap-4">
-          <NumberField label="手の長さ" note="わからなければ空欄で OK" suffix="cm" value={hand.lengthCm} onValue={(lengthCm) => setHand((h) => ({ ...h, lengthCm }))}
+        <div className="grid grid-cols-2 items-start gap-4">
+          <NumberField label="手の長さ" note="空欄でも OK" suffix="cm" value={hand.lengthCm} onValue={(lengthCm) => setHand((h) => ({ ...h, lengthCm }))}
             onInvalid={(v) => setInvalid((s) => ({ ...s, length: v }))} />
           <NumberField label="手の幅(任意)" suffix="cm" value={hand.widthCm} onValue={(widthCm) => setHand((h) => ({ ...h, widthCm }))}
             onInvalid={(v) => setInvalid((s) => ({ ...s, width: v }))} />

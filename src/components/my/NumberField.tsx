@@ -47,7 +47,7 @@ export function NumberField({ label, value, onValue, error, suffix, hint, note, 
         />
         {suffix && <span className="text-sm text-rl-muted">{suffix}</span>}
       </span>
-      {note && <p id={noteId} className="text-sm text-rl-muted">{note}</p>}
+      {note && <p id={noteId} className="text-sm text-rl-muted [word-break:auto-phrase] text-balance">{note}</p>}
     </Field>
   );
 }
