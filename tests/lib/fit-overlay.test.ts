@@ -25,6 +25,19 @@ describe("fitOverlay(手とマウスを同じ縮尺で重ねる)", () => {
     expect(g.mouse.y + g.mouse.height).toBe(0);
     expect(g.mouse.x + g.mouse.width / 2).toBe(0);
   });
+  it("handTransform で絵の端(親指の左端・中指の先・手のひらの右・手首)を写すと handBox の端に重なる", () => {
+    for (const [L, W] of [[17, null], [18, 8], [21, 9.5]] as const) {
+      const g = fitOverlay(L, W, 120, 62);
+      const m = /^translate\((\S+) (\S+)\) scale\((\S+) (\S+)\)$/.exec(g.handTransform);
+      expect(m).not.toBeNull();
+      const [tx, ty, sx, sy] = m!.slice(1).map(Number);
+      const near = (a: number, b: number) => expect(Math.abs(a - b)).toBeLessThan(0.2);
+      near(tx + 32 * sx, g.handBox.left);
+      near(tx + 170 * sx, g.handBox.right);
+      near(ty + 28 * sy, g.handBox.top);
+      near(ty + 240 * sy, g.handBox.bottom);
+    }
+  });
   it("手の幅が分からないときは長さ × 0.45 で描く", () => {
     const known = fitOverlay(20, 20 * HAND_WIDTH_RATIO, 120, 62);
     const guessed = fitOverlay(20, null, 120, 62);

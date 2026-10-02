@@ -107,8 +107,8 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
   const target = fitTarget(hand);
   const top3 = ranked.slice(0, 3).map((r) => device(r.mouse.id)).filter((d) => d !== undefined);
   const shareUrl = buildXShareUrl(buildMouseShareText(top3.map((d) => ({ brand: d.brand, name: d.name }))), pageUrl);
-  // 追補 6 章:重ね図に出すマウス(選んでいなければ 1 位)
-  const overlay = ranked.find((r) => r.mouse.id === overlayId)?.mouse ?? ranked[0]?.mouse;
+  // 追補 6 章:重ね図に出すマウス(選んでいなければ、絞り込んだ一覧の先頭。0 件なら 1 位)
+  const overlay = ranked.find((r) => r.mouse.id === overlayId)?.mouse ?? filtered[0]?.mouse ?? ranked[0]?.mouse;
   const overlayName = overlay ? (device(overlay.id)?.name ?? "") : "";
 
   return (
@@ -154,10 +154,10 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
               const compare = currentMouse ? compareWith(currentMouse, item.mouse) : null;
               const overlaid = overlay?.id === item.mouse.id;
               const onOverlay = () => { setOverlayId(item.mouse.id); requestAnimationFrame(revealFitFigure); };
-              // 追補 6 章:1 位は大きな行(主ボタンはここ)。2 位からは今のカード(店のボタンは二番手)
-              if (rank === 1) return <TopMouseRow key={item.mouse.id} item={item} brand={d.brand} name={d.name} reason={reason} links={links} compare={compare} overlaid={overlaid} onOverlay={onOverlay} />;
+              // 追補 6 章:一覧の先頭は大きな行(主ボタンはここ。絞り込みで 1 位が外れても先頭が持つ)。2 番目からはカード(店のボタンは二番手)
+              if (item === shown[0]) return <TopMouseRow key={item.mouse.id} rank={rank} item={item} brand={d.brand} name={d.name} reason={reason} links={links} compare={compare} overlaid={overlaid} onOverlay={onOverlay} />;
               return (
-                <MouseCard key={item.mouse.id} rank={rank} primaryShop={false} item={item} brand={d.brand} name={d.name}
+                <MouseCard key={item.mouse.id} rank={rank} item={item} brand={d.brand} name={d.name}
                   reason={reason}
                   compare={compare}
                   links={links}

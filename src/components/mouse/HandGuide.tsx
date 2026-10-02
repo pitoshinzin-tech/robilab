@@ -1,13 +1,13 @@
+import { HAND_ART_PATHS } from "@/lib/fit-overlay";
+
 /** 手の測り方の図。長さ=手首のしわから中指の先まで、幅=親指を除いた4本の付け根の幅。 */
 export function HandGuide() {
   return (
     <figure className="grid gap-2">
       <svg viewBox="0 0 220 260" role="img" aria-label="手の長さと幅の測り方" className="mx-auto h-56 w-auto">
         <g fill="none" stroke="var(--rl-muted)" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round">
-          {/* 手のひらと指 */}
-          <path d="M70 240 L70 150 Q70 130 80 125 L80 60 Q80 48 90 48 Q100 48 100 60 L100 120 L102 40 Q102 28 112 28 Q122 28 122 40 L122 118 L126 48 Q126 36 136 36 Q146 36 146 48 L146 122 L150 72 Q150 60 160 60 Q170 60 170 72 L170 170 Q170 215 140 240 Z" />
-          {/* 親指 */}
-          <path d="M70 175 Q48 160 38 135 Q32 122 42 118 Q52 114 58 128 L70 150" />
+          {/* 手のひらと指・親指(実寸の重ね図と同じ線。src/lib/fit-overlay.ts) */}
+          {HAND_ART_PATHS.map((d) => <path key={d} d={d} />)}
         </g>
         {/* 長さ:手首から中指の先 */}
         <g stroke="var(--rl-secondary)" strokeWidth="3" fill="var(--rl-secondary)">

@@ -9,10 +9,9 @@ import { ChipButton } from "@/components/ui/chip-button";
 const SHAPE = { symmetric: "左右対称", right: "右手用" } as const;
 const CONNECTION = { wired: "有線", wireless: "無線" } as const;
 
-export function MouseCard({ rank, primaryShop, item, brand, name, reason, compare, links, imageUrl, overlaid = false, onOverlay }: {
+/** 2 番目からのカード。店のボタンはすべて二番手(主ボタンは先頭の大きな行 TopMouseRow だけ) */
+export function MouseCard({ rank, item, brand, name, reason, compare, links, imageUrl, overlaid = false, onOverlay }: {
   rank: number;
-  /** 1 位のカードだけ true(Amazon のボタンを主ボタンにする。主ボタンは 1 画面に 1 つ)。追補 6 章で 1 位は TopMouseRow になったので、今はいつも false */
-  primaryShop: boolean;
   item: Ranked; brand: string; name: string;
   /** おすすめの理由(src/lib/mouse-reason.ts。手の情報と公式の数字だけから作る) */
   reason: string;
@@ -55,7 +54,7 @@ export function MouseCard({ rank, primaryShop, item, brand, name, reason, compar
         <div className="grid gap-3 border-t border-rl-line pt-4">
           {(links.amazonPr || links.rakutenPr) && <Badge variant="pr" className="justify-self-start">PR</Badge>}
           <div className="flex flex-wrap gap-2">
-            <ButtonAnchor href={links.amazon} target="_blank" rel="sponsored noopener noreferrer" variant={primaryShop ? "primary" : "secondary"} size="sm">Amazon で探す<ExternalLink aria-hidden className="size-4" /></ButtonAnchor>
+            <ButtonAnchor href={links.amazon} target="_blank" rel="sponsored noopener noreferrer" variant="secondary" size="sm">Amazon で探す<ExternalLink aria-hidden className="size-4" /></ButtonAnchor>
             <ButtonAnchor href={links.rakuten} target="_blank" rel="sponsored noopener noreferrer" variant="secondary" size="sm">{links.rakutenIsItem ? "楽天で見る" : "楽天で探す"}<ExternalLink aria-hidden className="size-4" /></ButtonAnchor>
           </div>
           <ButtonAnchor href={links.official} target="_blank" rel="noopener noreferrer" variant="ghost" size="sm" className="justify-self-start">公式ページ<ExternalLink aria-hidden className="size-4" /></ButtonAnchor>
