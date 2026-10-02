@@ -1,9 +1,11 @@
+import { ViewTransition } from "react";
 import { Mic } from "lucide-react";
 import { GAMES } from "@/data/games";
 import { TIME_SLOTS } from "@/data/lobby-options";
 import type { Candidate } from "@/lib/lobby-types";
 import type { PeopleMatch } from "@/lib/people-match";
 import { heatOf, spriteFill } from "@/lib/type-sprite";
+import { MORPH_PIXEL, NAV_FORWARD, playerVtName } from "@/lib/motion/vt-names";
 import { TypeIcon } from "@/components/brand/TypeIcon";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardLink } from "@/components/ui/card";
@@ -23,7 +25,10 @@ export function CandidateCard({ c, match, link = true }: { c: Candidate; match: 
     <div className="flex min-w-0 gap-4 pl-2">
       {/* 角丸にかからないよう上下 16px あける */}
       <span aria-hidden className="absolute top-4 bottom-4 left-0 w-1" style={{ backgroundImage: `repeating-linear-gradient(to bottom, ${band} 0 8px, transparent 8px 16px)` }} />
-      {c.type_code ? <TypeIcon code={c.type_code} size={64} dissolve={link} /> : <span aria-hidden className="size-16 shrink-0 rounded-rl-sm bg-rl-surface-2" />}
+      {/* 追補 S3:一覧の札の絵がプロフィールの札の絵へ移る(player-ID。loading.tsx が先に出たときは移らずにふつうに入る) */}
+      {c.type_code ? (
+        <ViewTransition name={playerVtName(c.id)} share={MORPH_PIXEL} default="none"><TypeIcon code={c.type_code} size={64} dissolve={link} /></ViewTransition>
+      ) : <span aria-hidden className="size-16 shrink-0 rounded-rl-sm bg-rl-surface-2" />}
       <div className="grid min-w-0 flex-1 content-start gap-1">
         <div className="flex min-w-0 flex-wrap items-start justify-between gap-x-3 gap-y-1">
           <span data-long-name className="min-w-0 text-xl font-bold wrap-anywhere">{c.nickname}</span>
@@ -53,5 +58,5 @@ export function CandidateCard({ c, match, link = true }: { c: Candidate; match: 
       </div>
     </div>
   );
-  return link ? <CardLink href={`/lobby/${c.id}`} className="rl-dissolve-host">{body}</CardLink> : <Card className="relative">{body}</Card>;
+  return link ? <CardLink href={`/lobby/${c.id}`} transitionTypes={[NAV_FORWARD]} className="rl-dissolve-host">{body}</CardLink> : <Card className="relative">{body}</Card>;
 }

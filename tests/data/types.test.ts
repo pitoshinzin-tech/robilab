@@ -23,3 +23,11 @@ describe("TYPES", () => {
     }
   });
 });
+
+describe("結果の画面に同時に出る 3 つの絵(View Transition の名前 type-CODE が 1 ページで重ならない)", () => {
+  it.each(TYPES.map((t) => [t.code, t] as const))("%s:自分・ベスト・次点が 3 つとも違い、どれも 16 タイプのコード", (_, t) => {
+    expect(new Set([t.code, t.bestMatch, t.secondMatch]).size).toBe(3);
+    expect(ALL_TYPE_CODES).toContain(t.bestMatch);
+    expect(ALL_TYPE_CODES).toContain(t.secondMatch);
+  });
+});

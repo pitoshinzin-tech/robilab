@@ -1,7 +1,8 @@
 "use client";
-import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { useLayoutEffect, useRef, ViewTransition, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { MORPH_PIXEL, NAV_FORWARD, typeVtName } from "@/lib/motion/vt-names";
 import { axisInitials, axisLine } from "@/lib/type-axes";
 import { REDUCED_MOTION_QUERY } from "@/lib/motion/use-reduced-motion";
 import { ROSTER_THRESHOLD, isMostlyVisible, rosterSeen } from "@/lib/motion/roster-entrance";
@@ -54,8 +55,8 @@ export function TypeRoster({ items, showName = false, mobileName = true, nameSiz
         <li key={t.code} className="rl-roster-item rl-dissolve-host" style={{ "--i": i } as CSSProperties} data-l0={t.code[0]} data-l1={t.code[1]} data-l2={t.code[2]} data-l3={t.code[3]}>
           {/* PC は横の余白を 0 にして名前の幅を取る(列の間 gap-x-2 で足りる)。
               絵の塗り替え(動きの参考 025)は、icon に dissolve を付けた TypeIcon を渡す(li が .rl-dissolve-host) */}
-          <Link href={`/type/${t.code}`} className="rl-lock grid min-h-11 place-items-center content-start gap-1 p-2 md:px-0 md:py-2">
-            {t.icon}
+          <Link href={`/type/${t.code}`} transitionTypes={[NAV_FORWARD]} className="rl-lock grid min-h-11 place-items-center content-start gap-1 p-2 md:px-0 md:py-2">
+            <ViewTransition name={typeVtName(t.code)} share={MORPH_PIXEL} default="none">{t.icon}</ViewTransition>
             <span className="font-display text-sm text-rl-highlight">{t.code}</span>
             {/* 名前は日本語の文節で折る(対応しないブラウザは今までどおりどこでも折れる)。読み上げは下の sr-only の正式な名前。
                 mobileName={false} のときスマホは名前を出さず、絵・コード・頭文字の 3 段にそろえる */}

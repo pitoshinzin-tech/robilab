@@ -10,7 +10,7 @@ import { rankGames } from "@/lib/role-match";
 import { buildShareText, buildXShareUrl } from "@/lib/share";
 import { getSiteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
-import { MORPH_PIXEL, VT_TYPE_SPRITE } from "@/lib/motion/vt-names";
+import { MORPH_PIXEL, NAV_FORWARD, TYPE_ROW, VT_TYPE_SPRITE, typeVtName } from "@/lib/motion/vt-names";
 import { GlitchTitle } from "@/components/brand/GlitchTitle";
 import { TypeIcon } from "@/components/brand/TypeIcon";
 import { AxisBars } from "@/components/result/AxisBars";
@@ -76,7 +76,8 @@ export default async function TypePage({ params, searchParams }: Props) {
       {/* 左の 5 列:絵と読み方。PC はスクロールしても横に残る(読んでいる間も自分の絵が見える) */}
       <div className="lg:col-span-5 lg:row-span-2">
         <div className="lg:sticky lg:top-8">
-          <SpriteReading code={type.code} icon={fromDiagnosis ? <ViewTransition name={VT_TYPE_SPRITE} share={MORPH_PIXEL} default="none">{bigIcon}</ViewTransition> : bigIcon} />
+          {/* 大きな絵は、診断から来たときは type-sprite(診断のマスの画面から)、それ以外は type-CODE(名簿・相性の行から移る) */}
+          <SpriteReading code={type.code} icon={<ViewTransition name={fromDiagnosis ? VT_TYPE_SPRITE : typeVtName(type.code)} share={MORPH_PIXEL} default="none">{bigIcon}</ViewTransition>} />
         </div>
       </div>
 
@@ -125,8 +126,11 @@ export default async function TypePage({ params, searchParams }: Props) {
           <ul className="border-t border-rl-line">
             {matches.map(({ label, t }) => (
               <li key={label} className="border-b border-rl-line">
-                <Link href={`/type/${t.code}`} className="rl-lock group grid grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-4 py-4">
-                  <TypeIcon code={t.code} size={48} />
+                {/* 行の絵は、行から次の結果へ移るとき(type-row)だけ次の結果の大きな絵と対になる(名簿から来たときに行の絵まで飛んでこない) */}
+                <Link href={`/type/${t.code}`} transitionTypes={[NAV_FORWARD, TYPE_ROW]} className="rl-lock group grid grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-4 py-4">
+                  <ViewTransition name={typeVtName(t.code)} share={{ [TYPE_ROW]: MORPH_PIXEL, default: "none" }} default="none">
+                    <TypeIcon code={t.code} size={48} />
+                  </ViewTransition>
                   <span className="grid min-w-0">
                     <span className="text-sm text-rl-muted">{label}・<span className="font-display">{t.code}</span></span>
                     <span aria-hidden className="text-2xl font-bold text-balance [word-break:auto-phrase] wrap-anywhere md:text-rl-title">{t.name.replace(/タイプ$/, "")}</span>

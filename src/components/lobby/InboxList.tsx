@@ -5,6 +5,7 @@ import { Check, ExternalLink, Inbox } from "lucide-react";
 import { respondAction } from "@/app/lobby/actions";
 import type { InboxRow } from "@/lib/lobby-types";
 import { discordProfileUrl } from "@/lib/discord-link";
+import { NAV_FORWARD } from "@/lib/motion/vt-names";
 import { Badge } from "@/components/ui/badge";
 import { ButtonAnchor } from "@/components/ui/button-link";
 import { PlainButton } from "@/components/ui/plain-button";
@@ -53,7 +54,7 @@ export function InboxList({ rows, icons, myType }: { rows: InboxRow[]; icons: Re
             {received.map((r) => (
               <Card as="li" key={r.approach_id} className="grid gap-3">
                 <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
-                  <Link href={`/lobby/${r.partner_id}`} className="rl-dissolve-host inline-flex min-h-11 min-w-0 items-center gap-3 rounded-rl-sm text-base font-bold text-rl-accent underline-offset-4 hover:underline">
+                  <Link href={`/lobby/${r.partner_id}`} transitionTypes={[NAV_FORWARD]} className="rl-dissolve-host inline-flex min-h-11 min-w-0 items-center gap-3 rounded-rl-sm text-base font-bold text-rl-accent underline-offset-4 hover:underline">
                     {iconOf(r.type_code)}
                     <span data-long-name className="min-w-0 wrap-anywhere">{r.nickname}</span>
                   </Link>
