@@ -29,10 +29,10 @@ export default function MousePage() {
           価格や在庫は各ショップでご確認ください。Amazon・楽天のリンクには広告(PR)が含まれる場合があります(<Link href="/disclosure" className="text-rl-accent underline">広告表記</Link>)。
         </p>
         {Object.keys(MICE_RAKUTEN).length > 0 && (
-          // 楽天ウェブサービスのクレジット表記(公式の「テキストクレジット」のコードをそのまま使う。改変しない決まりなので rel も足さない。target="_blank" は今のブラウザでは noopener 扱い)
+          // 楽天ウェブサービスのクレジット表記(公式の「テキストクレジット」のコード。文言とリンク先は変えず、別タブで開くので rel="noopener noreferrer" だけ足す)
           <p className="text-xs text-rl-muted">
             {/* Rakuten Web Services Attribution Snippet FROM HERE */}
-            <a href="https://developers.rakuten.com/" target="_blank">Supported by Rakuten Developers</a>
+            <a href="https://developers.rakuten.com/" target="_blank" rel="noopener noreferrer">Supported by Rakuten Developers</a>
             {/* Rakuten Web Services Attribution Snippet TO HERE */}
           </p>
         )}
