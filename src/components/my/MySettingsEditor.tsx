@@ -160,7 +160,8 @@ export function MySettingsEditor() {
       <div className="flex flex-wrap items-end gap-x-6 gap-y-2 lg:col-span-2">
         <p className="grid gap-1">
           <span className="text-sm text-rl-muted">入力済み</span>
-          <NumUnit value={progress.done} unit={`/ ${progress.total} 項目`} className="text-rl-display-1" />
+          {/* 0 のときはマゼンタにしない(斜線つきの 0 が「禁止」の印に見えるため) */}
+          <NumUnit value={progress.done} unit={`/ ${progress.total} 項目`} muted={progress.done === 0} className="text-rl-display-1" />
         </p>
         <ProgressCells total={progress.total} done={progress.done} pulse={pulse} />
       </div>
