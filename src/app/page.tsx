@@ -5,8 +5,10 @@ import { BRAND } from "@/lib/brand";
 import { TYPES } from "@/data/types";
 import { aimCharForDate, jstDate } from "@/lib/aim/daily";
 import { loadRanking } from "@/lib/aim/ranking";
+import { parsePath, toStroke } from "@/lib/aim/path";
+import { strokeSchedule } from "@/lib/motion/stroke-schedule";
 import { FLASK_16, PARTY_16, RULER_16 } from "@/lib/pixel-art";
-import { KanjiStrokes } from "@/components/brand/KanjiStrokes";
+import { HeroKanji } from "@/components/brand/HeroKanji";
 import { TodayLabel } from "@/components/brand/TodayLabel";
 import { PixelStair } from "@/components/brand/PixelStair";
 import { PixelArt } from "@/components/brand/PixelArt";
@@ -29,6 +31,8 @@ export default async function Home() {
   const char = aimCharForDate(date);
   const yesterday = aimCharForDate(yesterdayOf(date));
   const top = (await loadRanking(date))[0] ?? null;
+  // 追補 S1:線の長さに比例した時間割(合計 1,400ms 以内)。長さはサーバーで計算するので、ブラウザでは測らない
+  const schedule = strokeSchedule(char.strokes.map((d) => toStroke(parsePath(d)).length));
 
   return (
     <main className="pb-12 md:pb-16">
@@ -36,7 +40,7 @@ export default async function Home() {
       <section aria-labelledby="today-heading" className="rl-hero-ground">
         <div className={cn(inner, "grid gap-8 pt-8 pb-8 lg:grid-cols-12 lg:items-center lg:gap-6 lg:pt-16")}>
           <div className="flex items-start justify-center gap-4 lg:col-span-7 lg:justify-start">
-            <KanjiStrokes strokes={char.strokes} className="size-(--rl-text-hero)" />
+            <HeroKanji strokes={char.strokes} schedule={schedule} />
             <TodayLabel as="h2" id="today-heading" glyph={char.glyph} date={date} strokes={char.strokes.length} />
           </div>
           <div className="grid content-center gap-4 lg:col-span-5">

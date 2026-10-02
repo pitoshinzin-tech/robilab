@@ -1,5 +1,5 @@
 import { useId, type CSSProperties } from "react";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 import type { StrokeSlot } from "@/lib/motion/stroke-schedule";
 
 /**

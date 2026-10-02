@@ -267,6 +267,46 @@ body {
 }
 
 /*
+ * 追補 S1:1 画ずつ引く(時間割はサーバーで strokeSchedule。delay と duration は各 path の style)。
+ * 描き終わった時刻(--rl-drawn-at)から、光の重ねが出て、色ズレの縁が 200ms ですっと定まって止まる(点滅しない)。
+ */
+.rl-stroke-draw {
+  stroke-dasharray: 1;
+  animation: rl-stroke var(--rl-ease-line) both;
+}
+@keyframes rl-stroke {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+.rl-kanji[data-drawing] .rl-kanji-glow {
+  animation: rl-glow-in 200ms var(--rl-ease-line) var(--rl-drawn-at) both;
+}
+.rl-kanji[data-drawing] .rl-kanji-ghost-m,
+.rl-kanji[data-drawing] .rl-kanji-ghost-c {
+  animation: rl-settle 200ms var(--rl-ease-line) var(--rl-drawn-at) both;
+}
+@keyframes rl-glow-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rl-settle {
+  from {
+    opacity: 0;
+    transform: translateX(0);
+  }
+}
+
+/*
  * 追補 S4:押せるものに照準が合う。L 字の角の印が外から寄って止まる(CSS だけ)。
  * ::before が上の 2 つの角、::after が下の 2 つの角。寄る動きは transform: scale の近似(inset は動かさない)。
  * .rl-lock は要素そのもの、.rl-lock-in は「親のリンクにホバー・フォーカスしたとき、中の箱に」出す(::before を別の印に使うタブ用)。
@@ -422,6 +462,14 @@ body {
   }
   .rl-skeleton-pixel::after {
     animation: none !important;
+  }
+  .rl-stroke-draw,
+  .rl-kanji[data-drawing] .rl-kanji-glow,
+  .rl-kanji[data-drawing] .rl-kanji-ghost-m,
+  .rl-kanji[data-drawing] .rl-kanji-ghost-c {
+    animation: none !important;
+    opacity: 1;
+    stroke-dashoffset: 0;
   }
 }
 

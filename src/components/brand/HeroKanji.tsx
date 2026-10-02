@@ -1,0 +1,98 @@
+"use client";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { PenLine } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { StrokeSlot } from "@/lib/motion/stroke-schedule";
+import { appendPoint, pointsToPath, toViewBox, type TracePoint } from "@/lib/motion/hero-trace";
+import { KanjiStrokes } from "@/components/brand/KanjiStrokes";
+import { Button } from "@/components/ui/button";
+import { CopyButton } from "@/components/ui/copy-button";
+
+const FINE = "(hover: hover) and (pointer: fine)";
+function subscribeFine(onChange: () => void) {
+  const m = window.matchMedia(FINE);
+  m.addEventListener("change", onChange);
+  return () => m.removeEventListener("change", onChange);
+}
+
+/**
+ * 追補 S1:トップのヒーローの漢字。線は KanjiStrokes が CSS で引く(ここに JS の動きはない)。ここは「触ると答える」部分だけ。
+ * PC:漢字の上で照準(細い十字と 4 つの角)が出る。押したままなぞると、その線がライムで重なり「この感じで全部の画をなぞる」。点数は付けない。
+ * スマホ:「1 画なぞってみる」を押したときだけ、漢字の箱が指の入力を受ける(押す前は touch-action: auto でスクロールを奪わない)。
+ * (HeroKanji は @/data/types も TypeIcon も import しない。ブラウザの JS を小さくするため。)
+ */
+export function HeroKanji({ strokes, schedule, className }: { strokes: readonly string[]; schedule: readonly StrokeSlot[]; className?: string }) {
+  const fine = useSyncExternalStore(subscribeFine, () => window.matchMedia(FINE).matches, () => false);
+  const [trying, setTrying] = useState(false);
+  const [aim, setAim] = useState<TracePoint | null>(null);
+  const [trace, setTrace] = useState<readonly TracePoint[]>([]);
+  const [traced, setTraced] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  const drawing = useRef(false);
+  const pending = useRef<TracePoint | null>(null);
+  const frame = useRef(0);
+  const active = fine || trying;
+
+  useEffect(() => () => cancelAnimationFrame(frame.current), []);
+
+  const at = (e: React.PointerEvent): TracePoint | null => {
+    const el = box.current;
+    return el ? toViewBox(e.clientX, e.clientY, el.getBoundingClientRect()) : null;
+  };
+  // pointermove は 1 フレームに 1 回にまとめる
+  const flush = () => {
+    frame.current = 0;
+    const p = pending.current;
+    if (!p) return;
+    if (fine) setAim(p);
+    if (drawing.current) setTrace((prev) => appendPoint(prev, p));
+  };
+  const onMove = (e: React.PointerEvent) => {
+    if (!active) return;
+    pending.current = at(e);
+    if (!frame.current) frame.current = requestAnimationFrame(flush);
+  };
+  const onDown = (e: React.PointerEvent) => {
+    if (!active) return;
+    const p = at(e);
+    if (!p) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drawing.current = true;
+    setTraced(false);
+    setTrace([p]);
+  };
+  const onUp = () => {
+    if (!drawing.current) return;
+    drawing.current = false;
+    setTraced(trace.length >= 2);
+  };
+
+  return (
+    <div className={cn("grid justify-items-center gap-3", className)}>
+      <div ref={box} className={cn("relative size-(--rl-text-hero)", fine && "cursor-crosshair")} style={{ touchAction: trying ? "none" : "auto" }}
+        onPointerMove={onMove} onPointerDown={onDown} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={() => setAim(null)}>
+        <KanjiStrokes strokes={strokes} schedule={schedule} className="size-full" />
+        <svg viewBox="0 0 109 109" aria-hidden className="pointer-events-none absolute inset-0 size-full overflow-visible">
+          {trace.length > 1 && <path d={pointsToPath(trace)} fill="none" stroke="var(--rl-success)" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />}
+          {fine && aim && (
+            <g transform={`translate(${aim.x} ${aim.y})`} fill="none" stroke="var(--rl-accent)" strokeWidth={0.6}>
+              <path d="M-7 0H-2M2 0H7M0 -7V-2M0 2V7" />
+              <path d="M-5 -3V-5H-3M3 -5H5V-3M5 3V5H3M-3 5H-5V3" />
+            </g>
+          )}
+        </svg>
+      </div>
+      <div aria-live="polite" className="grid min-h-11 justify-items-center gap-2 text-center">
+        {fine && traced && <p className="text-sm">この感じで全部の画をなぞる</p>}
+        {!fine && !trying && <Button type="button" variant="secondary" size="sm" onClick={() => setTrying(true)}><PenLine aria-hidden />1 画なぞってみる</Button>}
+        {!fine && trying && !traced && <p className="text-sm text-rl-muted">漢字の上を指でなぞってください</p>}
+        {!fine && traced && (
+          <>
+            <p className="text-sm">続きは PC で。</p>
+            <CopyButton path="/aim" label="リンクをコピー" size="sm" />
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
