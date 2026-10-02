@@ -662,6 +662,7 @@ body {
  * 追補 6 章・動きの参考 012:/lobby(未ログイン)の流れの 3 段。開いたとき 1 回だけ、点が点き、次の点まで線が引かれる
  * (点 120ms・steps(2)、線 240ms・なめらか。1 段 360ms ずつ、合計 840ms)。スマホは縦(scaleY)、768px 以上は横(scaleX)。
  * 動かすのは opacity と transform だけ。reduced-motion では最初から全部出す。この画面の自動の動きはこれだけ。
+ * 自動の動きの 4 つ(Global Constraints)の外だが、認めた例外(Task 12 のコントローラーの判断:1 回・840ms 以下・reduced-motion で止める・この画面で唯一)。
  */
 .rl-flow-dot {
   animation: rl-glow-in 120ms steps(2, end) calc(var(--i, 0) * 360ms) backwards;

@@ -38,9 +38,14 @@ export function CandidateCard({ c, match, link = true }: { c: Candidate; match: 
         {c.type_code ? <Badge variant="code" className="justify-self-start">{c.type_code}</Badge> : <span className="text-sm text-rl-muted">タイプ未診断</span>}
         {match && match.reasons.length > 0 && <p className="text-sm [word-break:auto-phrase]">{match.reasons.join("・")}</p>}
         <p className="flex flex-wrap items-center gap-x-2 text-sm text-rl-muted">
-          <span>{c.games.map((g) => gameName(g.id)).join(" / ")}</span>
-          {c.time_slots.length > 0 && <span>・ {c.time_slots.map(slotName).join(" ")}</span>}
-          {c.voice_ok && <span className="inline-flex items-center gap-1">・<Mic aria-hidden className="size-4" />VC 可</span>}
+          {/* 区切りの「・」は 2 つ目から(ゲーム・時間帯が空でも先頭に「・」だけが出ない) */}
+          {[
+            c.games.length > 0 && <span key="games">{c.games.map((g) => gameName(g.id)).join(" / ")}</span>,
+            c.time_slots.length > 0 && <span key="slots">{c.time_slots.map(slotName).join(" ")}</span>,
+            c.voice_ok && <span key="voice" className="inline-flex items-center gap-1"><Mic aria-hidden className="size-4" />VC 可</span>,
+          ]
+            .filter(Boolean)
+            .map((item, i) => (i === 0 ? item : [<span key={`sep-${i}`} aria-hidden>・</span>, item]))}
         </p>
         {c.bio && <p data-long-name className={link ? "line-clamp-3 text-sm wrap-anywhere" : "text-base wrap-anywhere"}>{c.bio}</p>}
       </div>

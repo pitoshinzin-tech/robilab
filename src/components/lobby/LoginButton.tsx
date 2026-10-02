@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { buttonVariants } from "@/components/ui/button-link";
@@ -15,6 +15,12 @@ export function LoginButton({ next = "/lobby", variant = "discord", size, classN
   next?: string; variant?: "discord" | "ghost"; size?: "md" | "lg"; className?: string;
 }) {
   const [pending, setPending] = useState(false);
+  // Discord へ移ったあと「戻る」で bfcache から戻ると pending のまま止まるので、そのときだけ押せる状態に戻す
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => { if (e.persisted) setPending(false); };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
   const login = () => {
     if (pending) return;
     setPending(true);

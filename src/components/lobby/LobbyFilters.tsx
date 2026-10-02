@@ -16,7 +16,10 @@ import { NativeSelect } from "@/components/ui/native-select";
  * 欄は uncontrolled なので、URL が外から変わったとき(「条件をゆるめる」で /lobby へ)は欄の値を URL に合わせ直す
  * (key で作り直すとフォーカスが外れるため、DOM の値だけを書き換える)。
  */
-export function LobbyFilters({ game, slot, voice }: { game?: string; slot?: string; voice: boolean }) {
+export function LobbyFilters({ game: rawGame, slot: rawSlot, voice }: { game?: string; slot?: string; voice: boolean }) {
+  // URL の値が選択肢にないとき(古いリンク・手入力)は「全ゲーム」「全時間帯」を出す(欄が空に見えないように)
+  const game = GAMES.some((g) => g.id === rawGame) ? rawGame : "";
+  const slot = TIME_SLOTS.some((t) => t.id === rawSlot) ? rawSlot : "";
   const gameRef = useRef<HTMLSelectElement>(null);
   const slotRef = useRef<HTMLSelectElement>(null);
   const voiceRef = useRef<HTMLInputElement>(null);
