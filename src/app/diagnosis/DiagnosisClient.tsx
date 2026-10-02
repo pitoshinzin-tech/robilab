@@ -128,24 +128,25 @@ export function DiagnosisClient({ examples }: { examples: readonly DiagnosisExam
   const lit = state.done ? QUESTIONS.length : state.index + (picked !== null ? 1 : 0);
   return (
     // 採点(最終)の直し:PC は 12 列の 2 列。左 7 列に進み具合・問い・戻る、右 5 列に始める画面と同じ 288px のマスの画面
-    // (答えるたびに行が点く S2 が、質問の間ずっと主役になる)。lg より狭い幅は 1 列で、読みやすい 640px のまま
-    <div className="grid max-w-[640px] gap-6 lg:max-w-none lg:grid-cols-12 lg:items-start">
-      {/* 追補 S2:スマホはマスの画面(96px)を進み具合の上に。PC は右の列で 3 行ぶんの高さ */}
-      <div className="justify-self-start lg:col-span-5 lg:col-start-8 lg:row-span-3 lg:row-start-1 lg:justify-self-center">
+    // (答えるたびに行が点く S2 が、質問の間ずっと主役になる)。lg より狭い幅は 640px までで、
+    // マスの画面(96px)と何問目を横に並べる(375×812 で 4 つ目の答えがタブバーの下に隠れないように。最終 2 回目の直し)
+    <div className="grid max-w-[640px] grid-cols-[96px_minmax(0,1fr)] gap-x-4 gap-y-6 lg:max-w-none lg:grid-cols-12 lg:items-start lg:gap-6">
+      {/* 追補 S2:スマホはマスの画面(96px)を何問目の左に。PC は右の列で 3 行ぶんの高さ */}
+      <div className="col-start-1 row-start-1 justify-self-start lg:col-span-5 lg:col-start-8 lg:row-span-3 lg:row-start-1 lg:justify-self-center">
         <ViewTransition name={VT_TYPE_SPRITE} share={MORPH_PIXEL} default="none">
           <SpriteScreen size={288} litRows={lit} revealCode={reveal} onRevealed={() => setPainted(true)} className="size-24 lg:size-72" />
         </ViewTransition>
       </div>
-      <div className="min-w-0 lg:col-span-7 lg:col-start-1 lg:row-start-1"><ProgressBar current={state.index + 1} total={QUESTIONS.length} /></div>
-      <div className="min-w-0 lg:col-span-7 lg:col-start-1 lg:row-start-2">
+      <div className="col-start-2 row-start-1 min-w-0 self-end lg:col-span-7 lg:col-start-1 lg:row-start-1 lg:self-auto"><ProgressBar current={state.index + 1} total={QUESTIONS.length} /></div>
+      <div className="col-span-2 min-w-0 lg:col-span-7 lg:col-start-1 lg:row-start-2">
         <QuestionCard question={q} selected={picked ?? state.answers[q.id]} onAnswer={answer} headingRef={headingRef} />
       </div>
-      <Button type="button" variant="ghost" size="sm" className="justify-self-start lg:col-span-7 lg:col-start-1 lg:row-start-3" onClick={() => dispatch({ type: "back" })}
+      <Button type="button" variant="ghost" size="sm" className="col-span-2 justify-self-start lg:col-span-7 lg:col-start-1 lg:row-start-3" onClick={() => dispatch({ type: "back" })}
         disabled={state.index === 0 || state.done || picked !== null}>
         <ChevronLeft aria-hidden />ひとつ前へ
       </Button>
       {state.done && (
-        <LoadingRegion label="結果を表示しています" className="grid gap-4 lg:col-span-7 lg:col-start-1 lg:row-start-4">
+        <LoadingRegion label="結果を表示しています" className="col-span-2 grid gap-4 lg:col-span-7 lg:col-start-1 lg:row-start-4">
           <p aria-hidden className="text-center text-base text-rl-muted">結果を表示しています…</p>
           <Skeleton className="h-40 w-full rounded-rl-md" />
         </LoadingRegion>
