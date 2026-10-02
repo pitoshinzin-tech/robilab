@@ -99,7 +99,7 @@ export function SensitivityClient({ initial = null }: { initial?: Initial }) {
             <TurnRuler cm={results.cm} />
           </Card>
           <div className="grid gap-2">
-            <PlainButton variant="secondary" className="justify-self-start" onClick={save}>マイ設定に保存</PlainButton>
+            <PlainButton variant="primary" className="justify-self-start" onClick={save}>マイ設定に保存</PlainButton>
             {saved && (
               <p role="status" className={saved.ok ? "flex items-start gap-2 text-sm text-rl-success" : "flex items-start gap-2 text-sm text-rl-danger"}>
                 {saved.ok ? <Check aria-hidden className="mt-0.5 size-4 shrink-0" /> : <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />}
@@ -108,13 +108,13 @@ export function SensitivityClient({ initial = null }: { initial?: Initial }) {
             )}
           </div>
           <section aria-labelledby="sens-others" className="grid gap-4">
-            <SectionHeading id="sens-others" title="ほかのゲームだと…" />
+            <SectionHeading id="sens-others" title="ほかのゲームだと…" description={`同じ振り向き(${results.cm}cm)になるゲーム内の感度`} />
             <ul className="grid gap-2">
               {results.others.map((o) => (
                 <li key={o.game.id} className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-rl-sm bg-rl-surface px-4 py-3">
                   <span className="min-w-0 text-base">{o.game.name}</span>
                   {isInGameRange(o.sens, o.game) ? (
-                    <span className="font-display text-base tabular-nums">{o.sens}</span>
+                    <span className="font-display text-base tabular-nums text-rl-highlight">{o.sens}</span>
                   ) : (
                     <span className="flex items-center gap-1 text-sm text-rl-warning"><TriangleAlert aria-hidden className="size-4 shrink-0" />設定できる範囲({o.game.min}〜{o.game.max})の外です</span>
                   )}
