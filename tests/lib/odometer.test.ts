@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { odometerWheels } from "@/lib/motion/odometer";
+import { decimalPlaces, odometerWheels, rollValue, ROLL_MS } from "@/lib/motion/odometer";
 
 describe("odometerWheels(回転式カウンターの各桁の輪の位置。上の桁から)", () => {
   it("整数のときは、どの輪もちょうど数字の位置(止まった形)", () => {
@@ -23,5 +23,40 @@ describe("odometerWheels(回転式カウンターの各桁の輪の位置。上�
   it("負の数・NaN は 0", () => {
     expect(odometerWheels(-5, 2)).toEqual([0, 0]);
     expect(odometerWheels(Number.NaN, 2)).toEqual([0, 0]);
+  });
+});
+
+describe("rollValue(入力を変えたとき、前の数から新しい数へ回す)", () => {
+  it("始まりは前の数、ROLL_MS で新しい数ちょうど", () => {
+    expect(rollValue(34.64, 17.32, 0)).toBe(34.64);
+    expect(rollValue(34.64, 17.32, ROLL_MS)).toBe(17.32);
+    expect(rollValue(34.64, 17.32, 99999)).toBe(17.32);
+  });
+  it("増えるときも減るときも、行き過ぎずに近づく", () => {
+    let prev = 10;
+    for (let t = 0; t <= ROLL_MS; t += 20) {
+      const v = rollValue(10, 40, t);
+      expect(v).toBeGreaterThanOrEqual(prev);
+      expect(v).toBeLessThanOrEqual(40);
+      prev = v;
+    }
+    prev = 40;
+    for (let t = 0; t <= ROLL_MS; t += 20) {
+      const v = rollValue(40, 10, t);
+      expect(v).toBeLessThanOrEqual(prev);
+      expect(v).toBeGreaterThanOrEqual(10);
+      prev = v;
+    }
+  });
+  it("時間が 0 以下なら、すぐ新しい数", () => {
+    expect(rollValue(1, 2, 0, 0)).toBe(2);
+  });
+});
+
+describe("decimalPlaces(小数点より下の桁の数。輪を回すときの倍率に使う)", () => {
+  it("文字のとおりの桁の数", () => {
+    expect(decimalPlaces("34.64")).toBe(2);
+    expect(decimalPlaces("34.6")).toBe(1);
+    expect(decimalPlaces("35")).toBe(0);
   });
 });

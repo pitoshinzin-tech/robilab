@@ -15,3 +15,22 @@ export function odometerWheels(value: number, places: number): number[] {
   }
   return wheels.reverse();
 }
+
+/** 入力を変えたときに数を回す時間(開く・閉じると同じ 200ms。定規の伸び縮みとそろえる) */
+export const ROLL_MS = 200;
+
+/**
+ * 動きの参考 070 を「人の操作に答える動き」として使う:前の数 from から新しい数 to へ durationMs で回す(終わりがゆっくり)。
+ * ページを開いたときは使わない(前の数がないので回らない)。終わりはちょうど to。
+ */
+export function rollValue(from: number, to: number, elapsedMs: number, durationMs = ROLL_MS): number {
+  if (!(durationMs > 0) || elapsedMs >= durationMs) return to;
+  const t = Math.max(0, elapsedMs) / durationMs;
+  return from + (to - from) * (1 - (1 - t) ** 3);
+}
+
+/** 文字の数の、小数点より下の桁の数(「34.64」なら 2) */
+export function decimalPlaces(text: string): number {
+  const i = text.indexOf(".");
+  return i < 0 ? 0 : text.length - i - 1;
+}

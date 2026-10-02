@@ -8,6 +8,10 @@ import { browserStorage, loadLocal } from "@/lib/my-settings-store";
 import { useIsClient } from "@/lib/use-is-client";
 import { ProCard } from "@/components/pros/ProCard";
 import { ProList } from "@/components/pros/ProList";
+import { Card } from "@/components/ui/card";
+import { ChipButton, ChipButtonGroup } from "@/components/ui/chip-button";
+import { SectionHeading } from "@/components/ui/section-heading";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SORTS: [ProSort, string][] = [["cmAsc", "振り向きが短い順"], ["cmDesc", "振り向きが長い順"], ["name", "名前順"]];
 
@@ -21,42 +25,31 @@ export function ProsClient() {
   const current = tab ?? initialTab;
 
   return (
-    <div className="grid gap-6">
-      <section className="grid gap-3 rounded-2xl border border-[var(--rl-border)] bg-[var(--rl-surface)] p-4">
-        <h2 className="font-bold">あなたに近いプロ</h2>
+    <div className="grid gap-8">
+      <Card as="section" aria-labelledby="pros-near" className="grid gap-4">
+        <SectionHeading id="pros-near" title="あなたに近いプロ" />
         {!isClient ? (
-          <div className="h-24 rounded-xl bg-white/5" />
+          <Skeleton className="h-24 w-full rounded-rl-md" />
         ) : user ? (
           <>
-            <p className="text-sm">あなたの振り向き:<span className="font-bold text-[var(--rl-highlight)]">約 {user.cm}cm</span>({getSensGame(user.game)!.name})</p>
-            <ul className="grid gap-2 sm:grid-cols-2">
+            <p className="text-base">あなたの振り向き:<span className="font-display tabular-nums text-rl-highlight">約 {user.cm}cm</span>({getSensGame(user.game)!.name})</p>
+            {/* 近いプロは箱にしない行(ProCard)。このカードの中にカードを入れない */}
+            <ul className="grid gap-x-6 gap-y-4 md:grid-cols-2">
               {nearPros(user.cm, user.game, PROS, 5).map((item) => <ProCard key={item.pro.id} item={item} userCm={user.cm} />)}
             </ul>
           </>
         ) : (
-          <p className="text-sm">
-            <Link href="/tools/sensitivity" className="underline">感度計算</Link>でマイ設定に保存すると、振り向きが近いプロが出ます。
-          </p>
+          <p className="text-base"><Link href="/tools/sensitivity" className="text-rl-accent underline">感度計算</Link>でマイ設定に保存すると、振り向きが近いプロが出ます。</p>
         )}
-      </section>
-
-      <section className="grid gap-3">
-        <div className="flex flex-wrap gap-2" role="group" aria-label="ゲーム">
-          {PRO_GAMES.map((g) => (
-            <button key={g} type="button" aria-pressed={current === g} onClick={() => setTab(g)}
-              className={`rounded-full border px-4 py-2 text-sm ${current === g ? "border-[var(--rl-secondary)] bg-[var(--rl-card)]" : "border-white/10"}`}>
-              {getSensGame(g)!.name}
-            </button>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-2 text-xs" role="group" aria-label="並び替え">
-          {SORTS.map(([v, label]) => (
-            <button key={v} type="button" aria-pressed={sort === v} onClick={() => setSort(v)}
-              className={`rounded-full border px-3 py-1 ${sort === v ? "border-[var(--rl-secondary)] bg-[var(--rl-card)]" : "border-white/10"}`}>
-              {label}
-            </button>
-          ))}
-        </div>
+      </Card>
+      <section aria-label="ゲームごとの一覧" className="grid gap-4">
+        {/* base-ui の ChipGroup ではなく、読まない ChipButtonGroup(矢印キーで移る。選ぶのは Enter・Space) */}
+        <ChipButtonGroup label="ゲーム">
+          {PRO_GAMES.map((g) => <ChipButton key={g} pressed={current === g} onClick={() => setTab(g)}>{getSensGame(g)!.name}</ChipButton>)}
+        </ChipButtonGroup>
+        <ChipButtonGroup label="並び替え">
+          {SORTS.map(([v, label]) => <ChipButton key={v} pressed={sort === v} onClick={() => setSort(v)}>{label}</ChipButton>)}
+        </ChipButtonGroup>
         <ProList pros={sortPros(PROS.filter((p) => p.game === current), sort)} />
       </section>
     </div>
