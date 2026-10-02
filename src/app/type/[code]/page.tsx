@@ -116,7 +116,7 @@ export default async function TypePage({ params, searchParams }: Props) {
 
         <section className="grid gap-4">
           <SectionHeading title="おすすめゲームと合うロール" />
-          <GameRanking ranks={ranks} />
+          <GameRanking ranks={ranks} showScore={fromDiagnosis} />
         </section>
 
         <section className="grid gap-4">
@@ -141,7 +141,7 @@ export default async function TypePage({ params, searchParams }: Props) {
         </section>
 
         <AffiliateList typeCode={type.code} />
-        <ButtonLink href="/diagnosis" variant="ghost" className="justify-self-center">もう一度診断する</ButtonLink>
+        <ButtonLink href="/diagnosis" variant="ghost" className="justify-self-center">{fromDiagnosis ? "もう一度診断する" : "診断する"}</ButtonLink>
       </div>
     </main>
   );
