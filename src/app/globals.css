@@ -67,6 +67,8 @@
   --rl-text-display-2: clamp(72px, 55.1px + 4.51vw, 120px);
   --rl-text-display-3: clamp(120px, 105.9px + 3.76vw, 160px);
   --rl-text-hero: clamp(160px, 117.7px + 11.27vw, 280px);
+  /* PC(1024px 以上)のトップのヒーローの漢字だけ:画面の高さで決める(900px の画面で 440px)。SVG の線なので重さは変わらない */
+  --rl-text-hero-lg: min(56svh, 440px);
 
   /* 追補 5-2:間(ま)の 3 段(スマホの値。1024px 以上は下の @media) */
   --rl-ma-lg: 96px;
@@ -257,16 +259,67 @@ body {
   stroke: var(--rl-highlight);
   filter: drop-shadow(0 0 4px rgba(255, 79, 216, 0.6));
 }
-/* 色ズレの縁:SVG の 1 単位 ≒ 2.6px(280px のとき)なので 1.2 単位 ≒ 3px */
+/*
+ * 色ズレの縁:SVG の 1 単位 ≒ 2.6px(280px のとき)なので 1.2 単位 ≒ 3px(--rl-ghost)。
+ * --rl-shift(0〜1)はトップのお試しのなぞりの速さ(HeroKanji。動きの参考 045):ゆっくりだと縁が閉じ、速いと 3px まで開く。
+ * ふだん(なぞっていない)は 1 = 3px。3px を超えて開くことはない(追補 4-5)。
+ */
 .rl-kanji-ghost-m {
   stroke: var(--rl-magenta);
   mix-blend-mode: screen;
-  transform: translateX(1.2px);
+  transform: translateX(calc(var(--rl-ghost, 1.2px) * var(--rl-shift, 1)));
 }
 .rl-kanji-ghost-c {
   stroke: var(--rl-cyan);
   mix-blend-mode: screen;
-  transform: translateX(-1.2px);
+  transform: translateX(calc(var(--rl-ghost, 1.2px) * var(--rl-shift, 1) * -1));
+}
+/* トップのヒーローの漢字:離すと 200ms で 3px に戻って止まる。PC は箱が 440px までになるので 0.75 単位(約 3px) */
+.rl-hero-kanji .rl-kanji-ghost-m,
+.rl-hero-kanji .rl-kanji-ghost-c {
+  transition: transform 200ms var(--rl-ease-line);
+}
+@media (min-width: 1024px) {
+  .rl-hero-kanji {
+    --rl-ghost: 0.75px;
+  }
+}
+
+/*
+ * 動きの参考 025(Pixel Dissolve):ドット絵の上に 1 段明るい色の重ねを置き、ホバー・フォーカスで上から 4 段で塗り替える(200ms)。
+ * 動かすのは clip-path だけ。トップの入口の 3 つのドット絵と名簿のタイプの絵。
+ */
+.rl-dissolve-lit {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 200ms steps(4, end);
+}
+.rl-dissolve-host:focus-within .rl-dissolve-lit {
+  clip-path: inset(0);
+}
+@media (hover: hover) {
+  .rl-dissolve-host:hover .rl-dissolve-lit {
+    clip-path: inset(0);
+  }
+}
+/* 名簿のタイプの絵(色が多いので重ねは白の薄い光) */
+.rl-dissolve-tint {
+  background: rgba(255, 255, 255, 0.14);
+  mix-blend-mode: screen;
+}
+
+/* 動きの参考 012(Stroke-Draw):入口の行のホバー・フォーカスで、下の線が左から右へ引かれる(transform: scaleX だけ) */
+.rl-draw-line {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 200ms var(--rl-ease-line);
+}
+.rl-draw-row:focus-within .rl-draw-line {
+  transform: none;
+}
+@media (hover: hover) {
+  .rl-draw-row:hover .rl-draw-line {
+    transform: none;
+  }
 }
 
 /*
@@ -317,7 +370,9 @@ body {
  * 追補 S4:押せるものに照準が合う。L 字の角の印が外から寄って止まる(CSS だけ)。
  * ::before が上の 2 つの角、::after が下の 2 つの角。寄る動きは transform: scale の近似(inset は動かさない)。
  * .rl-lock は要素そのもの、.rl-lock-in は「親のリンクにホバー・フォーカスしたとき、中の箱に」出す(::before を別の印に使うタブ用)。
+ * @layer components に置く:Tailwind の utilities(absolute / fixed / sticky など)が position: relative を上書きできるように。
  */
+@layer components {
 .rl-lock,
 .rl-lock-in {
   position: relative;
@@ -388,6 +443,7 @@ body {
 .rl-lock:is(:disabled, [aria-disabled="true"])::before,
 .rl-lock:is(:disabled, [aria-disabled="true"])::after {
   display: none;
+}
 }
 
 /*

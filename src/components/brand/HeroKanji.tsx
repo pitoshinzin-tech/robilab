@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import type { StrokeSlot } from "@/lib/motion/stroke-schedule";
 import { appendPoint, pointsToPath, toViewBox, type TracePoint } from "@/lib/motion/hero-trace";
 import { MORPH_LINE, VT_TODAY_KANJI } from "@/lib/motion/vt-names";
+import { REDUCED_MOTION_QUERY } from "@/lib/motion/use-reduced-motion";
 import { KanjiStrokes } from "@/components/brand/KanjiStrokes";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
@@ -19,6 +20,7 @@ function subscribeFine(onChange: () => void) {
 /**
  * 追補 S1:トップのヒーローの漢字。線は KanjiStrokes が CSS で引く(ここに JS の動きはない)。ここは「触ると答える」部分だけ。
  * PC:描き終わると「漢字をなぞってみる(ドラッグ)」の案内が出る。漢字の上で照準(細い十字と 4 つの角)が出る。押したままなぞると、その線がライムで重なり「この感じで全部の画をなぞる」。点数は付けない。
+ * なぞっている間は、速さで色ズレの縁が開き閉じする(動きの参考 045。PC・スマホとも)。
  * スマホ:「1 画なぞってみる」を押したときだけ、漢字の箱が指の入力を受ける(押す前は touch-action: auto でスクロールを奪わない)。
  * (HeroKanji は @/data/types も TypeIcon も import しない。ブラウザの JS を小さくするため。)
  */
@@ -34,6 +36,8 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
   const points = useRef<readonly TracePoint[]>([]);
   const pending = useRef<TracePoint | null>(null);
   const frame = useRef(0);
+  const lastPoint = useRef<TracePoint | null>(null);
+  const speed = useRef(0);
   // スマホはお試しの 1 画を描き終えたら入力を受けるのをやめる(スクロールを返し、「続きは PC で。」を消さない)
   const capture = trying && !traced;
   const active = fine || capture;
@@ -61,6 +65,24 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
       setTrace(next);
     }
   };
+  /**
+   * 動きの参考 045:なぞる速さで色ズレの縁を開く(0 = 閉じる、1 = ふだんの 3px。それより広げない)。
+   * 値は箱の CSS 変数 --rl-shift に直接書く(毎フレームの再描画を足さない)。動きを減らす設定では触らない。
+   */
+  const setShift = (value: number | null) => {
+    const el = box.current;
+    if (!el) return;
+    if (value === null) el.style.removeProperty("--rl-shift");
+    else if (!window.matchMedia(REDUCED_MOTION_QUERY).matches) el.style.setProperty("--rl-shift", value.toFixed(2));
+  };
+  const trackSpeed = (p: TracePoint) => {
+    const prev = lastPoint.current;
+    lastPoint.current = p;
+    if (!prev) return;
+    // 1 フレームに 6 単位(箱の約 5.5%)動けば最大。急に跳ねないよう前の値と混ぜる
+    speed.current = speed.current * 0.6 + Math.min(1, Math.hypot(p.x - prev.x, p.y - prev.y) / 6) * 0.4;
+    setShift(speed.current);
+  };
   // pointermove は 1 フレームに 1 回にまとめる
   const flush = () => {
     frame.current = 0;
@@ -68,7 +90,10 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
     pending.current = null;
     if (!p) return;
     if (fine) setAim(p);
-    if (drawing.current) extend(p);
+    if (drawing.current) {
+      extend(p);
+      trackSpeed(p);
+    }
   };
   const onMove = (e: React.PointerEvent) => {
     if (!active) return;
@@ -84,6 +109,9 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
     e.currentTarget.setPointerCapture(e.pointerId);
     drawing.current = true;
     points.current = [p];
+    lastPoint.current = p;
+    speed.current = 0;
+    setShift(0);
     setDragging(true);
     setTraced(false);
     setTrace(points.current);
@@ -96,6 +124,9 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
       if (fine) setAim(p);
       extend(p);
     }
+    // 離すと 200ms でふだんの 3px に戻って止まる(transition は globals.css の .rl-hero-kanji)
+    lastPoint.current = null;
+    setShift(null);
     setDragging(false);
     setTraced(points.current.length >= 2);
   };
@@ -106,7 +137,7 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
 
   return (
     <div className={cn("grid justify-items-center gap-3", className)}>
-      <div ref={box} className={cn("relative size-(--rl-text-hero)", fine && "cursor-crosshair", dragging && "select-none")} style={{ touchAction: capture ? "none" : "auto" }}
+      <div ref={box} className={cn("rl-hero-kanji relative size-(--rl-text-hero) lg:size-(--rl-text-hero-lg)", fine && "cursor-crosshair", dragging && "select-none")} style={{ touchAction: capture ? "none" : "auto" }}
         onPointerMove={onMove} onPointerDown={onDown} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onLeave}>
         {/* 追補 S3:「今日の文字に挑戦」で /aim へ行くと、この漢字が /aim の見出しの漢字へ移る(共有の要素 today-kanji) */}
         <ViewTransition name={VT_TODAY_KANJI} share={MORPH_LINE} default="none">

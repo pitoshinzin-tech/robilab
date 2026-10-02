@@ -7,7 +7,8 @@ import { REDUCED_MOTION_QUERY } from "@/lib/motion/use-reduced-motion";
 import { ROSTER_THRESHOLD, isMostlyVisible, rosterSeen } from "@/lib/motion/roster-entrance";
 import { useIsClient } from "@/lib/use-is-client";
 
-export type RosterItem = { code: string; name: string; icon: ReactNode };
+/** name は画面に出す名前(短くしてよい)、label は読み上げる正式な名前(なければ name) */
+export type RosterItem = { code: string; name: string; label?: string; icon: ReactNode };
 
 /**
  * 追補 S5:16 タイプの名簿(箱なしの絵 + コード)。画面に入ったとき 1 回だけ 1 体ずつ現れる。サイトで「スクロールで動く」のはここだけ。
@@ -47,13 +48,18 @@ export function TypeRoster({ items, showName = false, className }: { items: read
   return (
     <ul ref={list} className={cn("rl-roster relative grid grid-cols-4 gap-x-2 gap-y-4 pb-10 md:grid-cols-8", className)}>
       {items.map((t, i) => (
-        <li key={t.code} className="rl-roster-item" style={{ "--i": i } as CSSProperties}>
-          <Link href={`/type/${t.code}`} className="rl-lock grid min-h-11 place-items-center gap-1 p-2">
-            {t.icon}
+        <li key={t.code} className="rl-roster-item rl-dissolve-host" style={{ "--i": i } as CSSProperties}>
+          <Link href={`/type/${t.code}`} className="rl-lock grid min-h-11 place-items-center content-start gap-1 p-2">
+            {/* 動きの参考 025:ホバー・フォーカスで絵が上から 4 段で 1 段明るくなる */}
+            <span className="relative grid">
+              {t.icon}
+              <span aria-hidden className="rl-dissolve-lit rl-dissolve-tint pointer-events-none absolute inset-0 rounded-rl-sm" />
+            </span>
             <span className="font-display text-sm text-rl-highlight">{t.code}</span>
-            {showName && <span className="text-center text-sm font-bold wrap-anywhere">{t.name}</span>}
+            {/* 名前は日本語の文節で折る(対応しないブラウザは今までどおりどこでも折れる)。読み上げは下の sr-only の正式な名前 */}
+            {showName && <span aria-hidden className="text-center text-xs font-bold wrap-anywhere [word-break:auto-phrase] text-balance md:text-sm">{t.name}</span>}
             <span aria-hidden className="text-xs text-rl-muted pointer-fine:hidden">{axisInitials(t.code)}</span>
-            <span className="sr-only">{showName ? axisLine(t.code) : `${t.name}(${axisLine(t.code)})`}</span>
+            <span className="sr-only">{`${t.label ?? t.name}(${axisLine(t.code)})`}</span>
           </Link>
           <span aria-hidden className="rl-roster-axes pointer-events-none absolute inset-x-0 bottom-0 hidden h-8 items-center justify-center text-sm pointer-fine:flex">
             {axisLine(t.code)}

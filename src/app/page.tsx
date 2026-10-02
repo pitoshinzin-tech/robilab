@@ -42,15 +42,16 @@ export default async function Home() {
 
   return (
     <main className={hasRecords ? "pb-12 md:pb-16" : undefined}>
-      {/* 1. ヒーロー:箱にしない。地に点の格子とノイズ。PC は最初の画面をヒーローで埋める(ヘッダー 64px と階段 24px を引いた高さ)。
-          12 列のうち 7 列に漢字と縦組み(右に寄せて札に近づける)、5 列に「今日の挑戦の札」 */}
+      {/* 1. ヒーロー:箱にしない。地に点の格子とノイズ。PC は最初の画面をヒーローで埋める(ヘッダー 64px と階段 24px を引いた高さ。
+          大きな画面で間延びしないよう 760px まで)。12 列のうち 7 列に漢字(PC は画面の高さで最大 440px)と縦組み、
+          5 列に「今日の挑戦の札」。札は漢字の下の端にそろえて、真ん中の 1 本の帯ではなく斜めの流れにする */}
       <section aria-labelledby="today-heading" className="rl-hero-ground">
-        <div className={cn(inner, "grid gap-8 pt-8 pb-8 lg:min-h-[calc(100svh-64px-24px)] lg:grid-cols-12 lg:content-center lg:items-center lg:gap-6 lg:pt-16")}>
-          <div className="flex items-start justify-center gap-4 lg:col-span-7 lg:justify-end lg:pr-12">
+        <div className={cn(inner, "grid gap-8 pt-8 pb-8 lg:min-h-[min(calc(100svh-88px),760px)] lg:grid-cols-12 lg:content-center lg:items-center lg:gap-6 lg:pt-16")}>
+          <div className="flex items-start justify-center gap-4 lg:col-span-7 lg:justify-end lg:pr-16">
             <HeroKanji strokes={char.strokes} schedule={schedule} />
             <TodayLabel id="today-heading" glyph={char.glyph} date={date} strokes={char.strokes.length} />
           </div>
-          <div className="grid content-center gap-6 lg:col-span-5">
+          <div className="grid content-center gap-6 lg:col-span-5 lg:self-end lg:pb-12">
             <div className="grid gap-4">
               <p className="text-xl font-bold">書き順どおりになぞるエイム練習</p>
               <ul className="grid gap-2">
@@ -70,10 +71,11 @@ export default async function Home() {
             ) : (
               <p className="text-sm text-rl-muted">今日の 1 位はまだいません。最初の記録がランキングの 1 位になります</p>
             )}
-            <div className="flex flex-wrap items-center gap-3">
+            {/* PC は主ボタン 1 つ。スマホは押す形のボタンを漢字の下の「1 画なぞってみる」1 つにし、ここは文字のリンク 2 つだけ */}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
               <ButtonLink href="/aim" prefetch variant="primary" size="lg" className="hidden pointer-fine:inline-flex">今日の文字に挑戦</ButtonLink>
-              <ButtonLink href="/aim#ranking" variant="secondary" className="pointer-fine:hidden">ランキングを見る</ButtonLink>
-              <span className="pointer-fine:hidden"><CopyButton path="/aim" label="PC で遊ぶリンクをコピー" /></span>
+              <ButtonLink href="/aim#ranking" variant="ghost" size="sm" className="px-0 pointer-fine:hidden">ランキングを見る<ChevronRight aria-hidden /></ButtonLink>
+              <span className="pointer-fine:hidden"><CopyButton path="/aim" label="PC で遊ぶリンクをコピー" variant="ghost" size="sm" className="px-0" /></span>
             </div>
           </div>
         </div>
@@ -84,7 +86,8 @@ export default async function Home() {
       {/* 2. h1 = このページで何ができるか(サイトの名前はヘッダーのロゴと読み上げだけ)。ヒーローのあとが「間・大」。
           色ズレは最初の画面で漢字の縁の 1 つだけにするので、ここには付けない */}
       <section aria-labelledby="start-heading" className={cn(inner, "pt-rl-ma-lg")}>
-        <h1 className="max-w-[24em] text-rl-title font-bold">
+        {/* スマホは 24px(3 行)、PC は 32px(2 行)。日本語の文節で折り、行の長さをそろえる */}
+        <h1 className="max-w-[24em] text-2xl font-bold [word-break:auto-phrase] text-balance md:text-rl-title">
           <span className="sr-only">{BRAND.name} — </span>
           {BRAND.lead}
         </h1>
@@ -93,9 +96,9 @@ export default async function Home() {
             スマホは主ボタンがないので、診断の行だけ主ボタンの見た目の札を持つ */}
         <h2 id="start-heading" className="sr-only">はじめる</h2>
         <ul className="mt-rl-ma-sm border-t border-rl-line">
-          <li className="border-b border-rl-line">
+          <li className="rl-draw-row rl-dissolve-host relative border-b border-rl-line">
             <Link href="/diagnosis" className="rl-lock group grid grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-4 py-6 md:gap-6 md:py-8">
-              <PixelArt grid={FLASK_16} size={48} />
+              <PixelArt grid={FLASK_16} size={48} dissolve />
               <div className="grid min-w-0 gap-1">
                 <h3 className="flex items-center gap-2 text-rl-title font-bold">自分を知る<FlaskConical aria-hidden className="size-5 text-rl-muted" /></h3>
                 <span className="text-base text-rl-muted">1 分半のゲーマータイプ診断</span>
@@ -103,10 +106,11 @@ export default async function Home() {
               </div>
               <ChevronRight aria-hidden className="size-6 text-rl-muted transition-colors group-hover:text-rl-text" />
             </Link>
+            <span aria-hidden className="rl-draw-line pointer-events-none absolute inset-x-0 -bottom-px h-px bg-rl-text" />
           </li>
-          <li className="border-b border-rl-line">
+          <li className="rl-draw-row rl-dissolve-host relative border-b border-rl-line">
             <div className="grid grid-cols-[48px_minmax(0,1fr)] items-start gap-4 py-6 md:gap-6 md:py-8">
-              <PixelArt grid={RULER_16} size={48} />
+              <PixelArt grid={RULER_16} size={48} dissolve />
               <div className="grid min-w-0 gap-1">
                 <h3 className="flex items-center gap-2 text-rl-title font-bold">感度・マウス<Mouse aria-hidden className="size-5 text-rl-muted" /></h3>
                 <p className="text-base text-rl-muted">手に合うマウスと、ゲーム間の感度の換算</p>
@@ -121,16 +125,18 @@ export default async function Home() {
                 </ul>
               </div>
             </div>
+            <span aria-hidden className="rl-draw-line pointer-events-none absolute inset-x-0 -bottom-px h-px bg-rl-text" />
           </li>
-          <li className="border-b border-rl-line">
+          <li className="rl-draw-row rl-dissolve-host relative border-b border-rl-line">
             <Link href="/lobby" className="rl-lock group grid grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-4 py-6 md:gap-6 md:py-8">
-              <PixelArt grid={PARTY_16} size={48} />
+              <PixelArt grid={PARTY_16} size={48} dissolve />
               <div className="grid min-w-0 gap-1">
                 <h3 className="flex items-center gap-2 text-rl-title font-bold">仲間を探す<Users aria-hidden className="size-5 text-rl-muted" /></h3>
                 <span className="text-base text-rl-muted">一緒に遊ぶ人を見つける。18 歳以上が対象です</span>
               </div>
               <ChevronRight aria-hidden className="size-6 text-rl-muted transition-colors group-hover:text-rl-text" />
             </Link>
+            <span aria-hidden className="rl-draw-line pointer-events-none absolute inset-x-0 -bottom-px h-px bg-rl-text" />
           </li>
         </ul>
       </section>
@@ -139,12 +145,15 @@ export default async function Home() {
           トップだけ PC は 64px の絵と名前つき(スマホは 48px) */}
       <section aria-labelledby="types-heading" className="rl-dot-grid mt-rl-ma-md bg-rl-surface py-12">
         <div className={cn(inner, "grid gap-6")}>
-          <SectionHeading id="types-heading" title="16 のゲーマータイプ" action={<ButtonLink href="/types" variant="ghost" size="sm">タイプ一覧へ</ButtonLink>} />
+          {/* 「タイプ一覧へ」は PC は見出しの右、スマホは名簿の下の左端(見出しの下に回って半端にずれないように) */}
+          <SectionHeading id="types-heading" title="16 のゲーマータイプ" action={<ButtonLink href="/types" variant="ghost" size="sm" className="hidden md:inline-flex">タイプ一覧へ</ButtonLink>} />
+          {/* 見出しが「16 のゲーマータイプ」なので、名簿の名前は「タイプ」を外して短くする(読み上げは正式な名前) */}
           <TypeRoster
             showName
             className="gap-y-6"
-            items={TYPES.map((t) => ({ code: t.code, name: t.name, icon: <TypeIcon code={t.code} size={64} className="size-12 md:size-16" /> }))}
+            items={TYPES.map((t) => ({ code: t.code, name: t.name.replace(/タイプ$/, ""), label: t.name, icon: <TypeIcon code={t.code} size={64} className="size-12 md:size-16" /> }))}
           />
+          <ButtonLink href="/types" variant="ghost" size="sm" className="justify-self-start px-0 md:hidden">タイプ一覧へ<ChevronRight aria-hidden /></ButtonLink>
         </div>
       </section>
 
