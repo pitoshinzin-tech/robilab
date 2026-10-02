@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { TypeIcon } from "@/components/brand/TypeIcon";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Card } from "@/components/ui/card";
+import { NumUnit } from "@/components/ui/num-unit";
 import { Badge } from "@/components/ui/badge";
 import { ChipButton, ChipButtonGroup } from "@/components/ui/chip-button";
 import { Field, FieldError, fieldDescribedBy } from "@/components/ui/field";
@@ -35,7 +36,7 @@ type Update = (patch: Partial<MySettings>) => void;
 type Pulse = { from: number; to: number; n: number };
 
 /**
- * (追補 6 章)埋まり具合の 8 マスのバー(1 項目 = 1 マス。1 マス 8px・間 2px)。
+ * (追補 6 章)埋まり具合の 8 マスのバー(1 項目 = 1 マス。1 マス 16px・間 2px)。
  * 開いたときは止まった形。入力で増えたマスだけが、左から 1 マスずつ 2 段で点く(rl-cell-on。動きを減らす設定では止まる)。
  */
 function ProgressCells({ total, done, pulse }: { total: number; done: number; pulse: Pulse | null }) {
@@ -45,7 +46,7 @@ function ProgressCells({ total, done, pulse }: { total: number; done: number; pu
         const on = i < done;
         const fresh = on && pulse !== null && i >= pulse.from && i < pulse.to;
         return (
-          <span key={i} className="relative size-2 bg-rl-surface-2">
+          <span key={i} className="relative size-4 bg-rl-surface-2">
             {on && (
               <span key={fresh ? `on-${pulse?.n}` : "on"} className={cn("absolute inset-0 bg-rl-secondary", fresh && "rl-cell-on")}
                 style={fresh ? ({ "--rl-cell-i": i - (pulse?.from ?? 0) } as CSSProperties) : undefined} />
@@ -57,18 +58,22 @@ function ProgressCells({ total, done, pulse }: { total: number; done: number; pu
   );
 }
 
-/** (追補 5-3・6 章)見出しは幅いっぱいの行。埋まった項目は右に Check、まだの項目は「まだ」と文字で */
-function Section({ id, title, filled, children }: { id: string; title: string; filled?: boolean; children: ReactNode }) {
-  return (
-    <Card as="section" aria-labelledby={id} className="grid gap-4">
-      <div className="flex items-center justify-between gap-3 border-b border-rl-line pb-3">
-        <SectionHeading id={id} title={title} className="min-w-0" />
-        {filled === true && <span className="inline-flex shrink-0 items-center text-rl-success"><Check aria-hidden className="size-5" /><span className="sr-only">入力済み</span></span>}
-        {filled === false && <span className="shrink-0 text-sm text-rl-muted">まだ</span>}
-      </div>
-      {children}
-    </Card>
+/**
+ * (追補 5-3・6 章)見出しは幅いっぱいの行。埋まった項目は右に Check、まだの項目は「まだ」と文字で。
+ * boxed=false:入力が 1 つだけの節は箱にせず、上の線で区切る行にする(箱は入力のまとまりだけ。同じ形の箱が続かないように)。
+ */
+function Section({ id, title, filled, boxed = true, children }: { id: string; title: string; filled?: boolean; boxed?: boolean; children: ReactNode }) {
+  const head = (
+    <div className={cn("flex items-center justify-between gap-3", boxed && "border-b border-rl-line pb-3")}>
+      <SectionHeading id={id} title={title} className="min-w-0" />
+      {filled === true && <span className="inline-flex shrink-0 items-center text-rl-success"><Check aria-hidden className="size-5" /><span className="sr-only">入力済み</span></span>}
+      {filled === false && <span className="shrink-0 text-sm text-rl-muted">まだ</span>}
+    </div>
   );
+  if (!boxed) {
+    return <section aria-labelledby={id} className="grid gap-4 border-t border-rl-line pt-6">{head}{children}</section>;
+  }
+  return <Card as="section" aria-labelledby={id} className="grid gap-4">{head}{children}</Card>;
 }
 
 /** 6つの枠の位置をここで持つ。画面の枠と保存される並びを常に一致させる。 */
@@ -152,16 +157,17 @@ export function MySettingsEditor() {
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
       {/* 追補 6 章:埋まり具合は 8 マスのバー(1 項目 = 1 マス)と数字 */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 lg:col-span-2">
-        <p className="text-base">
-          入力済み <span className="font-display text-xl tabular-nums text-rl-highlight">{progress.done}</span> / {progress.total} 項目
+      <div className="flex flex-wrap items-end gap-x-6 gap-y-2 lg:col-span-2">
+        <p className="grid gap-1">
+          <span className="text-sm text-rl-muted">入力済み</span>
+          <NumUnit value={progress.done} unit={`/ ${progress.total} 項目`} className="text-rl-display-1" />
         </p>
         <ProgressCells total={progress.total} done={progress.done} pulse={pulse} />
       </div>
 
       {/* スマホは「名刺 → 項目 → 保存と公開 → 消す操作」の順。1024px 以上は右の列に名刺と保存と公開を固定する */}
       <div className="contents lg:sticky lg:top-6 lg:col-start-2 lg:row-span-2 lg:row-start-2 lg:grid lg:gap-4">
-        <div className="order-1 min-w-0 lg:order-none"><CardPreview data={valid ? toPublicCardData(draft) : null} rewrite={pulse !== null} /></div>
+        <div className="order-1 min-w-0 lg:order-none"><CardPreview data={valid ? toPublicCardData(draft) : null} rewrite={pulse !== null} hasType={Boolean(type)} /></div>
         <div className="order-3 min-w-0 lg:order-none">
           <SyncPanel loggedIn={loggedIn} slug={slug} status={status} serverError={serverError} canPublish={valid && status !== "server-error"} hasErrors={!valid}
             onPublic={(on) => void setPublic(on)} />
@@ -169,7 +175,7 @@ export function MySettingsEditor() {
       </div>
 
       <div key={revision} className="order-2 grid min-w-0 gap-6 lg:order-none lg:col-start-1 lg:row-start-2">
-        <Section id="my-type" title="タイプ" filled={filled(["type"])}>
+        <Section id="my-type" title="タイプ" filled={filled(["type"])} boxed={false}>
           {type ? (
             <div className="flex min-w-0 items-center gap-3">
               <TypeIcon code={type.code} size={48} />
@@ -181,7 +187,8 @@ export function MySettingsEditor() {
           ) : (
             <div className="grid gap-4">
               <p className="text-sm text-rl-muted [word-break:auto-phrase]">診断すると、タイプが名刺に入ります。</p>
-              <ButtonLink href="/diagnosis" variant="secondary" size="sm" className="justify-self-start">
+              {/* タイプがないときは、名刺の保存ではなく診断がこの画面の主ボタン(CardPreview の hasType と対) */}
+              <ButtonLink href="/diagnosis" variant="primary" className="justify-self-start">
                 <FlaskConical aria-hidden />1 分半で診断する
               </ButtonLink>
             </div>
@@ -223,7 +230,7 @@ export function MySettingsEditor() {
 
         <CrosshairEditor value={draft.crosshair} onChange={(crosshair) => update({ crosshair })} />
 
-        <Section id="my-card-name" title="名刺の表示名" filled={filled(["cardName"])}>
+        <Section id="my-card-name" title="名刺の表示名" filled={filled(["cardName"])} boxed={false}>
           <Field id="my-card-name-input" label={`カードに出す名前(${MY_SETTINGS_LIMITS.cardNameMax}字まで)`} error={errors.cardName}>
             <Input id="my-card-name-input" defaultValue={draft.cardName ?? ""} invalid={Boolean(errors.cardName)}
               aria-describedby={fieldDescribedBy("my-card-name-input", { error: Boolean(errors.cardName) })}

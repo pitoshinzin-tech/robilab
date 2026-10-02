@@ -11,11 +11,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 const layer = "col-start-1 row-start-1 inline-flex items-center justify-center gap-2";
 
 /**
- * 名刺カードのプレビューと「名刺の画像を保存」(この画面でただ 1 つの主ボタン)。入力が止まってから 0.8 秒後に作り直す。
+ * 名刺カードのプレビューと「名刺の画像を保存」。入力が止まってから 0.8 秒後に作り直す。
+ * 保存はタイプが入っているときだけ主ボタン。タイプがないときは「診断する」が主ボタンなので、ここは secondary にし、
+ * 名刺のコードが仮の「????」であることを書き添える(本当の値に見せない)。
  * (追補 6 章)作り直した画像は上から 2 段(120ms)で重ねて出し、下に 1 つ前の画像を残す(明るさが変わらない)。
  * rewrite が false のあいだ(開いたあと、まだ入力していないとき)は書き換えの動きを付けない。
  */
-export function CardPreview({ data, rewrite = false }: { data: PublicCardData | null; rewrite?: boolean }) {
+export function CardPreview({ data, rewrite = false, hasType = true }: { data: PublicCardData | null; rewrite?: boolean; hasType?: boolean }) {
   const [pair, setPair] = useState<{ url: string | null; prev: string | null }>({ url: null, prev: null });
   const [failed, setFailed] = useState(false);
   // (動きの参考 009)保存を押した画像の URL。画像が作り直されると元の文字に戻る(時間では戻さない)
@@ -55,9 +57,10 @@ export function CardPreview({ data, rewrite = false }: { data: PublicCardData | 
       ) : (
         <Skeleton className="aspect-[1200/630] w-full" />
       )}
+      {!hasType && <p className="text-sm text-rl-muted [word-break:auto-phrase]">タイプは診断するまで「????」と出ます。</p>}
       {failed && <FieldError>画像を作れませんでした。入力を少し変えると、作り直します。</FieldError>}
       {url && (
-        <ButtonAnchor href={url} download="robilab-my-card.png" variant="primary" className="justify-self-start" onClick={() => setSavedUrl(url)}>
+        <ButtonAnchor href={url} download="robilab-my-card.png" variant={hasType ? "primary" : "secondary"} className="justify-self-start" onClick={() => setSavedUrl(url)}>
           {/* 元の文字と「保存しました」を同じマスに重ね、幅を変えない */}
           <span className="grid">
             <span className={cn(layer, saved && "invisible")}><Download aria-hidden />名刺の画像を保存</span>
