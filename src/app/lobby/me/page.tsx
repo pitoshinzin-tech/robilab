@@ -6,6 +6,8 @@ import { AccountStatusNotice } from "@/components/lobby/AccountStatusNotice";
 import type { Candidate } from "@/lib/lobby-types";
 import { updateProfileAction } from "../actions";
 import { DeleteAccount } from "./DeleteAccount";
+import { PageShell } from "@/components/ui/page-shell";
+import { DangerZone } from "@/components/ui/danger-zone";
 
 export default async function MePage() {
   const supabase = await createSupabaseServer();
@@ -28,10 +30,13 @@ export default async function MePage() {
     created_at: me.created_at,
   };
   return (
-    <main className="mx-auto grid max-w-md gap-8 px-4 py-6">
-      <h1 className="text-2xl font-bold">プロフィール</h1>
-      <ProfileForm mode="edit" action={updateProfileAction} initial={initial} />
-      <DeleteAccount />
-    </main>
+    <PageShell title="プロフィール">
+      <div className="grid gap-12">
+        <ProfileForm mode="edit" action={updateProfileAction} initial={initial} />
+        <DangerZone headingId="danger-heading">
+          <DeleteAccount />
+        </DangerZone>
+      </div>
+    </PageShell>
   );
 }
