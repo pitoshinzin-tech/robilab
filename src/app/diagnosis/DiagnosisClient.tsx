@@ -8,7 +8,7 @@ import { scoreAxes } from "@/lib/scoring";
 import { recordDiagnosis } from "@/lib/analytics";
 import { applyDiagnosisToLocal, browserStorage } from "@/lib/my-settings-store";
 import { resultPath, shouldPrefetch } from "@/lib/diagnosis-result";
-import { pickExample, type DiagnosisExample } from "@/lib/diagnosis-example";
+import { pickExample, spriteReading, type DiagnosisExample } from "@/lib/diagnosis-example";
 import { useReducedMotion } from "@/lib/motion/use-reduced-motion";
 import { MORPH_PIXEL, TYPE_REVEAL, VT_TYPE_SPRITE } from "@/lib/motion/vt-names";
 import { ProgressBar } from "@/components/diagnosis/ProgressBar";
@@ -94,21 +94,29 @@ export function DiagnosisClient({ examples }: { examples: readonly DiagnosisExam
         <div className="grid gap-6 md:col-span-5">
           <NumUnit value={QUESTIONS.length} unit="問" className="text-rl-display-2" />
           <SquareList items={FACTS} className="gap-3" itemClassName="[word-break:auto-phrase] text-balance" />
-          <p className="text-sm text-rl-muted">{DIAGNOSIS_NOTE}</p>
+          <p className="text-sm text-rl-muted [word-break:auto-phrase] text-balance">{DIAGNOSIS_NOTE}</p>
           <Button type="button" variant="primary" size="lg" className="justify-self-start" onClick={() => setStarted(true)}>診断をはじめる</Button>
         </div>
         <figure className="grid justify-items-center gap-2 md:col-span-7">
           <button type="button" aria-label="例のタイプの絵を見る(押すたびに次のタイプ)"
-            className="cursor-pointer rounded-rl-sm transition-transform duration-(--rl-dur-fast) ease-rl-out active:translate-y-px"
+            className="rl-lock cursor-pointer rounded-rl-sm transition-transform duration-(--rl-dur-fast) ease-rl-out active:translate-y-px"
             onPointerEnter={(e) => { if (e.pointerType === "mouse") showExample(); }}
             onPointerLeave={(e) => { if (e.pointerType === "mouse") hideExample(); }}
             onClick={showExample} onBlur={hideExample}>
             <SpriteScreen size={288} revealCode={example?.code ?? null} className="size-40 md:size-72" />
           </button>
-          <figcaption className="grid justify-items-center gap-1 text-center text-sm text-rl-muted">
+          <figcaption className="grid max-w-[36em] justify-items-center gap-1 text-center text-sm text-rl-muted [word-break:auto-phrase] text-balance">
             <span>この 12 行が、あなたのタイプの絵になります</span>
-            {/* 箱は最初から取っておく(出たり消えたりで下がずれない) */}
-            <span aria-live="polite" className="min-h-[1.5em]">{example ? <>例:<span className="font-display">{example.code}</span> {example.name}</> : null}</span>
+            {/* 採点 D2-1:触れられることを言う。言い方は入力で変える(CSS で出し分けるので、ハイドレーションの前から正しい) */}
+            {example ? (
+              <span>押すたびに次のタイプ</span>
+            ) : (
+              <span><span className="hidden pointer-fine:inline">マスにマウスを乗せると</span><span className="pointer-fine:hidden">マスを押すと</span>、例の絵になります</span>
+            )}
+            {/* 採点 D2-2:例の絵の読み方。箱は 2 行ぶん最初から取っておく(出たり消えたりで下がずれない) */}
+            <span aria-live="polite" className="min-h-[3.4em] text-rl-text">
+              {example ? <>例:<span className="font-display">{example.code}</span> {example.name}({spriteReading(example.code)})</> : null}
+            </span>
           </figcaption>
         </figure>
       </div>

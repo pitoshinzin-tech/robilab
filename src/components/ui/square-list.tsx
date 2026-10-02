@@ -5,8 +5,9 @@ export function SquareList({ items, className, itemClassName }: { items: readonl
   return (
     <ul className={cn("grid gap-2", className)}>
       {items.map((line) => (
-        <li key={line} className={cn("flex items-center gap-3 text-base", itemClassName)}>
-          <span aria-hidden className="size-2 shrink-0 bg-rl-secondary" />
+        <li key={line} className={cn("flex items-start gap-3 text-base", itemClassName)}>
+          {/* 1 行目の真ん中に置く(2 行に折れても印が行の間に浮かない) */}
+          <span aria-hidden className="mt-[calc((1lh_-_8px)/2)] size-2 shrink-0 bg-rl-secondary" />
           {line}
         </li>
       ))}

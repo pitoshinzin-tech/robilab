@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { pickExample } from "@/lib/diagnosis-example";
+import { pickExample, spriteReading } from "@/lib/diagnosis-example";
 
 describe("pickExample", () => {
   const list = ["A", "B", "C"] as const;
@@ -16,5 +16,16 @@ describe("pickExample", () => {
   });
   it("空の一覧は null", () => {
     expect(pickExample([], 0)).toBeNull();
+  });
+});
+
+describe("spriteReading", () => {
+  it("絵の部分と軸の言葉を、頭・目・体の横・色の順に並べる", () => {
+    expect(spriteReading("ARCH")).toBe("頭 = 攻め・目 = 直感・体の横 = チーム・色 = 熱血");
+    expect(spriteReading("GBLZ")).toBe("頭 = 守り・目 = 戦略・体の横 = ソロ・色 = 冷静");
+  });
+  it("おかしなコードは空", () => {
+    expect(spriteReading("XXXX")).toBe("");
+    expect(spriteReading("AR")).toBe("");
   });
 });
