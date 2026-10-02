@@ -304,6 +304,15 @@ body {
     clip-path: inset(0);
   }
 }
+/* 絵とボタンが離れている所(404):.rl-dissolve-scope の中の .rl-dissolve-trigger(ボタンの列)に乗る・フォーカスしたときも塗り替える */
+.rl-dissolve-scope:has(.rl-dissolve-trigger:focus-within) .rl-dissolve-lit {
+  clip-path: inset(0);
+}
+@media (hover: hover) {
+  .rl-dissolve-scope:has(.rl-dissolve-trigger:hover) .rl-dissolve-lit {
+    clip-path: inset(0);
+  }
+}
 
 /* 動きの参考 012(Stroke-Draw):入口の行のホバー・フォーカスで、下の線が左から右へ引かれる(transform: scaleX だけ) */
 .rl-draw-line {
