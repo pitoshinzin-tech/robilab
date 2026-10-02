@@ -53,9 +53,10 @@ export function BottomTabBar() {
                 aria-current={active === t.id ? "page" : undefined}
                 className="relative flex h-16 flex-col items-center justify-center gap-1 text-xs font-bold text-rl-muted before:absolute before:inset-x-3 before:top-0 before:h-[3px] before:bg-transparent aria-[current=page]:text-rl-text aria-[current=page]:before:bg-rl-selected"
               >
-                <span className="rl-lock-in grid justify-items-center gap-1 px-2">
+                {/* 375px で 1 タブ 75px。「今日の文字」(12px × 5 字)が 1 行に収まるよう、左右の余白を 4px にして折り返さない */}
+                <span className="rl-lock-in grid justify-items-center gap-1 px-1">
                   <Icon aria-hidden className="size-6" />
-                  <span>{t.label}</span>
+                  <span className="whitespace-nowrap tracking-normal">{t.label}</span>
                 </span>
               </Link>
             </li>

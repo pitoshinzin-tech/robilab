@@ -160,6 +160,9 @@ body {
   --ease-rl-out: var(--rl-ease-out);
   --ease-rl-in: var(--rl-ease-in);
   --ease-rl-line: var(--rl-ease-line);
+  /* 文字の段階の 32px(ページと入口の見出し)。任意の値 text-[32px] の代わり */
+  --text-rl-title: 2rem;
+  --text-rl-title--line-height: 1.3;
   --text-rl-display-1: var(--rl-text-display-1);
   --text-rl-display-1--line-height: 1;
   --text-rl-display-2: var(--rl-text-display-2);
@@ -298,6 +301,10 @@ body {
   from {
     opacity: 0;
   }
+}
+/* PC のお試しの案内。漢字を描き終わった時刻(--rl-drawn-at)から 200ms で出る(場所は最初から取ってあるので CLS 0) */
+.rl-trace-hint {
+  animation: rl-glow-in 200ms var(--rl-ease-line) var(--rl-drawn-at, 0ms) both;
 }
 @keyframes rl-settle {
   from {
@@ -499,7 +506,8 @@ body {
   .rl-stroke-draw,
   .rl-kanji[data-drawing] .rl-kanji-glow,
   .rl-kanji[data-drawing] .rl-kanji-ghost-m,
-  .rl-kanji[data-drawing] .rl-kanji-ghost-c {
+  .rl-kanji[data-drawing] .rl-kanji-ghost-c,
+  .rl-trace-hint {
     animation: none !important;
     opacity: 1;
     stroke-dashoffset: 0;

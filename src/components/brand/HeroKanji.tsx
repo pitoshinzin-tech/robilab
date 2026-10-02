@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { PenLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { StrokeSlot } from "@/lib/motion/stroke-schedule";
@@ -17,7 +17,7 @@ function subscribeFine(onChange: () => void) {
 
 /**
  * 追補 S1:トップのヒーローの漢字。線は KanjiStrokes が CSS で引く(ここに JS の動きはない)。ここは「触ると答える」部分だけ。
- * PC:漢字の上で照準(細い十字と 4 つの角)が出る。押したままなぞると、その線がライムで重なり「この感じで全部の画をなぞる」。点数は付けない。
+ * PC:描き終わると「漢字をなぞってみる(ドラッグ)」の案内が出る。漢字の上で照準(細い十字と 4 つの角)が出る。押したままなぞると、その線がライムで重なり「この感じで全部の画をなぞる」。点数は付けない。
  * スマホ:「1 画なぞってみる」を押したときだけ、漢字の箱が指の入力を受ける(押す前は touch-action: auto でスクロールを奪わない)。
  * (HeroKanji は @/data/types も TypeIcon も import しない。ブラウザの JS を小さくするため。)
  */
@@ -36,6 +36,8 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
   // スマホはお試しの 1 画を描き終えたら入力を受けるのをやめる(スクロールを返し、「続きは PC で。」を消さない)
   const capture = trying && !traced;
   const active = fine || capture;
+  const lastSlot = schedule.at(-1);
+  const drawnAt = lastSlot ? lastSlot.delay + lastSlot.duration : 0;
 
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
@@ -118,6 +120,12 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
       </div>
       <div aria-live="polite" className="grid min-h-11 justify-items-center gap-2 text-center">
         {fine && traced && <p className="text-sm">この感じで全部の画をなぞる</p>}
+        {/* PC の案内はなぞる前から出す。サーバーの描画では fine=false なので、出し分けは CSS(FINE と同じ条件)で行う */}
+        {!traced && !dragging && !trying && (
+          <p className="rl-trace-hint hidden text-sm text-rl-muted [@media(hover:hover)_and_(pointer:fine)]:block" style={{ "--rl-drawn-at": `${drawnAt}ms` } as CSSProperties}>
+            漢字をなぞってみる(ドラッグ)
+          </p>
+        )}
         {/* サーバーの描画では fine=false なので、PC ではハイドレーションの前から CSS(FINE と同じ条件)で隠す */}
         {!fine && !trying && (
           <Button type="button" variant="secondary" size="sm" onClick={() => setTrying(true)} className="[@media(hover:hover)_and_(pointer:fine)]:hidden">
