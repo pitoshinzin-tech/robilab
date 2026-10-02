@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 import { getType } from "@/data/types";
 import { CUSTOM_TYPE_ICONS } from "@/data/type-icons";
 import { heatOf, spriteFill, spriteRows } from "@/lib/type-sprite";

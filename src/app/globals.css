@@ -383,6 +383,35 @@ body {
   display: none;
 }
 
+/*
+ * 追補 S5:名簿の入場(画面に入ったとき 1 回だけ。左上から 30ms ずつ、1 体 4 段の clip-path。16 体で 600ms)。
+ * backwards:終わったあとに clip-path を残さない(照準の角の印が箱の外に出るため)。
+ */
+.rl-roster[data-armed]:not([data-in]) .rl-roster-item {
+  clip-path: inset(0 0 100% 0);
+}
+.rl-roster[data-in] .rl-roster-item {
+  animation: rl-roster-in 120ms steps(4, end) backwards;
+  animation-delay: calc(var(--i) * 30ms);
+}
+@keyframes rl-roster-in {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+/* ホバー・フォーカスしたタイプの軸の言葉を、名簿の下に 1 行で(PC だけ。場所は最初から取ってあるので CLS 0) */
+.rl-roster-axes {
+  opacity: 0;
+}
+@media (hover: hover) {
+  .rl-roster-item:is(:hover, :focus-within) .rl-roster-axes {
+    opacity: 1;
+  }
+}
+
 /* 追補 S2・S3:共有の要素(絵はカクカク、線はなめらか。400ms 以下) */
 ::view-transition-group(.rl-morph-pixel) {
   animation-duration: 360ms;
@@ -461,6 +490,10 @@ body {
     animation: none !important;
   }
   .rl-skeleton-pixel::after {
+    animation: none !important;
+  }
+  .rl-roster .rl-roster-item {
+    clip-path: none !important;
     animation: none !important;
   }
   .rl-stroke-draw,

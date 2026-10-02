@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 import { STAIR_TILE } from "@/lib/pixel-art";
 
 /** 追補 5-4:ヒーローの下の境目(8px の段・高さ 24px)。ヒーローの点の格子を、階段の形で終わらせる。 */

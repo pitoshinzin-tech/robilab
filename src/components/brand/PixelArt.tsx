@@ -1,4 +1,4 @@
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 import { PIXEL_VAR, pixelCells, type PixelGrid } from "@/lib/pixel-art";
 
 /** コードで描くドット絵(追補 7-1)。label を渡したときだけ読み上げる(ふだんは飾り)。 */

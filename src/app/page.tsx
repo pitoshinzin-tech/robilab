@@ -13,6 +13,7 @@ import { TodayLabel } from "@/components/brand/TodayLabel";
 import { PixelStair } from "@/components/brand/PixelStair";
 import { PixelArt } from "@/components/brand/PixelArt";
 import { TypeIcon } from "@/components/brand/TypeIcon";
+import { TypeRoster } from "@/components/brand/TypeRoster";
 import { ButtonLink } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { NumUnit } from "@/components/ui/num-unit";
@@ -116,21 +117,11 @@ export default async function Home() {
         </ul>
       </section>
 
-      {/* 4. 16 タイプの名簿 = ページの幅を 1 回だけ破る帯(Task 7B で入場の動きとホバーの軸の文を足す) */}
+      {/* 4. 16 タイプの名簿 = ページの幅を 1 回だけ破る帯。追補 S5:画面に入ったとき 1 回だけ 1 体ずつ現れ、ホバーで軸の言葉が出る */}
       <section aria-labelledby="types-heading" className="rl-dot-grid mt-rl-ma-md bg-rl-surface py-12">
         <div className={cn(inner, "grid gap-6")}>
           <SectionHeading id="types-heading" title="16 のゲーマータイプ" action={<ButtonLink href="/types" variant="ghost" size="sm">タイプ一覧へ</ButtonLink>} />
-          <ul className="grid grid-cols-4 gap-x-2 gap-y-4 md:grid-cols-8">
-            {TYPES.map((t) => (
-              <li key={t.code}>
-                <Link href={`/type/${t.code}`} className="rl-lock grid min-h-11 place-items-center gap-1 p-2">
-                  <TypeIcon code={t.code} size={48} />
-                  <span className="font-display text-sm text-rl-highlight">{t.code}</span>
-                  <span className="sr-only">{t.name}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <TypeRoster items={TYPES.map((t) => ({ code: t.code, name: t.name, icon: <TypeIcon code={t.code} size={48} /> }))} />
         </div>
       </section>
 
