@@ -87,7 +87,7 @@ export default async function TypePage({ params, searchParams }: Props) {
       {/* 右の 7 列:コード・名前・キャッチコピー。下の本文も同じ 7 列にそろえる(左の端が 1 本になる) */}
       <section className="grid justify-items-center gap-4 text-center lg:col-span-7 lg:col-start-6 lg:justify-items-start lg:pt-6 lg:text-left">
         {/* 動きの参考 082:コードは診断から来たときだけ 1 回マスクの中からせり上がる(S2 の芯。直接開いたときは止まった形) */}
-        <p className="font-display text-rl-display-1 font-black tracking-[0.04em] text-rl-highlight">
+        <p className="font-display text-rl-display-1 font-black lg:text-rl-display-2 tracking-[0.04em] text-rl-highlight">
           <span className={fromDiagnosis ? "rl-mask-rise" : undefined}>{type.code}</span>
         </p>
         <GlitchTitle className="text-rl-title text-balance [word-break:auto-phrase] lg:text-rl-heading">{type.name}</GlitchTitle>
@@ -114,8 +114,8 @@ export default async function TypePage({ params, searchParams }: Props) {
         </section>
 
         <section className="grid gap-6 md:grid-cols-2">
-          <div className="grid content-start gap-4"><SectionHeading title="強み" /><ul className="list-disc pl-5 text-base">{type.strengths.map((s) => <li key={s}>{s}</li>)}</ul></div>
-          <div className="grid content-start gap-4"><SectionHeading title="伸びしろ" /><ul className="list-disc pl-5 text-base">{type.growth.map((s) => <li key={s}>{s}</li>)}</ul></div>
+          <div className="grid content-start gap-4"><SectionHeading title="強み" /><ul className="list-disc pl-5 text-base [word-break:auto-phrase] text-pretty">{type.strengths.map((s) => <li key={s}>{s}</li>)}</ul></div>
+          <div className="grid content-start gap-4"><SectionHeading title="伸びしろ" /><ul className="list-disc pl-5 text-base [word-break:auto-phrase] text-pretty">{type.growth.map((s) => <li key={s}>{s}</li>)}</ul></div>
         </section>
 
         <section className="grid gap-4">
@@ -148,7 +148,7 @@ export default async function TypePage({ params, searchParams }: Props) {
         </section>
 
         <AffiliateList typeCode={type.code} />
-        <ButtonLink href="/diagnosis" variant="ghost" className="justify-self-center">{fromDiagnosis ? "もう一度診断する" : "診断する"}</ButtonLink>
+        <ButtonLink href="/diagnosis" variant="ghost" className="justify-self-start">{fromDiagnosis ? "もう一度診断する" : "診断する"}</ButtonLink>
       </div>
     </main>
     </ViewTransition>
