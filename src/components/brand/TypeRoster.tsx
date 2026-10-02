@@ -17,8 +17,8 @@ export type RosterItem = { code: string; name: string; label?: string; icon: Rea
  * ハイドレーションの時点ですでに 2 割以上見えている名簿は動かさない(見えていたものが消えて組み直すちらつきを出さない)。
  * 絵(TypeIcon)はサーバーで作って icon で受け取る(16 タイプの文章をブラウザの JS に入れない)。
  */
-export function TypeRoster({ items, showName = false, mobileName = true, className }: {
-  items: readonly RosterItem[]; showName?: boolean; mobileName?: boolean; className?: string;
+export function TypeRoster({ items, showName = false, mobileName = true, nameSize = "xs", className }: {
+  items: readonly RosterItem[]; showName?: boolean; mobileName?: boolean; nameSize?: "xs" | "sm"; className?: string;
 }) {
   const list = useRef<HTMLUListElement>(null);
   const clientMount = useIsClient();
@@ -50,7 +50,8 @@ export function TypeRoster({ items, showName = false, mobileName = true, classNa
   return (
     <ul ref={list} className={cn("rl-roster relative grid grid-cols-4 gap-x-2 gap-y-4 pb-10 md:grid-cols-8", className)}>
       {items.map((t, i) => (
-        <li key={t.code} className="rl-roster-item rl-dissolve-host" style={{ "--i": i } as CSSProperties}>
+        // data-l0〜l3:コードの 4 文字(一覧の凡例の 2 択で絞るとき、CSS が合わないタイプを薄くする)
+        <li key={t.code} className="rl-roster-item rl-dissolve-host" style={{ "--i": i } as CSSProperties} data-l0={t.code[0]} data-l1={t.code[1]} data-l2={t.code[2]} data-l3={t.code[3]}>
           {/* PC は横の余白を 0 にして名前の幅を取る(列の間 gap-x-2 で足りる)。
               絵の塗り替え(動きの参考 025)は、icon に dissolve を付けた TypeIcon を渡す(li が .rl-dissolve-host) */}
           <Link href={`/type/${t.code}`} className="rl-lock grid min-h-11 place-items-center content-start gap-1 p-2 md:px-0 md:py-2">
@@ -59,7 +60,7 @@ export function TypeRoster({ items, showName = false, mobileName = true, classNa
             {/* 名前は日本語の文節で折る(対応しないブラウザは今までどおりどこでも折れる)。読み上げは下の sr-only の正式な名前。
                 mobileName={false} のときスマホは名前を出さず、絵・コード・頭文字の 3 段にそろえる */}
             {showName && (
-              <span aria-hidden className={cn("text-center text-xs font-bold wrap-anywhere [word-break:auto-phrase] text-balance md:text-sm", !mobileName && "hidden md:block")}>{t.name}</span>
+              <span aria-hidden className={cn("text-center font-bold wrap-anywhere [word-break:auto-phrase] text-balance", nameSize === "sm" ? "text-sm" : "text-xs md:text-sm", !mobileName && "hidden md:block")}>{t.name}</span>
             )}
             <span aria-hidden className="text-xs text-rl-muted pointer-fine:hidden">{axisInitials(t.code)}</span>
             <span className="sr-only">{`${t.label ?? t.name}(${axisLine(t.code)})`}</span>

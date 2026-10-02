@@ -32,4 +32,8 @@ describe("cn(追補の表示用の段・間・イージングを知っている)
     expect(cn("mt-8", "mt-rl-ma-lg")).toBe("mt-rl-ma-lg");
     expect(cn("gap-4", "gap-rl-ma-sm")).toBe("gap-rl-ma-sm");
   });
+  it("40px の見出しの段(text-rl-heading。結果のタイプの名前)も文字の大きさで、色は残る", () => {
+    expect(cn("text-rl-title", "lg:text-rl-heading", "text-rl-highlight")).toBe("text-rl-title lg:text-rl-heading text-rl-highlight");
+    expect(cn("text-xl", "text-rl-heading")).toBe("text-rl-heading");
+  });
 });

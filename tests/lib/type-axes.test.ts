@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { TYPES } from "@/data/types";
-import { axisInitials, axisLegend, axisLine, axisWords } from "@/lib/type-axes";
+import { axisInitials, axisLegend, axisLine, axisWords, matchesAxisFilter } from "@/lib/type-axes";
 
 describe("タイプのコード → 軸の言葉(名簿のホバーの 1 行)", () => {
   it("ARCH と GBLZ", () => {
@@ -18,5 +18,20 @@ describe("タイプのコード → 軸の言葉(名簿のホバーの 1 行)", 
     expect(axisWords("XXXX")).toEqual([]);
     expect(axisWords("ARC")).toEqual([]);
     expect(axisLine("")).toBe("");
+  });
+});
+
+describe("matchesAxisFilter(一覧の凡例の 2 択で名簿を絞る)", () => {
+  it("何も選ばないと全部残る", () => {
+    expect(TYPES.every((t) => matchesAxisFilter(t.code, [null, null, null, null]))).toBe(true);
+  });
+  it("1 つの軸を選ぶと、その文字のタイプだけ(8 体)", () => {
+    expect(matchesAxisFilter("ARCH", ["A", null, null, null])).toBe(true);
+    expect(matchesAxisFilter("GRCH", ["A", null, null, null])).toBe(false);
+    expect(TYPES.filter((t) => matchesAxisFilter(t.code, [null, "B", null, null]))).toHaveLength(8);
+  });
+  it("重ねると絞り込まれ、4 つ選ぶと 1 体", () => {
+    expect(TYPES.filter((t) => matchesAxisFilter(t.code, ["A", null, "L", null]))).toHaveLength(4);
+    expect(TYPES.filter((t) => matchesAxisFilter(t.code, ["G", "B", "L", "Z"])).map((t) => t.code)).toEqual(["GBLZ"]);
   });
 });

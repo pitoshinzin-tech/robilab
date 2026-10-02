@@ -12,7 +12,7 @@ const PARTS = [
 
 /**
  * 追補 6 章:結果の大きな絵に「この絵の読み方」を添える。PC は絵の部分から右へ細い引き出し線(線の言葉)と言葉、スマホは文だけ。
- * 絵(TypeIcon)はサーバーで作って icon で受け取る。
+ * 絵(TypeIcon)はサーバーで作って icon で受け取る。PC は引き出し線が同じことを示すので、文は読み上げだけに残す(lg:sr-only)。
  * 線の終わり(x 14.5)は絵の右端から約 26px(240px のとき)。言葉は 32px の所から置き、線と重ねない。
  */
 export function SpriteReading({ code, icon, className }: { code: string; icon: ReactNode; className?: string }) {
@@ -32,7 +32,7 @@ export function SpriteReading({ code, icon, className }: { code: string; icon: R
           ))}
         </ul>
       </div>
-      <figcaption className="max-w-[30em] text-sm text-rl-muted">この絵の読み方:頭 = 攻め/守り、目 = 直感/戦略、体の横 = チーム/ソロ、色 = 熱血/冷静</figcaption>
+      <figcaption className="max-w-[30em] text-center text-sm text-balance text-rl-muted [word-break:auto-phrase] lg:sr-only">この絵の読み方:頭 = 攻め/守り、目 = 直感/戦略、体の横 = チーム/ソロ、色 = 熱血/冷静</figcaption>
     </figure>
   );
 }

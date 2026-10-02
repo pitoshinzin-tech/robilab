@@ -165,6 +165,9 @@ body {
   /* 文字の段階の 32px(ページと入口の見出し)。任意の値 text-[32px] の代わり */
   --text-rl-title: 2rem;
   --text-rl-title--line-height: 1.3;
+  /* 文字の段階の 40px(結果のタイプの名前だけ)。任意の値 text-[40px] の代わり */
+  --text-rl-heading: 2.5rem;
+  --text-rl-heading--line-height: 1.2;
   --text-rl-display-1: var(--rl-text-display-1);
   --text-rl-display-1--line-height: 1;
   --text-rl-display-2: var(--rl-text-display-2);
@@ -470,6 +473,24 @@ body {
   }
 }
 
+/*
+ * /types の凡例の 2 択(TypeAxisFilter):選んだ文字を持たないタイプを薄くする。動かすのは opacity だけ(120ms)。
+ * 動きを減らす設定では、全体の決まり(transition .01ms)ですぐ切り替わる。
+ */
+.rl-roster-filter .rl-roster-item {
+  transition: opacity 120ms var(--rl-ease-line);
+}
+.rl-roster-filter[data-f0="A"] .rl-roster-item:not([data-l0="A"]),
+.rl-roster-filter[data-f0="G"] .rl-roster-item:not([data-l0="G"]),
+.rl-roster-filter[data-f1="R"] .rl-roster-item:not([data-l1="R"]),
+.rl-roster-filter[data-f1="B"] .rl-roster-item:not([data-l1="B"]),
+.rl-roster-filter[data-f2="C"] .rl-roster-item:not([data-l2="C"]),
+.rl-roster-filter[data-f2="L"] .rl-roster-item:not([data-l2="L"]),
+.rl-roster-filter[data-f3="H"] .rl-roster-item:not([data-l3="H"]),
+.rl-roster-filter[data-f3="Z"] .rl-roster-item:not([data-l3="Z"]) {
+  opacity: 0.35;
+}
+
 /* 追補 S2・S3:共有の要素(絵はカクカク、線はなめらか。400ms 以下) */
 ::view-transition-group(.rl-morph-pixel) {
   animation-duration: 360ms;
@@ -592,7 +613,7 @@ body {
 }
 
 /*
- * 動きの参考 082(マスクの中から 1 行がせり上がる):結果のタイプのコードだけ(1 画面 1 か所)。開いたとき 1 回。
+ * 動きの参考 082(マスクの中から 1 行がせり上がる):結果のタイプのコードだけ(1 画面 1 か所)。診断から来たときだけ 1 回(S2 の芯)。
  * transform と clip-path を同じ割合で動かし、元の箱の外を見せない(終わったあとは何も残さない = 切れない)。
  */
 .rl-mask-rise {
@@ -610,19 +631,12 @@ body {
   }
 }
 /*
- * 動きの参考 074(マーカーの下線):結果の説明の要の 1 文だけ。軸のマスが埋まったあと 1 回、マゼンタの 2px の線が文に沿って引かれる。
- * 文が 2 行以上に折れても 1 本の線として行をまたいで引くため、行の箱の背景(slice)で描く。
- * 動かすのは背景の幅だけ(描き直しは 1 段落・1 回。配置の計算は起きない)。
+ * 結果の説明の要の 1 文に、止まった 2px の下線(パープル)。動かさない(結果の自動の動きは S2 の芯の 3 つだけ)。
+ * 文が 2 行以上に折れても行ごとに線が続くよう、行の箱の背景で描く。
  */
 .rl-marker-text {
-  background: linear-gradient(var(--rl-highlight), var(--rl-highlight)) left bottom / 100% 2px no-repeat;
+  background: linear-gradient(var(--rl-secondary), var(--rl-secondary)) left bottom / 100% 2px no-repeat;
   padding-bottom: 2px;
-  animation: rl-marker-text-in 600ms var(--rl-ease-line) 500ms backwards;
-}
-@keyframes rl-marker-text-in {
-  from {
-    background-size: 0% 2px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -645,7 +659,6 @@ body {
   .rl-bar-fill,
   .rl-meter-fill,
   .rl-mask-rise,
-  .rl-marker-text,
   .rl-marker::after {
     animation: none !important;
   }

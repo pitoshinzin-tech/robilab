@@ -72,24 +72,30 @@ export default async function TypePage({ params, searchParams }: Props) {
   );
 
   return (
-    <main className={cn(pageContainerClass("wide"), "grid gap-12")}>
-      <section className="grid items-center gap-6 lg:grid-cols-12">
-        <div className="lg:col-span-5">
+    <main className={cn(pageContainerClass("wide"), "grid gap-6 lg:grid-cols-12 lg:gap-x-6 lg:gap-y-0")}>
+      {/* 左の 5 列:絵と読み方。PC はスクロールしても横に残る(読んでいる間も自分の絵が見える) */}
+      <div className="lg:col-span-5 lg:row-span-2">
+        <div className="lg:sticky lg:top-8">
           <SpriteReading code={type.code} icon={fromDiagnosis ? <ViewTransition name={VT_TYPE_SPRITE} share={MORPH_PIXEL} default="none">{bigIcon}</ViewTransition> : bigIcon} />
         </div>
-        <div className="grid justify-items-center gap-3 text-center lg:col-span-7 lg:justify-items-start lg:text-left">
-          {/* 動きの参考 082:コードだけ、開いたとき 1 回マスクの中からせり上がる(1 画面 1 か所) */}
-          <p className="font-display text-rl-display-1 font-black tracking-[0.04em] text-rl-highlight"><span className="rl-mask-rise">{type.code}</span></p>
-          <GlitchTitle className="text-[40px] leading-[1.2]">{type.name}</GlitchTitle>
-          <p className="text-xl">「{type.catchcopy}」</p>
-          {!fromDiagnosis && <ButtonLink href="/diagnosis" variant="secondary"><FlaskConical aria-hidden />自分も診断する</ButtonLink>}
-        </div>
+      </div>
+
+      {/* 右の 7 列:コード・名前・キャッチコピー。下の本文も同じ 7 列にそろえる(左の端が 1 本になる) */}
+      <section className="grid justify-items-center gap-3 text-center lg:col-span-7 lg:col-start-6 lg:justify-items-start lg:pt-6 lg:text-left">
+        {/* 動きの参考 082:コードは診断から来たときだけ 1 回マスクの中からせり上がる(S2 の芯。直接開いたときは止まった形) */}
+        <p className="font-display text-rl-display-1 font-black tracking-[0.04em] text-rl-highlight">
+          <span className={fromDiagnosis ? "rl-mask-rise" : undefined}>{type.code}</span>
+        </p>
+        <GlitchTitle className="text-rl-title text-balance [word-break:auto-phrase] lg:text-rl-heading">{type.name}</GlitchTitle>
+        <p className="text-xl text-balance [word-break:auto-phrase]">「{type.catchcopy}」</p>
+        {!fromDiagnosis && <ButtonLink href="/diagnosis" variant="primary"><FlaskConical aria-hidden />自分も診断する</ButtonLink>}
       </section>
 
-      <div className="mx-auto grid w-full max-w-[640px] gap-12">
-        {/* key:同じタイプで軸だけ違う結果へ移ったときも、マスの埋まりと % の数え上げを 1 回やり直す */}
-        <section aria-label="4 つの軸"><AxisBars key={`${type.code}:${axesParam ?? ""}`} axes={axes} /></section>
+      <div className="mt-rl-ma-sm grid min-w-0 gap-rl-ma-sm lg:col-span-7 lg:col-start-6 lg:mt-rl-ma-md">
+        {/* key:同じタイプで軸だけ違う結果へ移ったときも、マスの埋まりを 1 回やり直す */}
+        <section aria-label="4 つの軸"><AxisBars key={`${type.code}:${axesParam ?? ""}`} axes={axes} fromDiagnosis={fromDiagnosis} /></section>
         <section aria-label="説明">
+          {/* 要の 1 文に止まった下線(文字組み。動かさない) */}
           <p className="text-base leading-[1.8]"><span className="rl-marker-text">{keySentence}</span>{rest}</p>
         </section>
 
@@ -115,7 +121,7 @@ export default async function TypePage({ params, searchParams }: Props) {
 
         <section className="grid gap-4">
           <SectionHeading title="相性のいいタイプ" />
-          {/* 追補 5-3:カードにせず、幅いっぱいの行 */}
+          {/* 追補 5-3:カードにせず、幅いっぱいの行。名前は見出しが「タイプ」なので「タイプ」を外す(名簿と同じ。読み上げは正式な名前) */}
           <ul className="border-t border-rl-line">
             {matches.map(({ label, t }) => (
               <li key={label} className="border-b border-rl-line">
@@ -123,7 +129,8 @@ export default async function TypePage({ params, searchParams }: Props) {
                   <TypeIcon code={t.code} size={48} />
                   <span className="grid min-w-0">
                     <span className="text-sm text-rl-muted">{label}・<span className="font-display">{t.code}</span></span>
-                    <span className="text-[32px] font-bold leading-[1.3] wrap-anywhere">{t.name}</span>
+                    <span aria-hidden className="text-2xl font-bold text-balance [word-break:auto-phrase] wrap-anywhere md:text-rl-title">{t.name.replace(/タイプ$/, "")}</span>
+                    <span className="sr-only">{t.name}</span>
                   </span>
                   <ChevronRight aria-hidden className="size-6 text-rl-muted transition-colors group-hover:text-rl-text" />
                 </Link>

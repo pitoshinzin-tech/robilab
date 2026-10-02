@@ -140,7 +140,7 @@ export default async function Home() {
       <section aria-labelledby="types-heading" className="rl-dot-grid mt-rl-ma-md bg-rl-surface py-12">
         <div className={cn(inner, "grid gap-6")}>
           {/* 「タイプ一覧へ」は PC は見出しの右、スマホは名簿の下の左端(見出しの下に回って半端にずれないように) */}
-          <SectionHeading id="types-heading" title="16 のゲーマータイプ" description={`4 文字は ${axisLegend()}`} action={<ButtonLink href="/types" variant="ghost" size="sm" className="hidden md:inline-flex">タイプ一覧へ</ButtonLink>} />
+          <SectionHeading id="types-heading" title="16 のゲーマータイプ" description={<span className="[word-break:auto-phrase]">4 文字は {axisLegend().split("・").map((g, i) => <span key={g} className="inline-block">{i > 0 && "・"}{g}</span>)}</span>} action={<ButtonLink href="/types" variant="ghost" size="sm" className="hidden md:inline-flex">タイプ一覧へ</ButtonLink>} />
           {/* 見出しが「16 のゲーマータイプ」なので、名簿の名前は「タイプ」を外して短くする(読み上げは正式な名前) */}
           <TypeRoster
             showName
