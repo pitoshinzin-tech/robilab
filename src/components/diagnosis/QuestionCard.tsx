@@ -11,7 +11,7 @@ export function QuestionCard({ question, selected, onAnswer, headingRef }: {
   return (
     <Card as="section" aria-labelledby={headingId} className="grid gap-6">
       {/* 追補 6 章:1 問 1 画面で余白が多いので、質問の文を主役に(20 → 24px) */}
-      <h2 id={headingId} ref={headingRef} tabIndex={-1} className="text-2xl font-bold leading-[1.5]">{question.text}</h2>
+      <h2 id={headingId} ref={headingRef} tabIndex={-1} className="text-2xl font-bold leading-[1.5] [word-break:auto-phrase] text-balance">{question.text}</h2>
       <div role="group" aria-labelledby={headingId} className="grid gap-4">
         {ANSWER_OPTIONS.map((o) => (
           <Chip key={o.value} pressed={selected === o.value} onPressedChange={() => onAnswer(o.value)} className="min-h-14 w-full justify-start text-base">

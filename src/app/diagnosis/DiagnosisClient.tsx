@@ -127,22 +127,25 @@ export function DiagnosisClient({ examples }: { examples: readonly DiagnosisExam
   // 押した瞬間に、その問いの行が点く
   const lit = state.done ? QUESTIONS.length : state.index + (picked !== null ? 1 : 0);
   return (
-    // 質問の画面は 1 問 1 画面なので、広い幅の中でも読みやすい 640px に(h1 と左をそろえる)
-    <div className="grid max-w-[640px] gap-6">
-      {/* 追補 S2:スマホはマスの画面(64px)を進み具合の帯の上に、PC は右(96px) */}
-      <div className="flex flex-col-reverse items-start gap-3 md:flex-row md:items-end md:justify-between md:gap-6">
-        <div className="w-full min-w-0 md:flex-1"><ProgressBar current={state.index + 1} total={QUESTIONS.length} /></div>
+    // 採点(最終)の直し:PC は 12 列の 2 列。左 7 列に進み具合・問い・戻る、右 5 列に始める画面と同じ 288px のマスの画面
+    // (答えるたびに行が点く S2 が、質問の間ずっと主役になる)。lg より狭い幅は 1 列で、読みやすい 640px のまま
+    <div className="grid max-w-[640px] gap-6 lg:max-w-none lg:grid-cols-12 lg:items-start">
+      {/* 追補 S2:スマホはマスの画面(96px)を進み具合の上に。PC は右の列で 3 行ぶんの高さ */}
+      <div className="justify-self-start lg:col-span-5 lg:col-start-8 lg:row-span-3 lg:row-start-1 lg:justify-self-center">
         <ViewTransition name={VT_TYPE_SPRITE} share={MORPH_PIXEL} default="none">
-          <SpriteScreen size={96} litRows={lit} revealCode={reveal} onRevealed={() => setPainted(true)} className="size-16 md:size-24" />
+          <SpriteScreen size={288} litRows={lit} revealCode={reveal} onRevealed={() => setPainted(true)} className="size-24 lg:size-72" />
         </ViewTransition>
       </div>
-      <QuestionCard question={q} selected={picked ?? state.answers[q.id]} onAnswer={answer} headingRef={headingRef} />
-      <Button type="button" variant="ghost" size="sm" className="justify-self-start" onClick={() => dispatch({ type: "back" })}
+      <div className="min-w-0 lg:col-span-7 lg:col-start-1 lg:row-start-1"><ProgressBar current={state.index + 1} total={QUESTIONS.length} /></div>
+      <div className="min-w-0 lg:col-span-7 lg:col-start-1 lg:row-start-2">
+        <QuestionCard question={q} selected={picked ?? state.answers[q.id]} onAnswer={answer} headingRef={headingRef} />
+      </div>
+      <Button type="button" variant="ghost" size="sm" className="justify-self-start lg:col-span-7 lg:col-start-1 lg:row-start-3" onClick={() => dispatch({ type: "back" })}
         disabled={state.index === 0 || state.done || picked !== null}>
         <ChevronLeft aria-hidden />ひとつ前へ
       </Button>
       {state.done && (
-        <LoadingRegion label="結果を表示しています" className="grid gap-4">
+        <LoadingRegion label="結果を表示しています" className="grid gap-4 lg:col-span-7 lg:col-start-1 lg:row-start-4">
           <p aria-hidden className="text-center text-base text-rl-muted">結果を表示しています…</p>
           <Skeleton className="h-40 w-full rounded-rl-md" />
         </LoadingRegion>
