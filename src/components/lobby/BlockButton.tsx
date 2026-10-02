@@ -1,13 +1,16 @@
 "use client";
 import { useState, useTransition } from "react";
+import { Ban } from "lucide-react";
 import { blockAction } from "@/app/lobby/actions";
+import { PlainButton } from "@/components/ui/plain-button";
+import { FieldError } from "@/components/ui/field";
 
 export function BlockButton({ id }: { id: string }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   return (
     <div className="grid gap-1">
-      <button type="button" disabled={pending}
+      <PlainButton variant="ghost" size="sm" loading={pending} loadingText="ブロック中…"
         onClick={() => {
           if (confirm("この人をブロックしますか?おたがいに表示されなくなります。")) {
             start(async () => {
@@ -15,11 +18,10 @@ export function BlockButton({ id }: { id: string }) {
               if (res?.error) setError(res.error);
             });
           }
-        }}
-        className="text-sm text-[var(--rl-muted)] underline">
-        ブロックする
-      </button>
-      {error && <p role="alert" className="text-sm text-[var(--rl-danger)]">{error}</p>}
+        }}>
+        <Ban aria-hidden />ブロックする
+      </PlainButton>
+      {error && <FieldError>{error}</FieldError>}
     </div>
   );
 }
