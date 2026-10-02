@@ -64,7 +64,9 @@ export function SensSetup({ onSaved, initialGameId, loggedIn = false, strokes, l
 
   return (
     <Card className="grid gap-6 lg:grid-cols-12">
-      <div className="grid max-w-[480px] content-start gap-4 lg:col-span-5">
+      {/* 予告の枠(遊ぶ面と同じ高さ)の横で、フォームの列は縦の真ん中に置く */}
+      <div className="grid max-w-[480px] content-start gap-4 lg:col-span-5 lg:content-center">
+        <p className="text-xl font-bold">この面で、今日の文字をなぞります</p>
         <p className="text-base">ゲームと同じ感度で練習するために、ふだんの設定を教えてください(マイ設定に保存されます)。</p>
         <Field id="aim-sens-game" label="ゲーム">
           <NativeSelect id="aim-sens-game" value={gameId} onChange={(e) => setGameId(e.target.value)}>
@@ -82,6 +84,7 @@ export function SensSetup({ onSaved, initialGameId, loggedIn = false, strokes, l
         <Button type="button" variant="primary" className="justify-self-start" onClick={save} disabled={drawing}>保存して練習する</Button>
         {drawing && <p role="status" className="text-sm">保存しました。書く面を用意しています</p>}
         {!loggedIn && loginHint}
+        <p className="text-sm text-rl-muted">保存した感度はマイ設定で変えられます</p>
       </div>
       {/* 遊ぶ面の予告。遊ぶ面と同じ高さの箱を取っておき、保存したあとに画面が跳ねないようにする */}
       <div aria-hidden className="relative hidden h-[min(70vh,640px)] place-items-center rounded-rl-md border border-rl-line bg-rl-bg lg:col-span-7 lg:grid">

@@ -32,14 +32,14 @@ export default async function AimPage() {
   const rows = await loadRanking(date);
   return (
     <main className={pageContainerClass("wide")}>
-      {/* 見出しの帯は 12 列:左 7 列に漢字と縦組みの h1、右 5 列に遊び方の 3 行(トップと共通)と今日の 1 位 */}
-      <header className="grid gap-6 lg:grid-cols-12 lg:items-end">
-        <div className="flex items-start gap-4 md:gap-6 lg:col-span-7">
+      {/* 見出しの帯:漢字+縦組みのすぐ右に遊び方の札(間 64px)。札の下の端を漢字の下の端にそろえ、左に固めて読む流れを 1 本にする */}
+      <header className="flex flex-wrap items-end gap-x-16 gap-y-6">
+        <div className="flex items-start gap-4 md:gap-6">
           {/* 追補 S3:漢字は共有の要素 today-kanji(HeroKanji の中。1 ページに 1 つ)。スマホは「1 画なぞってみる」 */}
           <HeroKanji strokes={char.strokes} variant="aim" />
           <TodayLabel as="h1" glyph={char.glyph} date={date} strokes={char.strokes.length} />
         </div>
-        <div className="grid gap-4 lg:col-span-5">
+        <div className="grid max-w-[28em] gap-4">
           <HowToPlay />
           {rows[0] ? (
             <p className="grid gap-1">

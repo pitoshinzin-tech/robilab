@@ -7,7 +7,6 @@ import { flapRanks } from "@/lib/motion/flap";
 import { ArrowUp } from "lucide-react";
 import { RankBadge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
-import { CopyButton } from "@/components/ui/copy-button";
 import { DecodeNumber } from "@/components/aim/DecodeNumber";
 import { SectionHeading } from "@/components/ui/section-heading";
 export type { RankingRow } from "@/lib/aim/ranking";
@@ -20,7 +19,7 @@ const EMPTY_SEATS = [1, 2, 3] as const;
 
 export function Ranking({ rows, mine, loggedIn = false, canPlay = false, decodeKey = 0, className }: {
   rows: RankingRow[]; mine: { rank: number; score: number } | null; loggedIn?: boolean;
-  /** PC で遊べるとき true(空のときの案内を「上の面で書く」にする。false ならリンクのコピー) */
+  /** PC で遊べるとき true(空のときに「上の面で書く」を出す) */
   canPlay?: boolean;
   /** 送信が済んだ回数。1 以上なら、自分の順位の数字が 2 段だけ乱れてから決まる(動きの参考 064) */
   decodeKey?: number;
@@ -50,11 +49,8 @@ export function Ranking({ rows, mine, loggedIn = false, canPlay = false, decodeK
             ))}
           </ol>
           <p className="text-sm">最初の記録が 1 位になります</p>
-          <div>
-            {canPlay
-              ? <ButtonLink href="#play" variant="ghost" size="sm" className="px-0">上の面で書く<ArrowUp aria-hidden /></ButtonLink>
-              : <CopyButton path="/aim" label="PC で開くリンクをコピー" variant="ghost" size="sm" className="px-0" />}
-          </div>
+          {/* スマホは上の札に「PC で開くリンクをコピー」があるので、ここには出さない(同じ行き先のボタンを 1 画面に 2 つ置かない) */}
+          {canPlay && <div><ButtonLink href="#play" variant="ghost" size="sm" className="px-0">上の面で書く<ArrowUp aria-hidden /></ButtonLink></div>}
         </div>
       ) : (
         <ol className="grid gap-2">
