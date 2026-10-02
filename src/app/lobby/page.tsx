@@ -62,6 +62,9 @@ export default async function LobbyPage({ searchParams }: Props) {
               </li>
             ))}
           </ol>
+          {/* 375 でも最初の画面に入るよう、ログインは流れのすぐ下(見本・安心の節は押す前に読み足す情報) */}
+          {sp.login === "failed" && <p role="alert" className="text-sm text-rl-danger">ログインできませんでした。もう一度お試しください。</p>}
+          <LoginButton next="/lobby" size="lg" className="justify-self-start" />
           {/*
             ロビーの中身の見本(ログイン前でも、成立すると 2 人の絵が線でつながることが分かる)。相性 % は作り物の数に見えるので出さない。
             線は引く動きを付けない(この画面の線の見せ場は上の流れの 1 つだけ)。
@@ -83,8 +86,6 @@ export default async function LobbyPage({ searchParams }: Props) {
               ))}
             </ul>
           </section>
-          {sp.login === "failed" && <p role="alert" className="text-sm text-rl-danger">ログインできませんでした。もう一度お試しください。</p>}
-          <LoginButton next="/lobby" size="lg" className="justify-self-start" />
         </div>
       </PageShell>
     );
