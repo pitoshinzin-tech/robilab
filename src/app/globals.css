@@ -242,6 +242,30 @@ body {
   background-size: 160px 160px, 8px 8px;
 }
 
+/* 追補 S1:ヒーローの漢字。色の名前(マゼンタ・シアン)は D29 の色ズレの例外として、ここと .rl-glitch だけで使う */
+.rl-kanji-line {
+  stroke: var(--rl-highlight);
+}
+.rl-kanji-muted {
+  stroke: var(--rl-line-strong);
+}
+/* 光は動かさない。強さを変えるときはこの重ねの opacity(Task 7A) */
+.rl-kanji-glow {
+  stroke: var(--rl-highlight);
+  filter: drop-shadow(0 0 4px rgba(255, 79, 216, 0.6));
+}
+/* 色ズレの縁:SVG の 1 単位 ≒ 2.6px(280px のとき)なので 1.2 単位 ≒ 3px */
+.rl-kanji-ghost-m {
+  stroke: var(--rl-magenta);
+  mix-blend-mode: screen;
+  transform: translateX(1.2px);
+}
+.rl-kanji-ghost-c {
+  stroke: var(--rl-cyan);
+  mix-blend-mode: screen;
+  transform: translateX(-1.2px);
+}
+
 /*
  * 追補 S4:押せるものに照準が合う。L 字の角の印が外から寄って止まる(CSS だけ)。
  * ::before が上の 2 つの角、::after が下の 2 つの角。寄る動きは transform: scale の近似(inset は動かさない)。

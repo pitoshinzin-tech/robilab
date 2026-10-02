@@ -1,6 +1,6 @@
+import type { RankingRow } from "@/lib/aim/ranking";
+export type { RankingRow } from "@/lib/aim/ranking";
 import Link from "next/link";
-
-export type RankingRow = { rank: number; name: string; score: number; accuracy: number; time_ms: number };
 
 export function Ranking({ rows, mine, loggedIn = false }: { rows: RankingRow[]; mine: { rank: number; score: number } | null; loggedIn?: boolean }) {
   return (

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { aimCharForDate, jstDate } from "@/lib/aim/daily";
 import { aimOgImagePath } from "@/lib/aim/share";
-import { createSupabaseAnon } from "@/lib/supabase/anon";
-import type { RankingRow } from "@/components/aim/Ranking";
+import { loadRanking } from "@/lib/aim/ranking";
 import { AimClient } from "./AimClient";
 
 export const dynamic = "force-dynamic";
@@ -18,13 +17,6 @@ export function generateMetadata(): Metadata {
     openGraph: { title: TITLE, description: DESCRIPTION, images: [{ url: image, width: 1200, height: 630 }] },
     twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: [image] },
   };
-}
-
-async function loadRanking(date: string): Promise<RankingRow[]> {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return [];
-  const { data, error } = await createSupabaseAnon().rpc("get_aim_ranking", { p_date: date });
-  if (error) return [];
-  return (data ?? []) as RankingRow[];
 }
 
 export default async function AimPage() {

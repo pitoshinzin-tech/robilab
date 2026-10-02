@@ -3,6 +3,7 @@ export const BRAND = {
   nameEn: "ROBILAB",
   tagline: "GAMER'S LOBBY & LAB",
   description: "1分半のタイプ診断、感度計算、仲間さがし。ゲーマーのロビー&研究所。",
+  lead: "タイプ診断・感度合わせ・仲間探しができる、ゲーマーのロビーと研究所",
   colors: {
     bg: "#0A0C16",
     cyan: "#39F3FF",

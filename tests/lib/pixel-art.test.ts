@@ -35,4 +35,11 @@ describe("ドット絵の格子(追補 7-1)", () => {
     expect(STAIR_TILE.width % 8).toBe(0);
     expect(stairSvg(2)).toContain(`viewBox="0 0 ${STAIR_TILE.width * 2} 24"`);
   });
+  it("階段の上の形(点の格子を続ける所)も 8px の段で、1 枚の中に収まる", () => {
+    const nums = STAIR_TILE.upper.match(/\d+/g)!.map(Number);
+    for (const n of nums) {
+      expect(n % 8).toBe(0);
+      expect(n).toBeLessThanOrEqual(STAIR_TILE.width);
+    }
+  });
 });

@@ -133,7 +133,7 @@ export function pixelGridSvg(grid: PixelGrid): string {
 }
 
 /** 追補 5-4:ヒーローの下の階段の境目(8px の段、高さ 24px)の 1 枚分。塗った所が下の地(--rl-bg)になる */
-export const STAIR_TILE = { width: 64, height: 24, path: "M0 24V16H16V8H32V0H48V24Z" } as const;
+export const STAIR_TILE = { width: 64, height: 24, path: "M0 24V16H16V8H32V0H48V24Z", upper: "M0 0H32V8H16V16H0Z M48 0H64V24H48Z" } as const;
 
 export function stairSvg(tiles = 4): string {
   const w = STAIR_TILE.width * tiles;
