@@ -10,7 +10,7 @@ import { rankGames } from "@/lib/role-match";
 import { buildShareText, buildXShareUrl } from "@/lib/share";
 import { getSiteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
-import { MORPH_PIXEL, NAV_FORWARD, TYPE_ROW, VT_TYPE_SPRITE, typeVtName } from "@/lib/motion/vt-names";
+import { MORPH_PIXEL, NAV_FORWARD, PAGE_VT_CLASSES, TYPE_ROW, VT_TYPE_SPRITE, typeVtName } from "@/lib/motion/vt-names";
 import { GlitchTitle } from "@/components/brand/GlitchTitle";
 import { TypeIcon } from "@/components/brand/TypeIcon";
 import { AxisBars } from "@/components/result/AxisBars";
@@ -72,6 +72,9 @@ export default async function TypePage({ params, searchParams }: Props) {
   );
 
   return (
+    // 追補 S3:PageShell と同じ enter / exit(深く入る・戻る・型なし・診断から)。このページは PageShell を使わないので、ここで包む。
+    // 大きな絵と相性の行の絵は内側の名前付きの ViewTransition が別に移る(名前は 1 ページで重ならない)
+    <ViewTransition enter={PAGE_VT_CLASSES} exit={PAGE_VT_CLASSES} default="none">
     <main className={cn(pageContainerClass("wide"), "grid gap-6 lg:grid-cols-12 lg:gap-x-6 lg:gap-y-0")}>
       {/* 左の 5 列:絵と読み方。PC はスクロールしても横に残る(読んでいる間も自分の絵が見える) */}
       <div className="lg:col-span-5 lg:row-span-2">
@@ -148,5 +151,6 @@ export default async function TypePage({ params, searchParams }: Props) {
         <ButtonLink href="/diagnosis" variant="ghost" className="justify-self-center">{fromDiagnosis ? "もう一度診断する" : "診断する"}</ButtonLink>
       </div>
     </main>
+    </ViewTransition>
   );
 }
