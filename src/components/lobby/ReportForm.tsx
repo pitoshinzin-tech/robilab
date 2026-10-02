@@ -35,7 +35,7 @@ export function ReportForm({ id }: { id: string }) {
       </Field>
       <p className="text-sm text-rl-muted">通報すると、この人はあなたには表示されなくなり(ブロック)、運営が内容を確認します。年齢詐称の通報は、確認が終わるまで相手が利用停止になります。嫌がらせ目的の通報はご遠慮ください。</p>
       {error && <FieldError>{error}</FieldError>}
-      <PlainButton variant="secondary" className="justify-self-start" loading={pending} loadingText="送信中…"
+      <PlainButton variant="secondary" className="justify-self-start" fixedWidth loading={pending} loadingText="送信中…"
         onClick={() => start(async () => setError((await reportAction(id, reason, detail)).error))}>通報を送る</PlainButton>
     </Card>
   );

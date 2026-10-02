@@ -35,9 +35,13 @@ export function InboxList({ rows, icons, myType }: { rows: InboxRow[]; icons: Re
   const respond = (id: string, accept: boolean) => {
     setBusy(`${id}:${accept}`);
     start(async () => {
-      const res = await respondAction(id, accept);
-      setDone((d) => ({ ...d, [id]: res.error ? { ok: false, text: res.error } : { ok: true, text: res.ok ?? "" } }));
-      setBusy(null);
+      try {
+        const res = await respondAction(id, accept);
+        setDone((d) => ({ ...d, [id]: res.error ? { ok: false, text: res.error } : { ok: true, text: res.ok ?? "" } }));
+      } finally {
+        // 通信が落ちて throw しても、押した行の loading を必ず戻す(エラーは一番近い error.tsx へ)
+        setBusy(null);
+      }
     });
   };
   return (
@@ -60,8 +64,8 @@ export function InboxList({ rows, icons, myType }: { rows: InboxRow[]; icons: Re
                   <p role="status" className={done[r.approach_id].ok ? "text-sm text-rl-success" : "text-sm text-rl-danger"}>{done[r.approach_id].text}</p>
                 ) : (
                   <div className="flex flex-wrap gap-3">
-                    <PlainButton variant="secondary" size="sm" disabled={pending} loading={busy === `${r.approach_id}:true`} loadingText="送信中…" onClick={() => respond(r.approach_id, true)}><Check aria-hidden />OK</PlainButton>
-                    <PlainButton variant="ghost" size="sm" disabled={pending} loading={busy === `${r.approach_id}:false`} loadingText="送信中…" onClick={() => respond(r.approach_id, false)}>今回はパス</PlainButton>
+                    <PlainButton variant="secondary" size="sm" fixedWidth disabled={pending} loading={busy === `${r.approach_id}:true`} loadingText="送信中…" onClick={() => respond(r.approach_id, true)}><Check aria-hidden />OK</PlainButton>
+                    <PlainButton variant="ghost" size="sm" fixedWidth disabled={pending} loading={busy === `${r.approach_id}:false`} loadingText="送信中…" onClick={() => respond(r.approach_id, false)}>今回はパス</PlainButton>
                   </div>
                 )}
               </Card>

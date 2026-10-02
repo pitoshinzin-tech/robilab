@@ -14,7 +14,7 @@ export function ApproachButton({ id }: { id: string }) {
   const limit = msg.error === lobbyErrorMessage("DAILY_LIMIT");
   return (
     <div className="grid gap-2">
-      <PlainButton variant="primary" size="lg" className="w-full md:w-auto md:justify-self-start" loading={pending} loadingText="送信中…" disabled={done}
+      <PlainButton variant="primary" size="lg" className="w-full md:w-auto md:justify-self-start" fixedWidth loading={pending} loadingText="送信中…" disabled={done}
         onClick={() => start(async () => setMsg(await sendApproachAction(id)))}>
         <Send aria-hidden />{done ? "声をかけました" : "一緒にやりたい!"}
       </PlainButton>

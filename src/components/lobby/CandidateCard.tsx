@@ -17,6 +17,7 @@ const slotName = (id: string) => TIME_SLOTS.find((t) => t.id === id)?.label ?? i
  * 一覧の札はホバー・フォーカスで絵が上から 4 段で塗り替わる(動きの参考 025。TypeIcon の dissolve、CSS だけ)。
  */
 export function CandidateCard({ c, match, link = true }: { c: Candidate; match: PeopleMatch | null; link?: boolean }) {
+  const reasons = match ? (link ? match.reasons : match.reasons.slice(1)) : [];
   const band = c.type_code ? spriteFill("body", heatOf(c.type_code)) : "var(--rl-line-strong)";
   const body = (
     <div className="flex min-w-0 gap-4 pl-2">
@@ -26,7 +27,8 @@ export function CandidateCard({ c, match, link = true }: { c: Candidate; match: 
       <div className="grid min-w-0 flex-1 content-start gap-1">
         <div className="flex min-w-0 flex-wrap items-start justify-between gap-x-3 gap-y-1">
           <span data-long-name className="min-w-0 text-xl font-bold wrap-anywhere">{c.nickname}</span>
-          {match ? (
+          {/* link=false(プロフィール)では、相性 % と 1 つめの理由は上の PairFigure が大きく出すので、札では出さない */}
+          {match ? link && (
             <span className="whitespace-nowrap text-sm text-rl-muted">
               相性 <span className="font-display text-rl-heading leading-none font-extrabold tabular-nums text-rl-highlight">{match.score}</span>
               <span className="text-base text-rl-text">%</span>
@@ -36,7 +38,7 @@ export function CandidateCard({ c, match, link = true }: { c: Candidate; match: 
           )}
         </div>
         {c.type_code ? <Badge variant="code" className="justify-self-start">{c.type_code}</Badge> : <span className="text-sm text-rl-muted">タイプ未診断</span>}
-        {match && match.reasons.length > 0 && <p className="text-sm [word-break:auto-phrase]">{match.reasons.join("・")}</p>}
+        {reasons.length > 0 && <p className="text-sm [word-break:auto-phrase]">{reasons.join("・")}</p>}
         <p className="flex flex-wrap items-center gap-x-2 text-sm text-rl-muted">
           {/* 区切りの「・」は 2 つ目から(ゲーム・時間帯が空でも先頭に「・」だけが出ない) */}
           {[
