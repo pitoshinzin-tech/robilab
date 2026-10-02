@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, Download } from "lucide-react";
 import type { PublicCardData } from "@/lib/card-view";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,7 @@ export function CardPreview({ data, rewrite = false, hasType = true }: { data: P
   const url = pair.url;
   const saved = url !== null && savedUrl === url;
   const body = data ? JSON.stringify(data) : null;
+  const live = useRef<string[]>([]);
 
   useEffect(() => {
     if (!body) return;
@@ -34,6 +35,8 @@ export function CardPreview({ data, rewrite = false, hasType = true }: { data: P
         const res = await fetch("/api/card-image", { method: "POST", body, headers: { "Content-Type": "application/json" }, signal: ctrl.signal });
         if (!res.ok) throw new Error(String(res.status));
         const next = URL.createObjectURL(await res.blob());
+        // 画面に残っている 2 つ(今と 1 つ前)を覚えておき、閉じたときに消す。それより古いものは下の setPair で消している
+        live.current = [...live.current.slice(-1), next];
         setPair((p) => { if (p.prev) URL.revokeObjectURL(p.prev); return { url: next, prev: p.url }; });
         setFailed(false);
       } catch {
@@ -42,6 +45,12 @@ export function CardPreview({ data, rewrite = false, hasType = true }: { data: P
     }, 800);
     return () => { clearTimeout(t); ctrl.abort(); };
   }, [body]);
+
+  // 画面を離れたら、最後に作った画像の blob URL を消す(見た目は変わらない)
+  useEffect(() => {
+    const urls = live;
+    return () => { urls.current.forEach((u) => URL.revokeObjectURL(u)); urls.current = []; };
+  }, []);
 
   return (
     <Card as="section" aria-labelledby="my-card-preview" className="grid gap-4">
