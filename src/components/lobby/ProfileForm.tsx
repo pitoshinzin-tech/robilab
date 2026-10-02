@@ -145,7 +145,7 @@ export function ProfileForm({ mode, action, initial }: Props) {
       {state.error && <FieldError>{state.error}</FieldError>}
       {underAge && (
         <div className="grid gap-4">
-          <p className="text-base [word-break:auto-phrase]">18 歳になったら使えます。それまでは診断やマイ設定を使ってね。</p>
+          <p className="text-base [word-break:auto-phrase]">それまでは診断やマイ設定を使ってね。</p>
           <ButtonLink href="/" variant="secondary" className="justify-self-start">トップへ</ButtonLink>
         </div>
       )}
