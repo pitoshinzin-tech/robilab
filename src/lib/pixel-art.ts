@@ -148,3 +148,11 @@ export function stairSvg(tiles = 4): string {
     "",
   ].join("\n");
 }
+
+/** 追補 6 章:マスのバー(既定 10 マス)で塗るマスの数。% を四捨五入し、0〜cells に収める */
+export const PIXEL_BAR_CELLS = 10;
+
+export function pixelBarFill(pct: number, cells = PIXEL_BAR_CELLS): number {
+  if (!Number.isFinite(pct)) return 0;
+  return Math.min(cells, Math.max(0, Math.round((pct / 100) * cells)));
+}

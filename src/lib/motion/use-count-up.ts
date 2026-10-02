@@ -15,23 +15,28 @@ export function countUpValue(target: number, elapsedMs: number, durationMs = COU
   return Math.round(countUpRaw(target, elapsedMs, durationMs));
 }
 
-/** 数え上げの今の値(丸めない)。target が変わったら 0 から数え直す。 */
+/**
+ * 数え上げの今の値(丸めない)。target が変わったら 0 から数え直す。
+ * 値は「どの target の数え上げか」と一緒に持ち、target が変わった描画では前の数を出さずに 0 から始める
+ * (effect の最初のフレームまで、前の target の最後の数が 1 フレーム見えるのを防ぐ)。
+ */
 export function useCountUpRaw(target: number, durationMs = COUNT_UP_MS): number {
   const reduced = useReducedMotion();
-  const [shown, setShown] = useState(0);
+  const [shown, setShown] = useState({ target, value: 0 });
   useEffect(() => {
     if (reduced) return;
     let raf = 0;
     const start = performance.now();
     const tick = (now: number) => {
       const v = countUpRaw(target, now - start, durationMs);
-      setShown(v);
+      setShown({ target, value: v });
       if (v !== target) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [target, durationMs, reduced]);
-  return reduced ? target : shown;
+  if (reduced) return target;
+  return shown.target === target ? shown.value : 0;
 }
 
 export function useCountUp(target: number, durationMs = COUNT_UP_MS): number {

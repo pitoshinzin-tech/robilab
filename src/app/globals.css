@@ -578,12 +578,50 @@ body {
   background-image: repeating-linear-gradient(90deg, var(--rl-line) 0 8px, transparent 8px 16px);
   animation: rl-pixel-fill 1.6s steps(8, end) infinite;
 }
+/* 追補 6 章:マスのバーが表示時に 1 回だけ、左から 1 マスずつ埋まる(1 マス 40ms) */
+.rl-meter-fill {
+  animation: rl-pixel-fill calc(var(--rl-meter-steps) * 40ms) steps(var(--rl-meter-steps), end) backwards;
+}
 @keyframes rl-pixel-fill {
   from {
     clip-path: inset(0 100% 0 0);
   }
   to {
     clip-path: inset(0 0 0 0);
+  }
+}
+
+/*
+ * 動きの参考 082(マスクの中から 1 行がせり上がる):結果のタイプのコードだけ(1 画面 1 か所)。開いたとき 1 回。
+ * transform と clip-path を同じ割合で動かし、元の箱の外を見せない(終わったあとは何も残さない = 切れない)。
+ */
+.rl-mask-rise {
+  display: inline-block;
+  animation: rl-mask-rise 400ms var(--rl-ease-line) 120ms backwards;
+}
+@keyframes rl-mask-rise {
+  from {
+    transform: translateY(100%);
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    transform: none;
+    clip-path: inset(0);
+  }
+}
+/*
+ * 動きの参考 074(マーカーの下線):結果の説明の要の 1 文だけ。軸のマスが埋まったあと 1 回、マゼンタの 2px の線が文に沿って引かれる。
+ * 文が 2 行以上に折れても 1 本の線として行をまたいで引くため、行の箱の背景(slice)で描く。
+ * 動かすのは背景の幅だけ(描き直しは 1 段落・1 回。配置の計算は起きない)。
+ */
+.rl-marker-text {
+  background: linear-gradient(var(--rl-highlight), var(--rl-highlight)) left bottom / 100% 2px no-repeat;
+  padding-bottom: 2px;
+  animation: rl-marker-text-in 600ms var(--rl-ease-line) 500ms backwards;
+}
+@keyframes rl-marker-text-in {
+  from {
+    background-size: 0% 2px;
   }
 }
 
@@ -605,6 +643,9 @@ body {
   /* 時間差(animation-delay)の間に行が消えて見えないよう、めくる動きは出さない */
   .rl-flap,
   .rl-bar-fill,
+  .rl-meter-fill,
+  .rl-mask-rise,
+  .rl-marker-text,
   .rl-marker::after {
     animation: none !important;
   }

@@ -1,41 +1,17 @@
 import * as React from "react";
-import Link from "next/link";
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
-import { cva, type VariantProps } from "class-variance-authority";
 import { LoaderCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ButtonAnchor, ButtonLink, buttonVariants, type ButtonVariant, type ButtonVariants } from "./button-link";
 
-/** ボタンの見た目(設計書 2-5)。primary は 1 画面に 1 つだけ。 */
-const buttonVariants = cva(
-  "relative inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-2 whitespace-nowrap rounded-rl-pill border border-transparent font-bold transition-[background-color,border-color,color,box-shadow,transform] duration-(--rl-dur-fast) ease-rl-out active:translate-y-px active:brightness-95 disabled:cursor-not-allowed disabled:opacity-45 aria-disabled:cursor-not-allowed aria-disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
-  {
-    variants: {
-      variant: {
-        primary: "rl-lock bg-rl-accent text-rl-on-accent hover:bg-rl-accent-hover hover:shadow-rl-glow-1 focus-visible:shadow-rl-glow-1",
-        secondary: "rl-lock border-rl-line-strong bg-rl-surface-2 text-rl-text hover:border-rl-text/60",
-        ghost: "bg-transparent text-rl-muted underline-offset-4 hover:text-rl-text hover:underline",
-        danger: "border-rl-danger bg-transparent text-rl-danger hover:bg-rl-danger/10",
-        discord: "bg-rl-discord text-white hover:brightness-110",
-      },
-      size: {
-        sm: "h-11 px-4 text-sm",
-        md: "h-12 px-6 text-base",
-        lg: "h-14 px-8 text-base",
-        icon: "size-11 p-0",
-      },
-    },
-    defaultVariants: { variant: "secondary", size: "md" },
-  },
-);
+export type { ButtonVariant };
 
-type Variants = VariantProps<typeof buttonVariants>;
-export type ButtonVariant = NonNullable<Variants["variant"]>;
-
-type ButtonProps = Omit<ButtonPrimitive.Props, "className"> & Variants & { className?: string; loading?: boolean; loadingText?: string };
+type ButtonProps = Omit<ButtonPrimitive.Props, "className"> & ButtonVariants & { className?: string; loading?: boolean; loadingText?: string };
 
 /**
  * 押すボタン。loading の間は押せず、中央に回るアイコンと「〜中…」を出す(連打で 2 回動かない)。
  * 元の文字は見えない状態で残すので、loading で幅が変わらない。
+ * 見た目(buttonVariants)とリンクの ButtonLink / ButtonAnchor は ./button-link にある(リンクだけのページはそちらを直接 import すると軽い)。
  */
 function Button({ className, variant, size, loading = false, loadingText, disabled, children, ...props }: ButtonProps) {
   return (
@@ -59,16 +35,6 @@ function Button({ className, variant, size, loading = false, loadingText, disabl
       )}
     </ButtonPrimitive>
   );
-}
-
-/** 見た目だけボタンのページ内リンク(<a> のまま。role="button" にしない) */
-function ButtonLink({ className, variant, size, ...props }: React.ComponentProps<typeof Link> & Variants) {
-  return <Link data-slot="button" className={cn(buttonVariants({ variant, size }), className)} {...props} />;
-}
-
-/** 見た目だけボタンの外へのリンク・ダウンロード(target / rel / download は呼ぶ側が渡す) */
-function ButtonAnchor({ className, variant, size, ...props }: React.ComponentProps<"a"> & Variants) {
-  return <a data-slot="button" className={cn(buttonVariants({ variant, size }), className)} {...props} />;
 }
 
 export { Button, ButtonLink, ButtonAnchor, buttonVariants };

@@ -1,29 +1,48 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { TYPES } from "@/data/types";
+import { PROS_READY } from "@/data/pros";
+import { subnavFor } from "@/lib/nav";
 import { TypeIcon } from "@/components/brand/TypeIcon";
+import { TypeRoster } from "@/components/brand/TypeRoster";
+import { SubNav } from "@/components/brand/SubNav";
+import { PageShell } from "@/components/ui/page-shell";
+import { ButtonLink } from "@/components/ui/button-link";
 
 export const metadata: Metadata = { title: "16のゲーマータイプ一覧" };
 
+/** 4 軸の読み方(src/lib/type-sprite.ts の絵の規則と同じ) */
+const AXIS_RULES = [
+  ["A 攻め/G 守り", "A はとがった頭、G は平らな兜"],
+  ["R 直感/B 戦略", "R は斜めの目と稲妻、B はゴーグル"],
+  ["C チーム/L ソロ", "C は両わきの仲間の点、L は右だけのマント"],
+  ["H 熱血/Z 冷静", "H はマゼンタと炎、Z は淡いパープルと雪"],
+] as const;
+
 export default function TypesPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-bold">16のゲーマータイプ</h1>
-      <ul className="grid gap-3 sm:grid-cols-2">
-        {TYPES.map((t) => (
-          <li key={t.code}>
-            <Link href={`/type/${t.code}`} className="flex items-center gap-3 rounded-xl border border-white/10 bg-[var(--rl-surface)] p-3">
-              <TypeIcon code={t.code} size={48} />
-              <div>
-                <div className="font-display text-sm text-[var(--rl-magenta)]">{t.code}</div>
-                <div className="font-bold">{t.name}</div>
-                <div className="text-xs text-[var(--rl-muted)]">{t.catchcopy}</div>
+    <PageShell width="wide" title="16 のゲーマータイプ" description="4 つの軸の組み合わせで 16 タイプ。絵の形と色で、どの軸かが分かります。"
+      subnav={<SubNav label="診断" items={subnavFor("diagnosis", PROS_READY)} />}>
+      <div className="grid gap-8">
+        {/* 追補 5-3:箱にせず、上下の線だけ */}
+        <section aria-label="4 つの軸の読み方" className="border-y border-rl-line py-6">
+          <dl className="grid gap-3 md:grid-cols-2">
+            {AXIS_RULES.map(([axis, rule]) => (
+              <div key={axis} className="grid">
+                <dt className="text-sm font-bold">{axis}</dt>
+                <dd className="text-sm text-rl-muted">{rule}</dd>
               </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
-      <Link href="/diagnosis" className="mt-8 inline-block rounded-full bg-[var(--rl-accent)] px-6 py-3 font-bold text-[var(--rl-on-accent)]">自分のタイプを診断する</Link>
-    </main>
+            ))}
+          </dl>
+        </section>
+        {/* 追補 S5:箱なしの名簿(絵 + コード + 名前)。画面に入ったとき 1 回だけ集まる。
+            見出しが「16 のゲーマータイプ」なので、名前は「タイプ」を外して短くする(読み上げは正式な名前。トップの名簿と同じ)。
+            絵はホバー・フォーカスで上から塗り替わる(動きの参考 025。li が .rl-dissolve-host) */}
+        <TypeRoster
+          showName
+          items={TYPES.map((t) => ({ code: t.code, name: t.name.replace(/タイプ$/, ""), label: t.name, icon: <TypeIcon code={t.code} size={64} dissolve /> }))}
+        />
+        <ButtonLink href="/diagnosis" variant="primary" className="justify-self-start">診断して自分のタイプを知る</ButtonLink>
+      </div>
+    </PageShell>
   );
 }

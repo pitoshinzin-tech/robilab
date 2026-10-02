@@ -1,24 +1,27 @@
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 import { affiliatesFor } from "@/data/affiliates";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 export function AffiliateList({ typeCode }: { typeCode: string }) {
   const items = affiliatesFor(typeCode);
   if (items.length === 0) return null;
   return (
-    <section>
-      <div className="mb-3 flex items-center gap-2">
-        <h2 className="text-lg font-bold">このタイプのあなたに</h2>
-        <span className="rounded bg-white/15 px-2 py-0.5 text-xs">PR</span>
-      </div>
+    <section aria-labelledby="pr-heading" className="grid gap-4">
+      <SectionHeading id="pr-heading" title="このタイプのあなたに" action={<Badge variant="pr">PR</Badge>} />
       <ul className="grid gap-3">
         {items.map((a) => (
-          <li key={a.id} className="rounded-xl border border-white/10 bg-[var(--rl-surface)] p-4">
-            <a href={a.url} target="_blank" rel="sponsored noopener" className="font-bold underline">{a.name}</a>
-            <p className="mt-1 text-sm text-[var(--rl-muted)]">{a.comment}</p>
-          </li>
+          <Card as="li" key={a.id} className="grid gap-1">
+            <a href={a.url} target="_blank" rel="sponsored noopener" className="inline-flex min-h-11 items-center gap-1 justify-self-start text-base font-bold text-rl-accent underline-offset-4 hover:underline">
+              {a.name}<ExternalLink aria-hidden className="size-4" />
+            </a>
+            <p className="text-sm text-rl-muted">{a.comment}</p>
+          </Card>
         ))}
       </ul>
-      <p className="mt-2 text-xs text-[var(--rl-muted)]">当サイトはアフィリエイトプログラムに参加しています。<Link href="/disclosure" className="underline">広告表記</Link></p>
+      <p className="text-sm text-rl-muted">このリンクから買うと、ロビラボに紹介料が入ることがあります(<Link href="/disclosure" className="text-rl-accent underline">広告表記</Link>)。</p>
     </section>
   );
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PIXEL_GRIDS, STAIR_TILE, pixelCells, pixelGridSvg, stairSvg, type PixelGrid } from "@/lib/pixel-art";
+import { PIXEL_BAR_CELLS, PIXEL_GRIDS, STAIR_TILE, pixelBarFill, pixelCells, pixelGridSvg, stairSvg, type PixelGrid } from "@/lib/pixel-art";
 
 describe("ドット絵の格子(追補 7-1)", () => {
   it.each(PIXEL_GRIDS.map((g) => [g.id, g] as const))("%s は size × size で、# と . だけ", (_, g) => {
@@ -41,5 +41,16 @@ describe("ドット絵の格子(追補 7-1)", () => {
       expect(n % 8).toBe(0);
       expect(n).toBeLessThanOrEqual(STAIR_TILE.width);
     }
+  });
+});
+
+describe("pixelBarFill(% → 塗るマスの数)", () => {
+  it.each([[0, 0], [100, 10], [55, 6], [54, 5], [5, 1], [4, 0], [-5, 0], [104, 10], [Number.NaN, 0]])("%s%% → %i マス", (pct, n) => {
+    expect(pixelBarFill(pct)).toBe(n);
+  });
+  it("既定は 10 マス、ほかのマスの数も使える", () => {
+    expect(PIXEL_BAR_CELLS).toBe(10);
+    expect(pixelBarFill(62.5, 8)).toBe(5);
+    expect(pixelBarFill(100, 8)).toBe(8);
   });
 });
