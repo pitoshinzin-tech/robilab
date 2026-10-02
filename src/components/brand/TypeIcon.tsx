@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getType } from "@/data/types";
 import { CUSTOM_TYPE_ICONS } from "@/data/type-icons";
@@ -20,7 +19,9 @@ export function TypeIcon({ code, size = 48, labelled = false, animate = false, g
   const name = type ? `${type.code} ${type.name}のアイコン` : "";
   const box = cn("shrink-0 rounded-rl-sm bg-rl-surface", glow && "shadow-rl-glow-2", animate && "rl-assemble", className);
   if (CUSTOM_TYPE_ICONS.includes(code)) {
-    return <Image src={`/types/${code}.png`} alt={labelled ? name : ""} width={size} height={size} unoptimized className={cn("rl-pixel", box)} />;
+    // next/image(unoptimized)ではなく <img>:next/image はクライアントの部品なので、使わないときもページごとに約 4.5KB(gzip)の JS が入るため
+    // eslint-disable-next-line @next/next/no-img-element -- 最適化しない小さなドット絵(public/types/CODE.png)をそのまま出す
+    return <img src={`/types/${code}.png`} alt={labelled ? name : ""} width={size} height={size} loading="lazy" decoding="async" className={cn("rl-pixel", box)} />;
   }
   const rows = spriteRows(code);
   const heat = heatOf(code);
