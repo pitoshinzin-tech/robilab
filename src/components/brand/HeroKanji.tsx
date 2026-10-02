@@ -27,11 +27,15 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
   const [aim, setAim] = useState<TracePoint | null>(null);
   const [trace, setTrace] = useState<readonly TracePoint[]>([]);
   const [traced, setTraced] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const drawing = useRef(false);
+  const points = useRef<readonly TracePoint[]>([]);
   const pending = useRef<TracePoint | null>(null);
   const frame = useRef(0);
-  const active = fine || trying;
+  // スマホはお試しの 1 画を描き終えたら入力を受けるのをやめる(スクロールを返し、「続きは PC で。」を消さない)
+  const capture = trying && !traced;
+  const active = fine || capture;
 
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
@@ -39,13 +43,29 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
     const el = box.current;
     return el ? toViewBox(e.clientX, e.clientY, el.getBoundingClientRect()) : null;
   };
+  /** まだ描いていない点を捨てる(予約したフレームも取り消す) */
+  const takePending = () => {
+    cancelAnimationFrame(frame.current);
+    frame.current = 0;
+    const p = pending.current;
+    pending.current = null;
+    return p;
+  };
+  const extend = (p: TracePoint) => {
+    const next = appendPoint(points.current, p);
+    if (next !== points.current) {
+      points.current = next;
+      setTrace(next);
+    }
+  };
   // pointermove は 1 フレームに 1 回にまとめる
   const flush = () => {
     frame.current = 0;
     const p = pending.current;
+    pending.current = null;
     if (!p) return;
     if (fine) setAim(p);
-    if (drawing.current) setTrace((prev) => appendPoint(prev, p));
+    if (drawing.current) extend(p);
   };
   const onMove = (e: React.PointerEvent) => {
     if (!active) return;
@@ -53,24 +73,38 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
     if (!frame.current) frame.current = requestAnimationFrame(flush);
   };
   const onDown = (e: React.PointerEvent) => {
-    if (!active) return;
+    if (!active || e.button !== 0) return;
     const p = at(e);
     if (!p) return;
+    if (e.pointerType === "mouse") e.preventDefault(); // なぞる間に文字を選ばない
+    takePending();
     e.currentTarget.setPointerCapture(e.pointerId);
     drawing.current = true;
+    points.current = [p];
+    setDragging(true);
     setTraced(false);
-    setTrace([p]);
+    setTrace(points.current);
   };
   const onUp = () => {
     if (!drawing.current) return;
     drawing.current = false;
-    setTraced(trace.length >= 2);
+    const p = takePending();
+    if (p) {
+      if (fine) setAim(p);
+      extend(p);
+    }
+    setDragging(false);
+    setTraced(points.current.length >= 2);
+  };
+  const onLeave = () => {
+    takePending();
+    setAim(null);
   };
 
   return (
     <div className={cn("grid justify-items-center gap-3", className)}>
-      <div ref={box} className={cn("relative size-(--rl-text-hero)", fine && "cursor-crosshair")} style={{ touchAction: trying ? "none" : "auto" }}
-        onPointerMove={onMove} onPointerDown={onDown} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={() => setAim(null)}>
+      <div ref={box} className={cn("relative size-(--rl-text-hero)", fine && "cursor-crosshair", dragging && "select-none")} style={{ touchAction: capture ? "none" : "auto" }}
+        onPointerMove={onMove} onPointerDown={onDown} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onLeave}>
         <KanjiStrokes strokes={strokes} schedule={schedule} className="size-full" />
         <svg viewBox="0 0 109 109" aria-hidden className="pointer-events-none absolute inset-0 size-full overflow-visible">
           {trace.length > 1 && <path d={pointsToPath(trace)} fill="none" stroke="var(--rl-success)" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />}
@@ -84,7 +118,12 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
       </div>
       <div aria-live="polite" className="grid min-h-11 justify-items-center gap-2 text-center">
         {fine && traced && <p className="text-sm">この感じで全部の画をなぞる</p>}
-        {!fine && !trying && <Button type="button" variant="secondary" size="sm" onClick={() => setTrying(true)}><PenLine aria-hidden />1 画なぞってみる</Button>}
+        {/* サーバーの描画では fine=false なので、PC ではハイドレーションの前から CSS(FINE と同じ条件)で隠す */}
+        {!fine && !trying && (
+          <Button type="button" variant="secondary" size="sm" onClick={() => setTrying(true)} className="[@media(hover:hover)_and_(pointer:fine)]:hidden">
+            <PenLine aria-hidden />1 画なぞってみる
+          </Button>
+        )}
         {!fine && trying && !traced && <p className="text-sm text-rl-muted">漢字の上を指でなぞってください</p>}
         {!fine && traced && (
           <>
