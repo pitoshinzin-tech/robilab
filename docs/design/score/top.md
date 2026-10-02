@@ -274,3 +274,19 @@
 
 - 凡例の 1 行(`page.tsx` の名簿の `SectionHeading` の `description`)に `[word-break:auto-phrase] text-balance`。375 で「C チーム/L ソロ」が切れないように、4 つの組を `<span className="inline-block">` で包んでもよい。
 - Lighthouse(スマホ)を測る。
+
+---
+
+# 5 回目(中間 3 回目)
+
+- 見たもの:`shots/<画面>-375-m3.png`・`-1440-m3.png`(本番ビルド、CDP の端末の真似、全体、reduced-motion オン、題名で本物の画面と確かめ済み、横のはみ出しなし)。375 でタブバーが途中に写るのは撮り方の癖で、バグではない。
+
+| 観点 | 点 | 4 回目 | 根拠 |
+|---|---|---|---|
+| Design | 8.5 | 8.5 | 375 の凡例が「R 直感/B 戦略 / ・C チーム/L ソロ…」と組の切れ目で折れるようになった。ほかは 4 回目と同じ。 |
+| Usability | 8.5(仮) | 8.5 | 変わらず。Lighthouse はまだ。 |
+| Creativity | 8.5 | 8.5 | 変わらず。 |
+| Content | 8.5 | 8.5 | 変わらず。 |
+| **重みつき平均** | **8.5** | 8.5 | 合格(Lighthouse の数字で確定)。 |
+
+- 残り:Lighthouse(スマホ)を測ることだけ。
