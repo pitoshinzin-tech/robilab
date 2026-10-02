@@ -91,3 +91,27 @@
 - 質問の画面(375・1440)、最後の答えのあとの塗り替えと結果へ移る動き(録画)。
 
 - 見込み:D2-1・D2-2 で Design 8.5・Usability 8.5・Creativity 8.5・Content 8.5 → 平均 8.5。
+
+---
+
+## 最終(Task 19・794933e)
+
+- 見たもの:`shots/final/diagnosis-{375,1440}.png`(始める画面)、`diagnosis-q-{375,1440}.png`(1 問目)。本番ビルド、reduced-motion オン、横のはみ出しなし。
+- 動きはソースで確認:`SpriteScreen`(行が点く・塗り替わる WAAPI)、`DiagnosisClient` の `router.push` の `transitionTypes` と `<ViewTransition name={VT_TYPE_SPRITE}>`(S2)。録画はまだ。
+
+| 観点 | 重み | 点 | 満たしていない条件 | 根拠 |
+|---|---|---|---|---|
+| Design | 40% | 7.5 | ①(質問の画面) | 始める画面は良い(「12」display-2、マス 288px)。**質問の画面**:一番大きい文字が問いの 24px で、本文 16px の 1.5 倍。1440 は 640px の列が左に寄り、右半分が空。始める画面で主役だった 288px のマスが、質問の画面で 96px の小さな箱になり、進み具合の帯の右上に浮く(主役が消える)。375 で問いが「自分か / ら先に」と単語の途中で折れる。 |
+| Usability | 30% | 8.5 | — | 主ボタン 1 つ。答えは 56px の高さ。「ひとつ前へ」は 1 問目で押せない形。 |
+| Creativity | 20% | 8.5 | — | マスに触れると例の絵(案内の文つき)。S2。 |
+| Content | 10% | 8.5 | — | 時間・分かること・答え方、例の絵の読み方。 |
+| **重みつき平均** | | **8.10** | | 主要の線 8.5 に届かない。**不合格**(Design 7.5) |
+
+直すこと(優先順)
+
+1. (P0)質問の画面を 2 列に:`src/app/diagnosis/DiagnosisClient.tsx:131` の `grid max-w-[640px] gap-6` を `grid gap-6 lg:grid-cols-12 lg:items-start` にし、進み具合・問い・戻るを `lg:col-span-7`、マスの画面を `lg:col-span-5 lg:row-span-3 lg:justify-self-center` に分ける。`:136` の `SpriteScreen` を `size={288}`・`className="size-24 lg:size-72"`(スマホは 96px で帯の上)。答えるたびに 288px のマスの行が点く = S2 が質問の間ずっと主役になる。
+2. (P0)進み具合の数を表示用の数字に:`src/components/diagnosis/ProgressBar.tsx:12` の `{current} / {total}` を `NumUnit`(`value={current}`・`unit={`/ ${total}`}`・`className="text-rl-display-1"`)にする。56〜72px で、本文との差が 4 倍 → 問いを 24px のままでも、画面の一番大きい文字が数字になり ① に近づく(①は 6 倍なので、display-1 の 72px ÷ 本文 16px = 4.5 倍。厳しく満たすなら `lg:text-rl-display-2`)。
+3. (P1)問いの折れ方:`src/components/diagnosis/QuestionCard.tsx:14` の h2 に `[word-break:auto-phrase] text-balance`。
+4. (社長)最後の答え → 結果の 10 秒の録画(S2)。Lighthouse スマホ。
+
+- 見込み:1〜3 で Design 8.5・Creativity 9.0 → 平均 8.6。

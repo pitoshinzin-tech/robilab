@@ -1,0 +1,23 @@
+# マウス探し(`/mouse`)の採点
+
+## 最終(Task 19・794933e)
+
+- 見たもの:`shots/final/mouse-{375,1440}.png`(入力前)、`mouse-hand-375.png`(手のデータを入れたはずの状態。**入力前と同じ写真**で、結果の画面は写っていない。`mouse-hand-1440` は撮り方のずれで `mouse-1440` と同じ)。結果の画面(`TopMouseRow` の大きな行・`FitOverlay` の実寸の重ね図・`MouseCard`・絞り込み 0 件の `EmptyState`)は、ソースで採点した。
+- 合格の線:4 観点すべて 8 以上、重みつき平均 8.2 以上(追補 8-1)。
+
+| 観点 | 重み | 点 | 満たしていない条件 | 根拠 |
+|---|---|---|---|---|
+| Design | 40% | 7.5 | ①・③ | 入力前の画面で一番大きい文字は h1 の 32px(本文 14〜16px の 2 倍)。1440 で入力の箱が幅いっぱい(約 1120px)、2 桁の数を入れる欄が 1 つ 約 500px。375 で左のラベル「手の長さ(わからなければ空欄でOK)」だけが 2 行になり、2 つの欄の高さがずれる。結果の画面は良い形(1 位は display-2 の数字、寸法は `NumUnit`)。 |
+| Usability | 30% | 8.0 | — | 主ボタン 1 つ(合うマウスを見る)。読み込み中は `Skeleton`、0 件は `EmptyState`+「絞り込みを外す」。結果の写真がないので、ここは 8.0 止まり。 |
+| Creativity | 20% | 8.0 | ③(入力前) | 実寸の重ね図(手の線が引かれる 012、マウスを替えると面が入れ替わる)は良い表現だが、**手を入れて結果を開くまで見えない**。入力前の画面は持ち方の線の絵だけ。 |
+| Content | 10% | 8.5 | — | 理由の文、寸法に単位、今のマウスとの比べ(`compareWith`)、PR の表記。 |
+| **重みつき平均** | | **7.85** | | **不合格**(Design 7.5) |
+
+## 直すこと(優先順)
+
+1. (P0)入力前を 2 列に、右に実寸の重ね図の見本:`src/components/mouse/HandSetup.tsx` の `Card`(:60)の中を `lg:grid-cols-[minmax(0,560px)_minmax(0,1fr)]` にし、右の列に `FitOverlay`(手の長さは入力中の値、空なら `DEFAULT_HAND_LENGTH_CM`、マウスは `rankMice` の 1 位)と、その上に手の長さを `NumUnit`(`text-rl-display-2`、単位 cm。空のときは「平均 {DEFAULT_HAND_LENGTH_CM}」と muted)。入れるたびに図と数が変わる = 触ると答える・① を満たす・入力欄が 560px に収まる。スマホは図を入力の下に `h-40` で。
+2. (P0)ラベルの高さをそろえる:`HandSetup.tsx:70` の label を「手の長さ」にし、「わからなければ空欄で OK」は `NumberField` の説明(14px muted、欄の下)へ。
+3. (P2)`src/components/mouse/MouseCard.tsx:50` の寸法の `dd` を `font-display tabular-nums text-rl-highlight`(数字はマゼンタの決まり)。
+4. (社長・コントローラー)手のデータを入れた状態の写真(結果・重ね図・0 件)を撮り直す。保存のキーは `src/lib/my-settings-store.ts` の `loadLocal` が読むもの。
+
+- 見込み:1・2 で Design 8.5・Usability 8.5・Creativity 8.5 → 平均 8.5。
