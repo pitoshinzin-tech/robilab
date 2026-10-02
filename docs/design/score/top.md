@@ -254,3 +254,23 @@
 | P1 | R3-2 名簿の塗り替えをドットだけに | Design・Creativity の細部 |
 | P1 | R3-3 札の文に `auto-phrase` と `text-balance` | Design の細部 |
 | P2 | R3-5 Lighthouse とタブバーの写真の確かめ | Usability の仮の点を確定 |
+
+---
+
+# 4 回目(中間 2 回目・e363358)
+
+- 見たもの:`shots/top-1440-m2.png`・`top-375-m2.png`(CDP の端末の真似・全体・reduced-motion オン。横のはみ出しなし。375 でタブバーが途中に写るのは撮り方の癖)。
+- 3 回目の直し(6ad1f79:名簿の名前の幅・4 文字の凡例・ドットだけの塗り替え・札の文の折り方)は、写真ですべて確かめた。1440 で 16 体の名前が 1 行、375 は「絵・コード・頭文字」の 3 段でそろう。札の文は 2 行で切れ目が自然。
+
+| 観点 | 点 | 3 回目 | 根拠 |
+|---|---|---|---|
+| Design | 8.5 | 8.5 | 細部の切れ方が直った。残りは小さい:375 の凡例の 1 行が「C チー / ム」と切れる。 |
+| Usability | 8.5(仮) | 8.5 | 変わらず。Lighthouse はまだ。 |
+| Creativity | 8.5 | 8.5 | 変わらず。 |
+| Content | 8.5 | 8.0 | 名簿の 4 文字の意味が見出しの下に 1 行で読める。 |
+| **重みつき平均** | **8.5** | 8.45 | 合格(4 観点すべて 8 以上・平均 8.5)。Lighthouse の数字で Usability が確定するまでは「仮の合格」。 |
+
+残り(P2)
+
+- 凡例の 1 行(`page.tsx` の名簿の `SectionHeading` の `description`)に `[word-break:auto-phrase] text-balance`。375 で「C チーム/L ソロ」が切れないように、4 つの組を `<span className="inline-block">` で包んでもよい。
+- Lighthouse(スマホ)を測る。
