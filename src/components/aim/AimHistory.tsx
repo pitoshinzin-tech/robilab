@@ -1,6 +1,7 @@
 import { bestDay, lastNDays, streakDays, type AimDays } from "@/lib/aim/history";
 import { buildChart, CHART_H, CHART_W } from "@/lib/aim/history-chart";
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/ui/section-heading";
 
@@ -28,10 +29,11 @@ function Chart({ title, label, values, max, from, to }: {
   );
 }
 
-export function AimHistory({ days, today, loggedIn, serverError, canClear, onClear, streakIcon }: {
+export function AimHistory({ days, today, loggedIn, serverError, canClear, onClear, streakIcon, className }: {
   days: AimDays; today: string; loggedIn: boolean; serverError: boolean; canClear: boolean; onClear: () => void;
   /** 追補 6 章:連続日数の 8×8 の炎のドット(サーバーで描いて渡す。ドット絵のデータをブラウザの JS に入れないため) */
   streakIcon?: ReactNode;
+  className?: string;
 }) {
   const slots = lastNDays(days, today, DAYS);
   const played = slots.filter((s) => s.day);
@@ -42,7 +44,7 @@ export function AimHistory({ days, today, loggedIn, serverError, canClear, onCle
   };
 
   return (
-    <section aria-labelledby="history-heading" className="grid gap-4">
+    <section aria-labelledby="history-heading" className={cn("grid gap-4", className)}>
       <SectionHeading id="history-heading" title="あなたの記録" />
       {serverError && <p className="text-sm text-rl-warning">サーバーの記録を読めませんでした(この端末の記録だけを出しています)</p>}
       {!best ? (

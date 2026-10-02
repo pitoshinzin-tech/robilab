@@ -25,6 +25,16 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Result = { accuracy: number; timeMs: number; perStroke: number[] };
+
+/** 未ログインの案内(文+押す所。主ボタンより弱い ghost) */
+function LoginHint() {
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+      <span className="text-sm text-rl-muted">ログインするとランキングに載ります</span>
+      <LoginButton next="/aim" variant="ghost" />
+    </div>
+  );
+}
 const noSubscribe = () => () => {};
 const finePointer = () => window.matchMedia("(pointer: fine)").matches;
 // ?debug=1 のときだけ、遊ぶ画面に診断を出す
@@ -46,6 +56,8 @@ export function AimClient({ char, date, rows, streakIcon }: { char: AimChar; dat
   const [sendMessage, setSendMessage] = useState<string | null>(null);
   const [canResend, setCanResend] = useState(false);
   const [sending, setSending] = useState(false);
+  // 送信が済んだ回数(表示だけ:順位の数字が決まる動き 064 を、送信のあとにだけ出すため)
+  const [submitted, setSubmitted] = useState(0);
   const [mine, setMine] = useState<{ rank: number; score: number } | null>(null);
   const [historyRev, setHistoryRev] = useState(0);
   const [serverDays, setServerDays] = useState<AimDays | null>(null);
@@ -128,6 +140,7 @@ export function AimClient({ char, date, rows, streakIcon }: { char: AimChar; dat
       }
       setSendMessage(`ランキングに送りました(今日の自己ベスト ${Number(data).toLocaleString("ja-JP")} 点)。`);
       setCanResend(false);
+      setSubmitted((n) => n + 1);
       refreshMine();
       refreshHistory();
       router.refresh();
@@ -147,12 +160,12 @@ export function AimClient({ char, date, rows, streakIcon }: { char: AimChar; dat
   if (!isClient) play = <Skeleton className="aspect-video w-full rounded-rl-md" />;
   else if (!hasMouse) play = (
     <Card className="grid gap-3">
-      <p className="text-base">今日の文字は PC で遊べます(マウスの感度をそのまま使うため)。スマホでは、今日の文字とランキングを見られます。</p>
+      <p className="text-base">マウスの感度をそのまま使うので、記録は PC で。</p>
       <div><CopyButton path="/aim" label="PC で開くリンクをコピー" /></div>
-      {!loggedIn && <p className="text-sm text-rl-muted">ログインするとランキングに載ります</p>}
+      {!loggedIn && <LoginHint />}
     </Card>
   );
-  else if (deg === null) play = <SensSetup onSaved={() => setSettingsRev((n) => n + 1)} initialGameId={settings?.mainGame} loggedIn={loggedIn} />;
+  else if (deg === null) play = <SensSetup onSaved={() => setSettingsRev((n) => n + 1)} initialGameId={settings?.mainGame} loggedIn={loggedIn} strokes={char.strokes} loginHint={<LoginHint />} />;
   else {
     play = (
       <div className="grid gap-4">
@@ -172,21 +185,23 @@ export function AimClient({ char, date, rows, streakIcon }: { char: AimChar; dat
         )}
         <div className="flex flex-wrap items-center gap-3">
           <ButtonLink href="/my" variant="ghost" size="sm">クロスヘアと感度を変える(マイ設定)</ButtonLink>
-          {!loggedIn && <><span className="text-sm text-rl-muted">ログインするとランキングに載ります</span><LoginButton next="/aim" /></>}
+          {!loggedIn && <LoginHint />}
         </div>
       </div>
     );
   }
 
+  // 余白は「間」の 3 段:見出し → 遊ぶ面は小、遊ぶ面 → 記録は中(話題が変わる)、記録 → ランキングは小(同じ「結果」の話題)
   return (
     <>
-      {play}
+      <div id="play" className="mt-rl-ma-sm scroll-mt-4">{play}</div>
       {isClient && (
-        <AimHistory days={days} today={date} loggedIn={loggedIn} serverError={loggedIn && serverError}
+        <AimHistory className="mt-rl-ma-md" days={days} today={date} loggedIn={loggedIn} serverError={loggedIn && serverError}
           canClear={Object.keys(localDays).length > 0} streakIcon={streakIcon}
           onClear={() => { clearLocal(browserStorage()); setHistoryRev((n) => n + 1); }} />
       )}
-      <Ranking rows={rows} mine={mine} loggedIn={loggedIn} />
+      <Ranking className={isClient ? "mt-rl-ma-sm" : "mt-rl-ma-md"} rows={rows} mine={mine} loggedIn={loggedIn}
+        canPlay={isClient && hasMouse} decodeKey={submitted} />
     </>
   );
 }

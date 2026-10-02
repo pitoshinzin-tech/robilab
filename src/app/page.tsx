@@ -11,6 +11,7 @@ import { axisLegend } from "@/lib/type-axes";
 import { FLASK_16, PARTY_16, RULER_16 } from "@/lib/pixel-art";
 import { HeroKanji } from "@/components/brand/HeroKanji";
 import { TodayLabel } from "@/components/brand/TodayLabel";
+import { HowToPlay } from "@/components/aim/HowToPlay";
 import { PixelStair } from "@/components/brand/PixelStair";
 import { PixelArt } from "@/components/brand/PixelArt";
 import { TypeIcon } from "@/components/brand/TypeIcon";
@@ -26,8 +27,6 @@ export const revalidate = 60;
 /** 中身の幅(1120px + 左右の余白)。名簿の帯だけ幅いっぱいにするので、main ではなくセクションごとに付ける */
 const inner = "mx-auto w-full max-w-[1168px] px-4 md:px-6";
 const MOUSE_LINKS = [["/mouse", "マウス探し"], ["/tools/sensitivity", "感度計算"]] as const;
-/** ヒーローの「今日の挑戦の札」の遊び方(点数の式は src/lib/aim/trace.ts の computeScore:ずれの少なさ × 速さ) */
-const HOW_TO_PLAY = ["1 画ずつ、書き順どおりになぞる", "ずれの少なさと速さで点数が付く", "日本時間の 0 時に次の文字へ"] as const;
 const yesterdayOf = (date: string) => new Date(Date.parse(`${date}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
 
 export default async function Home() {
@@ -55,14 +54,8 @@ export default async function Home() {
           <div className="grid content-center gap-6 lg:col-span-5 lg:self-end lg:pb-12">
             <div className="grid gap-4">
               <p className="text-xl font-bold">書き順どおりになぞるエイム練習</p>
-              <ul className="grid gap-2">
-                {HOW_TO_PLAY.map((line) => (
-                  <li key={line} className="flex items-center gap-3 text-base">
-                    <span aria-hidden className="size-2 shrink-0 bg-rl-secondary" />
-                    {line}
-                  </li>
-                ))}
-              </ul>
+              {/* 遊び方の 3 行は /aim の見出しと共通(src/lib/aim/how-to-play.ts) */}
+              <HowToPlay />
             </div>
             {top ? (
               <p className="grid gap-1">

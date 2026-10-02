@@ -520,6 +520,41 @@ body {
   }
 }
 
+/*
+ * /aim の結果:画ごとの 10 マスのバーが、結果を出したとき 1 回だけ左から 1 マスずつ埋まる(数え上げと同じ 600ms・steps(10))。
+ * いちばんずれた画の「ここがずれました」には、埋まったあとマゼンタの下線が 1 回引かれる(動きの参考 074。1 画面 1 か所)。
+ */
+.rl-bar-fill {
+  animation: rl-bar-fill 600ms steps(10, end) backwards;
+}
+@keyframes rl-bar-fill {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+.rl-marker {
+  position: relative;
+}
+.rl-marker::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  background: var(--rl-highlight);
+  transform-origin: left center;
+  animation: rl-marker-in 400ms var(--rl-ease-line) 600ms backwards;
+}
+@keyframes rl-marker-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+
 /* 追補 S4:選んだときの Check を 120ms で線として引く(線の言葉) */
 .rl-draw-check {
   stroke-dasharray: 24;
@@ -568,7 +603,9 @@ body {
     animation: none !important;
   }
   /* 時間差(animation-delay)の間に行が消えて見えないよう、めくる動きは出さない */
-  .rl-flap {
+  .rl-flap,
+  .rl-bar-fill,
+  .rl-marker::after {
     animation: none !important;
   }
   .rl-roster .rl-roster-item {

@@ -23,9 +23,16 @@ function subscribeFine(onChange: () => void) {
  * なぞっている間は、速さで色ズレの縁が開き閉じする(動きの参考 045。PC・スマホとも)。
  * スマホ:「1 画なぞってみる」を押したときだけ、漢字の箱が指の入力を受ける(押す前は touch-action: auto でスクロールを奪わない)。
  * (HeroKanji は @/data/types も TypeIcon も import しない。ブラウザの JS を小さくするため。)
+ * variant="aim":/aim の見出し(display-3)。描き終わった形で出し(自動の動きを足さない)、PC ではなぞらない(下に本物の遊ぶ面があるため)。
+ * スマホの「1 画なぞってみる」だけを出す。リンクのコピーは /aim のスマホの札にあるので出さない。
  */
-export function HeroKanji({ strokes, schedule, className }: { strokes: readonly string[]; schedule: readonly StrokeSlot[]; className?: string }) {
-  const fine = useSyncExternalStore(subscribeFine, () => window.matchMedia(FINE).matches, () => false);
+export function HeroKanji({ strokes, schedule, variant = "top", className }: {
+  strokes: readonly string[]; schedule?: readonly StrokeSlot[]; variant?: "top" | "aim"; className?: string;
+}) {
+  const isTop = variant === "top";
+  const fineMedia = useSyncExternalStore(subscribeFine, () => window.matchMedia(FINE).matches, () => false);
+  // /aim の PC は、なぞりも照準も出さない(touch のお試しだけ)
+  const fine = isTop && fineMedia;
   const [trying, setTrying] = useState(false);
   const [aim, setAim] = useState<TracePoint | null>(null);
   const [trace, setTrace] = useState<readonly TracePoint[]>([]);
@@ -41,7 +48,7 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
   // スマホはお試しの 1 画を描き終えたら入力を受けるのをやめる(スクロールを返し、「続きは PC で。」を消さない)
   const capture = trying && !traced;
   const active = fine || capture;
-  const lastSlot = schedule.at(-1);
+  const lastSlot = schedule?.at(-1);
   const drawnAt = lastSlot ? lastSlot.delay + lastSlot.duration : 0;
 
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
@@ -137,7 +144,7 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
 
   return (
     <div className={cn("grid justify-items-center gap-3", className)}>
-      <div ref={box} className={cn("rl-hero-kanji relative size-(--rl-text-hero) lg:size-(--rl-text-hero-lg)", fine && "cursor-crosshair", dragging && "select-none")} style={{ touchAction: capture ? "none" : "auto" }}
+      <div ref={box} className={cn("rl-hero-kanji relative", isTop ? "size-(--rl-text-hero) lg:size-(--rl-text-hero-lg)" : "size-(--rl-text-display-3)", fine && "cursor-crosshair", dragging && "select-none")} style={{ touchAction: capture ? "none" : "auto" }}
         onPointerMove={onMove} onPointerDown={onDown} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onLeave}>
         {/* 追補 S3:「今日の文字に挑戦」で /aim へ行くと、この漢字が /aim の見出しの漢字へ移る(共有の要素 today-kanji) */}
         <ViewTransition name={VT_TODAY_KANJI} share={MORPH_LINE} default="none">
@@ -153,25 +160,25 @@ export function HeroKanji({ strokes, schedule, className }: { strokes: readonly 
           )}
         </svg>
       </div>
-      <div aria-live="polite" className="grid min-h-11 justify-items-center gap-2 text-center">
+      <div aria-live="polite" className={cn("grid min-h-11 justify-items-center gap-2 text-center", !isTop && "[@media(hover:hover)_and_(pointer:fine)]:hidden")}>
         {fine && traced && <p className="text-sm">この感じで全部の画をなぞる</p>}
         {/* PC の案内はなぞる前から出す。サーバーの描画では fine=false なので、出し分けは CSS(FINE と同じ条件)で行う */}
-        {!traced && !dragging && !trying && (
+        {isTop && !traced && !dragging && !trying && (
           <p className="rl-trace-hint hidden text-sm text-rl-muted [@media(hover:hover)_and_(pointer:fine)]:block" style={{ "--rl-drawn-at": `${drawnAt}ms` } as CSSProperties}>
             漢字をなぞってみる(ドラッグ)
           </p>
         )}
         {/* サーバーの描画では fine=false なので、PC ではハイドレーションの前から CSS(FINE と同じ条件)で隠す */}
-        {!fine && !trying && (
+        {!fineMedia && !trying && (
           <Button type="button" variant="secondary" size="sm" onClick={() => setTrying(true)} className="[@media(hover:hover)_and_(pointer:fine)]:hidden">
             <PenLine aria-hidden />1 画なぞってみる
           </Button>
         )}
-        {!fine && trying && !traced && <p className="text-sm text-rl-muted">漢字の上を指でなぞってください</p>}
-        {!fine && traced && (
+        {!fineMedia && trying && !traced && <p className="text-sm text-rl-muted">漢字の上を指でなぞってください</p>}
+        {!fineMedia && traced && (
           <>
             <p className="text-sm">続きは PC で。</p>
-            <CopyButton path="/aim" label="リンクをコピー" size="sm" />
+            {isTop && <CopyButton path="/aim" label="リンクをコピー" size="sm" />}
           </>
         )}
       </div>

@@ -6,15 +6,19 @@ import { pointsToPath } from "@/lib/motion/hero-trace";
  * お手本の線は KanjiStrokes の tone="muted" と同じ形(rl-kanji-muted)を、ここで直接描く
  * (KanjiStrokes をブラウザの JS に入れると、トップの見せ場とチャンクを分け合って JS が増えるため)。
  */
-export function TraceOverlay({ strokes, trail, className }: {
-  strokes: readonly string[]; trail: readonly (readonly { x: number; y: number }[])[]; className?: string;
+export function TraceOverlay({ strokes, trail, focus = -1, className }: {
+  strokes: readonly string[]; trail: readonly (readonly { x: number; y: number }[])[];
+  /** いちばんずれた画の番号(その画のお手本を少し太く、注意の色で)。-1 なら示さない */
+  focus?: number;
+  className?: string;
 }) {
   return (
     <figure className={cn("grid justify-items-start gap-2", className)}>
       <svg viewBox="0 0 109 109" aria-hidden className="size-40 overflow-visible md:size-48">
         <g className="rl-kanji-muted" fill="none" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-          {strokes.map((d, i) => <path key={i} d={d} />)}
+          {strokes.map((d, i) => i === focus ? null : <path key={i} d={d} />)}
         </g>
+        {strokes[focus] && <path d={strokes[focus]} fill="none" stroke="var(--rl-warning)" strokeWidth={4.5} strokeLinecap="round" strokeLinejoin="round" />}
         <g fill="none" stroke="var(--rl-success)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
           {trail.filter((s) => s.length > 1).map((s, i) => <path key={i} d={pointsToPath(s)} />)}
         </g>
