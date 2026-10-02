@@ -49,6 +49,18 @@ export function buildTypeSprite(code: string): SpriteCell[] | null {
   ];
 }
 
+export type SpriteRow = { y: number; cells: SpriteCell[] };
+
+/**
+ * 12 行に分けた絵(追補 S2:診断で 1 行ずつ点け、最後に行ごとに塗り替えるため)。
+ * 空の行も含めて必ず 12 行。行の中の順は buildTypeSprite と同じ(目は体の後)。
+ */
+export function spriteRows(code: string): SpriteRow[] | null {
+  const sprite = buildTypeSprite(code);
+  if (!sprite) return null;
+  return Array.from({ length: SPRITE_SIZE }, (_, y) => ({ y, cells: sprite.filter((c) => c.y === y) }));
+}
+
 export function heatOf(code: string): Heat {
   return code.endsWith("H") ? "H" : "Z";
 }

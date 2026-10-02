@@ -17,6 +17,9 @@ import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton, LoadingRegion } from "@/components/ui/skeleton";
 import { CopyButton } from "@/components/ui/copy-button";
 import { TypeIcon } from "@/components/brand/TypeIcon";
+import { PixelArt } from "@/components/brand/PixelArt";
+import { NumUnit } from "@/components/ui/num-unit";
+import { PIXEL_GRIDS } from "@/lib/pixel-art";
 import { TYPES } from "@/data/types";
 
 export function UiShowcase() {
@@ -95,6 +98,18 @@ export function UiShowcase() {
       <section className="flex flex-wrap gap-2">
         {TYPES.map((t) => <TypeIcon key={t.code} code={t.code} size={64} />)}
         <TypeIcon code="ARCH" size={160} labelled glow animate />
+      </section>
+      <section className="rl-hero-ground grid gap-3 rounded-rl-md p-4">
+        <p className="font-display text-rl-display-1 font-extrabold text-rl-highlight">ARCH</p>
+        <NumUnit value="34.6" unit="cm" className="text-rl-display-1" />
+        <p className="font-display text-rl-display-2 font-black">404</p>
+        <div className="flex flex-wrap items-end gap-4">
+          {PIXEL_GRIDS.map((g) => <PixelArt key={g.id} grid={g} size={48} label={g.title} />)}
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <TypeIcon code="ARCH" size={96} />
+          <TypeIcon code="GBLZ" size={240} labelled />
+        </div>
       </section>
     </main>
   );

@@ -29,7 +29,7 @@ function CardLink({ className, children, ...props }: React.ComponentProps<typeof
     <Link
       data-slot="card"
       className={cn(
-        "group flex min-w-0 cursor-pointer items-center gap-4 rounded-rl-md border border-rl-line bg-rl-surface p-4 text-rl-text transition-[background-color,border-color,transform] duration-(--rl-dur-fast) ease-rl-out hover:border-rl-line-strong hover:bg-rl-surface-2 active:translate-y-px md:p-6",
+        "rl-lock group flex min-w-0 cursor-pointer items-center gap-4 rounded-rl-md border border-rl-line bg-rl-surface p-4 text-rl-text transition-[background-color,border-color,transform] duration-(--rl-dur-fast) ease-rl-out hover:border-rl-line-strong hover:bg-rl-surface-2 active:translate-y-px md:p-6",
         className,
       )}
       {...props}

@@ -2,9 +2,9 @@ import Image from "next/image";
 import { cn } from "cn";
 import { getType } from "@/data/types";
 import { CUSTOM_TYPE_ICONS } from "@/data/type-icons";
-import { SPRITE_ROLES, buildTypeSprite, heatOf, spriteFill } from "@/lib/type-sprite";
+import { heatOf, spriteFill, spriteRows } from "@/lib/type-sprite";
 
-export type TypeIconSize = 32 | 48 | 64 | 160;
+export type TypeIconSize = 32 | 48 | 64 | 96 | 160 | 240;
 
 /**
  * 16 タイプのアイコン。本人のドット絵(public/types/CODE.png)があればそれを、なければ 4 軸から組み立てた仮の絵を出す。
@@ -20,19 +20,19 @@ export function TypeIcon({ code, size = 48, labelled = false, animate = false, g
   if (CUSTOM_TYPE_ICONS.includes(code)) {
     return <Image src={`/types/${code}.png`} alt={labelled ? name : ""} width={size} height={size} unoptimized className={cn("rl-pixel", box)} />;
   }
-  const sprite = buildTypeSprite(code);
+  const rows = spriteRows(code);
   const heat = heatOf(code);
   const a11y = labelled && type ? { role: "img" as const, "aria-label": name } : { "aria-hidden": true as const };
   return (
     <svg viewBox="-1 -1 14 14" width={size} height={size} shapeRendering="crispEdges" className={box} {...a11y}>
-      {sprite &&
-        SPRITE_ROLES.map((role) => (
-          <g key={role} fill={spriteFill(role, heat)}>
-            {sprite.filter((c) => c.role === role).map((c) => (
-              <rect key={`${c.x}-${c.y}`} x={c.x} y={c.y} width={c.w} height={c.h} />
-            ))}
-          </g>
-        ))}
+      {/* 追補 S2:1 行ずつ <g data-row> にまとめる(空の行も置くので、いつも 12 個) */}
+      {rows?.map((r) => (
+        <g key={r.y} data-row={r.y}>
+          {r.cells.map((c) => (
+            <rect key={`${c.role}-${c.x}`} x={c.x} y={c.y} width={c.w} height={c.h} fill={spriteFill(c.role, heat)} />
+          ))}
+        </g>
+      ))}
     </svg>
   );
 }

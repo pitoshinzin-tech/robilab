@@ -15,7 +15,7 @@ export function HeaderNav() {
           aria-current={active === t.id ? "page" : undefined}
           className="relative inline-flex h-11 items-center rounded-rl-sm px-3 text-sm font-bold text-rl-muted after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-transparent hover:text-rl-text aria-[current=page]:text-rl-text aria-[current=page]:after:bg-rl-selected"
         >
-          {t.label}
+          <span className="rl-lock-in inline-flex h-8 items-center">{t.label}</span>
         </Link>
       ))}
     </nav>

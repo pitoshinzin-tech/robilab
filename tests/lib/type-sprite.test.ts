@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 import { readRootTokens } from "@/lib/contrast";
-import { SPRITE_HEX, SPRITE_ROLES, SPRITE_SIZE, buildTypeSprite, spriteFill, typeSpriteSvg, type SpriteCell, type SpriteRole } from "@/lib/type-sprite";
+import { SPRITE_HEX, SPRITE_ROLES, SPRITE_SIZE, buildTypeSprite, spriteFill, spriteRows, typeSpriteSvg, type SpriteCell, type SpriteRole } from "@/lib/type-sprite";
 
 const CODES = ["A", "G"].flatMap((a) => ["R", "B"].flatMap((b) => ["C", "L"].flatMap((c) => ["H", "Z"].map((d) => a + b + c + d))));
 const of = (code: string, role: SpriteRole): SpriteCell[] => buildTypeSprite(code)!.filter((c) => c.role === role);
@@ -82,5 +82,29 @@ describe("spriteFill と SVG の書き出し", () => {
     for (const id of ["background", "body", "head", "sides", "aura", "eyes"]) expect(svg).toContain(`<g id="${id}"`);
     expect(svg).not.toContain("var(");
     expect(typeSpriteSvg("nope")).toBeNull();
+  });
+});
+
+describe("spriteRows(S2 で 1 行ずつ点けるための 12 行)", () => {
+  it("16 タイプとも 12 行(空の行も含む)で、y が 0〜11 の順", () => {
+    for (const code of CODES) expect(spriteRows(code)!.map((r) => r.y)).toEqual([...Array(SPRITE_SIZE).keys()]);
+  });
+  it("行の中のマスはその行の y だけで、全部の行を合わせると元の絵と同じマス", () => {
+    for (const code of CODES) {
+      const rows = spriteRows(code)!;
+      for (const r of rows) for (const c of r.cells) expect(c.y).toBe(r.y);
+      const key = (c: SpriteCell) => `${c.x},${c.y},${c.role}`;
+      expect(rows.flatMap((r) => r.cells).map(key).sort()).toEqual(buildTypeSprite(code)!.map(key).sort());
+    }
+  });
+  it("行の中でも目は体より後(体の上に重ねて穴に見せる)", () => {
+    for (const code of CODES) for (const r of spriteRows(code)!) {
+      const lastBody = r.cells.map((c) => c.role).lastIndexOf("body");
+      const firstEye = r.cells.findIndex((c) => c.role === "eye");
+      if (lastBody >= 0 && firstEye >= 0) expect(firstEye).toBeGreaterThan(lastBody);
+    }
+  });
+  it("おかしなコードは null", () => {
+    expect(spriteRows("XXXX")).toBeNull();
   });
 });

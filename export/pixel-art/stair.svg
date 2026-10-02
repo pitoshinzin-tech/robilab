@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 24" width="256" height="24" shape-rendering="crispEdges">
+  <title>ヒーローの下の階段の境目</title>
+  <g id="stair" fill="#0A0C16">
+    <path transform="translate(0 0)" d="M0 24V16H16V8H32V0H48V24Z"/>
+    <path transform="translate(64 0)" d="M0 24V16H16V8H32V0H48V24Z"/>
+    <path transform="translate(128 0)" d="M0 24V16H16V8H32V0H48V24Z"/>
+    <path transform="translate(192 0)" d="M0 24V16H16V8H32V0H48V24Z"/>
+  </g>
+</svg>

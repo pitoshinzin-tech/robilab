@@ -9,6 +9,10 @@ export const cn = createCn({
     theme: {
       radius: ["rl-sm", "rl-md", "rl-pill"],
       shadow: ["rl-glow-1", "rl-glow-2", "rl-float"],
+      // 追補 4-2・5-2:表示用の文字の段・間の 3 段・線のイージング
+      text: ["rl-display-1", "rl-display-2", "rl-display-3", "rl-hero"],
+      spacing: ["rl-ma-lg", "rl-ma-md", "rl-ma-sm"],
+      ease: ["rl-line"],
     },
   },
 })

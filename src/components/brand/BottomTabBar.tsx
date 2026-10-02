@@ -53,8 +53,10 @@ export function BottomTabBar() {
                 aria-current={active === t.id ? "page" : undefined}
                 className="relative flex h-16 flex-col items-center justify-center gap-1 text-xs font-bold text-rl-muted before:absolute before:inset-x-3 before:top-0 before:h-[3px] before:bg-transparent aria-[current=page]:text-rl-text aria-[current=page]:before:bg-rl-selected"
               >
-                <Icon aria-hidden className="size-6" />
-                <span>{t.label}</span>
+                <span className="rl-lock-in grid justify-items-center gap-1 px-2">
+                  <Icon aria-hidden className="size-6" />
+                  <span>{t.label}</span>
+                </span>
               </Link>
             </li>
           );

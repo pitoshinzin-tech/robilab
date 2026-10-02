@@ -15,3 +15,17 @@ describe("cn(ロビラボの角丸・影のクラスを知っている)", () => 
     expect(cn("rounded-rl-sm text-rl-muted", "text-sm")).toBe("rounded-rl-sm text-rl-muted text-sm");
   });
 });
+
+describe("cn(追補の表示用の段・間・イージングを知っている)", () => {
+  it("表示用の段と色は両方残る", () => {
+    expect(cn("text-rl-highlight", "text-rl-display-1")).toBe("text-rl-highlight text-rl-display-1");
+  });
+  it("表示用の段はほかの文字の大きさを上書きする", () => {
+    expect(cn("text-xl", "text-rl-display-1")).toBe("text-rl-display-1");
+    expect(cn("text-rl-display-2", "text-rl-hero")).toBe("text-rl-hero");
+  });
+  it("間の 3 段は余白として上書きする", () => {
+    expect(cn("mt-8", "mt-rl-ma-lg")).toBe("mt-rl-ma-lg");
+    expect(cn("gap-4", "gap-rl-ma-sm")).toBe("gap-rl-ma-sm");
+  });
+});

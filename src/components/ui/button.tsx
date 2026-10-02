@@ -11,8 +11,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-rl-accent text-rl-on-accent hover:bg-rl-accent-hover hover:shadow-rl-glow-1 focus-visible:shadow-rl-glow-1",
-        secondary: "border-rl-line-strong bg-rl-surface-2 text-rl-text hover:border-rl-text/60",
+        primary: "rl-lock bg-rl-accent text-rl-on-accent hover:bg-rl-accent-hover hover:shadow-rl-glow-1 focus-visible:shadow-rl-glow-1",
+        secondary: "rl-lock border-rl-line-strong bg-rl-surface-2 text-rl-text hover:border-rl-text/60",
         ghost: "bg-transparent text-rl-muted underline-offset-4 hover:text-rl-text hover:underline",
         danger: "border-rl-danger bg-transparent text-rl-danger hover:bg-rl-danger/10",
         discord: "bg-rl-discord text-white hover:brightness-110",
