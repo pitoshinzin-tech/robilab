@@ -11,13 +11,17 @@ import { cn } from "@/lib/utils";
 export const chipClassName =
   "group/chip relative inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-rl-sm border-2 border-rl-line-strong bg-rl-surface-2 px-4 text-sm font-bold text-rl-text transition-[background-color,border-color,transform] duration-(--rl-dur-fast) ease-rl-out hover:border-rl-text/60 active:translate-y-px aria-pressed:border-rl-selected aria-pressed:bg-rl-selected-bg disabled:cursor-not-allowed disabled:opacity-45";
 
-// (追補 S4)選んだときにチェックが線で引かれる(rl-draw-check は globals.css)
+// (追補 S4)選んだときにチェックが線で引かれる(rl-draw-check は globals.css)。
+// 引くのは押したあと(チップに data-rl-touched があるとき)だけ。開いたときに最初から選ばれているチップは動かない
 export const chipCheckClassName = "rl-draw-check hidden size-4 shrink-0 group-aria-pressed/chip:block";
 
 /** ふつうの <button aria-pressed> のチップ。 */
-export function ChipButton({ pressed, className, children, ...props }: Omit<React.ComponentProps<"button">, "aria-pressed"> & { pressed: boolean }) {
+export function ChipButton({ pressed, className, children, onClick, ...props }: Omit<React.ComponentProps<"button">, "aria-pressed"> & { pressed: boolean }) {
+  // 押したら(Enter・Space も click になる)チェックを引けるようにする。effect は使わない
+  const [touched, setTouched] = React.useState(false);
   return (
-    <button type="button" aria-pressed={pressed} className={cn(chipClassName, className)} {...props}>
+    <button type="button" aria-pressed={pressed} data-rl-touched={touched || undefined} className={cn(chipClassName, className)}
+      onClick={(e) => { setTouched(true); onClick?.(e); }} {...props}>
       <Check aria-hidden className={chipCheckClassName} />
       {children}
     </button>
@@ -28,16 +32,19 @@ export function ChipButton({ pressed, className, children, ...props }: Omit<Reac
  * フォームで送るチェックボックスのチップ(GET の絞り込み・プロフィールの選択)。中身は本物の <input type="checkbox">(Tab で線・Space で切り替え)。
  * base-ui を読まないのでここに置く(chip.tsx からも同じものを出す)。
  */
-export function CheckChip({ children, className, ...props }: Omit<React.ComponentProps<"input">, "type"> & { children: React.ReactNode; className?: string }) {
+export function CheckChip({ children, className, onChange, ...props }: Omit<React.ComponentProps<"input">, "type"> & { children: React.ReactNode; className?: string }) {
+  // 切り替えたら(クリック・Space)チェックを引けるようにする。最初から入っているチェックは動かない
+  const [touched, setTouched] = React.useState(false);
   return (
     <label
+      data-rl-touched={touched || undefined}
       className={cn(
         chipClassName,
         "has-checked:border-rl-selected has-checked:bg-rl-selected-bg has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-rl-focus has-disabled:cursor-not-allowed has-disabled:opacity-45",
         className,
       )}
     >
-      <input type="checkbox" className="peer sr-only" {...props} />
+      <input type="checkbox" className="peer sr-only" onChange={(e) => { setTouched(true); onChange?.(e); }} {...props} />
       <Check aria-hidden className="rl-draw-check hidden size-4 shrink-0 peer-checked:block" />
       {children}
     </label>

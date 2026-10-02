@@ -22,11 +22,13 @@ export function TypeAxisFilter({ codes, rules, children }: { codes: readonly str
   const [picked, setPicked] = useState<Picked>([null, null, null, null]);
   const any = picked.some((p) => p !== null);
   const count = codes.filter((c) => matchesAxisFilter(c, picked)).length;
-  const toggle = (i: number, letter: string) => setPicked((prev) => prev.map((p, j) => (j === i ? (p === letter ? null : letter) : p)) as Picked);
+  // 押したあとだけチェックを線で引く(globals.css の rl-draw-check は data-rl-touched の中だけ動く)
+  const [touched, setTouched] = useState(false);
+  const toggle = (i: number, letter: string) => { setTouched(true); setPicked((prev) => prev.map((p, j) => (j === i ? (p === letter ? null : letter) : p)) as Picked); };
   return (
     <div className="grid gap-6">
       {/* 追補 5-3:箱にせず、上下の線だけ */}
-      <section aria-label="4 つの軸の読み方(押すと名簿を絞れる)" className="grid gap-4 border-y border-rl-line py-6">
+      <section aria-label="4 つの軸の読み方(押すと名簿を絞れる)" data-rl-touched={touched || undefined} className="grid gap-4 border-y border-rl-line py-6">
         <ul className="grid gap-4 md:grid-cols-2">
           {AXES.map((a, i) => (
             <li key={a.id} className="grid gap-2">

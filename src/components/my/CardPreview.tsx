@@ -61,7 +61,7 @@ export function CardPreview({ data, rewrite = false }: { data: PublicCardData | 
           {/* 元の文字と「保存しました」を同じマスに重ね、幅を変えない */}
           <span className="grid">
             <span className={cn(layer, saved && "invisible")}><Download aria-hidden />名刺の画像を保存</span>
-            <span className={cn(layer, !saved && "invisible")}>{saved && <Check aria-hidden className="rl-draw-check" />}保存しました</span>
+            <span className={cn(layer, !saved && "invisible")}>{saved && <Check aria-hidden data-rl-touched="" className="rl-draw-check" />}保存しました</span>
           </span>
         </ButtonAnchor>
       )}

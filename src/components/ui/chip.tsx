@@ -11,9 +11,11 @@ const checkClassName = chipCheckClassName;
 
 type ChipProps = Omit<React.ComponentProps<typeof Toggle>, "className"> & { className?: string };
 
-export function Chip({ className, children, ...props }: ChipProps) {
+export function Chip({ className, children, onClick, ...props }: ChipProps) {
+  // 押したあとだけチェックを線で引く(開いたときに最初から選ばれているチップは動かない。globals.css の rl-draw-check)
+  const [touched, setTouched] = React.useState(false);
   return (
-    <Toggle className={cn(chipClassName, className)} {...props}>
+    <Toggle className={cn(chipClassName, className)} data-rl-touched={touched || undefined} onClick={(e) => { setTouched(true); onClick?.(e); }} {...props}>
       <Check aria-hidden className={checkClassName} />
       {children}
     </Toggle>

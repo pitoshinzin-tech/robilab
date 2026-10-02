@@ -110,7 +110,7 @@ function SensSection({ draft, errors, update, filled }: { draft: MySettings; err
   );
   const rest = SENS_GAMES.filter((g) => !shown.includes(g.id));
   return (
-    <Section id="my-sens" title="DPI と感度" filled={filled}>
+    <Section id="my-sens" title="感度" filled={filled}>
       <div className="grid gap-4 sm:grid-cols-2">
         <NumberField label="マウスの DPI" value={draft.dpi} error={errors.dpi} onValue={(dpi) => update({ dpi })} />
         <Field id="my-main-game" label="メインのゲーム">

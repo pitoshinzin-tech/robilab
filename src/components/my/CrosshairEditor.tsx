@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { CROSSHAIR_COLORS, CROSSHAIR_LIMITS, CROSSHAIR_SHAPES, drawCrosshair, type Crosshair, type CrosshairShape } from "@/lib/crosshair";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,8 @@ function Slider({ id, label, value, min, max, onChange }: { id: string; label: s
 
 export function CrosshairEditor({ value, onChange }: { value: Crosshair; onChange: (c: Crosshair) => void }) {
   const canvas = useRef<HTMLCanvasElement>(null);
+  // 色の丸を押したあとだけ Check を線で引く(開いたときに選ばれている色は動かない)
+  const [colorTouched, setColorTouched] = useState(false);
   useEffect(() => {
     const el = canvas.current;
     const ctx = el?.getContext("2d");
@@ -65,7 +67,8 @@ export function CrosshairEditor({ value, onChange }: { value: Crosshair; onChang
                 {CROSSHAIR_COLORS.map((c) => {
                   const on = color === c;
                   return (
-                    <button key={c} type="button" aria-pressed={on} aria-label={COLOR_NAME[c] ?? c} title={COLOR_NAME[c] ?? c} onClick={() => set({ color: c })}
+                    <button key={c} type="button" aria-pressed={on} aria-label={COLOR_NAME[c] ?? c} title={COLOR_NAME[c] ?? c}
+                      data-rl-touched={colorTouched || undefined} onClick={() => { setColorTouched(true); set({ color: c }); }}
                       className="group/sw relative grid size-11 cursor-pointer place-items-center rounded-rl-pill border-2 border-transparent transition-[border-color,transform] duration-(--rl-dur-fast) ease-rl-out hover:border-rl-line-strong active:translate-y-px aria-pressed:border-rl-selected">
                       <span aria-hidden className="size-8 rounded-rl-pill border border-rl-line-strong" style={{ background: c }} />
                       {on && <Check aria-hidden strokeWidth={3} className={cn("rl-draw-check absolute size-4", c === "#7b61ff" ? "text-rl-text" : "text-rl-bg")} />}

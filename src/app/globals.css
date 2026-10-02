@@ -604,13 +604,23 @@ body {
   }
 }
 
-/* 追補 S4:選んだときの Check を 120ms で線として引く(線の言葉) */
+/*
+ * 追補 S4:選んだときの Check を 120ms で線として引く(線の言葉)。
+ * 引くのは、人が押した部品(自分か親に data-rl-touched がある)だけ。開いたときに最初から選ばれている Check は、引き終わった形で出す
+ * (開いたときの自動の動きを 0 にする。data-rl-touched は押したときのイベントの中で付ける)。
+ */
 .rl-draw-check {
   stroke-dasharray: 24;
-  stroke-dashoffset: 24;
-  animation: rl-draw 120ms var(--rl-ease-out) forwards;
+  stroke-dashoffset: 0;
+}
+[data-rl-touched] .rl-draw-check,
+.rl-draw-check[data-rl-touched] {
+  animation: rl-draw 120ms var(--rl-ease-out) both;
 }
 @keyframes rl-draw {
+  from {
+    stroke-dashoffset: 24;
+  }
   to {
     stroke-dashoffset: 0;
   }
