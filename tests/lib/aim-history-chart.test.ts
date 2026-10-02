@@ -17,7 +17,7 @@ describe("buildChart", () => {
 
   it("has no today point when today is not played", () => {
     expect(buildChart([1, null], 10).today).toBeNull();
-    expect(buildChart([null, null], 10)).toEqual({ lines: [], dots: [], today: null });
+    expect(buildChart([null, null], 10)).toEqual({ lines: [], dots: [], gaps: [], today: null });
   });
 
   it("draws a single played day (only slot) as a dot", () => {
@@ -42,5 +42,26 @@ describe("buildChart", () => {
       expect(y).toBeGreaterThanOrEqual(CHART_PAD);
       expect(y).toBeLessThanOrEqual(CHART_H - CHART_PAD);
     }
+  });
+
+  it("does not bridge gaps unless asked", () => {
+    expect(buildChart([1, 2, null, 3, null, 4, 5], 10).gaps).toEqual([]);
+  });
+
+  it("bridges missing days into one path with dashed gaps when bridge is on", () => {
+    const g = buildChart([1, 2, null, 3, null, null, 4, 5], 10, { bridge: true });
+    // 実線と点は bridge なしと同じ
+    expect(g.lines).toHaveLength(2);
+    expect(g.dots.map((d) => d.index)).toEqual([3]);
+    // またぐ線は 2 本:2 日目 → 4 日目、4 日目 → 7 日目(遊んだ日だけを順につなぐ)
+    const ends = g.gaps.map((s) => s.split(" ").map((p) => Number(p.split(",")[0])));
+    const x = (i: number) => Math.round((CHART_PAD + (i * (CHART_W - 2 * CHART_PAD)) / 7) * 10) / 10;
+    expect(ends).toEqual([[x(1), x(3)], [x(3), x(6)]]);
+  });
+
+  it("does not bridge leading or trailing missing days", () => {
+    const g = buildChart([null, 1, 2, null], 10, { bridge: true });
+    expect(g.gaps).toEqual([]);
+    expect(g.lines).toHaveLength(1);
   });
 });
