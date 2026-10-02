@@ -3,15 +3,10 @@ import { useState, type ReactNode } from "react";
 import { Check } from "lucide-react";
 import { AXES } from "@/data/axes";
 import { matchesAxisFilter } from "@/lib/type-axes";
+// チップの見た目は chip-button.tsx のものをそのまま使う(このファイルは base-ui を読まない)
+import { chipCheckClassName, chipClassName } from "@/components/ui/chip-button";
 
 type Picked = [string | null, string | null, string | null, string | null];
-
-/**
- * チップの見た目(src/components/ui/chip.tsx の chipClassName と同じ)。chip.tsx は base-ui の Toggle を読むので、
- * この画面では import せずクラスだけ写す(/types が base-ui のチャンクを読まないように)。
- */
-const chipClass =
-  "group/chip relative inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-rl-sm border-2 border-rl-line-strong bg-rl-surface-2 px-4 text-sm font-bold text-rl-text transition-[background-color,border-color,transform] duration-(--rl-dur-fast) ease-rl-out hover:border-rl-text/60 active:translate-y-px aria-pressed:border-rl-selected aria-pressed:bg-rl-selected-bg";
 
 /**
  * /types の凡例(4 軸の読み方)を、押せる 2 択にする。選んだ文字を持たないタイプは名簿の中で薄くなる(opacity 0.35。CSS)。
@@ -34,9 +29,9 @@ export function TypeAxisFilter({ codes, rules, children }: { codes: readonly str
             <li key={a.id} className="grid gap-2">
               <div role="group" aria-label={`${a.left}か${a.right}で絞る`} className="flex flex-wrap gap-2">
                 {[[a.leftLetter, a.left], [a.rightLetter, a.right]].map(([letter, word]) => (
-                  <button key={letter} type="button" aria-pressed={picked[i] === letter} onClick={() => toggle(i, letter)} className={chipClass}>
+                  <button key={letter} type="button" aria-pressed={picked[i] === letter} onClick={() => toggle(i, letter)} className={chipClassName}>
                     {/* (追補 S4)選んだときにチェックが線で引かれる(rl-draw-check は globals.css) */}
-                    <Check aria-hidden className="rl-draw-check hidden size-4 shrink-0 group-aria-pressed/chip:block" />
+                    <Check aria-hidden className={chipCheckClassName} />
                     <span className="font-display">{letter}</span>{word}
                   </button>
                 ))}
