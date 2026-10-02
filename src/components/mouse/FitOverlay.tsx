@@ -1,15 +1,18 @@
 "use client";
 import { useState } from "react";
 import { HAND_ART_PATHS, fitOverlay } from "@/lib/fit-overlay";
+import { cn } from "@/lib/utils";
 
 /**
  * 追補 6 章:実寸の重ね図。自分の手(線)と、選んだマウス(パープルの面)を同じ縮尺で重ねる。数字だけより一目で「合う」が分かる。
  * マウスを替えると、面が 200ms で入れ替わる(key を替えて rl-fit-swap)。最初に出たときは入れ替えの動きを付けない(手の線を引く動きだけ)。
  * 動きの参考 012(Stroke-Draw):手の輪郭は、図が出たとき 1 回だけ線として引かれる(rl-stroke-draw。pathLength=1 の stroke-dashoffset)。
  * マウスを替えても手は描き直さない。動きを減らす設定では描き終わった形で出る(globals.css)。
+ * drawHand=false:手の線を引く動きを付けない(入力前の見本。ページを開いただけで動くものを増やさない)。
  */
-export function FitOverlay({ handLengthCm, handWidthCm, mouse }: {
+export function FitOverlay({ handLengthCm, handWidthCm, mouse, drawHand = true, svgClassName }: {
   handLengthCm: number; handWidthCm: number | null; mouse: { id: string; name: string; lengthMm: number; widthMm: number };
+  drawHand?: boolean; svgClassName?: string;
 }) {
   // 一度でもマウスを替えたか(描画中に前の値と比べる React の「前の props から決める state」の形。effect も ref も使わない)
   const [prevId, setPrevId] = useState(mouse.id);
@@ -22,12 +25,12 @@ export function FitOverlay({ handLengthCm, handWidthCm, mouse }: {
   const label = `手の長さ ${handLengthCm}cm と、${mouse.name}(長さ ${mouse.lengthMm}mm・幅 ${mouse.widthMm}mm)を同じ縮尺で重ねた図`;
   return (
     <figure className="grid gap-2">
-      <svg viewBox={g.viewBox} role="img" aria-label={label} className="mx-auto h-56 w-auto max-w-full">
+      <svg viewBox={g.viewBox} role="img" aria-label={label} className={cn("mx-auto h-56 w-auto max-w-full", svgClassName)}>
         <rect key={mouse.id} className={swapped ? "rl-fit-swap" : undefined} x={g.mouse.x} y={g.mouse.y} width={g.mouse.width} height={g.mouse.height} rx={g.mouse.rx}
           fill="var(--rl-selected-bg)" stroke="var(--rl-secondary-text)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
         {/* 手の線は面の上に重ねる(マウスに隠れず、指先・手首とマウスの端の位置が比べられる) */}
         <g transform={g.handTransform} fill="none" stroke="var(--rl-muted)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round">
-          {HAND_ART_PATHS.map((d) => <path key={d} d={d} pathLength={1} className="rl-stroke-draw" style={{ animationDuration: "400ms" }} />)}
+          {HAND_ART_PATHS.map((d) => <path key={d} d={d} pathLength={1} className={drawHand ? "rl-stroke-draw" : undefined} style={drawHand ? { animationDuration: "400ms" } : undefined} />)}
         </g>
       </svg>
       <figcaption className="text-sm text-rl-muted">

@@ -1,4 +1,4 @@
-import type { Grip, MySettings } from "@/lib/my-settings";
+import { MY_SETTINGS_LIMITS, type Grip, type MySettings } from "@/lib/my-settings";
 import type { MouseSpec } from "@/data/mice";
 
 /**
@@ -119,5 +119,19 @@ export function handFrom(hand: MySettings["hand"] | null): { hand: Hand; estimat
   return {
     hand: { lengthCm: hand.lengthCm ?? DEFAULT_HAND_LENGTH_CM, widthCm: hand.widthCm, grip: hand.grip },
     estimated,
+  };
+}
+
+/**
+ * 入力の途中の値から、見本の重ね図に使う手を作る(表示だけ。保存・計算の結果には使わない)。
+ * 範囲の外・空欄の長さは平均(DEFAULT_HAND_LENGTH_CM)にして estimated を true、範囲の外の幅は null、持ち方が未選択ならかぶせ持ち。
+ */
+export function previewHand(hand: MySettings["hand"]): { hand: Hand; estimated: boolean } {
+  const L = MY_SETTINGS_LIMITS;
+  const inLength = hand.lengthCm !== null && hand.lengthCm >= L.handLengthMin && hand.lengthCm <= L.handLengthMax;
+  const inWidth = hand.widthCm !== null && hand.widthCm >= L.handWidthMin && hand.widthCm <= L.handWidthMax;
+  return {
+    hand: { lengthCm: inLength ? hand.lengthCm! : DEFAULT_HAND_LENGTH_CM, widthCm: inWidth ? hand.widthCm : null, grip: hand.grip ?? "palm" },
+    estimated: !inLength,
   };
 }

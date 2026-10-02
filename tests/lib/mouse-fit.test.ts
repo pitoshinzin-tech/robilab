@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { MouseSpec } from "@/data/mice";
 import {
-  applyFilter, compareWith, DEFAULT_HAND_LENGTH_CM, fitDistance, fitScore, fitTarget, handFrom, NO_FILTER, rankMice, targetText,
+  applyFilter, compareWith, DEFAULT_HAND_LENGTH_CM, fitDistance, fitScore, fitTarget, handFrom, NO_FILTER, previewHand, rankMice, targetText,
 } from "@/lib/mouse-fit";
 
 const m = (id: string, lengthMm: number, widthMm: number, weightG: number, extra: Partial<MouseSpec> = {}): MouseSpec => ({
@@ -114,5 +114,22 @@ describe("handFrom", () => {
     expect(handFrom({ lengthCm: null, widthCm: 9, grip: "claw" })).toEqual({
       hand: { lengthCm: 18, widthCm: 9, grip: "claw" }, estimated: true,
     });
+  });
+});
+
+describe("previewHand", () => {
+  it("uses the typed values when they are in range", () => {
+    expect(previewHand({ lengthCm: 19.5, widthCm: 9, grip: "claw" })).toEqual({ hand: { lengthCm: 19.5, widthCm: 9, grip: "claw" }, estimated: false });
+  });
+  it("falls back to the average length and palm grip while the form is empty", () => {
+    expect(previewHand({ lengthCm: null, widthCm: null, grip: null })).toEqual({
+      hand: { lengthCm: DEFAULT_HAND_LENGTH_CM, widthCm: null, grip: "palm" }, estimated: true,
+    });
+  });
+  it("ignores out-of-range values in the middle of typing (e.g. 1 before 19)", () => {
+    expect(previewHand({ lengthCm: 1, widthCm: 90, grip: "fingertip" })).toEqual({
+      hand: { lengthCm: DEFAULT_HAND_LENGTH_CM, widthCm: null, grip: "fingertip" }, estimated: true,
+    });
+    expect(previewHand({ lengthCm: 25, widthCm: 5, grip: null }).hand).toEqual({ lengthCm: 25, widthCm: 5, grip: "palm" });
   });
 });
