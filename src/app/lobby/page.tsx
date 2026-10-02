@@ -3,10 +3,12 @@ import { redirect } from "next/navigation";
 import { Bell as BellIcon, Check, Inbox, ShieldCheck, UserRound } from "lucide-react";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { assertNoRpcError } from "@/lib/lobby-errors";
+import { TypeIcon } from "@/components/brand/TypeIcon";
 import { LoginButton } from "@/components/lobby/LoginButton";
 import { CandidateCard } from "@/components/lobby/CandidateCard";
 import { AccountStatusNotice } from "@/components/lobby/AccountStatusNotice";
 import { LobbyFilters } from "@/components/lobby/LobbyFilters";
+import { PairFigure } from "@/components/lobby/PairFigure";
 import { ButtonLink } from "@/components/ui/button-link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageShell } from "@/components/ui/page-shell";
@@ -48,18 +50,27 @@ export default async function LobbyPage({ searchParams }: Props) {
           */}
           <ol aria-label="使い方の流れ" className="grid gap-6 md:grid-cols-3 md:gap-4">
             {STEPS.map((s, i) => (
-              <li key={s} className="relative grid grid-cols-[8px_minmax(0,1fr)] gap-4 md:grid-cols-1 md:gap-3" style={{ "--i": i } as React.CSSProperties}>
+              <li key={s} className="relative grid grid-cols-[8px_minmax(0,1fr)] content-start gap-4 md:grid-cols-1" style={{ "--i": i } as React.CSSProperties}>
                 {i < STEPS.length - 1 && (
                   <span aria-hidden className="rl-flow-seg absolute top-3 -bottom-9 left-[3px] w-0.5 bg-rl-line-strong md:top-[3px] md:-right-5 md:bottom-auto md:left-1 md:h-0.5 md:w-auto" />
                 )}
                 <span aria-hidden className="rl-flow-dot relative mt-2 size-2 bg-rl-highlight md:mt-0" />
-                <span className="grid gap-1 text-base [word-break:auto-phrase]">
-                  <span className="font-display text-sm text-rl-highlight">{i + 1}</span>
-                  {s}
+                <span className="grid gap-2 text-base">
+                  <span className="font-display text-rl-display-1 leading-none font-extrabold tabular-nums text-rl-highlight">{i + 1}</span>
+                  <span className="[word-break:auto-phrase] text-balance">{s}</span>
                 </span>
               </li>
             ))}
           </ol>
+          {/*
+            ロビーの中身の見本(ログイン前でも、成立すると 2 人の絵が線でつながることが分かる)。相性 % は作り物の数に見えるので出さない。
+            線は引く動きを付けない(この画面の線の見せ場は上の流れの 1 つだけ)。
+          */}
+          <figure className="grid gap-3 border-t border-rl-line pt-6">
+            <figcaption className="text-xs font-bold text-rl-muted">見本</figcaption>
+            <PairFigure className="max-w-[480px]" me={<TypeIcon code="ARCH" size={64} />} partner={<TypeIcon code="GBLH" size={64} />}
+              reason="おたがいが OK すると線がつながる" />
+          </figure>
           {/* 箱(Card)にしない(追補 5-3:箱は押せる一覧・入力・プレイヤーの札だけ)。上の線で区切る */}
           <section aria-labelledby="safety-heading" className="grid gap-4 border-t border-rl-line pt-6">
             <h2 id="safety-heading" className="text-xl font-bold">安心して使うために</h2>
