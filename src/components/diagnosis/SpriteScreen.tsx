@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils";
 import { SPRITE_SIZE, heatOf, spriteFill, spriteRows } from "@/lib/type-sprite";
 import { useReducedMotion } from "@/lib/motion/use-reduced-motion";
 
-export type SpriteScreenSize = 64 | 96 | 160;
+/** 288 = 12 × 24px(診断の始める画面の PC。8 の倍数のマス) */
+export type SpriteScreenSize = 64 | 96 | 160 | 288;
 /** 1 行が左から点く時間(steps(12)) */
 const LIGHT_MS = 120;
 /** 塗り替えの 1 行ずつの間(12 行で 360ms) */

@@ -30,4 +30,4 @@ const ORDER = ["q1", "q4", "q7", "q10", "q2", "q5", "q8", "q11", "q3", "q6", "q9
 
 export const QUESTIONS: Question[] = ORDER.map((id) => ALL[id]);
 
-export const DIAGNOSIS_NOTE = "普段のゲーム全般で考えてね。";
+export const DIAGNOSIS_NOTE = "ふだん遊ぶゲーム全体を思い浮かべて答えてください";

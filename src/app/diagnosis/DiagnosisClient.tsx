@@ -1,13 +1,14 @@
 "use client";
 import { useEffect, useReducer, useRef, useState, ViewTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { QUESTIONS, DIAGNOSIS_NOTE, type AnswerValue } from "@/data/questions";
 import { diagnosisReducer, initialState } from "@/lib/diagnosis-state";
 import { scoreAxes } from "@/lib/scoring";
 import { recordDiagnosis } from "@/lib/analytics";
 import { applyDiagnosisToLocal, browserStorage } from "@/lib/my-settings-store";
 import { resultPath, shouldPrefetch } from "@/lib/diagnosis-result";
+import { pickExample, type DiagnosisExample } from "@/lib/diagnosis-example";
 import { useReducedMotion } from "@/lib/motion/use-reduced-motion";
 import { MORPH_PIXEL, TYPE_REVEAL, VT_TYPE_SPRITE } from "@/lib/motion/vt-names";
 import { ProgressBar } from "@/components/diagnosis/ProgressBar";
@@ -15,6 +16,7 @@ import { QuestionCard } from "@/components/diagnosis/QuestionCard";
 import { SpriteScreen } from "@/components/diagnosis/SpriteScreen";
 import { Button } from "@/components/ui/button";
 import { NumUnit } from "@/components/ui/num-unit";
+import { SquareList } from "@/components/ui/square-list";
 import { Skeleton, LoadingRegion } from "@/components/ui/skeleton";
 
 /** 押した答えを見せてから次へ進むまでの時間(押した手応え) */
@@ -24,10 +26,13 @@ const REVEAL_FALLBACK_MS = 500;
 // 追補 6 章:問題の数は「12 問」として大きく出すので、ここには入れない
 const FACTS = ["約 1 分半", "16 タイプのどれかが分かる", "向いているロール・相性のいい仲間も分かる"];
 
-export function DiagnosisClient() {
+export function DiagnosisClient({ examples }: { examples: readonly DiagnosisExample[] }) {
   const [state, dispatch] = useReducer(diagnosisReducer, initialState);
   const [started, setStarted] = useState(false);
   const [picked, setPicked] = useState<AnswerValue | null>(null);
+  // 始める画面の例の絵(何回目か・今見せているタイプ)
+  const [turn, setTurn] = useState(0);
+  const [example, setExample] = useState<DiagnosisExample | null>(null);
   // 追補 S2:最後の答えを押した時点で決まるタイプ(塗り替えに使う)と、塗り替えが終わったか
   const [reveal, setReveal] = useState<string | null>(null);
   const [painted, setPainted] = useState(false);
@@ -75,23 +80,36 @@ export function DiagnosisClient() {
     }, PICK_MS);
   };
 
+  // 採点 D-3:始める画面のマスに触れる(マウスを乗せる・押す・Enter)と、例のタイプの絵が上から塗り替わる。離すと消える
+  const showExample = () => {
+    setExample(pickExample(examples, turn));
+    setTurn((t) => t + 1);
+  };
+  const hideExample = () => setExample(null);
+
   if (!started) {
-    // 追補 6 章:左に「12 問」(display-1・Orbitron 800・マゼンタ)と事実、右に 12×12 の空のマス(160px)
+    // 採点 D-1・D-2:広い幅の 12 列。左 5 列に「12 問」(display-2)・事実・注意・ボタン、右 7 列に 12×12 のマス(PC 288px・スマホ 160px)
     return (
-      <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-        <div className="grid gap-6">
-          <NumUnit value={QUESTIONS.length} unit="問" className="text-rl-display-1" />
-          <ul className="grid gap-3">
-            {FACTS.map((f) => (
-              <li key={f} className="flex items-start gap-3 text-base"><Check aria-hidden className="mt-1 size-5 shrink-0 text-rl-success" />{f}</li>
-            ))}
-          </ul>
-          <Button type="button" variant="primary" size="lg" className="justify-self-start" onClick={() => setStarted(true)}>診断をはじめる</Button>
+      <div className="grid gap-8 md:grid-cols-12 md:items-center md:gap-6">
+        <div className="grid gap-6 md:col-span-5">
+          <NumUnit value={QUESTIONS.length} unit="問" className="text-rl-display-2" />
+          <SquareList items={FACTS} className="gap-3" itemClassName="[word-break:auto-phrase] text-balance" />
           <p className="text-sm text-rl-muted">{DIAGNOSIS_NOTE}</p>
+          <Button type="button" variant="primary" size="lg" className="justify-self-start" onClick={() => setStarted(true)}>診断をはじめる</Button>
         </div>
-        <figure className="grid justify-items-center gap-2">
-          <SpriteScreen size={160} />
-          <figcaption className="text-sm text-rl-muted">この 12 行が、あなたのタイプの絵になります</figcaption>
+        <figure className="grid justify-items-center gap-2 md:col-span-7">
+          <button type="button" aria-label="例のタイプの絵を見る(押すたびに次のタイプ)"
+            className="cursor-pointer rounded-rl-sm transition-transform duration-(--rl-dur-fast) ease-rl-out active:translate-y-px"
+            onPointerEnter={(e) => { if (e.pointerType === "mouse") showExample(); }}
+            onPointerLeave={(e) => { if (e.pointerType === "mouse") hideExample(); }}
+            onClick={showExample} onBlur={hideExample}>
+            <SpriteScreen size={288} revealCode={example?.code ?? null} className="size-40 md:size-72" />
+          </button>
+          <figcaption className="grid justify-items-center gap-1 text-center text-sm text-rl-muted">
+            <span>この 12 行が、あなたのタイプの絵になります</span>
+            {/* 箱は最初から取っておく(出たり消えたりで下がずれない) */}
+            <span aria-live="polite" className="min-h-[1.5em]">{example ? <>例:<span className="font-display">{example.code}</span> {example.name}</> : null}</span>
+          </figcaption>
         </figure>
       </div>
     );
@@ -101,7 +119,8 @@ export function DiagnosisClient() {
   // 押した瞬間に、その問いの行が点く
   const lit = state.done ? QUESTIONS.length : state.index + (picked !== null ? 1 : 0);
   return (
-    <div className="grid gap-6">
+    // 質問の画面は 1 問 1 画面なので、広い幅の中でも読みやすい 640px に(h1 と左をそろえる)
+    <div className="grid max-w-[640px] gap-6">
       {/* 追補 S2:スマホはマスの画面(64px)を進み具合の帯の上に、PC は右(96px) */}
       <div className="flex flex-col-reverse items-start gap-3 md:flex-row md:items-end md:justify-between md:gap-6">
         <div className="w-full min-w-0 md:flex-1"><ProgressBar current={state.index + 1} total={QUESTIONS.length} /></div>
