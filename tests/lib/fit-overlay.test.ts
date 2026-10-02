@@ -38,6 +38,13 @@ describe("fitOverlay(手とマウスを同じ縮尺で重ねる)", () => {
       near(ty + 240 * sy, g.handBox.bottom);
     }
   });
+  it("実寸:絵の幅の矢印(x=80〜170)を写した幅が、入れた手の幅(cm × 10 の mm)と同じ", () => {
+    for (const W of [7.5, 8, 9.5]) {
+      const g = fitOverlay(18, W, 120, 62);
+      const sx = Number(/scale\((\S+) \S+\)/.exec(g.handTransform)![1]);
+      expect(Math.abs((170 - 80) * sx - W * 10)).toBeLessThan(0.2);
+    }
+  });
   it("手の幅が分からないときは長さ × 0.45 で描く", () => {
     const known = fitOverlay(20, 20 * HAND_WIDTH_RATIO, 120, 62);
     const guessed = fitOverlay(20, null, 120, 62);

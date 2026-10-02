@@ -7,8 +7,8 @@ export const HAND_ART_PATHS: readonly string[] = [
   "M70 240 L70 150 Q70 130 80 125 L80 60 Q80 48 90 48 Q100 48 100 60 L100 120 L102 40 Q102 28 112 28 Q122 28 122 40 L122 118 L126 48 Q126 36 136 36 Q146 36 146 48 L146 122 L150 72 Q150 60 160 60 Q170 60 170 72 L170 170 Q170 215 140 240 Z",
   "M70 175 Q48 160 38 135 Q32 122 42 118 Q52 114 58 128 L70 150",
 ];
-/** 絵の中の、親指の左端・指の先・手のひらの左右・手首 */
-const ART = { left: 32, top: 28, palmLeft: 70, palmRight: 170, bottom: 240 } as const;
+/** 絵の中の、親指の左端・指の先・手のひらの幅(HandGuide の「幅」の矢印と同じ x=80〜170。4 本の指の付け根)・手首 */
+const ART = { left: 32, top: 28, palmLeft: 80, palmRight: 170, bottom: 240 } as const;
 /** 手の幅が分からないときの目安(長さ × 0.45) */
 export const HAND_WIDTH_RATIO = 0.45;
 const PAD_MM = 6;
