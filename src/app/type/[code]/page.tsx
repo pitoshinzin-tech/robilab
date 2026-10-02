@@ -5,7 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { ChevronRight, FlaskConical, Share2, Users } from "lucide-react";
 import { ALL_TYPE_CODES, getType } from "@/data/types";
 import { normalizeTypeCode } from "@/lib/type-code";
-import { parseAxesParam } from "@/lib/axes-param";
+import { isDiagnosisAxesParam, parseAxesParam } from "@/lib/axes-param";
 import { rankGames } from "@/lib/role-match";
 import { buildShareText, buildXShareUrl } from "@/lib/share";
 import { getSiteUrl } from "@/lib/site-url";
@@ -52,8 +52,9 @@ export default async function TypePage({ params, searchParams }: Props) {
   }
   const type = getType(normalized)!;
   const { axes: axesParam } = await searchParams;
-  const axes = parseAxesParam(axesParam, type.code);
-  const fromDiagnosis = Boolean(axesParam);
+  // 読める ?axes= のときだけ「診断から来た」。壊れた値は直接開いたのと同じ(タイプの既定の軸・% なし・「診断する」)
+  const fromDiagnosis = isDiagnosisAxesParam(axesParam, type.code);
+  const axes = parseAxesParam(fromDiagnosis ? axesParam : undefined, type.code);
   const ranks = rankGames(axes);
   const site = getSiteUrl();
   const shareUrl = buildXShareUrl(
@@ -97,7 +98,7 @@ export default async function TypePage({ params, searchParams }: Props) {
 
       <div className="mt-rl-ma-sm grid min-w-0 gap-rl-ma-sm lg:col-span-7 lg:col-start-6 lg:mt-rl-ma-md">
         {/* key:同じタイプで軸だけ違う結果へ移ったときも、マスの埋まりを 1 回やり直す */}
-        <section aria-label="4 つの軸"><AxisBars key={`${type.code}:${axesParam ?? ""}`} axes={axes} fromDiagnosis={fromDiagnosis} /></section>
+        <section aria-label="4 つの軸"><AxisBars key={`${type.code}:${fromDiagnosis ? axesParam : ""}`} axes={axes} fromDiagnosis={fromDiagnosis} /></section>
         <section aria-label="説明">
           {/* 要の 1 文に止まった下線(文字組み。動かさない) */}
           <p className="text-base leading-[1.8]"><span className="rl-marker-text">{keySentence}</span>{rest}</p>

@@ -1,5 +1,37 @@
 import { describe, it, expect } from "vitest";
-import { parseAxesParam } from "@/lib/axes-param";
+import { isDiagnosisAxesParam, parseAxesParam } from "@/lib/axes-param";
+import { resultPath } from "@/lib/diagnosis-result";
+
+describe("isDiagnosisAxesParam", () => {
+  it("accepts four in-range numbers whose signs match the code", () => {
+    expect(isDiagnosisAxesParam("0.33,0.50,0.11,0.78", "ARCH")).toBe(true);
+    expect(isDiagnosisAxesParam("-1.00,-0.20,-0.11,-0.78", "GBLZ")).toBe(true);
+    expect(isDiagnosisAxesParam("1,-1,0.2,-0.2", "ABCZ")).toBe(true);
+  });
+  it("accepts what the diagnosis itself links to", () => {
+    const { code, path } = resultPath({ attack: -0.33, instinct: 0.56, team: -0.11, heat: 1 });
+    expect(isDiagnosisAxesParam(new URLSearchParams(path.split("?")[1]).get("axes") ?? undefined, code)).toBe(true);
+  });
+  it("rejects missing, empty or garbage values", () => {
+    expect(isDiagnosisAxesParam(undefined, "ARCH")).toBe(false);
+    expect(isDiagnosisAxesParam("", "ARCH")).toBe(false);
+    expect(isDiagnosisAxesParam("x", "ARCH")).toBe(false);
+    expect(isDiagnosisAxesParam("0.3,0.3,0.3", "ARCH")).toBe(false);
+    expect(isDiagnosisAxesParam("0.3,0.3,0.3,0.3,0.3", "ARCH")).toBe(false);
+    expect(isDiagnosisAxesParam("0.3,,0.3,0.3", "ARCH")).toBe(false);
+    expect(isDiagnosisAxesParam("0.3,abc,0.3,0.3", "ARCH")).toBe(false);
+    expect(isDiagnosisAxesParam("0.3,Infinity,0.3,0.3", "ARCH")).toBe(false);
+  });
+  it("rejects numbers out of -1..1 or zero", () => {
+    expect(isDiagnosisAxesParam("5,0.3,0.3,0.3", "ARCH")).toBe(false);
+    expect(isDiagnosisAxesParam("0.3,-1.01,0.3,0.3", "ARCH")).toBe(false);
+    expect(isDiagnosisAxesParam("0,0.3,0.3,0.3", "ARCH")).toBe(false);
+  });
+  it("rejects signs that contradict the code letters", () => {
+    expect(isDiagnosisAxesParam("-0.5,0.3,0.3,0.3", "ARCH")).toBe(false);
+    expect(isDiagnosisAxesParam("0.5,0.3,0.3,0.3", "ARCZ")).toBe(false);
+  });
+});
 
 describe("parseAxesParam", () => {
   it("reads four numbers", () => {
