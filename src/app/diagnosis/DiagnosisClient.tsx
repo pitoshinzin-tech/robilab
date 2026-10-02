@@ -1,16 +1,30 @@
 "use client";
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { QUESTIONS, DIAGNOSIS_NOTE } from "@/data/questions";
+import { Check, ChevronLeft } from "lucide-react";
+import { QUESTIONS, DIAGNOSIS_NOTE, type AnswerValue } from "@/data/questions";
 import { diagnosisReducer, initialState } from "@/lib/diagnosis-state";
 import { scoreAxes, toTypeCode } from "@/lib/scoring";
 import { recordDiagnosis } from "@/lib/analytics";
 import { applyDiagnosisToLocal, browserStorage } from "@/lib/my-settings-store";
 import { ProgressBar } from "@/components/diagnosis/ProgressBar";
 import { QuestionCard } from "@/components/diagnosis/QuestionCard";
+import { SpriteScreen } from "@/components/diagnosis/SpriteScreen";
+import { Button } from "@/components/ui/button";
+import { NumUnit } from "@/components/ui/num-unit";
+import { Skeleton, LoadingRegion } from "@/components/ui/skeleton";
+
+/** 押した答えを見せてから次へ進むまでの時間(押した手応え) */
+const PICK_MS = 200;
+// 追補 6 章:問題の数は「12 問」として大きく出すので、ここには入れない
+const FACTS = ["約 1 分半", "16 タイプのどれかが分かる", "向いているロール・相性のいい仲間も分かる"];
 
 export function DiagnosisClient() {
   const [state, dispatch] = useReducer(diagnosisReducer, initialState);
+  const [started, setStarted] = useState(false);
+  const [picked, setPicked] = useState<AnswerValue | null>(null);
+  const pickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const router = useRouter();
   const sent = useRef(false);
 
@@ -26,16 +40,57 @@ export function DiagnosisClient() {
     router.push(`/type/${code}?axes=${packed}`);
   }, [state.done, state.answers, router]);
 
+  useEffect(() => () => { if (pickTimer.current) clearTimeout(pickTimer.current); }, []);
+  // 「はじめる」のボタンが消えるので、読み上げとキーボードの位置を最初の質問へ移す
+  useEffect(() => { if (started) headingRef.current?.focus(); }, [started]);
+
+  const answer = (value: AnswerValue) => {
+    if (picked !== null || state.done) return;
+    setPicked(value);
+    pickTimer.current = setTimeout(() => {
+      pickTimer.current = null;
+      setPicked(null);
+      dispatch({ type: "answer", value });
+    }, PICK_MS);
+  };
+
+  if (!started) {
+    // 追補 6 章:左に「12 問」(display-1・Orbitron 800・マゼンタ)と事実、右に 12×12 の空のマス(160px)
+    return (
+      <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+        <div className="grid gap-6">
+          <NumUnit value={QUESTIONS.length} unit="問" className="text-rl-display-1" />
+          <ul className="grid gap-3">
+            {FACTS.map((f) => (
+              <li key={f} className="flex items-start gap-3 text-base"><Check aria-hidden className="mt-1 size-5 shrink-0 text-rl-success" />{f}</li>
+            ))}
+          </ul>
+          <Button type="button" variant="primary" size="lg" className="justify-self-start" onClick={() => setStarted(true)}>診断をはじめる</Button>
+          <p className="text-sm text-rl-muted">{DIAGNOSIS_NOTE}</p>
+        </div>
+        <figure className="grid justify-items-center gap-2">
+          <SpriteScreen size={160} />
+          <figcaption className="text-sm text-rl-muted">この 12 行が、あなたのタイプの絵になります</figcaption>
+        </figure>
+      </div>
+    );
+  }
+
   const q = QUESTIONS[state.index];
   return (
-    <div className="grid gap-5">
+    <div className="grid gap-6">
       <ProgressBar current={state.index + 1} total={QUESTIONS.length} />
-      <p className="text-sm text-[var(--rl-muted)]">{DIAGNOSIS_NOTE}</p>
-      <QuestionCard question={q} selected={state.answers[q.id]} onAnswer={(value) => dispatch({ type: "answer", value })} />
-      <button type="button" onClick={() => dispatch({ type: "back" })} disabled={state.index === 0 || state.done} className="justify-self-start text-sm text-[var(--rl-muted)] disabled:opacity-30">
-        ← ひとつ戻る
-      </button>
-      {state.done && <p className="text-center text-[var(--rl-cyan)]">結果を表示しています…</p>}
+      <QuestionCard question={q} selected={picked ?? state.answers[q.id]} onAnswer={answer} headingRef={headingRef} />
+      <Button type="button" variant="ghost" size="sm" className="justify-self-start" onClick={() => dispatch({ type: "back" })}
+        disabled={state.index === 0 || state.done || picked !== null}>
+        <ChevronLeft aria-hidden />ひとつ前へ
+      </Button>
+      {state.done && (
+        <LoadingRegion label="結果を表示しています" className="grid gap-3">
+          <p aria-hidden className="text-center text-base text-rl-muted">結果を表示しています…</p>
+          <Skeleton className="h-40 w-full rounded-rl-md" />
+        </LoadingRegion>
+      )}
     </div>
   );
 }
