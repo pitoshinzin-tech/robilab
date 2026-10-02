@@ -159,7 +159,7 @@ export function AimClient({ char, date, rows, streakIcon }: { char: AimChar; dat
   let play;
   if (!isClient) play = <Skeleton className="aspect-video w-full rounded-rl-md" />;
   else if (!hasMouse) play = (
-    <Card className="grid gap-3">
+    <Card className="grid gap-4">
       <p className="text-base">マウスの感度をそのまま使うので、記録は PC で。</p>
       <div><CopyButton path="/aim" label="PC で開くリンクをコピー" /></div>
       {!loggedIn && <LoginHint />}

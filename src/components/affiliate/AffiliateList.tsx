@@ -11,7 +11,7 @@ export function AffiliateList({ typeCode }: { typeCode: string }) {
   return (
     <section aria-labelledby="pr-heading" className="grid gap-4">
       <SectionHeading id="pr-heading" title="このタイプのあなたに" action={<Badge variant="pr">PR</Badge>} />
-      <ul className="grid gap-3">
+      <ul className="grid gap-4">
         {items.map((a) => (
           <Card as="li" key={a.id} className="grid gap-1">
             <a href={a.url} target="_blank" rel="sponsored noopener" className="inline-flex min-h-11 items-center gap-1 justify-self-start text-base font-bold text-rl-accent underline-offset-4 hover:underline">

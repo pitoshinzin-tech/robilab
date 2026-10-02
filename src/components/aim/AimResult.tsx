@@ -26,7 +26,7 @@ export function AimResult({ glyph, strokes, accuracy, timeMs, perStroke, sendMes
   const worst = worstStroke(perStroke);
   const url = typeof window !== "undefined" ? `${window.location.origin}/aim` : "/aim";
   return (
-    <Card as="section" aria-label="結果" className="grid gap-3">
+    <Card as="section" aria-label="結果" className="grid gap-4">
       {/* 追補 6 章+動きの参考 070:点数は display-1 で、0 から 600ms で桁の輪が回って止まる(読み上げは最後の数だけ) */}
       <NumUnit className="text-rl-display-1" unit="点" value={<Odometer value={score} />} />
       {trail && trail.length > 0 && <TraceOverlay strokes={strokePaths} trail={trail} focus={worst} />}

@@ -38,7 +38,7 @@ export function Ranking({ rows, mine, loggedIn = false, canPlay = false, decodeK
       <SectionHeading id="ranking" title="今日のランキング" />
       {rows.length === 0 ? (
         // 空のときも 1〜3 位の行の形を出し、点線の枠で「空いている席」に見せる(ロビー = 待合室の言葉)
-        <div className="grid gap-3">
+        <div className="grid gap-4">
           <ol aria-label="今日はまだだれも載っていません" className="grid gap-2">
             {EMPTY_SEATS.map((rank) => (
               <li key={rank} className="flex h-16 min-w-0 items-center gap-3 rounded-rl-sm border border-dashed border-rl-line-strong px-3">

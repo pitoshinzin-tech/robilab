@@ -44,18 +44,18 @@ export function SyncPanel({ loggedIn, slug, status, serverError, canPublish, has
         <span className="min-w-0">{text}</span>
       </p>
       {!loggedIn ? (
-        <div className="grid gap-3 border-t border-rl-line pt-4">
+        <div className="grid gap-4 border-t border-rl-line pt-4">
           <p className="text-sm text-rl-muted [word-break:auto-phrase]">Discord でログインすると、スマホと PC で共有でき、名刺を URL で公開できます。</p>
           <LoginButton next="/my" className="justify-self-start" />
         </div>
       ) : (
-        <div className="grid gap-3 border-t border-rl-line pt-4">
+        <div className="grid gap-4 border-t border-rl-line pt-4">
           <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm has-disabled:cursor-not-allowed has-disabled:opacity-45">
             <input type="checkbox" className="size-5 shrink-0 cursor-pointer accent-rl-selected disabled:cursor-not-allowed" checked={Boolean(slug)} disabled={!slug && !canPublish} onChange={(e) => onPublic(e.target.checked)} />
             <span className="min-w-0 [word-break:auto-phrase]">名刺を公開する(URL を知っている人が見られます)</span>
           </label>
           {pageUrl && (
-            <div className="grid gap-3">
+            <div className="grid gap-4">
               <a href={pageUrl} className="min-w-0 break-all text-sm text-rl-accent underline underline-offset-4">{pageUrl}</a>
               <ButtonAnchor href={buildXShareUrl("わたしのゲーム設定 #ロビラボ", pageUrl)} target="_blank" rel="noopener" variant="secondary" size="sm" className="justify-self-start">
                 <Share2 aria-hidden />X でシェア

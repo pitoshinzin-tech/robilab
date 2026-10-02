@@ -142,7 +142,7 @@ export function DiagnosisClient({ examples }: { examples: readonly DiagnosisExam
         <ChevronLeft aria-hidden />ひとつ前へ
       </Button>
       {state.done && (
-        <LoadingRegion label="結果を表示しています" className="grid gap-3">
+        <LoadingRegion label="結果を表示しています" className="grid gap-4">
           <p aria-hidden className="text-center text-base text-rl-muted">結果を表示しています…</p>
           <Skeleton className="h-40 w-full rounded-rl-md" />
         </LoadingRegion>

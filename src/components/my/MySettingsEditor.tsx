@@ -179,7 +179,7 @@ export function MySettingsEditor() {
               </div>
             </div>
           ) : (
-            <div className="grid gap-3">
+            <div className="grid gap-4">
               <p className="text-sm text-rl-muted [word-break:auto-phrase]">診断すると、タイプが名刺に入ります。</p>
               <ButtonLink href="/diagnosis" variant="secondary" size="sm" className="justify-self-start">
                 <FlaskConical aria-hidden />1 分半で診断する
@@ -191,7 +191,7 @@ export function MySettingsEditor() {
         <SensSection draft={draft} errors={errors} update={update} filled={filled(["dpi", "sens"])} />
 
         <Section id="my-hand" title="手と持ち方" filled={filled(["handSize", "grip"])}>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <NumberField label="手の長さ" suffix="cm" value={draft.hand.lengthCm} error={errors["hand.lengthCm"]} onValue={(lengthCm) => update({ hand: { ...draft.hand, lengthCm } })} />
             <NumberField label="手の幅" suffix="cm" value={draft.hand.widthCm} error={errors["hand.widthCm"]} onValue={(widthCm) => update({ hand: { ...draft.hand, widthCm } })} />
           </div>

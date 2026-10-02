@@ -11,7 +11,7 @@ export default function Loading() {
             <Skeleton className="size-(--rl-text-display-3)" />
             <Skeleton className="h-40 w-12" />
           </div>
-          <div className="grid gap-3 lg:col-span-5">
+          <div className="grid gap-4 lg:col-span-5">
             {[0, 1, 2].map((i) => <Skeleton key={i} className="h-6 w-64 max-w-full" />)}
             <Skeleton className="h-14 w-48" />
           </div>

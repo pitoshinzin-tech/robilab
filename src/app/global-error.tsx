@@ -25,7 +25,7 @@ export default function GlobalError({ error, retry }: { error: Error & { digest?
       <body className="antialiased" style={{ fontFamily: "system-ui, sans-serif" }}>
         <title>表示できませんでした|ロビラボ</title>
         <main className="mx-auto grid min-h-dvh w-full max-w-[688px] place-items-center px-4">
-          <div role="alert" className="grid justify-items-start gap-3 rounded-rl-md border border-rl-line bg-rl-surface p-4 md:p-6">
+          <div role="alert" className="grid justify-items-start gap-4 rounded-rl-md border border-rl-line bg-rl-surface p-4 md:p-6">
             <svg {...ICON} className="size-8 text-rl-danger">
               <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
               <path d="M12 9v4" />

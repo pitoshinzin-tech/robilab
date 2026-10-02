@@ -31,7 +31,7 @@ export function UiShowcase() {
   return (
     <main className="mx-auto grid w-full max-w-[1168px] gap-8 px-4 py-6 md:px-6">
       <h1 className="text-[32px] font-bold">部品の確認</h1>
-      <section className="grid gap-3">
+      <section className="grid gap-4">
         <h2 className="text-2xl font-bold">Button</h2>
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="primary">主ボタン</Button>
@@ -45,7 +45,7 @@ export function UiShowcase() {
         </div>
         <Card className="flex flex-wrap gap-3"><Button variant="primary" size="lg">カードの中の主ボタン</Button><Button size="sm">小さい</Button></Card>
       </section>
-      <section className="grid gap-3 md:grid-cols-2">
+      <section className="grid gap-4 md:grid-cols-2">
         <h2 className="text-2xl font-bold md:col-span-2">Card</h2>
         <Card><CardTitle>default</CardTitle><CardDescription>補足の文</CardDescription></Card>
         <Card variant="selected"><CardTitle>selected</CardTitle></Card>
@@ -80,7 +80,7 @@ export function UiShowcase() {
         <h2 className="w-full text-2xl font-bold">Badge</h2>
         <Badge variant="pr">PR</Badge><Badge variant="count">3</Badge><Badge variant="success">成立</Badge><Badge variant="code">ARCH</Badge><RankBadge rank={1} /><RankBadge rank={8} />
       </section>
-      <section className="grid gap-3">
+      <section className="grid gap-4">
         <SectionHeading title="Chip" description="1 つ選ぶ(矢印キーで移動)/いくつでも/フォーム" count={3} />
         <ChipGroup label="持ち方" value={grip} onValueChange={setGrip}>
           <Chip value="palm">かぶせ</Chip><Chip value="claw">つかみ</Chip><Chip value="fingertip">つまみ</Chip>
@@ -90,7 +90,7 @@ export function UiShowcase() {
         </ChipGroup>
         <div className="flex flex-wrap gap-2"><CheckChip name="voice" value="1">VC 可</CheckChip></div>
       </section>
-      <section className="grid gap-3 md:grid-cols-2">
+      <section className="grid gap-4 md:grid-cols-2">
         <EmptyState icon={Inbox} title="条件に合う人がまだいません" description="時間帯を増やすと見つかりやすくなります。" action={<Button>条件をゆるめる</Button>} />
         <ErrorState message="通信状態を確認して、もう一度お試しください。" onRetry={() => {}} showHome />
         <LoadingRegion className="grid gap-2"><Skeleton className="h-6 w-1/2" /><Skeleton className="h-24 w-full rounded-rl-md" /><Skeleton pixel className="h-8 w-full" /></LoadingRegion>
@@ -100,7 +100,7 @@ export function UiShowcase() {
         {TYPES.map((t) => <TypeIcon key={t.code} code={t.code} size={64} />)}
         <TypeIcon code="ARCH" size={160} labelled glow animate />
       </section>
-      <section className="rl-hero-ground grid gap-3 rounded-rl-md p-4">
+      <section className="rl-hero-ground grid gap-4 rounded-rl-md p-4">
         <p className="font-display text-rl-display-1 font-extrabold text-rl-highlight">ARCH</p>
         <NumUnit value="34.6" unit="cm" className="text-rl-display-1" />
         <p className="font-display text-rl-display-2 font-black">404</p>

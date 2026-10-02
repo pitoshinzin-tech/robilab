@@ -85,7 +85,7 @@ export default async function TypePage({ params, searchParams }: Props) {
       </div>
 
       {/* 右の 7 列:コード・名前・キャッチコピー。下の本文も同じ 7 列にそろえる(左の端が 1 本になる) */}
-      <section className="grid justify-items-center gap-3 text-center lg:col-span-7 lg:col-start-6 lg:justify-items-start lg:pt-6 lg:text-left">
+      <section className="grid justify-items-center gap-4 text-center lg:col-span-7 lg:col-start-6 lg:justify-items-start lg:pt-6 lg:text-left">
         {/* 動きの参考 082:コードは診断から来たときだけ 1 回マスクの中からせり上がる(S2 の芯。直接開いたときは止まった形) */}
         <p className="font-display text-rl-display-1 font-black tracking-[0.04em] text-rl-highlight">
           <span className={fromDiagnosis ? "rl-mask-rise" : undefined}>{type.code}</span>
@@ -103,7 +103,7 @@ export default async function TypePage({ params, searchParams }: Props) {
           <p className="text-base leading-[1.8]"><span className="rl-marker-text">{keySentence}</span>{rest}</p>
         </section>
 
-        <section aria-label="シェアと次の行動" className="grid gap-3">
+        <section aria-label="シェアと次の行動" className="grid gap-4">
           {/* 追補 6 章:何がシェアされるかを先に見せる */}
           {/* eslint-disable-next-line @next/next/no-img-element -- 動的な OG 画像をそのまま小さく見せる */}
           <img src={`/type/${type.code}/opengraph-image`} alt="シェアされる画像のプレビュー" width={1200} height={630} loading="lazy" className="h-auto w-full max-w-80 rounded-rl-sm border border-rl-line" />
@@ -114,8 +114,8 @@ export default async function TypePage({ params, searchParams }: Props) {
         </section>
 
         <section className="grid gap-6 md:grid-cols-2">
-          <div className="grid content-start gap-3"><SectionHeading title="強み" /><ul className="list-disc pl-5 text-base">{type.strengths.map((s) => <li key={s}>{s}</li>)}</ul></div>
-          <div className="grid content-start gap-3"><SectionHeading title="伸びしろ" /><ul className="list-disc pl-5 text-base">{type.growth.map((s) => <li key={s}>{s}</li>)}</ul></div>
+          <div className="grid content-start gap-4"><SectionHeading title="強み" /><ul className="list-disc pl-5 text-base">{type.strengths.map((s) => <li key={s}>{s}</li>)}</ul></div>
+          <div className="grid content-start gap-4"><SectionHeading title="伸びしろ" /><ul className="list-disc pl-5 text-base">{type.growth.map((s) => <li key={s}>{s}</li>)}</ul></div>
         </section>
 
         <section className="grid gap-4">

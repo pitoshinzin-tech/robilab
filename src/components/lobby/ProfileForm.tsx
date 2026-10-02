@@ -98,7 +98,7 @@ export function ProfileForm({ mode, action, initial }: Props) {
       <Field id="pf-nickname" label="ニックネーム(20文字まで)" required>
         <Input id="pf-nickname" name="nickname" maxLength={20} required defaultValue={initial?.nickname} />
       </Field>
-      <fieldset className="grid gap-3">
+      <fieldset className="grid gap-4">
         <legend className="mb-2 text-sm font-bold">遊ぶゲーム(1つ以上)</legend>
         <div className="flex flex-wrap gap-2">
           {GAMES.map((g) => (
@@ -144,7 +144,7 @@ export function ProfileForm({ mode, action, initial }: Props) {
       {clientError && <FieldError>{clientError}</FieldError>}
       {state.error && <FieldError>{state.error}</FieldError>}
       {underAge && (
-        <div className="grid gap-3">
+        <div className="grid gap-4">
           <p className="text-base [word-break:auto-phrase]">18 歳になったら使えます。それまでは診断やマイ設定を使ってね。</p>
           <ButtonLink href="/" variant="secondary" className="justify-self-start">トップへ</ButtonLink>
         </div>

@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
  */
 export function GameRanking({ ranks, showScore = true }: { ranks: GameRank[]; showScore?: boolean }) {
   return (
-    <ol className="grid gap-3">
+    <ol className="grid gap-4">
       {ranks.map((r, i) => (
         <Card as="li" key={r.game.id} className="grid gap-1">
           <div className="flex items-baseline justify-between gap-3">

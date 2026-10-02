@@ -61,7 +61,7 @@ export default async function LobbyPage({ searchParams }: Props) {
             ))}
           </ol>
           {/* 箱(Card)にしない(追補 5-3:箱は押せる一覧・入力・プレイヤーの札だけ)。上の線で区切る */}
-          <section aria-labelledby="safety-heading" className="grid gap-3 border-t border-rl-line pt-6">
+          <section aria-labelledby="safety-heading" className="grid gap-4 border-t border-rl-line pt-6">
             <h2 id="safety-heading" className="text-xl font-bold">安心して使うために</h2>
             <ul className="grid gap-2">
               {SAFETY.map((s) => (

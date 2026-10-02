@@ -71,7 +71,7 @@ export function SensitivityClient({ initial = null }: { initial?: Initial }) {
             {SENS_GAMES.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
           </NativeSelect>
         </Field>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           <Field id="sens-dpi" label="マウスの DPI">
             <Input id="sens-dpi" inputMode="decimal" value={dpiText} invalid={Boolean(error)} aria-describedby={inputDescribedBy} onChange={(e) => edit(setDpiText)(e.target.value)} />
           </Field>

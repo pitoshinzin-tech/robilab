@@ -50,9 +50,9 @@ export function InboxList({ rows, icons, myType }: { rows: InboxRow[]; icons: Re
       <section aria-labelledby="inbox-received" className="grid gap-4">
         <SectionHeading id="inbox-received" title="届いた声かけ" count={received.length} />
         {received.length === 0 ? <EmptyState icon={Inbox} title="まだありません。" /> : (
-          <ul className="grid gap-3">
+          <ul className="grid gap-4">
             {received.map((r) => (
-              <Card as="li" key={r.approach_id} className="grid gap-3">
+              <Card as="li" key={r.approach_id} className="grid gap-4">
                 <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
                   <Link href={`/lobby/${r.partner_id}`} transitionTypes={[NAV_FORWARD]} className="rl-dissolve-host inline-flex min-h-11 min-w-0 items-center gap-3 rounded-rl-sm text-base font-bold text-rl-accent underline-offset-4 hover:underline">
                     {iconOf(r.type_code)}
@@ -77,11 +77,11 @@ export function InboxList({ rows, icons, myType }: { rows: InboxRow[]; icons: Re
       <section aria-labelledby="inbox-matched" className="grid gap-4">
         <SectionHeading id="inbox-matched" title="つながった相手" count={matched.length} />
         {matched.length === 0 ? <EmptyState icon={Inbox} title="まだいません。" /> : (
-          <ul className="grid gap-3">
+          <ul className="grid gap-4">
             {matched.map((r) => {
               const profileUrl = discordProfileUrl(r.discord_user_id);
               return (
-                <Card as="li" key={r.approach_id} className="grid gap-3">
+                <Card as="li" key={r.approach_id} className="grid gap-4">
                   {/* 追補 6 章:成立した行だけ、2 つの絵の間の線が 1 回だけ引かれる */}
                   <PairFigure className="max-w-[320px]" me={iconOf(myType)} partner={iconOf(r.type_code)} drawLine />
                   <p data-long-name className="text-base font-bold wrap-anywhere">{r.nickname}</p>

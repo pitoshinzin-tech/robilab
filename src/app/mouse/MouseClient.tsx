@@ -115,7 +115,7 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
     <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
       {/* 左の列はスクロールしても残す。画面より高いときは列の中でスクロールできる(絞り込みが画面の下で切れないように) */}
       <div className="grid gap-6 lg:sticky lg:top-6 lg:max-h-[calc(100svh-48px)] lg:overflow-y-auto">
-        <Card as="section" aria-labelledby="mouse-target" className="grid gap-3">
+        <Card as="section" aria-labelledby="mouse-target" className="grid gap-4">
           <h2 id="mouse-target" className="text-xl font-bold">あなたの目安</h2>
           <p className="text-sm text-rl-muted">
             {GRIP_INFO[hand.grip].label}・手の長さ:{estimated ? `未入力(平均 ${DEFAULT_HAND_LENGTH_CM}cm で計算)` : `${hand.lengthCm}cm`}{hand.widthCm !== null && `・幅 ${hand.widthCm}cm`}

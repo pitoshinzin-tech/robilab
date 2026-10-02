@@ -44,7 +44,7 @@ export default function TypesPage() {
             items={TYPES.map((t) => ({ code: t.code, name: t.name.replace(/タイプ$/, ""), label: t.name, icon: <TypeIcon code={t.code} size={64} dissolve /> }))}
           />
         </TypeAxisFilter>
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
           <ButtonLink href="/diagnosis" variant="primary">診断して自分のタイプを知る</ButtonLink>
           <p className="text-sm text-rl-muted">12 問・約 1 分半で、あなたがどれか分かります</p>
         </div>

@@ -143,7 +143,7 @@ export function HeroKanji({ strokes, schedule, variant = "top", className }: {
   };
 
   return (
-    <div className={cn("grid justify-items-center gap-3", className)}>
+    <div className={cn("grid justify-items-center gap-4", className)}>
       <div ref={box} className={cn("rl-hero-kanji relative", isTop ? "size-(--rl-text-hero) lg:size-(--rl-text-hero-lg)" : "size-(--rl-text-display-3)", fine && "cursor-crosshair", dragging && "select-none")} style={{ touchAction: capture ? "none" : "auto" }}
         onPointerMove={onMove} onPointerDown={onDown} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onLeave}>
         {/* 追補 S3:「今日の文字に挑戦」で /aim へ行くと、この漢字が /aim の見出しの漢字へ移る(共有の要素 today-kanji) */}

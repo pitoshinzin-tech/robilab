@@ -51,7 +51,7 @@ export function MouseCard({ rank, item, brand, name, reason, compare, links, ima
         </dl>
         {compare && <p className="text-sm text-rl-secondary-text">{compare}</p>}
         {onOverlay && <ChipButton pressed={overlaid} onClick={onOverlay} className="justify-self-start">手と重ねる</ChipButton>}
-        <div className="grid gap-3 border-t border-rl-line pt-4">
+        <div className="grid gap-4 border-t border-rl-line pt-4">
           {(links.amazonPr || links.rakutenPr) && <Badge variant="pr" className="justify-self-start">PR</Badge>}
           <div className="flex flex-wrap gap-2">
             <ButtonAnchor href={links.amazon} target="_blank" rel="sponsored noopener noreferrer" variant="secondary" size="sm">Amazon で探す<ExternalLink aria-hidden className="size-4" /></ButtonAnchor>

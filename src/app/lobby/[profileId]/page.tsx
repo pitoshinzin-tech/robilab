@@ -49,7 +49,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ profil
         )}
         <ApproachButton id={c.id} />
         <p className="text-sm text-rl-muted">相手が OK すると、おたがいの Discord 名が通知に表示されます。</p>
-        <section aria-labelledby="trouble-heading" className="grid gap-3 border-t border-rl-line pt-6">
+        <section aria-labelledby="trouble-heading" className="grid gap-4 border-t border-rl-line pt-6">
           <h2 id="trouble-heading" className="text-xl font-bold">困ったとき</h2>
           <div className="flex flex-wrap items-start gap-3"><BlockButton id={c.id} /><ReportForm id={c.id} /></div>
         </section>

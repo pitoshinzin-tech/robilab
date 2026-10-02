@@ -18,7 +18,7 @@ const PARTS = [
 export function SpriteReading({ code, icon, className }: { code: string; icon: ReactNode; className?: string }) {
   const words = axisWords(code);
   return (
-    <figure className={cn("grid justify-items-center gap-3 lg:justify-items-start", className)}>
+    <figure className={cn("grid justify-items-center gap-4 lg:justify-items-start", className)}>
       <div className="relative w-fit">
         {icon}
         <svg viewBox="-1 -1 14 14" aria-hidden className="pointer-events-none absolute inset-0 hidden size-full overflow-visible lg:block">

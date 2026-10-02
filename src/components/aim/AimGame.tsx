@@ -514,7 +514,7 @@ export function AimGame({ char, degPerCount, crosshair, onFinish, onAbort, debug
   };
 
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-4">
       <div ref={stage} className={fullscreen ? "relative h-full w-full bg-rl-bg" : "relative"}>
         <canvas ref={canvas}
           className={`block w-full cursor-crosshair ${fullscreen ? "h-full" : "h-[min(70vh,640px)] rounded-rl-md border border-rl-line"}`}

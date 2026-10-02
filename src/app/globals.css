@@ -38,25 +38,18 @@
   --rl-focus: var(--rl-cyan);
   --rl-discord: #5865f2;
 
-  /* 移行中の別名(Task 18 で消す) */
-  --rl-card: var(--rl-surface);
-  --rl-border: var(--rl-line);
-  --rl-tertiary: var(--rl-success);
-
   /* 角丸・光・影 */
   --rl-radius-sm: 8px;
   --rl-radius-md: 16px;
   --rl-radius-pill: 9999px;
   --rl-glow-1: 0 0 0 1px rgba(57, 243, 255, 0.35), 0 0 16px rgba(57, 243, 255, 0.28);
   --rl-glow-2: 0 0 24px rgba(255, 79, 216, 0.45);
-  --rl-glow-2-text: 0 0 20px rgba(255, 79, 216, 0.5);
   --rl-shadow-float: 0 8px 24px rgba(0, 0, 0, 0.5);
 
   /* 動き */
   --rl-dur-fast: 120ms;
   --rl-dur-base: 200ms;
   --rl-ease-out: cubic-bezier(0.2, 0, 0, 1);
-  --rl-ease-in: cubic-bezier(0.4, 0, 1, 1);
 
   /* 追補 2 章:イージングは 2 種類だけ(線はなめらか、マスは段) */
   --rl-ease-line: cubic-bezier(0.2, 0, 0, 1);
@@ -160,7 +153,6 @@ body {
   --shadow-rl-glow-2: var(--rl-glow-2);
   --shadow-rl-float: var(--rl-shadow-float);
   --ease-rl-out: var(--rl-ease-out);
-  --ease-rl-in: var(--rl-ease-in);
   --ease-rl-line: var(--rl-ease-line);
   /* 文字の段階の 32px(ページと入口の見出し)。任意の値 text-[32px] の代わり */
   --text-rl-title: 2rem;
@@ -536,9 +528,6 @@ body {
 ::view-transition-group(.rl-morph-line) {
   animation-duration: 360ms;
   animation-timing-function: var(--rl-ease-line);
-}
-.rl-glow-text {
-  text-shadow: var(--rl-glow-2-text);
 }
 .rl-skeleton {
   animation: rl-pulse 1.6s ease-in-out infinite;
