@@ -55,10 +55,6 @@ export function PadRow({ pad, sizes, links, primary, narrowed }: {
       {pad.firmnessVariants.length > 0 && (
         <p className="text-sm text-rl-muted wrap-anywhere">硬さ(公式):<span className="text-rl-text">{pad.firmnessVariants.join("・")}</span></p>
       )}
-      <details className="group rounded-rl-sm border border-rl-line">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center px-4 text-sm font-bold [&::-webkit-details-marker]:hidden">公式の表記のメモ</summary>
-        <p className="px-4 pb-4 text-sm text-rl-muted wrap-anywhere">{pad.note}</p>
-      </details>
       <div className="grid gap-2">
         <ShopButtons links={links} primary={primary} />
         <p className="text-xs text-rl-muted">確認日 {pad.checkedAt}</p>

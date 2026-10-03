@@ -32,14 +32,21 @@ describe("PadRow", () => {
   it("生産終了だけに札を付ける", () => {
     const d = pads.find((x) => x.discontinued);
     const n = pads.find((x) => !x.discontinued)!;
-    if (d) expect(render(d)).toContain("生産終了");
+    expect(render(d!)).toContain("生産終了");
+    expect(d).toBeDefined();
     expect(render(n)).not.toContain("生産終了");
+  });
+  it("作業者向けのメモ(note)を画面に出さない", () => {
+    const p = pads.find((x) => x.note.length > 0)!;
+    const html = render(p);
+    expect(html).not.toContain(p.note);
+    expect(html).not.toContain("<details");
   });
   it("絞り込み中は注記が出る", () => {
     expect(render(pads[0], true)).toContain("絞り込みに合うものだけ");
     expect(render(pads[0], false)).not.toContain("絞り込みに合うものだけ");
   });
-  it("値の null・NaN・undefined を出さない(メモの文章は除く)", () => {
+  it("行全体に null・NaN・undefined を出さない", () => {
     for (const p of pads) expect(render(p).replace(/<details.*<\/details>/, "")).not.toMatch(/null|NaN|undefined/);
   });
 });

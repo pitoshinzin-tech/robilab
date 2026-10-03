@@ -48,7 +48,7 @@ export default async function PadsPage({ searchParams }: { searchParams: Promise
   return (
     <PageShell width="wide" title="マウスパッド探し" description="面・大きさ・厚さで絞り込み、メーカー公式の言葉で「速さ・止め」を読めます。"
       subnav={<SubNav label="感度・マウス" items={subnavFor("mouse", PROS_READY)} />}
-      actions={<p className="grid justify-items-end"><NumUnit value={all.length} unit="枚" className="text-rl-display-2" /><span className="text-sm text-rl-muted">公式の数字で比べられる数</span></p>}>
+      actions={<p className="grid justify-items-start md:justify-items-end"><NumUnit value={all.length} unit="枚" className="text-rl-display-2" /><span className="text-sm text-rl-muted">公式の数字で比べられる数</span></p>}>
       <div className="grid gap-8">
         <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
           <Card as="section" aria-labelledby="pads-filters" className="grid gap-4 lg:sticky lg:top-6">
@@ -64,7 +64,7 @@ export default async function PadsPage({ searchParams }: { searchParams: Promise
 
           <section aria-labelledby="pads-results" className="grid gap-4">
             <SectionHeading id="pads-results" title="人気の順" count={matches.length} />
-            <p className="flex flex-wrap items-center gap-2 text-sm text-rl-muted"><Badge variant="pr">PR</Badge>このリンクから買うと、ロビラボに紹介料が入ることがあります</p>
+            {matches.length > 0 && <p className="flex flex-wrap items-center gap-2 text-sm text-rl-muted"><Badge variant="pr">PR</Badge>このリンクから買うと、ロビラボに紹介料が入ることがあります</p>}
             {all.length === 0 ? (
               <EmptyState icon={PackageOpen} title="マウスパッドのデータがまだありません" description="先にマウス探しで、手に合うマウスを見られます。"
                 action={<ButtonLink href="/mouse" variant="secondary">マウス探しへ</ButtonLink>} />
@@ -82,7 +82,7 @@ export default async function PadsPage({ searchParams }: { searchParams: Promise
           </section>
         </div>
         <div className="grid gap-2 text-xs text-rl-muted">
-          <p>{POPULARITY_NOTE}</p>
+          <p className="text-sm">{POPULARITY_NOTE}</p>
           <p>大きさ・厚さ・速さと止めの言葉は、各メーカー公式サイトの表記です(確認日は製品ごと)。公式に書いていないものは「公式の記載なし」と出し、速さ・止めは点数にしません。生産終了は公式ページに書いてあるものだけ札を付けています。</p>
           <p>価格や在庫は各ショップでご確認ください。Amazon・楽天のリンクには広告(PR)が含まれる場合があります(<Link href="/disclosure" className="text-rl-accent underline">広告表記</Link>)。</p>
         </div>
