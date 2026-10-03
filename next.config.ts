@@ -20,6 +20,9 @@ const csp = [
   "img-src 'self' blob: data: https://thumbnail.image.rakuten.co.jp",
   "font-src 'self'",
   `connect-src 'self' ${supabaseOrigins()}${isDev ? " ws:" : ""}`,
+  // service worker は同じ origin の /sw.js だけ(blob: data: で登録させない)。manifest も同じ origin だけ
+  "worker-src 'self'",
+  "manifest-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -38,6 +41,16 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+      {
+        // Next.js の PWA の説明どおり。全体のルールのあとに置く(同じキーは後ろが勝つ)。
+        // sw.js の中の通信の決まりはこの応答の CSP で決まる。no-store で、壊れた版を直したら次に開いたときに入れ替わる
+        source: "/sw.js",
+        headers: [
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self'" },
         ],
       },
     ];
