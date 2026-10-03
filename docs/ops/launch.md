@@ -127,9 +127,11 @@ dev の DB には、リポジトリにない dev 専用の migration の記録�
 壊れた `sw.js` を配ってしまった・乗っ取りが疑われるとき(設計書 `docs/superpowers/specs/2026-10-03-pwa-design.md` 3-3)。
 
 1. `public/sw.js` の中身を、下の「止める版」に丸ごと置き換える(ファイル名・場所は変えない)。
-2. 公開する(いつもの手順)。`/sw.js` は `no-store` で、登録は `updateViaCache: "none"` なので、次にサイトを開いたときに新しい `sw.js` が入り、キャッシュを消して自分の登録を外す。
-3. 原因を直したら、元の `sw.js`(`git log -- public/sw.js` で探す)に戻し、`CACHE` の数字を 1 つ上げて公開する。
-4. 自分の PC で今すぐ外したいときは、Chrome の DevTools → Application → Service workers の「Unregister」と、Storage の「Clear site data」。
+2. **止めている間は layout の `<SwRegister />` も外す**(外さないと、開くたびに止める版が入っては外れる「入る→外れるのくり返し」になる)。
+3. 公開する(いつもの手順)。`/sw.js` は `no-store` で、登録は `updateViaCache: "none"` なので、次にサイトを開いたときに新しい `sw.js` が入り、キャッシュを消して自分の登録を外す。
+4. 原因を直したら、元の `sw.js`(`git log -- public/sw.js` で探す)に戻し、`CACHE` の数字を 1 つ上げ、`<SwRegister />` も戻して公開する。
+5. 自分の PC で今すぐ外したいときは、Chrome の DevTools → Application → Service workers の「Unregister」と、Storage の「Clear site data」。
+6. **乗っ取りが疑われるとき**(`/sw.js` 以外の URL で登録された worker は止める版では外れない):`next.config.ts` の `headers()` で、一時的に `Clear-Site-Data: "storage"` を返して公開する(その origin の service worker とキャッシュがまとめて消える)。**localStorage も消える**(今日の文字の記録・ホーム画面の案内の記録など、この端末だけのものが消える)ので、確認できたらすぐ外す。
 
 止める版(`fetch` を持たないので、ページはすべてブラウザがそのまま開く):
 

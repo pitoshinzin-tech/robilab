@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { BRAND } from "@/lib/brand";
 import { APP_ICONS, APP_SHORTCUTS, appManifest } from "@/lib/pwa/manifest-data";
+import { SITE_VIEWPORT } from "@/lib/pwa/head";
 import manifest from "@/app/manifest";
 import { decodePng } from "../../scripts/app-icons.mjs";
 
@@ -23,6 +24,12 @@ describe("manifest(設計書 2 章)", () => {
     });
     expect(m.orientation).toBeUndefined();
     expect(m.name).toBe("ロビラボ");
+  });
+  it("theme_color は layout の viewport.themeColor と同じ(ずれると起動の途中でバーの色が変わる)", () => {
+    // layout は next/font を読むので import せず、viewport が SITE_VIEWPORT そのものであることを文字で確かめる
+    const layout = readFileSync("src/app/layout.tsx", "utf8");
+    expect(layout).toMatch(/export const viewport: Viewport = SITE_VIEWPORT;/);
+    expect(m.theme_color).toBe(SITE_VIEWPORT.themeColor);
   });
   it("src/app/manifest.ts は appManifest() をそのまま返す", () => {
     expect(manifest()).toEqual(m);

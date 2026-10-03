@@ -8,6 +8,13 @@ describe("docs/ops/launch.md の service worker の止め方", () => {
     expect(DOC).toContain("## service worker を止めるとき");
     expect(DOC).toContain("## アプリのアイコンを本物に差し替えるとき");
   });
+  it("止め方の手順に、SwRegister を外すことと、乗っ取りのときの Clear-Site-Data(localStorage も消える)がある", () => {
+    const sec = DOC.slice(DOC.indexOf("## service worker を止めるとき"), DOC.indexOf("## アプリのアイコンを本物に差し替えるとき"));
+    expect(sec).toContain("止めている間は layout の `<SwRegister />` も外す");
+    expect(sec).toContain("入る→外れるのくり返し");
+    expect(sec).toContain('Clear-Site-Data: "storage"');
+    expect(sec).toContain("localStorage も消える");
+  });
   it("止める版の sw.js は、全部の robilab-* のキャッシュを消して登録を外し、fetch を持たない", async () => {
     const block = DOC.match(/```js sw-kill\n([\s\S]*?)```/);
     expect(block, "```js sw-kill のコードの段がない").not.toBeNull();
