@@ -1176,3 +1176,44 @@ html.rl-fresh [data-rl-pending="ssr"] > [data-slot="skeleton"] {
     background-color: var(--rl-selected-bg);
   }
 }
+
+/*
+ * キャラ図鑑の一覧:行(li)に乗せる・行のリンクにフォーカスすると、その段(.rl-role-link)の見出しの「このロールに合うタイプ」の絵
+ * ([data-role-type])が --rl-selected の枠になり、行の札([data-shift])も枠になる(JS 0。:has() は段の中だけに効く)。
+ * 目次:行(.rl-game-row)に乗せる・フォーカスすると、そのゲームの記号([data-game-symbol])の色が --rl-highlight に変わる。
+ * 乗せるのは hover: hover の端末だけ、フォーカスは常に。reduced-motion では即時。
+ */
+.rl-role-link [data-role-type],
+.rl-role-link [data-shift],
+.rl-game-row [data-game-symbol] g {
+  transition: box-shadow var(--rl-dur-fast) var(--rl-ease-line), border-color var(--rl-dur-fast) var(--rl-ease-line), fill var(--rl-dur-fast) var(--rl-ease-line);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rl-role-link [data-role-type],
+  .rl-role-link [data-shift],
+  .rl-game-row [data-game-symbol] g {
+    transition: none;
+  }
+}
+.rl-role-link:has(li:focus-within) [data-role-type] {
+  box-shadow: 0 0 0 2px var(--rl-selected);
+}
+.rl-role-link li:focus-within [data-shift] {
+  border-color: var(--rl-selected);
+  box-shadow: inset 0 0 0 1px var(--rl-selected);
+}
+.rl-game-row:focus-within [data-game-symbol] g {
+  fill: var(--rl-highlight);
+}
+@media (hover: hover) {
+  .rl-role-link:has(li:hover) [data-role-type] {
+    box-shadow: 0 0 0 2px var(--rl-selected);
+  }
+  .rl-role-link li:hover [data-shift] {
+    border-color: var(--rl-selected);
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-game-row:hover [data-game-symbol] g {
+    fill: var(--rl-highlight);
+  }
+}

@@ -23,7 +23,7 @@ export function CharRow({ char, href, showRole, shifts }: { char: Char; href: st
             <span className="flex flex-wrap gap-2 pt-1">
               <span className="sr-only">ロールの土台からずれた軸:</span>
               {shifts.map((r) => (
-                <span key={r.axis} className="inline-flex h-7 items-center gap-2 rounded-rl-sm border border-rl-line-strong px-2 text-sm">
+                <span key={r.axis} data-shift className="inline-flex h-7 items-center gap-2 rounded-rl-sm border border-rl-line-strong px-2 text-sm">
                   <span className="text-rl-muted">{r.left}/{r.right}</span>
                   <span className="font-bold">{r.word}</span>
                 </span>

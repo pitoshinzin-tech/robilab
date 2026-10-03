@@ -53,6 +53,14 @@ describe("一覧の中身(全 5 本。スト6 も描けることを確かめる)
     for (const r of ow.roles) expect(html, r.id).toContain(roleFitType(r).code);
     expect((html.match(/このロールに合うタイプ/g) ?? []).length).toBe(dexSections(ow, { ...CHAR_GAME_SETTINGS.overwatch, published: true }).filter((s) => s.roleId).length);
   });
+  it("触ると答える(JS 0):ロールの段に rl-role-link、見出しの絵に data-role-type、札に data-shift。型を決めていない段には付けない", () => {
+    const html = renderList("dbd");
+    const dbd = GAMES.find((g) => g.id === "dbd")!;
+    const typed = dexSections(dbd, { ...CHAR_GAME_SETTINGS.dbd, published: true }).filter((s) => s.roleId).length;
+    expect((html.match(/rl-role-link/g) ?? []).length).toBe(typed);
+    expect((html.match(/data-role-type/g) ?? []).length).toBe(typed);
+    expect(renderList("overwatch")).toContain("data-shift");
+  });
   it("行の札は、ロールの土台からずれた軸だけ(ウィンストンは「直感寄り」、札のないキャラは札なし)", () => {
     const html = renderList("overwatch");
     const w = CHARS.find((c) => c.game === "overwatch" && c.id === "winston")!;

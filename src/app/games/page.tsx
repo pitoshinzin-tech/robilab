@@ -42,14 +42,17 @@ export default function GamesPage() {
         ) : (
           <ul className="border-t border-rl-line">
             {rows.map(({ game, setting, count, checkedAt }) => (
-              <li key={game.id} className="border-b border-rl-line">
+              <li key={game.id} className="rl-game-row border-b border-rl-line">
                 <Link href={`/games/${game.id}/chars`} className="rl-lock group grid grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-4 py-6">
-                  <PixelArt grid={gameSymbol(game.id)} size={48} />
+                  <span data-game-symbol className="inline-flex"><PixelArt grid={gameSymbol(game.id)} size={48} /></span>
                   <span className="grid min-w-0 gap-1">
                     <span data-long-name className="text-2xl font-bold wrap-anywhere">{game.name}{setting.nameMark}</span>
-                    <span className="text-sm text-rl-muted">
-                      {setting.groupByRole && <>ロール <b className="text-rl-highlight">{game.roles.length}</b>・</>}
-                      代表 <b className="text-rl-highlight">{count}</b> 体・<span className="whitespace-nowrap">確認日 {checkedAt}</span>
+                    <span className="flex flex-wrap gap-x-2 text-sm text-rl-muted">
+                      <span className="whitespace-nowrap">
+                        {setting.groupByRole && <>ロール <b className="text-rl-highlight">{game.roles.length}</b>・</>}
+                        代表 <b className="text-rl-highlight">{count}</b> 体
+                      </span>
+                      <span className="whitespace-nowrap">確認日 {checkedAt}</span>
                     </span>
                     {!setting.matching && <span className="text-sm text-rl-muted">図鑑だけ(合うキャラは出していません)</span>}
                   </span>

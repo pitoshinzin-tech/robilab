@@ -33,7 +33,7 @@ export function CharListBody({ game, setting, sections, checkedAt }: {
       {sections.map((s) => {
         const type = roleType(s.roleId);
         return (
-        <section key={s.key} aria-labelledby={`dex-${s.key}`} className="grid gap-4">
+        <section key={s.key} aria-labelledby={`dex-${s.key}`} className={type ? "rl-role-link grid gap-4" : "grid gap-4"}>
           <div className="grid grid-cols-[48px_minmax(0,1fr)] items-center gap-4 md:grid-cols-[48px_minmax(0,1fr)_auto]">
             <PixelArt grid={roleSymbol(game.id, s.roleId)} size={48} />
             <div className="grid min-w-0 gap-1">
@@ -42,7 +42,7 @@ export function CharListBody({ game, setting, sections, checkedAt }: {
             </div>
             {type && (
               <p className="col-span-2 flex items-center gap-3 md:col-span-1">
-                <TypeIcon code={type.code} size={48} />
+                <span data-role-type className="inline-flex rounded-rl-sm"><TypeIcon code={type.code} size={48} /></span>
                 <span className="grid">
                   <span className="text-sm text-rl-muted">このロールに合うタイプ</span>
                   <span className="font-display text-xl font-extrabold text-rl-highlight">{type.code}<span className="sr-only"> {type.name}</span></span>
