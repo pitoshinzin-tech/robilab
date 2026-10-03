@@ -1,13 +1,14 @@
 import { ImageResponse } from "next/og";
 import { loadOgFont } from "@/lib/og-font";
 import type { CardView } from "@/lib/card-view";
+import { CARD_ACCENT, CARD_FALLBACK_GAMES, cardMainLines } from "@/lib/card-face";
 
 export const CARD_SIZE = { width: 1200, height: 630 };
-const ACCENT = { cyan: "#39F3FF", magenta: "#FF4FD8", purple: "#7B61FF", lime: "#B6FF3B" } as const;
 
-/** 名刺カード(1200×630)。見た目の最終調整は本人が行う前提の叩き台。 */
+/** 名刺カード(1200×630)。見た目の最終調整は本人が行う前提の叩き台。/my のプレビューは同じ組みの HTML(CardFace.tsx)。組みを変えるときは両方を直す。 */
 export async function renderCardImage(view: CardView): Promise<ImageResponse> {
-  const accent = ACCENT[view.accent];
+  const accent = CARD_ACCENT[view.accent];
+  const main = cardMainLines(view);
   const typeCode = view.typeCode ?? "????";
   const typeName = view.typeName ?? "タイプ未診断";
   const lines = [
@@ -15,12 +16,12 @@ export async function renderCardImage(view: CardView): Promise<ImageResponse> {
     typeCode,
     typeName,
     view.cardName ?? "",
-    view.main ? `${view.main.gameName} 感度 ${view.main.sens} / ${view.main.dpi} DPI` : "",
-    view.main ? `eDPI ${view.main.edpi} ・ 振り向き ${view.main.cm360} cm` : "",
+    main?.sens ?? "",
+    main?.edpi ?? "",
     view.grip ?? "",
     ...view.devices.map((d) => `${d.label} ${d.name}`),
     ...view.favoriteGames,
-    "好きなゲーム 未登録",
+    ...CARD_FALLBACK_GAMES,
   ];
   // 使う文字だけを、重複なし・並べ替えて渡す(入力した文の並びがフォント取得の URL に残らないように)
   const font = await loadOgFont([...new Set(lines.join(""))].sort().join(""));
@@ -47,10 +48,10 @@ export async function renderCardImage(view: CardView): Promise<ImageResponse> {
         <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
           <div style={{ fontSize: 22, opacity: 0.7, textShadow: "2px 0 0 #FF4FD8, -2px 0 0 #39F3FF" }}>ロビラボ マイ設定</div>
           <div style={{ fontSize: 56, marginTop: 8 }}>{view.cardName ?? ""}</div>
-          {view.main && (
+          {main && (
             <div style={{ display: "flex", flexDirection: "column", marginTop: 16, color: "#39F3FF" }}>
-              <div style={{ fontSize: 30 }}>{`${view.main.gameName} 感度 ${view.main.sens} / ${view.main.dpi} DPI`}</div>
-              <div style={{ fontSize: 26 }}>{`eDPI ${view.main.edpi} ・ 振り向き ${view.main.cm360} cm`}</div>
+              <div style={{ fontSize: 30 }}>{main.sens}</div>
+              <div style={{ fontSize: 26 }}>{main.edpi}</div>
             </div>
           )}
           {view.grip && <div style={{ fontSize: 24, marginTop: 8, color: "#B6FF3B" }}>{view.grip}</div>}
@@ -63,7 +64,7 @@ export async function renderCardImage(view: CardView): Promise<ImageResponse> {
             ))}
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 18 }}>
-            {(view.favoriteGames.length ? view.favoriteGames : ["好きなゲーム 未登録"]).map((g) => (
+            {(view.favoriteGames.length ? view.favoriteGames : CARD_FALLBACK_GAMES).map((g) => (
               <div key={g} style={{ fontSize: 20, padding: "4px 14px", borderRadius: 999, border: "2px solid #7B61FF" }}>{g}</div>
             ))}
           </div>
