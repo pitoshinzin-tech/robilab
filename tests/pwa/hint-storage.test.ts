@@ -22,6 +22,16 @@ describe("recordInstalled(インストールしたら二度と出さない、を
     recordInstalled(s);
     expect(JSON.parse(s.raw.get(HINT_STORAGE_KEY)!)).toEqual({ v: 1, days: ["2026-10-01", "2026-10-02"], dismissed: true });
   });
+  it("壊れた値は来訪日なしで dismissed にする(読むときは parseHintState がそろえる)", () => {
+    const s = memStorage({ [HINT_STORAGE_KEY]: "{" });
+    recordInstalled(s);
+    expect(JSON.parse(s.raw.get(HINT_STORAGE_KEY)!)).toEqual({ v: 1, days: [], dismissed: true });
+  });
+  it("キーは install-hint.ts と同じで、layout から読む hint-storage は install-hint を import しない(全ページの JS を増やさない)", () => {
+    const src = readFileSync("src/lib/pwa/hint-storage.ts", "utf8");
+    expect(src).toContain(`const KEY = "${HINT_STORAGE_KEY}";`);
+    expect(src).not.toMatch(/from "\.\/install-hint"|@\/lib\/pwa\/install-hint/);
+  });
   it("storage が無い・投げるときも落ちない", () => {
     expect(() => recordInstalled(null)).not.toThrow();
     const bad = { getItem: () => { throw new Error("x"); }, setItem: () => { throw new Error("x"); } };
