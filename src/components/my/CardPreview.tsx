@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
-import { Check, Download } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Check, Download, LoaderCircle } from "lucide-react";
 import { buildCardView, type PublicCardData } from "@/lib/card-view";
+import { cardSaveState } from "@/lib/card-face";
 import { cn } from "@/lib/utils";
 import { CardFace } from "@/components/card/CardFace";
-import { ButtonAnchor } from "@/components/ui/button-link";
+import { ButtonAnchor, buttonVariants } from "@/components/ui/button-link";
 import { Card } from "@/components/ui/card";
 import { FieldError } from "@/components/ui/field";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,7 +18,7 @@ function Face({ body, className, hidden = false }: { body: string; className?: s
   const view = useMemo(() => buildCardView(JSON.parse(body) as PublicCardData), [body]);
   return (
     <div aria-hidden={hidden || undefined} className={cn("absolute inset-0 overflow-hidden rounded-rl-sm border border-rl-line [container-type:inline-size]", className)}>
-      <CardFace view={view} label="名刺カードのプレビュー" />
+      <CardFace view={view} />
     </div>
   );
 }
@@ -25,7 +26,9 @@ function Face({ body, className, hidden = false }: { body: string; className?: s
 /**
  * 名刺カードのプレビューと「名刺の画像を保存」。
  * 表示速度(docs/design/perf.md):プレビューは画像と同じ組みの HTML(CardFace)で、開いた直後から描く(前は /api/card-image の PNG が届くまで Skeleton で、LCP が 4 秒前後だった)。
- * 保存する PNG は今までどおり裏で作る(開いた直後はすぐ、入力のあとは止まってから 0.8 秒後)。届く前に保存を押したら、届いてから保存する。
+ * 保存する PNG は今までどおり裏で作る(開いた直後はすぐ、入力のあとは止まってから 0.8 秒後)。
+ * 今の入力の PNG が届くまで、保存のボタンは「画像を準備中…」で押せない(押してから待って保存すると、Safari などでユーザーの操作と見なされず止まることがある)。届いたら押した時にすぐ保存する。
+ * 入力が正しくない間(data が null)は、前の PNG を捨てて保存できないようにする(プレビューは直前の正しい内容のまま)。
  * プレビューの描き直しも今までと同じ間(入力が止まってから 0.8 秒)で、上から 2 段(120ms)で重ねて出し、下に 1 つ前を残す。
  * 保存はタイプが入っているときだけ主ボタン。タイプがないときは「診断する」が主ボタンなので、ここは secondary にし、
  * 名刺のコードが仮の「????」であることを書き添える(本当の値に見せない)。
@@ -41,19 +44,25 @@ export function CardPreview({ data, rewrite = false, hasType = true }: { data: P
   // (動きの参考 009)保存を押した画像の URL。画像が作り直されると元の文字に戻る(時間では戻さない)
   const [savedUrl, setSavedUrl] = useState<string | null>(null);
   const live = useRef<string[]>([]);
-  const pending = useRef<{ body: string; promise: Promise<string | null> } | null>(null);
-  const url = png?.url ?? null;
+  // 入力が正しくなくなったら、前の PNG を捨てる(描いている間に前の値を直す形。blob URL は下の effect で消す)
+  if (body === null && png !== null) setPng(null);
+  const state = cardSaveState({ pngBody: png?.body ?? null, body, failed });
+  const url = state === "ready" && png ? png.url : null;
   const saved = url !== null && savedUrl === url;
 
   // まだ 1 枚も作っていないとき(開いた直後)は待たずに作る。入力の後は 0.8 秒待つ(今までどおり)
   const first = png === null;
   useEffect(() => {
-    if (!body) return;
+    if (!body) {
+      // 捨てた PNG の blob URL を消す
+      live.current.forEach((u) => URL.revokeObjectURL(u));
+      live.current = [];
+      return;
+    }
     const ctrl = new AbortController();
-    let resolve: (u: string | null) => void = () => {};
-    pending.current = { body, promise: new Promise((r) => { resolve = r; }) };
     const t = setTimeout(async () => {
       setFaces((f) => (f.cur === body ? f : { cur: body, prev: f.cur }));
+      setFailed(false);
       try {
         const res = await fetch("/api/card-image", { method: "POST", body, headers: { "Content-Type": "application/json" }, signal: ctrl.signal });
         if (!res.ok) throw new Error(String(res.status));
@@ -63,14 +72,11 @@ export function CardPreview({ data, rewrite = false, hasType = true }: { data: P
         if (old) URL.revokeObjectURL(old);
         live.current = [...live.current.slice(-1), next];
         setPng({ url: next, body });
-        setFailed(false);
-        resolve(next);
       } catch {
         if (!ctrl.signal.aborted) setFailed(true);
-        resolve(null);
       }
     }, first ? 0 : 800);
-    return () => { clearTimeout(t); ctrl.abort(); resolve(null); };
+    return () => { clearTimeout(t); ctrl.abort(); };
     // first は body が変わった時の値を使う(画像が届いて first が変わっても作り直さない)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [body]);
@@ -80,20 +86,6 @@ export function CardPreview({ data, rewrite = false, hasType = true }: { data: P
     const urls = live;
     return () => { urls.current.forEach((u) => URL.revokeObjectURL(u)); urls.current = []; };
   }, []);
-
-  /** PNG が今の入力のものでなければ(まだ作っている・入力の直後)、できるのを待ってから保存する */
-  const onSave = async (e: MouseEvent<HTMLAnchorElement>) => {
-    if (png && png.body === body) { setSavedUrl(png.url); return; }
-    e.preventDefault();
-    const p = pending.current;
-    const ready = p && p.body === body ? await p.promise : null;
-    if (!ready) return;
-    const a = document.createElement("a");
-    a.href = ready;
-    a.download = FILE_NAME;
-    a.click();
-    setSavedUrl(ready);
-  };
 
   return (
     <Card as="section" aria-labelledby="my-card-preview" className="grid gap-4">
@@ -108,15 +100,25 @@ export function CardPreview({ data, rewrite = false, hasType = true }: { data: P
       )}
       {!hasType && <p className="text-sm text-rl-muted [word-break:auto-phrase]">タイプは診断するまで「????」と出ます。</p>}
       {failed && <FieldError>画像を作れませんでした。入力を少し変えると、作り直します。</FieldError>}
-      {faces.cur && (
-        <ButtonAnchor href={url ?? "#"} download={FILE_NAME} variant={hasType ? "primary" : "secondary"} className="justify-self-start" onClick={onSave}>
-          {/* 元の文字と「保存しました」を同じマスに重ね、幅を変えない */}
+      {faces.cur && (url ? (
+        <ButtonAnchor href={url} download={FILE_NAME} variant={hasType ? "primary" : "secondary"} className="justify-self-start" onClick={() => setSavedUrl(url)}>
+          {/* 元の文字・「保存しました」・「画像を準備中…」を同じマスに重ね、幅を変えない */}
           <span className="grid">
             <span className={cn(layer, saved && "invisible")}><Download aria-hidden />名刺の画像を保存</span>
             <span className={cn(layer, !saved && "invisible")}>{saved && <Check aria-hidden data-rl-touched="" className="rl-draw-check" />}保存しました</span>
+            <span aria-hidden className={cn(layer, "invisible")}><LoaderCircle aria-hidden />画像を準備中…</span>
           </span>
         </ButtonAnchor>
-      )}
+      ) : (
+        // PNG がまだ(作っている・作れなかった・入力が正しくない)間は押せない。ボタンの形はそのまま
+        <button type="button" disabled className={cn(buttonVariants({ variant: hasType ? "primary" : "secondary" }), "justify-self-start")}>
+          <span className="grid">
+            <span className={cn(layer, state !== "preparing" && "invisible")} aria-hidden={state !== "preparing" || undefined}><LoaderCircle aria-hidden className="motion-safe:animate-spin" />画像を準備中…</span>
+            <span className={cn(layer, state === "preparing" && "invisible")} aria-hidden={state === "preparing" || undefined}><Download aria-hidden />名刺の画像を保存</span>
+            <span aria-hidden className={cn(layer, "invisible")}><Check aria-hidden />保存しました</span>
+          </span>
+        </button>
+      ))}
     </Card>
   );
 }
