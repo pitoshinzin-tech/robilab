@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { ViewTransition } from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ChevronRight, FlaskConical, Share2, Users } from "lucide-react";
+import { BookOpen, ChevronRight, FlaskConical, Share2, Users } from "lucide-react";
 import { ALL_TYPE_CODES, getType } from "@/data/types";
 import { normalizeTypeCode } from "@/lib/type-code";
 import { isDiagnosisAxesParam, parseAxesParam } from "@/lib/axes-param";
 import { rankGames } from "@/lib/role-match";
+import { resultCharPicks } from "@/lib/char-dex";
 import { buildShareText, buildXShareUrl } from "@/lib/share";
 import { getSiteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
@@ -56,6 +57,7 @@ export default async function TypePage({ params, searchParams }: Props) {
   const fromDiagnosis = isDiagnosisAxesParam(axesParam, type.code);
   const axes = parseAxesParam(fromDiagnosis ? axesParam : undefined, type.code);
   const ranks = rankGames(axes);
+  const charPicks = resultCharPicks(axes);
   const site = getSiteUrl();
   const shareUrl = buildXShareUrl(
     buildShareText(type, { name: ranks[0].game.name, role: ranks[0].best.role.name }),
@@ -121,7 +123,9 @@ export default async function TypePage({ params, searchParams }: Props) {
 
         <section className="grid gap-4">
           <SectionHeading title="おすすめゲームと合うロール" />
-          <GameRanking ranks={ranks} showScore={fromDiagnosis} />
+          <GameRanking ranks={ranks} showScore={fromDiagnosis} chars={charPicks} />
+          {/* 設計書 6-4:図鑑への入口はふつうのリンク(このページの主ボタンはシェア/診断のまま) */}
+          <ButtonLink href="/games" variant="ghost" className="justify-self-start"><BookOpen aria-hidden />キャラ図鑑を見る</ButtonLink>
         </section>
 
         <section className="grid gap-4">

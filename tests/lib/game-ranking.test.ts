@@ -1,0 +1,36 @@
+import { describe, it, expect } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { parseAxesParam } from "@/lib/axes-param";
+import { rankGames } from "@/lib/role-match";
+import { resultCharPicks } from "@/lib/char-dex";
+import { GameRanking } from "@/components/result/GameRanking";
+
+const axes = parseAxesParam(undefined, "ABCZ");
+const render = (chars?: Parameters<typeof GameRanking>[0]["chars"], showScore = false) =>
+  renderToStaticMarkup(createElement(GameRanking, { ranks: rankGames(axes), showScore, chars }));
+
+describe("GameRanking の合うキャラの行", () => {
+  it("chars を渡さなければ今までと同じ(キャラの行なし)", () => {
+    expect(render()).not.toContain("合うキャラ");
+  });
+  it("公開していて合うキャラを出すゲームの行に、3 体へのリンクと、条件を満たすときだけ手ざわりが違うかも", () => {
+    const html = render(resultCharPicks(axes));
+    expect(html).toContain('href="/games/overwatch/chars/reinhardt"');
+    expect(html).toContain('href="/games/overwatch/chars/winston"');
+    expect(html).toContain("ロールは同じでも、手ざわりが違うかも");
+    expect(html).toContain("意外な 1 体");
+    expect(html).toContain("ウィンストンは素早く動き回るキャラ");
+  });
+  it("スト6 の行にはキャラのリンクを出さない", () => {
+    expect(render(resultCharPicks(axes))).not.toContain("/games/sf6/");
+  });
+  it("直接開いた結果(% なし)でもキャラは出て、キャラの行に % を出さない", () => {
+    const html = render(resultCharPicks(axes), false);
+    expect(html).toContain("合うキャラ");
+    expect(html.replace(/<[^>]*>/g, " ")).not.toMatch(/\d+%/);
+  });
+  it("理由の文に否定の言葉を出さない", () => {
+    expect(render(resultCharPicks(axes))).not.toMatch(/苦手|向いていない|弱い/);
+  });
+});
