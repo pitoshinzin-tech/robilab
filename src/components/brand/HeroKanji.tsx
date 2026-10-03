@@ -7,7 +7,7 @@ import { appendPoint, pointsToPath, toViewBox, type TracePoint } from "@/lib/mot
 import { MORPH_LINE, VT_TODAY_KANJI } from "@/lib/motion/vt-names";
 import { REDUCED_MOTION_QUERY } from "@/lib/motion/use-reduced-motion";
 import { KanjiStrokes } from "@/components/brand/KanjiStrokes";
-import { Button } from "@/components/ui/button";
+import { PlainButton } from "@/components/ui/plain-button";
 import { CopyButton } from "@/components/ui/copy-button";
 
 const FINE = "(hover: hover) and (pointer: fine)";
@@ -170,9 +170,9 @@ export function HeroKanji({ strokes, schedule, variant = "top", className }: {
         )}
         {/* サーバーの描画では fine=false なので、PC ではハイドレーションの前から CSS(FINE と同じ条件)で隠す */}
         {!fineMedia && !trying && (
-          <Button type="button" variant="secondary" size="sm" onClick={() => setTrying(true)} className="[@media(hover:hover)_and_(pointer:fine)]:hidden">
+          <PlainButton type="button" variant="secondary" size="sm" onClick={() => setTrying(true)} className="[@media(hover:hover)_and_(pointer:fine)]:hidden">
             <PenLine aria-hidden />1 画なぞってみる
-          </Button>
+          </PlainButton>
         )}
         {!fineMedia && trying && !traced && <p className="text-sm text-rl-muted">漢字の上を指でなぞってください</p>}
         {!fineMedia && traced && (

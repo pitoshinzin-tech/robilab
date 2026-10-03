@@ -16,7 +16,8 @@ import { BottomTabBar } from "@/components/brand/BottomTabBar";
  * ここで fallback を書くと、英数字の寸法を合わせた代わりの書体(Zen Kaku Gothic New Fallback)が消えるので書かない。
  */
 const zen = Zen_Kaku_Gothic_New({
-  weight: ["500", "700", "900"],
+  // 900 は読まない(フォントの CSS の 1/3・gzip 約 32KB が描画を止めていた)。日本語の 900 の 2 か所は globals.css の .rl-black(700 + 縁)
+  weight: ["500", "700"],
   subsets: ["latin"],
   variable: "--font-zen",
   display: "swap",

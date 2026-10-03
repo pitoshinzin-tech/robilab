@@ -16,7 +16,7 @@ import { PixelStair } from "@/components/brand/PixelStair";
 import { PixelArt } from "@/components/brand/PixelArt";
 import { TypeIcon } from "@/components/brand/TypeIcon";
 import { TypeRoster } from "@/components/brand/TypeRoster";
-import { ButtonLink } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { CopyButton } from "@/components/ui/copy-button";
 import { NumUnit } from "@/components/ui/num-unit";
 import { SectionHeading } from "@/components/ui/section-heading";

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { loadSupabaseBrowser } from "@/lib/supabase/lazy";
 import { buttonVariants } from "@/components/ui/button-link";
 import { cn } from "@/lib/utils";
 
@@ -24,11 +24,11 @@ export function LoginButton({ next = "/lobby", variant = "discord", size, classN
   const login = () => {
     if (pending) return;
     setPending(true);
-    createSupabaseBrowser()
-      .auth.signInWithOAuth({
+    loadSupabaseBrowser()
+      .then((supabase) => supabase.auth.signInWithOAuth({
         provider: "discord",
         options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`, scopes: "identify" },
-      })
+      }))
       .then(({ error }) => { if (error) setPending(false); }, () => setPending(false));
   };
   const label = "Discord でログイン";

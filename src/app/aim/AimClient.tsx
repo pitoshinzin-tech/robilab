@@ -11,7 +11,7 @@ import { aimErrorMessage } from "@/lib/aim/share";
 import { CROSSHAIR_DEFAULT } from "@/lib/crosshair";
 import { adoptServerIfLocalEmpty, browserStorage, loadLocal } from "@/lib/my-settings-store";
 import { useIsClient } from "@/lib/use-is-client";
-import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { loadSupabaseBrowser } from "@/lib/supabase/lazy";
 import { errorCodeOf } from "@/lib/lobby-errors";
 import { AimHistory } from "@/components/aim/AimHistory";
 import { AimGame } from "@/components/aim/AimGame";
@@ -78,7 +78,8 @@ export function AimClient({ char, date, rows, streakIcon }: { char: AimChar; dat
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
     let cancelled = false;
     (async () => {
-      const supabase = createSupabaseBrowser();
+      const supabase = await loadSupabaseBrowser();
+      if (cancelled) return;
       const { data } = await supabase.auth.getUser();
       if (cancelled) return;
       setLoggedIn(Boolean(data.user));
@@ -96,7 +97,7 @@ export function AimClient({ char, date, rows, streakIcon }: { char: AimChar; dat
 
   const refreshMine = useCallback(() => {
     if (!loggedIn) return;
-    createSupabaseBrowser().rpc("my_aim_rank", { p_date: date }).then(({ data }) => {
+    loadSupabaseBrowser().then((s) => s.rpc("my_aim_rank", { p_date: date })).then(({ data }) => {
       const row = (data as { rank: number; score: number }[] | null)?.[0];
       setMine(row ? { rank: row.rank, score: row.score } : null);
     });
@@ -106,7 +107,7 @@ export function AimClient({ char, date, rows, streakIcon }: { char: AimChar; dat
   // 連続日数を 30 日より長く数えられるよう、400 日分を読む(グラフは直近 30 日だけ)
   const refreshHistory = useCallback(() => {
     if (!loggedIn) return;
-    createSupabaseBrowser().rpc("my_aim_history", { p_from: addDays(date, -399) }).then(({ data, error }) => {
+    loadSupabaseBrowser().then((s) => s.rpc("my_aim_history", { p_from: addDays(date, -399) })).then(({ data, error }) => {
       if (error) {
         // ログインが切れていたらブラウザの記録だけで出す(メッセージは出さない)
         if (errorCodeOf(error) === "NOT_LOGGED_IN") { setServerDays(null); setServerError(false); }
@@ -126,7 +127,7 @@ export function AimClient({ char, date, rows, streakIcon }: { char: AimChar; dat
     sendingRef.current = true;
     setSending(true);
     try {
-      const { data, error } = await createSupabaseBrowser().rpc("submit_aim_score", {
+      const { data, error } = await (await loadSupabaseBrowser()).rpc("submit_aim_score", {
         p_date: date, p_char_id: char.id, p_accuracy: r.accuracy, p_time_ms: r.timeMs, p_strokes: char.strokes.length,
       });
       if (error) {

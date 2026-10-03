@@ -231,6 +231,16 @@ body {
   }
 }
 
+/*
+ * 表示速度(docs/design/perf.md):Zen Kaku の 900 は読まない(@font-face 約 120 個・gzip 約 32KB の描画を止める CSS と、字のファイルが減る)。
+ * 日本語を 900 で出していた 2 か所(ヘッダーの「ロビラボ」・トップの縦組みの「今日の文字」)は、700 に同じ色の縁 0.03em を足して 900 の太さに近づける
+ * (並べて描いた比べ:docs/design/perf-zen-900-vs-700-stroke.png)。英字の Orbitron の font-black はそのまま(Orbitron は可変で 900 まである)。
+ */
+.rl-black {
+  font-weight: 700;
+  -webkit-text-stroke: 0.03em currentColor;
+}
+
 /* タイトルの色ずれ。ブランドの飾りとして「シアンは押せるものだけ」の例外(設計書 D29) */
 .rl-glitch {
   text-shadow: 1.5px 0 0 var(--rl-magenta), -1.5px 0 0 var(--rl-cyan);

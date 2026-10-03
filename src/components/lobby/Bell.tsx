@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell as BellIcon } from "lucide-react";
-import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { loadSupabaseBrowser } from "@/lib/supabase/lazy";
 import { Badge } from "@/components/ui/badge";
 
 const INBOX_SEEN_EVENT = "robilab:inbox-seen";
@@ -11,7 +11,7 @@ const INBOX_SEEN_EVENT = "robilab:inbox-seen";
 /** 未読数を取る。未ログイン・エラーなら null、Supabase 未設定なら "skip" */
 async function fetchUnread(): Promise<number | null | "skip"> {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return "skip";
-  const supabase = createSupabaseBrowser();
+  const supabase = await loadSupabaseBrowser();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
   const { data, error } = await supabase.rpc("unread_count");

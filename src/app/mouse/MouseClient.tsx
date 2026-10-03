@@ -13,7 +13,7 @@ import { adoptServerIfLocalEmpty, browserStorage, loadLocal } from "@/lib/my-set
 import { emptyMySettings, type MySettings } from "@/lib/my-settings";
 import { useIsClient } from "@/lib/use-is-client";
 import { cn } from "@/lib/utils";
-import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { loadSupabaseBrowser } from "@/lib/supabase/lazy";
 import { HandSetup, GRIP_INFO } from "@/components/mouse/HandSetup";
 import { MouseCard } from "@/components/mouse/MouseCard";
 import { MouseFilters } from "@/components/mouse/MouseFilters";
@@ -69,7 +69,7 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
       const storage = browserStorage();
       if (loadLocal(storage)) return; // この端末に設定がある(下の表示条件では待たない)
       try {
-        const supabase = createSupabaseBrowser();
+        const supabase = await loadSupabaseBrowser();
         const { data } = await supabase.auth.getUser();
         if (!cancelled && data.user) {
           const { data: row, error } = await supabase.from("my_settings").select("data").maybeSingle();

@@ -11,7 +11,7 @@ export function TodayLabel({ as: Tag = "p", id, glyph, date, strokes, className 
   const tcy = (n: number) => <span className="[text-combine-upright:all]">{n}</span>;
   return (
     <Tag id={id} className={cn("flex shrink-0 gap-2 [writing-mode:vertical-rl]", className)}>
-      <span className="text-xl font-black leading-none">今日の文字<span className="sr-only">「{glyph}」</span></span>
+      <span className="rl-black text-xl leading-none">今日の文字<span className="sr-only">「{glyph}」</span></span>
       <span className="text-sm font-bold text-rl-muted">
         <time dateTime={date}>{tcy(month)}月{tcy(day)}日</time>・{tcy(strokes)}画
       </span>
