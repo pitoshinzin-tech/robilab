@@ -1,0 +1,92 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { PackageOpen, SearchX } from "lucide-react";
+import { PADS } from "@/data/pads";
+import { PROS_READY } from "@/data/pros";
+import { byPopularity, POPULARITY_NOTE } from "@/lib/gear-popularity";
+import type { SearchParams } from "@/lib/gear-query";
+import { SURFACE_LABEL } from "@/lib/gear-labels";
+import { subnavFor } from "@/lib/nav";
+import {
+  SIZE_CLASSES, THICKNESS_CLASSES, filterPads, isPadFilterEmpty, padFilterHref, parsePadFilter, visiblePads, type PadFilter,
+} from "@/lib/pad-filter";
+import { affiliateEnv, shopLinks } from "@/lib/shop-links";
+import { PageShell } from "@/components/ui/page-shell";
+import { SubNav } from "@/components/brand/SubNav";
+import { NumUnit } from "@/components/ui/num-unit";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ButtonLink } from "@/components/ui/button-link";
+import { SectionHeading } from "@/components/ui/section-heading";
+import { FilterGroup, type FilterOption } from "@/components/gear/FilterGroup";
+import { PadRow } from "@/components/gear/PadRow";
+
+const TITLE = "マウスパッド探し(面・大きさ・厚さで選ぶ)";
+const DESCRIPTION = "人気のゲーミングマウスパッドを、メーカー公式の大きさ・厚さと、公式の言葉の「速さ・止め」で比べます。";
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: { title: TITLE, description: DESCRIPTION },
+  twitter: { card: "summary", title: TITLE, description: DESCRIPTION },
+};
+
+const SURFACES = ["cloth", "hybrid", "glass", "hard"] as const;
+
+function options<K extends keyof PadFilter>(filter: PadFilter, key: K, items: readonly (readonly [PadFilter[K], string])[]): FilterOption[] {
+  return items.map(([value, text]) => ({ key: String(value), text, href: padFilterHref(filter, { [key]: value } as Partial<PadFilter>), current: filter[key] === value }));
+}
+
+export default async function PadsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const filter = parsePadFilter(await searchParams);
+  const all = byPopularity(visiblePads(PADS));
+  const matches = filterPads(all, filter);
+  const env = affiliateEnv();
+  const narrowed = filter.size !== "all" || filter.thickness !== "all";
+
+  return (
+    <PageShell width="wide" title="マウスパッド探し" description="面・大きさ・厚さで絞り込み、メーカー公式の言葉で「速さ・止め」を読めます。"
+      subnav={<SubNav label="感度・マウス" items={subnavFor("mouse", PROS_READY)} />}
+      actions={<p className="grid justify-items-end"><NumUnit value={all.length} unit="枚" className="text-rl-display-2" /><span className="text-sm text-rl-muted">公式の数字で比べられる数</span></p>}>
+      <div className="grid gap-8">
+        <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
+          <Card as="section" aria-labelledby="pads-filters" className="grid gap-4 lg:sticky lg:top-6">
+            <h2 id="pads-filters" className="text-xl font-bold">絞り込み</h2>
+            <FilterGroup label="面" options={options(filter, "surface", [["all", "すべて"], ...SURFACES.map((s) => [s, SURFACE_LABEL[s]] as const)])} />
+            <FilterGroup label="大きさ" hint={`公式の横幅で分けた目安です(${SIZE_CLASSES.map((c) => `${c.id} ${c.hint}`).join("・")})。`}
+              options={options(filter, "size", [["all", "すべて"], ...SIZE_CLASSES.map((c) => [c.id, c.id] as const)])} />
+            <FilterGroup label="厚さ" hint={`公式の厚さがあるサイズだけで分けます(${THICKNESS_CLASSES.map((c) => `${c.label} ${c.hint}`).join("・")})。`}
+              options={options(filter, "thickness", [["all", "すべて"], ...THICKNESS_CLASSES.map((c) => [c.id, c.label] as const)])} />
+            <FilterGroup label="硬さ" options={options(filter, "firmness", [["all", "すべて"], ["variants", "硬さを選べる"]])} />
+            {!isPadFilterEmpty(filter) && <ButtonLink href="/pads" scroll={false} variant="ghost" size="sm" className="justify-self-start">絞り込みを外す</ButtonLink>}
+          </Card>
+
+          <section aria-labelledby="pads-results" className="grid gap-4">
+            <SectionHeading id="pads-results" title="人気の順" count={matches.length} />
+            <p className="flex flex-wrap items-center gap-2 text-sm text-rl-muted"><Badge variant="pr">PR</Badge>このリンクから買うと、ロビラボに紹介料が入ることがあります</p>
+            {all.length === 0 ? (
+              <EmptyState icon={PackageOpen} title="マウスパッドのデータがまだありません" description="先にマウス探しで、手に合うマウスを見られます。"
+                action={<ButtonLink href="/mouse" variant="secondary">マウス探しへ</ButtonLink>} />
+            ) : matches.length === 0 ? (
+              <EmptyState icon={SearchX} title="条件に合うマウスパッドがありません" description="絞り込みを 1 つ外すと見つかりやすくなります。"
+                action={<ButtonLink href="/pads" scroll={false} variant="secondary">絞り込みを外す</ButtonLink>} />
+            ) : (
+              <ol className="grid">
+                {matches.map((m, i) => (
+                  <PadRow key={m.pad.id} pad={m.pad} sizes={m.sizes} narrowed={narrowed} primary={i === 0}
+                    links={shopLinks(`${m.pad.brand} ${m.pad.name}`, m.pad.officialUrl, env)} />
+                ))}
+              </ol>
+            )}
+          </section>
+        </div>
+        <div className="grid gap-2 text-xs text-rl-muted">
+          <p>{POPULARITY_NOTE}</p>
+          <p>大きさ・厚さ・速さと止めの言葉は、各メーカー公式サイトの表記です(確認日は製品ごと)。公式に書いていないものは「公式の記載なし」と出し、速さ・止めは点数にしません。生産終了は公式ページに書いてあるものだけ札を付けています。</p>
+          <p>価格や在庫は各ショップでご確認ください。Amazon・楽天のリンクには広告(PR)が含まれる場合があります(<Link href="/disclosure" className="text-rl-accent underline">広告表記</Link>)。</p>
+        </div>
+      </div>
+    </PageShell>
+  );
+}

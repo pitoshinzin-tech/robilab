@@ -1,0 +1,55 @@
+import { describe, it, expect } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { PADS } from "@/data/pads";
+import { visiblePads } from "@/lib/pad-filter";
+import { shopLinks } from "@/lib/shop-links";
+import { PadRow } from "@/components/gear/PadRow";
+import { FilterGroup } from "@/components/gear/FilterGroup";
+import { chipClassName, chipCheckClassName } from "@/components/ui/chip-style";
+import { chipClassName as viaButton } from "@/components/ui/chip-button";
+
+const pads = visiblePads(PADS);
+const render = (pad: (typeof pads)[number], narrowed = false) =>
+  renderToStaticMarkup(createElement("ul", null, createElement(PadRow, { pad, sizes: pad.sizes, narrowed, primary: false, links: shopLinks(`${pad.brand} ${pad.name}`, pad.officialUrl, {}) })));
+
+describe("chip-style", () => {
+  it("文字として読め、chip-button からも同じものが出る", () => {
+    expect(typeof chipClassName).toBe("string");
+    expect(chipCheckClassName).toContain("rl-draw-check");
+    expect(viaButton).toBe(chipClassName);
+  });
+});
+
+describe("PadRow", () => {
+  it("公式の言葉を引用で出し、名前と確認日がある", () => {
+    const p = pads.find((x) => x.speedOfficial)!;
+    const html = render(p);
+    expect(html).toContain("<blockquote");
+    expect(html).toContain(p.name);
+    expect(html).toContain(`確認日 ${p.checkedAt}`);
+  });
+  it("生産終了だけに札を付ける", () => {
+    const d = pads.find((x) => x.discontinued);
+    const n = pads.find((x) => !x.discontinued)!;
+    if (d) expect(render(d)).toContain("生産終了");
+    expect(render(n)).not.toContain("生産終了");
+  });
+  it("絞り込み中は注記が出る", () => {
+    expect(render(pads[0], true)).toContain("絞り込みに合うものだけ");
+    expect(render(pads[0], false)).not.toContain("絞り込みに合うものだけ");
+  });
+  it("値の null・NaN・undefined を出さない(メモの文章は除く)", () => {
+    for (const p of pads) expect(render(p).replace(/<details.*<\/details>/, "")).not.toMatch(/null|NaN|undefined/);
+  });
+});
+
+describe("FilterGroup", () => {
+  it("選んでいるチップに aria-current が付く", () => {
+    const html = renderToStaticMarkup(createElement(FilterGroup, { label: "面", options: [
+      { key: "all", text: "すべて", href: "/pads", current: false }, { key: "glass", text: "ガラス", href: "/pads?surface=glass", current: true }] }));
+    expect(html).toContain('role="group"');
+    expect(html.match(/aria-current="true"/g)).toHaveLength(1);
+    expect(html).toContain('href="/pads?surface=glass"');
+  });
+});
