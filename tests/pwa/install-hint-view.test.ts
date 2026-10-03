@@ -74,6 +74,17 @@ describe("置き場所(設計書 4-1)", () => {
     expect(readFileSync("src/app/my/page.tsx", "utf8")).toContain('<InstallHintBlock place="my"');
     expect(readFileSync("src/app/page.tsx", "utf8")).not.toContain("InstallHint");
   });
+  it("/my の段は「消す操作」より上(取り消せない操作はページの最後)", () => {
+    expect(readFileSync("src/app/my/page.tsx", "utf8")).toMatch(/<MySettingsClient installHint=\{<InstallHintBlock place="my"/);
+    expect(readFileSync("src/components/my/MySettingsClient.tsx", "utf8")).toContain("<MySettingsEditor installHint={installHint} />");
+    const editor = readFileSync("src/components/my/MySettingsEditor.tsx", "utf8");
+    expect(editor.indexOf("{installHint}")).toBeGreaterThan(0);
+    expect(editor.indexOf("{installHint}")).toBeLessThan(editor.indexOf("<MyDangerZone"));
+    expect(editor.indexOf("<MyDangerZone")).toBe(editor.lastIndexOf("<MyDangerZone"));
+  });
+  it("手順の幅は 40em まで(1440 で 1 行が長くならない)", () => {
+    expect(readFileSync("src/components/pwa/InstallSteps.tsx", "utf8")).toContain('<ol className="grid max-w-[40em] gap-3">');
+  });
   it("/aim はサーバーの今日の日付を渡し、AimClient は記録の直後に差し込む", () => {
     expect(readFileSync("src/app/aim/page.tsx", "utf8")).toMatch(/installHint=\{<InstallHintBlock place="aim" today=\{date\}/);
     const client = readFileSync("src/app/aim/AimClient.tsx", "utf8");

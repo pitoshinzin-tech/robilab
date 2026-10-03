@@ -13,7 +13,7 @@ function Step({ n, icon: Icon, children }: { n: number; icon?: LucideIcon; child
 }
 
 function Steps({ children }: { children: ReactNode }) {
-  return <ol className="grid gap-3">{children}</ol>;
+  return <ol className="grid max-w-[40em] gap-3">{children}</ol>;
 }
 
 /** iPhone・iPad(Safari 以外のブラウザも同じ共有メニューから追加できる。iOS 16.4 以上) */

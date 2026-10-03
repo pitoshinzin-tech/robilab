@@ -11,8 +11,7 @@ export const metadata: Metadata = {
 export default function MyPage() {
   return (
     <PageShell width="wide" title="マイ設定" description="一度入れたら、感度計算などのツールが自動で使います。入力はその場で保存されます。">
-      <MySettingsClient />
-      <InstallHintBlock place="my" className="mt-rl-ma-md" />
+      <MySettingsClient installHint={<InstallHintBlock place="my" className="border-t border-rl-line pt-6" />} />
     </PageShell>
   );
 }

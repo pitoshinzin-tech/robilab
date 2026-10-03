@@ -1,11 +1,12 @@
 "use client";
-import { useDeferredValue } from "react";
+import { useDeferredValue, type ReactNode } from "react";
 import { useIsClient } from "@/lib/use-is-client";
 import { LoadingRegion, Skeleton } from "@/components/ui/skeleton";
 import { MySettingsEditor } from "./MySettingsEditor";
 
 /** localStorage はブラウザでしか読めないので、ハイドレーションが終わってからエディターを出す。読み込み中は項目と名刺の形を置く。 */
-export function MySettingsClient() {
+/** installHint:「ホーム画面に追加」の段(サーバーで描いて渡す)。エディターの中で「消す操作」の上に置く */
+export function MySettingsClient({ installHint }: { installHint?: ReactNode }) {
   // 表示速度(docs/design/perf.md):エディターの最初の描画は大きい(CPU が遅い端末で 1 回 0.5 秒ほどの長い処理になっていた)。
   // useDeferredValue で後回しの描画にすると、React が途中で手を離せるので、長い処理に分かれず、入力や描画を止めない。中身は同じ。
   const isClient = useDeferredValue(useIsClient(), false);
@@ -16,5 +17,5 @@ export function MySettingsClient() {
       <div className="grid gap-6 lg:col-start-1 lg:row-start-2">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-48 w-full rounded-rl-md" />)}</div>
     </LoadingRegion>
   );
-  return <MySettingsEditor />;
+  return <MySettingsEditor installHint={installHint} />;
 }

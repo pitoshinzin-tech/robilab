@@ -139,7 +139,7 @@ function SensSection({ draft, errors, update, filled }: { draft: MySettings; err
   );
 }
 
-export function MySettingsEditor() {
+export function MySettingsEditor({ installHint }: { installHint?: ReactNode }) {
   const { draft, errors, update: save, loggedIn, slug, status, serverError, revision, setPublic, removeAll } = useMySettings();
   const type = draft.typeCode ? getType(draft.typeCode) : undefined;
   const valid = Object.keys(errors).length === 0;
@@ -166,7 +166,7 @@ export function MySettingsEditor() {
         <ProgressCells total={progress.total} done={progress.done} pulse={pulse} />
       </div>
 
-      {/* スマホは「名刺 → 項目 → 保存と公開 → 消す操作」の順。1024px 以上は右の列に名刺と保存と公開を固定する */}
+      {/* スマホは「名刺 → 項目 → 保存と公開 → ホーム画面に追加 → 消す操作」の順。1024px 以上は右の列に名刺と保存と公開を固定する */}
       <div className="contents lg:sticky lg:top-6 lg:col-start-2 lg:row-span-2 lg:row-start-2 lg:grid lg:gap-4">
         <div className="order-1 min-w-0 lg:order-none"><CardPreview data={valid ? toPublicCardData(draft) : null} rewrite={pulse !== null} hasType={Boolean(type)} /></div>
         <div className="order-3 min-w-0 lg:order-none">
@@ -240,7 +240,9 @@ export function MySettingsEditor() {
         </Section>
       </div>
 
-      <div className="order-4 min-w-0 lg:order-none lg:col-start-1 lg:row-start-3">
+      {/* 「ホーム画面に追加」の段は消す操作の上(取り消せない操作はページの最後に置く) */}
+      <div className="order-4 grid min-w-0 gap-6 lg:order-none lg:col-start-1 lg:row-start-3">
+        {installHint}
         <MyDangerZone loggedIn={loggedIn} onRemove={removeAll} />
       </div>
     </div>
