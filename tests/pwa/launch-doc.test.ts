@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { readFileSync } from "node:fs";
 
-const DOC = readFileSync("docs/ops/launch.md", "utf8");
+const DOC = readFileSync("docs/ops/launch.md", "utf8").replace(/\r\n/g, "\n"); // 取り出し方(CRLF)に左右されないように
 
 describe("docs/ops/launch.md の service worker の止め方", () => {
   it("節がある", () => {
