@@ -3,9 +3,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { GRIPS, MY_SETTINGS_LIMITS, type Grip, type MySettings } from "@/lib/my-settings";
 import { browserStorage, saveHandToLocal } from "@/lib/my-settings-store";
-import { previewHand, rankMice } from "@/lib/mouse-fit";
-import { DEVICES } from "@/data/devices";
-import { MICE } from "@/data/mice";
+import { previewHand, rankMice, type FitMouse } from "@/lib/mouse-fit";
 import { NumberField } from "@/components/my/NumberField";
 import { buttonVariants } from "@/components/ui/button-link";
 import { Card } from "@/components/ui/card";
@@ -26,11 +24,13 @@ type Hand = MySettings["hand"];
 const L = MY_SETTINGS_LIMITS;
 
 /** 手の長さ・幅・持ち方の入力。保存はマイ設定(ブラウザ)。保存できなくても、その場の値で結果を出せるように返す。 */
-export function HandSetup({ initial, onDone, onCancel }: {
+export function HandSetup({ initial, onDone, onCancel, mice }: {
   initial: Hand;
   onDone: (hand: Hand, saved: boolean) => void;
   /** 渡されたときだけ「変えずに戻る」を出す */
   onCancel?: () => void;
+  /** 見本の重ね図に使うマウス(サーバーで作った行。名前つき) */
+  mice: readonly (FitMouse & { name: string })[];
 }) {
   const [hand, setHand] = useState<Hand>(initial);
   const [error, setError] = useState<string | null>(null);
@@ -63,8 +63,8 @@ export function HandSetup({ initial, onDone, onCancel }: {
 
   // 右の列の見本:入力中の値(空・範囲の外は平均、持ち方が未選択ならかぶせ持ち)で、いちばん近いマウスと重ねる。表示だけ
   const preview = previewHand(hand);
-  const top = rankMice(preview.hand, MICE)[0]?.mouse;
-  const topName = top ? (DEVICES.find((d) => d.id === top.id)?.name ?? "") : "";
+  const top = rankMice(preview.hand, mice)[0]?.mouse;
+  const topName = top?.name ?? "";
 
   return (
     <Card as="section" aria-labelledby="hand-setup" className="grid gap-4 lg:grid-cols-[minmax(0,560px)_minmax(0,1fr)] lg:gap-x-12">

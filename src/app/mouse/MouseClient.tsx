@@ -1,12 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { SearchX, Share2, TriangleAlert } from "lucide-react";
-import { DEVICES } from "@/data/devices";
-import { MICE, mouseById } from "@/data/mice";
-import { MICE_RAKUTEN } from "@/data/mice-rakuten";
 import { applyFilter, compareWith, DEFAULT_HAND_LENGTH_CM, fitTarget, handFrom, NO_FILTER, rankMice, targetText, type MouseFilter } from "@/lib/mouse-fit";
 import { recommendReason } from "@/lib/mouse-reason";
-import { shopLinks } from "@/lib/shop-links";
+import type { MouseRow } from "@/lib/mouse-rows";
 import { buildMouseShareText } from "@/lib/mouse-share";
 import { buildXShareUrl } from "@/lib/share";
 import { adoptServerIfLocalEmpty, browserStorage, loadLocal } from "@/lib/my-settings-store";
@@ -27,7 +24,6 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const FIRST = 10;
-const device = (id: string) => DEVICES.find((d) => d.id === id);
 const FIT_FIGURE_ID = "mouse-fit-figure";
 
 /** 「手と重ねる」を押したとき、重ね図が画面の外なら見える所まで送る(1 列のスマホ・タブレットで、押した結果が見えないのを防ぐ) */
@@ -40,7 +36,7 @@ function revealFitFigure() {
   el.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
 }
 
-export function MouseClient({ pageUrl }: { pageUrl: string }) {
+export function MouseClient({ pageUrl, mice }: { pageUrl: string; mice: MouseRow[] }) {
   const isClient = useIsClient();
   const [rev, setRev] = useState(0);
   // 保存できない環境(プライベートモードなど)で入力した値
@@ -83,12 +79,12 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
     return () => { cancelled = true; };
   }, []);
 
-  const ranked = hand ? rankMice(hand, MICE) : [];
+  const ranked = hand ? rankMice(hand, mice) : [];
   const filtered = applyFilter(ranked, filter);
   const shown = showAll ? filtered : filtered.slice(0, FIRST);
 
   const currentRef = settings?.devices.mouse ?? null;
-  const currentMouse = currentRef && "id" in currentRef ? mouseById(currentRef.id) ?? null : null;
+  const currentMouse = currentRef && "id" in currentRef ? mice.find((m) => m.id === currentRef.id) ?? null : null;
 
   /*
    * 読み込み中の面。表示速度(docs/design/perf.md):入力画面(HandSetup)を見えないまま置いて同じ高さを取り、その上に Skeleton を重ねる。
@@ -96,7 +92,7 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
    */
   const pendingView = (busy: boolean) => (
     <div aria-busy={busy || undefined} className="relative">
-      <div aria-hidden inert className="invisible"><HandSetup initial={emptyMySettings().hand} onDone={() => {}} /></div>
+      <div aria-hidden inert className="invisible"><HandSetup initial={emptyMySettings().hand} onDone={() => {}} mice={mice} /></div>
       <Skeleton className="absolute inset-0 rounded-rl-md" />
     </div>
   );
@@ -110,16 +106,17 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
         initial={handRaw ?? emptyMySettings().hand}
         onDone={(h, saved) => { setNotSaved(!saved); setMemoryHand(saved ? null : h); setEditing(false); setRev((n) => n + 1); }}
         onCancel={hand ? () => setEditing(false) : undefined}
+        mice={mice}
       />
     );
   }
 
   const target = fitTarget(hand);
-  const top3 = ranked.slice(0, 3).map((r) => device(r.mouse.id)).filter((d) => d !== undefined);
-  const shareUrl = buildXShareUrl(buildMouseShareText(top3.map((d) => ({ brand: d.brand, name: d.name }))), pageUrl);
+  const top3 = ranked.slice(0, 3).map((r) => ({ brand: r.mouse.brand, name: r.mouse.name }));
+  const shareUrl = buildXShareUrl(buildMouseShareText(top3), pageUrl);
   // 追補 6 章:重ね図に出すマウス(選んでいなければ、絞り込んだ一覧の先頭。0 件なら 1 位)
   const overlay = ranked.find((r) => r.mouse.id === overlayId)?.mouse ?? filtered[0]?.mouse ?? ranked[0]?.mouse;
-  const overlayName = overlay ? (device(overlay.id)?.name ?? "") : "";
+  const overlayName = overlay?.name ?? "";
 
   return (
     <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
@@ -155,23 +152,20 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
         ) : (
           <ol className="grid gap-4">
             {shown.map((item) => {
-              const d = device(item.mouse.id);
-              if (!d) return null;
+              const m = item.mouse;
               const rank = ranked.indexOf(item) + 1;
-              const rakuten = MICE_RAKUTEN[item.mouse.id];
-              const reason = recommendReason({ ...hand, estimated }, target, item.mouse, null);
-              const links = shopLinks(`${d.brand} ${d.name}`, item.mouse.officialUrl, undefined, rakuten?.itemUrl);
-              const compare = currentMouse ? compareWith(currentMouse, item.mouse) : null;
-              const overlaid = overlay?.id === item.mouse.id;
-              const onOverlay = () => { setOverlayId(item.mouse.id); requestAnimationFrame(revealFitFigure); };
+              const reason = recommendReason({ ...hand, estimated }, target, m, null);
+              const compare = currentMouse ? compareWith(currentMouse, m) : null;
+              const overlaid = overlay?.id === m.id;
+              const onOverlay = () => { setOverlayId(m.id); requestAnimationFrame(revealFitFigure); };
               // 追補 6 章:一覧の先頭は大きな行(主ボタンはここ。絞り込みで 1 位が外れても先頭が持つ)。2 番目からはカード(店のボタンは二番手)
-              if (item === shown[0]) return <TopMouseRow key={item.mouse.id} rank={rank} item={item} brand={d.brand} name={d.name} reason={reason} links={links} compare={compare} overlaid={overlaid} onOverlay={onOverlay} />;
+              if (item === shown[0]) return <TopMouseRow key={m.id} rank={rank} item={item} brand={m.brand} name={m.name} reason={reason} links={m.links} compare={compare} overlaid={overlaid} onOverlay={onOverlay} />;
               return (
-                <MouseCard key={item.mouse.id} rank={rank} item={item} brand={d.brand} name={d.name}
+                <MouseCard key={m.id} rank={rank} item={item} brand={m.brand} name={m.name}
                   reason={reason}
                   compare={compare}
-                  links={links}
-                  imageUrl={rakuten?.imageUrl ?? null} overlaid={overlaid} onOverlay={onOverlay} />
+                  links={m.links}
+                  imageUrl={m.imageUrl} overlaid={overlaid} onOverlay={onOverlay} />
               );
             })}
           </ol>
