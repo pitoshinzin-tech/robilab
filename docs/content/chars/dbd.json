@@ -6,7 +6,7 @@
     "nameJa": "ヒルビリー",
     "nameEn": "The Hillbilly",
     "officialRole": "殺人鬼(難易度:普通)",
-    "summary": "チェーンソーのダッシュで長い距離を一気に詰める殺人鬼。公式は暴力で一気に片をつける効率の良さを紹介している。",
+    "summary": "チェーンソーで一気に距離を詰めるのが持ち味の殺人鬼。",
     "quote": {
       "text": "チェーンソーダッシュを発動し、猛烈なスピードで長距離を移動する",
       "url": "https://deadbydaylight.com/ja/game/characters/the-hillbilly/"
@@ -24,7 +24,7 @@
     "nameJa": "ハントレス",
     "nameEn": "The Huntress",
     "officialRole": "殺人鬼(難易度:普通)",
-    "summary": "投げ斧で離れた相手を狙う殺人鬼。公式は忍耐強さと精度で追跡を早く終わらせられると紹介している。",
+    "summary": "投げ斧で遠くの相手を狙う殺人鬼。",
     "quote": {
       "text": "忍耐強さと精度を武器に、開始早々に追跡を終わらせることもできるだろう",
       "url": "https://deadbydaylight.com/ja/game/characters/the-huntress/"
@@ -52,7 +52,7 @@
     "nameJa": "ナース",
     "nameEn": "The Nurse",
     "officialRole": "殺人鬼(難易度:かなり難しい)",
-    "summary": "ブリンクで長い距離を一気に移動し、相手の動きを読んで追跡を終える殺人鬼。",
+    "summary": "瞬間移動のような能力で間合いを詰める殺人鬼。",
     "quote": {
       "text": "ブリンクの能力で長距離を高速移動し、生存者の動きを読んで逃げ場を潰すことができる",
       "url": "https://deadbydaylight.com/ja/game/characters/the-nurse/"
@@ -75,7 +75,7 @@
     "nameJa": "ブライト",
     "nameEn": "The Blight",
     "officialRole": "殺人鬼(難易度:かなり難しい)",
-    "summary": "トークンを使った高速の突進を連続で出し、相手にプレッシャーをかける殺人鬼。",
+    "summary": "勢いよく連続で突っ込み、攻めの圧をかける殺人鬼。",
     "quote": {
       "text": "トークンを使って高速で突進する",
       "url": "https://deadbydaylight.com/ja/game/characters/the-blight/"
@@ -98,7 +98,7 @@
     "nameJa": "レイス",
     "nameEn": "The Wraith",
     "officialRole": "殺人鬼(難易度:簡単)",
-    "summary": "鐘で姿を消し、気配を悟られずに近づいて奇襲する殺人鬼。",
+    "summary": "姿を消して、静かに近づく殺人鬼。",
     "quote": {
       "text": "気配をほとんど悟られることなく獲物の追跡し攻撃することができる",
       "url": "https://deadbydaylight.com/ja/game/characters/the-wraith/"
@@ -126,7 +126,7 @@
     "nameJa": "スピリット",
     "nameEn": "The Spirit",
     "officialRole": "殺人鬼(難易度:難しい)",
-    "summary": "フェイズウォークで互いに姿が見えない状態になり、気づかれないまま攻撃する殺人鬼。",
+    "summary": "姿の見えない状態で動き回って攻める殺人鬼。",
     "quote": {
       "text": "「山岡の祟り」を発動中は、スピリットも生存者も互いに姿が見えない",
       "url": "https://deadbydaylight.com/ja/game/characters/the-spirit/"
@@ -148,7 +148,7 @@
     "nameJa": "ドレッジ",
     "nameEn": "The Dredge",
     "officialRole": "殺人鬼(難易度:難しい)",
-    "summary": "ロッカーからロッカーへ移動して不意に現れる殺人鬼。",
+    "summary": "ロッカーを行き来して、不意に現れる殺人鬼。",
     "quote": {
       "text": "ロッカーをマップ上の通路として活用し、いつでもどこでも瞬時に姿を表すことができる",
       "url": "https://deadbydaylight.com/ja/game/characters/the-dredge/"
@@ -177,7 +177,7 @@
     "nameJa": "トラッパー",
     "nameEn": "The Trapper",
     "officialRole": "殺人鬼(難易度:簡単)",
-    "summary": "マップにトラバサミを仕掛けて、相手が慎重にならざるを得ない場所を作る殺人鬼。",
+    "summary": "罠を仕掛けて、相手の動きを縛る殺人鬼。",
     "quote": {
       "text": "生存者が頻繁に通る場所や背の高い草に覆われたエリアなどに罠を仕掛け",
       "url": "https://deadbydaylight.com/ja/game/characters/the-trapper/"
@@ -205,7 +205,7 @@
     "nameJa": "ハグ",
     "nameEn": "The Hag",
     "officialRole": "殺人鬼(難易度:かなり難しい)",
-    "summary": "幻像の罠を張り巡らせ、踏まれた場所へ瞬時に移動して攻撃する殺人鬼。",
+    "summary": "罠を張って、離れた場所から迫る殺人鬼。",
     "quote": {
       "text": "幻像の罠で危険な包囲網を張り巡らせ、生存者たちをうっかり自ら罠にはまらせる殺人鬼",
       "url": "https://deadbydaylight.com/ja/game/characters/the-hag/"
@@ -233,7 +233,7 @@
     "nameJa": "スカルマーチャント",
     "nameEn": "The Skull Merchant",
     "officialRole": "殺人鬼(難易度:難しい)",
-    "summary": "ドローンを置いて監視網を作り、生存者を探して追う殺人鬼。",
+    "summary": "ドローンで見張りの網を作って追う殺人鬼。",
     "quote": {
       "text": "不気味なドローンを駆使して恐怖の監視網を張り巡らせ",
       "url": "https://deadbydaylight.com/ja/game/characters/skull-merchant/"
@@ -262,7 +262,7 @@
     "nameJa": "メグ・トーマス",
     "nameEn": "Meg Thomas",
     "officialRole": "生存者",
-    "summary": "体育会系で、追跡をあえて長引かせて味方の時間を稼ぐ生存者。",
+    "summary": "追われ役を引き受けて、味方の時間を稼ぐ生存者。",
     "quote": {
       "text": "追跡を長引かせて殺人鬼を煽ることでスリルを味わいつつ",
       "url": "https://deadbydaylight.com/ja/game/characters/meg-thomas/"
@@ -290,7 +290,7 @@
     "nameJa": "ネア・カールソン",
     "nameEn": "Nea Karlsson",
     "officialRole": "生存者",
-    "summary": "猫のようなすばしっこさで、ピンチをうまく切り抜けてきた生存者。",
+    "summary": "身軽に動いて、ピンチをかわす生存者。",
     "quote": {
       "text": "ピンチの時でもうまく切り抜ける猫のようなすばしっこさ",
       "url": "https://deadbydaylight.com/ja/game/characters/nea-karlsson/"
@@ -308,7 +308,7 @@
     "nameJa": "デイビッド・キング",
     "nameEn": "David King",
     "officialRole": "生存者",
-    "summary": "ケンカ好きの荒っぽい男。ダッシュで攻撃をかわすパークがある生存者。",
+    "summary": "ケンカっ早い性格で、攻撃をかわす手を持つ生存者。",
     "quote": {
       "text": "負傷時、一気にダッシュして殺人鬼の攻撃を積極的にかわす",
       "url": "https://deadbydaylight.com/ja/game/characters/david-king/"
@@ -327,7 +327,7 @@
     "nameJa": "クローデット・モレル",
     "nameEn": "Claudette Morel",
     "officialRole": "生存者",
-    "summary": "植物学の知識を生かして、自分と味方を治療する生存者。",
+    "summary": "植物の知識を生かして、治療が得意な生存者。",
     "quote": {
       "text": "自身と他者を治療するプロであるクローデットのサポート",
       "url": "https://deadbydaylight.com/ja/game/characters/claudette-morel/"
@@ -355,7 +355,7 @@
     "nameJa": "ドワイト・フェアフィールド",
     "nameEn": "Dwight Fairfield",
     "officialRole": "生存者",
-    "summary": "チームの効率を高めるのが得意な、リーダー役の生存者。",
+    "summary": "周りをまとめて、チームの動きを助ける生存者。",
     "quote": {
       "text": "チームの効率性を見いだしてそれを高めるのが得意だ",
       "url": "https://deadbydaylight.com/ja/game/characters/dwight-fairfield/"
@@ -377,7 +377,7 @@
     "nameJa": "アダム・フランシス",
     "nameEn": "Adam Francis",
     "officialRole": "生存者",
-    "summary": "命懸けで他者を救う英雄のような教師。素早く戦略を練る生存者。",
+    "summary": "教師で、人を助けることを大事にする生存者。",
     "quote": {
       "text": "果敢にも命懸けで他者を救う英雄のような男だ",
       "url": "https://deadbydaylight.com/ja/game/characters/adam-francis/"
@@ -400,7 +400,7 @@
     "nameJa": "ジェーン・ロメロ",
     "nameEn": "Jane Romero",
     "officialRole": "生存者",
-    "summary": "周りと協力する才能を持つ生存者。パークで他の生存者を治療できる。",
+    "summary": "仲間と力を合わせるのが得意で、治療もこなす生存者。",
     "quote": {
       "text": "周りと協力する才能は貴重な財産だ",
       "url": "https://deadbydaylight.com/ja/game/characters/jane-romero/"
@@ -429,7 +429,7 @@
     "nameJa": "ジェイク・パーク",
     "nameEn": "Jake Park",
     "officialRole": "生存者",
-    "summary": "自然の中で生存本能を磨いた、気配を隠すのが得意な生存者。",
+    "summary": "気配を消して動くのが得意な生存者。",
     "quote": {
       "text": "自然の中で過ごしたことで生存本能が研ぎ澄まされた",
       "url": "https://deadbydaylight.com/ja/game/characters/jake-park/"
@@ -451,7 +451,7 @@
     "nameJa": "フェン・ミン",
     "nameEn": "Feng Min",
     "officialRole": "生存者",
-    "summary": "効率重視のeスポーツ選手。発電機の修理中の音を抑えるパークがある。",
+    "summary": "eスポーツ選手で、発電機の修理を静かに進める生存者。",
     "quote": {
       "text": "機械の取り扱い時は最大限慎重に、かつ正確に行う",
       "url": "https://deadbydaylight.com/ja/game/characters/feng-min/"
@@ -473,7 +473,7 @@
     "nameJa": "木村結衣",
     "nameEn": "Yui Kimura",
     "officialRole": "生存者",
-    "summary": "素早い決断力を持つ生存者。パークで追跡から逃れやすくなる。",
+    "summary": "決断が早く、追われても逃れやすい生存者。",
     "quote": {
       "text": "殺人鬼の追跡から完全に逃れることが可能になる",
       "url": "https://deadbydaylight.com/ja/game/characters/yui-kimura/"

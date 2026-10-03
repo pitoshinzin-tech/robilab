@@ -64,6 +64,12 @@ describe("パンくず", () => {
     expect(v.map((c) => c.path)).toEqual(["/games", "/games/valorant/chars"]);
     expect(JSON.stringify(v)).not.toContain("ジェット");
   });
+  it("VALORANT:全キャラの JSON-LD(パンくず)に名前(日本語・英語)が入らない", () => {
+    for (const c of CHARS.filter((x) => x.game === "valorant")) {
+      const json = breadcrumbJsonLd(charCrumbs(c, game("valorant"), CHAR_GAME_SETTINGS.valorant), "https://example.com");
+      for (const name of [c.nameJa, c.nameEn]) expect(json, c.id).not.toContain(name);
+    }
+  });
   it("JSON-LD は < を \\u003c にし、読み戻すと同じ中身", () => {
     const json = breadcrumbJsonLd([{ name: "</script><script>alert(1)</script>", path: "/games" }], "https://example.com");
     expect(json).not.toContain("<");
@@ -78,6 +84,8 @@ describe("isLatinText(英語の文に lang=\"en\" を付けるか)", () => {
   it.each([
     ["expels aggressors with deadly precision", true],
     ["© 2015-2026 and BEHAVIOUR, DEAD BY DAYLIGHT", true],
+    ["He said “run” — then ‘hid’ – fast", true],
+    ["“俊敏” — 日本語", false],
     ["俊敏で捉え難い戦闘スタイルを持ち", false],
     ["ロビラボ was created under Riot Games'", false],
   ])("%s → %s", (s, expected) => {

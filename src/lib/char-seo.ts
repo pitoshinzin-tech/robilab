@@ -68,7 +68,7 @@ export function breadcrumbJsonLd(crumbs: readonly Crumb[], site: string): string
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 
-/** 英語(ASCII と ©・’ だけ)の文か。英語の引用・断り書きに lang="en" を付けるため */
+/** 英語(ASCII と ©・‘・’・“・”・—・– だけ)の文か。英語の引用・断り書きに lang="en" を付けるため */
 export function isLatinText(s: string): boolean {
-  return /^[\x20-\x7E©’]+$/.test(s);
+  return /^[\x20-\x7E©‘’“”—–]+$/.test(s);
 }

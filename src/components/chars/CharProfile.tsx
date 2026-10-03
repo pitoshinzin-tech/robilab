@@ -78,7 +78,7 @@ export function CharProfile({ char, game, role, setting, axisRows, fits, sameRol
 
         {axisRows ? (
           <section aria-labelledby="char-lean" className="grid gap-4">
-            <SectionHeading id="char-lean" title="このキャラの傾向" description="4 つの軸を、数字でなく言葉で。土台はロールで、公式の言葉に手がかりがある軸だけ少しずらしています。" />
+            <SectionHeading id="char-lean" title="このキャラの傾向" description={setting.showQuotes ? "4 つの軸を、数字でなく言葉で。土台はロールで、公式の言葉に手がかりがある軸だけ少しずらしています。" : "4 つの軸を、数字でなく言葉で。土台は型で、公式ページの内容に手がかりがある軸だけ少しずらしています(出典は各行のリンクから)。"} />
             <ul className="flex flex-wrap gap-2">
               {axisRows.map((r) => (
                 <li key={r.axis} className="inline-flex h-11 items-center gap-2 rounded-rl-sm border border-rl-line px-3 text-sm">

@@ -74,6 +74,13 @@ describe("1 体のページの中身(代表 66 体すべて。スト6 も描け�
       if (c.roleBasis) expect(html, c.id).not.toContain(esc(c.roleBasis.text));
     }
   });
+  it("DbD:説明は自分たちの言葉で、「公式は…紹介」型や公式の紹介文の写しを使わない", () => {
+    for (const c of shown.filter((x) => x.game === "dbd")) {
+      expect(c.summary, c.id).not.toMatch(/公式は|紹介している/);
+      expect(c.quote.text.includes(c.summary) || c.summary.includes(c.quote.text), c.id).toBe(false);
+      expect(textOf(render(c)), c.id).not.toContain("公式の言葉に手がかり");
+    }
+  });
   it("どのキャラの roleBasis も画面に出さない", () => {
     for (const c of shown.filter((x) => x.roleBasis)) expect(render(c), c.id).not.toContain(esc(c.roleBasis!.text));
   });
@@ -90,8 +97,15 @@ describe("1 体のページ(静的に作る)", () => {
     expect(String(v.description)).not.toContain("ジェット");
     expect(v.alternates?.canonical).toBe("/games/valorant/chars/jett");
     expect(v).not.toHaveProperty("keywords");
+    for (const name of ["ジェット", "Jett"]) {
+      expect(String(v.openGraph?.title)).not.toContain(name);
+      expect(String(v.openGraph?.description)).not.toContain(name);
+    }
     const o = await charPage.generateMetadata({ params: Promise.resolve({ game: "overwatch", char: "winston" }) });
     expect(o.title).toBe("ウィンストン(オーバーウォッチ)はどんなタイプに合う?");
+  });
+  it("スト6(未公開)の metadata は空(title・OG に出さない)", async () => {
+    expect(await charPage.generateMetadata({ params: Promise.resolve({ game: "sf6", char: "ken" }) })).toEqual({});
   });
   it("予備・知らないキャラの metadata は空", async () => {
     expect(await charPage.generateMetadata({ params: Promise.resolve({ game: "valorant", char: "reyna" }) })).toEqual({});
