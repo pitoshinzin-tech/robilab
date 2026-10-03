@@ -28,7 +28,8 @@ export const viewport: Viewport = { themeColor: "#0A0C16", colorScheme: "dark" }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" className={orbitron.variable}>
+    // suppressHydrationWarning:/mouse の freshVisitorScript がハイドレーションの前に <html> に印のクラスを足すため(src/lib/fresh-visitor.ts)
+    <html lang="ja" className={orbitron.variable} suppressHydrationWarning>
       <body className="min-h-dvh pb-[calc(64px+env(safe-area-inset-bottom))] antialiased md:pb-0">
         <SiteHeader />
         {children}

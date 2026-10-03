@@ -97,9 +97,11 @@ export function MouseClient({ pageUrl, mice, other = null }: { pageUrl: string; 
   /*
    * 読み込み中の面。表示速度(docs/design/perf.md):入力画面(HandSetup)を見えないまま置いて同じ高さを取り、その上に Skeleton を重ねる。
    * 初めての人は確かめ終わると入力画面になるので、下の段(注意書き)が動かない(高さ 160px の Skeleton のときは CLS 0.258)。
+   * サーバーの HTML(busy でない面)には data-rl-pending="ssr"。初めての人(page.tsx の freshVisitorScript が <html> に印)には、
+   * globals.css でハイドレーションの前から入力画面を見せる(すぐ同じ入力画面になるので、早く出るだけ)。ログイン中・設定がある人は今までどおり。
    */
   const pendingView = (busy: boolean) => (
-    <div aria-busy={busy || undefined} className="relative">
+    <div aria-busy={busy || undefined} data-rl-pending={busy ? undefined : "ssr"} className="relative">
       <div aria-hidden inert className="invisible"><HandSetup initial={emptyMySettings().hand} onDone={() => {}} mice={mice} /></div>
       <Skeleton className="absolute inset-0 rounded-rl-md" />
     </div>

@@ -9,6 +9,7 @@ import { toMouseRows } from "@/lib/mouse-rows";
 import { skateCounts } from "@/lib/skate-match";
 import { subnavFor } from "@/lib/nav";
 import { getSiteUrl } from "@/lib/site-url";
+import { freshVisitorScript } from "@/lib/fresh-visitor";
 import { PageShell } from "@/components/ui/page-shell";
 import { SubNav } from "@/components/brand/SubNav";
 import { OtherMiceList } from "@/components/mouse/OtherMiceList";
@@ -31,6 +32,8 @@ export default function MousePage() {
     <PageShell width="wide" title="マウス探し" description="手の大きさと持ち方から、ちょうどいい大きさのマウスを探します。"
       subnav={<SubNav label="感度・マウス" items={subnavFor("mouse", PROS_READY)} />}>
       <div className="grid gap-8">
+        {/* 表示速度:初めての人には読み込み中の面を入力画面として見せる印(src/lib/fresh-visitor.ts)。読み込み中の面より前で動かす */}
+        <script dangerouslySetInnerHTML={{ __html: freshVisitorScript() }} />
         {/* 比べられない段はサーバーで描いて渡し、結果の右の列の最後にだけ出す(入力前は出さない) */}
         <MouseClient pageUrl={`${getSiteUrl()}/mouse`} mice={comparable} other={other.length > 0 ? <OtherMiceList items={other} /> : null} />
         <p className="text-xs text-rl-muted">

@@ -1091,3 +1091,14 @@ body {
     overflow-clip-margin: 24px;
   }
 }
+
+/*
+ * 表示速度(docs/design/perf.md):/mouse の読み込み中の面を、初めての人(src/lib/fresh-visitor.ts の印 .rl-fresh)にだけ、
+ * ハイドレーションの前から入力画面として見せる(Skeleton を外し、見えないまま置いた入力画面を見せる)。押せるのはハイドレーションのあと(inert のまま)。
+ */
+html.rl-fresh [data-rl-pending="ssr"] > .invisible {
+  visibility: visible;
+}
+html.rl-fresh [data-rl-pending="ssr"] > [data-slot="skeleton"] {
+  display: none;
+}
