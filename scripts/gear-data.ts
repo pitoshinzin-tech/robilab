@@ -6,7 +6,7 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
-import type { PadSpec, PadSurface, SkateMaterial, SkateShape, SkateSpec } from "../src/data/gear-types";
+import type { MouseConnection, MouseShape, MouseSpec, PadSpec, PadSurface, SkateMaterial, SkateShape, SkateSpec } from "../src/data/gear-types";
 
 const header = (src: string) =>
   `// scripts/gear-data.ts が ${src} から作る。手で直さない(JSON を直して \`node scripts/gear-data.ts\` で作り直す)。\n`;
@@ -25,6 +25,17 @@ export const PAD_RENAMES: Record<string, { brand?: string; name?: string }> = {
 export const DISCONTINUED_PADS: readonly string[] = ["artisan-shidenkai", "zowie-g-sr", "zowie-g-tr"];
 /** ソールの生産終了(skates-notes.md に記載なし) */
 export const DISCONTINUED_SKATES: readonly string[] = [];
+
+const MOUSE_SHAPES: readonly MouseShape[] = ["symmetric", "right"];
+const CONNECTIONS: readonly MouseConnection[] = ["wired", "wireless", "both"];
+/** マウスの生産終了(mice-notes.md に記載なし) */
+export const DISCONTINUED_MICE: readonly string[] = [];
+
+type RawMouse = {
+  id: string; brand: string; name: string; lengthMm: number | null; widthMm: number | null; heightMm: number | null; weightG: number | null;
+  shape: string | null; connection: string | null; sensor: string | null; officialUrl: string; checkedAt: string;
+  inExistingData: boolean; selectionBasis: string; notes: string;
+};
 
 const SURFACES: readonly PadSurface[] = ["cloth", "hybrid", "glass", "hard", "other"];
 const MATERIALS: readonly SkateMaterial[] = ["PTFE", "glass", "ceramic", "UPE", "other"];
@@ -49,7 +60,37 @@ function oneOf<T extends string>(value: string | null, allowed: readonly T[], wh
   throw new Error(`${where}: 想定外の値 ${JSON.stringify(value)}`);
 }
 
+/** 名前の直し・生産終了の表の id がデータにあるか。ないものは書き間違い(または消し忘れ)なので止める */
+export function assertKnownIds(listed: readonly string[], known: readonly string[], where: string): void {
+  const unknown = listed.filter((id) => !known.includes(id));
+  if (unknown.length > 0) throw new Error(`${where}: データにない id ${unknown.join(", ")}`);
+}
+
+export function toMouseSpecs(raw: RawMouse[]): MouseSpec[] {
+  assertKnownIds(DISCONTINUED_MICE, raw.map((m) => m.id), "DISCONTINUED_MICE");
+  return raw.map((m) => ({
+    id: m.id,
+    brand: m.brand,
+    name: m.name,
+    lengthMm: m.lengthMm,
+    widthMm: m.widthMm,
+    heightMm: m.heightMm,
+    weightG: m.weightG,
+    shape: oneOf(m.shape, MOUSE_SHAPES, `${m.id}.shape`),
+    connection: oneOf(m.connection, CONNECTIONS, `${m.id}.connection`),
+    sensor: m.sensor,
+    officialUrl: m.officialUrl,
+    checkedAt: m.checkedAt,
+    selectionBasis: m.selectionBasis,
+    note: m.notes,
+    discontinued: DISCONTINUED_MICE.includes(m.id),
+  }));
+}
+
 export function toPadSpecs(raw: { pads: RawPad[] }): PadSpec[] {
+  const padIds = raw.pads.map((p) => p.id);
+  assertKnownIds(Object.keys(PAD_RENAMES), padIds, "PAD_RENAMES");
+  assertKnownIds(DISCONTINUED_PADS, padIds, "DISCONTINUED_PADS");
   return raw.pads.map((p) => {
     const rename = PAD_RENAMES[p.id] ?? {};
     return {
@@ -73,6 +114,7 @@ export function toPadSpecs(raw: { pads: RawPad[] }): PadSpec[] {
 }
 
 export function toSkateSpecs(raw: { items: RawSkate[] }): SkateSpec[] {
+  assertKnownIds(DISCONTINUED_SKATES, raw.items.map((x) => x.id), "DISCONTINUED_SKATES");
   return raw.items.map((s) => {
     if (s.mouseId !== null && !s.mouseIds.includes(s.mouseId)) throw new Error(`${s.id}: mouseId が mouseIds に入っていない`);
     const shape = oneOf(s.shape, SKATE_SHAPES, `${s.id}.shape`);
@@ -126,10 +168,33 @@ ${lines(toSkateSpecs(raw))}
 `;
 }
 
+export function renderMiceTs(raw: RawMouse[]): string {
+  return `${header("docs/content/gear/mice.json")}// 並びは JSON のまま(src/data/mice-rakuten.ts の並びと合わせる。tests/data/mice-rakuten.test.ts)。
+import type { MouseSpec } from "./gear-types";
+export type { MouseConnection, MouseShape, MouseSpec } from "./gear-types";
+
+export const MICE: MouseSpec[] = [
+${lines(toMouseSpecs(raw))}
+];
+
+export function mouseById(id: string): MouseSpec | undefined {
+  return MICE.find((m) => m.id === id);
+}
+`;
+}
+
+export function renderMiceIdsTs(raw: RawMouse[]): string {
+  return `${header("docs/content/gear/mice.json")}// マウス探し(/mouse)に載っているマウスの id だけ。ブラウザの部品(プロ設定の行など)はこちらを読む(機種のデータ本体を JS に入れない)。
+export const MICE_IDS: readonly string[] = ${JSON.stringify(raw.map((m) => m.id))};
+`;
+}
+
 const readJson = (p: string) => JSON.parse(readFileSync(p, "utf8"));
 
 /** 書き出すファイル(テストも同じ一覧を使う) */
 export const TARGETS: { out: string; render: () => string }[] = [
+  { out: "src/data/mice.ts", render: () => renderMiceTs(readJson("docs/content/gear/mice.json")) },
+  { out: "src/data/mice-ids.ts", render: () => renderMiceIdsTs(readJson("docs/content/gear/mice.json")) },
   { out: "src/data/pads.ts", render: () => renderPadsTs(readJson("docs/content/gear/pads.json")) },
   { out: "src/data/skates.ts", render: () => renderSkatesTs(readJson("docs/content/gear/skates.json")) },
 ];

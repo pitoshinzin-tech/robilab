@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import type { ProSetting } from "@/data/pros";
 import { DEVICES } from "@/data/devices";
-import { mouseById } from "@/data/mice";
+import { MICE_IDS } from "@/data/mice-ids";
 import { getSensGame } from "@/data/sensitivity";
 import { diffText, type NearPro } from "@/lib/pro-match";
 
@@ -11,7 +11,7 @@ export function mouseLabel(p: ProSetting): { text: string; href: string | null }
   if (p.mouse) {
     const d = DEVICES.find((x) => x.id === p.mouse);
     if (!d) return null;
-    return { text: `${d.brand} ${d.name}`, href: mouseById(p.mouse) ? "/mouse" : null };
+    return { text: `${d.brand} ${d.name}`, href: MICE_IDS.includes(p.mouse) ? "/mouse" : null };
   }
   return p.mouseName ? { text: p.mouseName, href: null } : null;
 }

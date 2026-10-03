@@ -5,6 +5,30 @@
 export type MouseShape = "symmetric" | "right";
 export type MouseConnection = "wired" | "wireless" | "both";
 
+export type MouseSpec = {
+  id: string;
+  brand: string;
+  name: string;
+  lengthMm: number | null;
+  /** いちばん広いところ */
+  widthMm: number | null;
+  heightMm: number | null;
+  /** 標準の構成(公式の表記どおり。電池式は電池込み) */
+  weightG: number | null;
+  shape: MouseShape | null;
+  connection: MouseConnection | null;
+  sensor: string | null;
+  /** 数字の出典(メーカー公式のページ) */
+  officialUrl: string;
+  /** 確認した日(YYYY-MM-DD) */
+  checkedAt: string;
+  /** 人気の根拠(出典と順位) */
+  selectionBasis: string;
+  /** null の理由・原文の表記 */
+  note: string;
+  discontinued: boolean;
+};
+
 export type PadSurface = "cloth" | "hybrid" | "glass" | "hard" | "other";
 /** 1 つのサイズ(公式の表記。widthMm = 横幅、depthMm = 奥行き、thicknessMm = 厚さ) */
 export type PadSize = { label: string; widthMm: number | null; depthMm: number | null; thicknessMm: number | null };

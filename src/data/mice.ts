@@ -1,264 +1,65 @@
-/**
- * マウスの大きさ・重さ(メーカー公式の製品ページの数字。価格は載せない)。
- * id は src/data/devices.ts と同じ。メーカー名・製品名は devices.ts を使う。
- * 重さは、標準の電池を入れた状態の公式の数字(電池を使うマウスは電池込み)。
- * 増やすときは devices.ts とこのファイルの両方に足す(tests/data/mice.test.ts が確かめる)。
- */
-export type MouseSpec = {
-  id: string;
-  lengthMm: number;
-  /** いちばん広いところ */
-  widthMm: number;
-  heightMm: number;
-  /** 標準の構成(公式の表記どおり) */
-  weightG: number;
-  shape: "symmetric" | "right";
-  connection: "wired" | "wireless";
-  /** 数字の出典(メーカー公式の製品ページ) */
-  officialUrl: string;
-  /** 確認した日(YYYY-MM-DD) */
-  checkedAt: string;
-};
+// scripts/gear-data.ts が docs/content/gear/mice.json から作る。手で直さない(JSON を直して `node scripts/gear-data.ts` で作り直す)。
+// 並びは JSON のまま(src/data/mice-rakuten.ts の並びと合わせる。tests/data/mice-rakuten.test.ts)。
+import type { MouseSpec } from "./gear-types";
+export type { MouseConnection, MouseShape, MouseSpec } from "./gear-types";
 
 export const MICE: MouseSpec[] = [
-  {
-    id: "logicool-g-pro-x-superlight-2",
-    lengthMm: 125,
-    widthMm: 63.5,
-    heightMm: 40,
-    weightG: 60,
-    shape: "symmetric",
-    connection: "wireless",
-    officialUrl: "https://support.logi.com/hc/en-us/articles/15235304069783-Specification-G-PRO-X-Superlight-2-Lightspeed-Gaming-Mouse",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "logicool-g-pro-x-superlight-2-dex",
-    lengthMm: 125.8,
-    widthMm: 67.7,
-    heightMm: 43.9,
-    weightG: 60,
-    shape: "right",
-    connection: "wireless",
-    officialUrl: "https://support.logi.com/hc/en-us/articles/24668087532823-Specification-PRO-X-SUPERLIGHT-2-DEX",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "logicool-g-pro-x-superlight",
-    lengthMm: 125,
-    widthMm: 63.5,
-    heightMm: 40,
-    weightG: 63,
-    shape: "symmetric",
-    connection: "wireless",
-    officialUrl: "https://www.logitechg.com/en-us/shop/p/pro-x-superlight-wireless-mouse.910-005878",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "logicool-g502-x-plus",
-    lengthMm: 131.4,
-    widthMm: 79.2,
-    heightMm: 41.1,
-    weightG: 106,
-    shape: "right",
-    connection: "wireless",
-    officialUrl: "https://support.logi.com/hc/en-us/articles/7639125500183-Specification-G502-X-PLUS-Wireless-RGB-Gaming-Mouse",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "logicool-g502-hero",
-    lengthMm: 131.2,
-    widthMm: 75,
-    heightMm: 40,
-    weightG: 121,
-    shape: "right",
-    connection: "wired",
-    officialUrl: "https://www.logitechg.com/en-us/shop/p/g502-hero-gaming-mouse.910-005469",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "logicool-g305",
-    lengthMm: 116.6,
-    widthMm: 62.15,
-    heightMm: 38.2,
-    weightG: 99,
-    shape: "symmetric",
-    connection: "wireless",
-    officialUrl: "https://support.logi.com/hc/en-us/articles/360023303254-G305-LIGHTSPEED-Wireless-Gaming-Mouse-Technical-Specifications",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "logicool-g304",
-    lengthMm: 116.6,
-    widthMm: 62.15,
-    heightMm: 38.2,
-    weightG: 99,
-    shape: "symmetric",
-    connection: "wireless",
-    officialUrl: "https://support.logi.com/hc/en-us/articles/360023303474-G304-LIGHTSPEED-Wireless-Gaming-Mouse-Technical-Specifications",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "razer-deathadder-v3-pro",
-    lengthMm: 128,
-    widthMm: 68,
-    heightMm: 44,
-    weightG: 63,
-    shape: "right",
-    connection: "wireless",
-    officialUrl: "https://www.razer.com/gaming-mice/razer-deathadder-v3-pro",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "razer-deathadder-v3",
-    lengthMm: 128,
-    widthMm: 68,
-    heightMm: 44,
-    weightG: 59,
-    shape: "right",
-    connection: "wired",
-    officialUrl: "https://www.razer.com/gaming-mice/razer-deathadder-v3",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "razer-viper-v3-pro",
-    lengthMm: 127.1,
-    widthMm: 63.9,
-    heightMm: 39.9,
-    weightG: 54,
-    shape: "symmetric",
-    connection: "wireless",
-    officialUrl: "https://www.razer.com/gaming-mice/razer-viper-v3-pro",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "razer-viper-mini",
-    lengthMm: 118.3,
-    widthMm: 53.5,
-    heightMm: 38.3,
-    weightG: 61,
-    shape: "symmetric",
-    connection: "wired",
-    officialUrl: "https://www.razer.com/gaming-mice/razer-viper-mini",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "razer-basilisk-v3-pro",
-    lengthMm: 130,
-    widthMm: 75.4,
-    heightMm: 42.5,
-    weightG: 112,
-    shape: "right",
-    connection: "wireless",
-    officialUrl: "https://www.razer.com/gaming-mice/razer-basilisk-v3-pro",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "pulsar-x2-v2",
-    lengthMm: 120.4,
-    widthMm: 63,
-    heightMm: 38,
-    weightG: 53,
-    shape: "symmetric",
-    connection: "wireless",
-    officialUrl: "https://www.pulsar.gg/products/x2v2-gaming-mouse",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "pulsar-xlite-v3",
-    lengthMm: 122,
-    widthMm: 66,
-    heightMm: 43,
-    weightG: 55,
-    shape: "right",
-    connection: "wireless",
-    officialUrl: "https://www.pulsar.gg/products/xlite-v3-medium-gaming-mouse",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "endgame-gear-op1-8k",
-    lengthMm: 118.2,
-    widthMm: 60.5,
-    heightMm: 37.2,
-    weightG: 50.5,
-    shape: "symmetric",
-    connection: "wired",
-    officialUrl: "https://endgamegear.com/products/op1-8k-gaming-mouse",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "endgame-gear-xm2we",
-    lengthMm: 122,
-    widthMm: 66,
-    heightMm: 38,
-    weightG: 63,
-    shape: "symmetric",
-    connection: "wireless",
-    officialUrl: "https://endgamegear.com/products/xm2we-wireless-gaming-mouse",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "steelseries-aerox-3-wireless",
-    lengthMm: 120.55,
-    widthMm: 67.03,
-    heightMm: 37.98,
-    weightG: 68,
-    shape: "right",
-    connection: "wireless",
-    officialUrl: "https://steelseries.com/gaming-mice/aerox-3-wireless",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "steelseries-rival-3-wireless",
-    lengthMm: 120.6,
-    widthMm: 67,
-    heightMm: 37.9,
-    weightG: 106,
-    shape: "right",
-    connection: "wireless",
-    officialUrl: "https://steelseries.com/gaming-mice/rival-3-wireless",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "corsair-m75-wireless",
-    lengthMm: 128,
-    widthMm: 65,
-    heightMm: 42,
-    weightG: 89,
-    shape: "symmetric",
-    connection: "wireless",
-    officialUrl: "https://www.corsair.com/us/en/explorer/gamer/mice/corsair-m75-and-m75-wireless-everything-you-need-to-know/",
-    checkedAt: "2026-09-29",
-  },
-  {
-    id: "hyperx-pulsefire-haste-2",
-    lengthMm: 124.3,
-    widthMm: 66.8,
-    heightMm: 38.2,
-    weightG: 53,
-    shape: "symmetric",
-    connection: "wired",
-    officialUrl: "https://hyperx.com/products/hyperx-pulsefire-haste-2-gaming-mouse",
-    checkedAt: "2026-09-29",
-  },
+  {"id":"logicool-g-pro-x-superlight-2","brand":"Logicool G","name":"PRO X SUPERLIGHT 2","lengthMm":125,"widthMm":63.5,"heightMm":40,"weightG":60,"shape":"symmetric","connection":"wireless","sensor":"HERO 2","officialUrl":"https://support.logi.com/hc/en-us/articles/15235304069783-Specification-G-PRO-X-Superlight-2-Lightspeed-Gaming-Mouse","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 11位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 21位 / BCNランキング 2026年8月 ゲーミングマウス TOP10 10位(2026-09-18 公開) / ProSettings.net プロ使用率 1位(2026-10-03 取得)","note":"数値は既存どおり(日本公式 https://www.logicool.co.jp/ja-jp/shop/p/pro-x2-superlight-wireless-mouse.910-006643 も同じ 125/63.5/40mm・60g)。形状は PRO X2 SUPERSTRIKE の日本公式ページの「PRO X SUPERLIGHT と PRO X SUPERLIGHT 2によって改良された左右対称の形状」という説明から symmetric(この機種のページ自体には形状の記載なし)。ワイヤレス機。ケーブルでの有線動作は公式仕様に明記がないため connection は wireless。","discontinued":false},
+  {"id":"logicool-g-pro-x-superlight-2-dex","brand":"Logicool G","name":"PRO X SUPERLIGHT 2 DEX","lengthMm":125.8,"widthMm":67.7,"heightMm":43.9,"weightG":60,"shape":"right","connection":"wireless","sensor":"HERO 2","officialUrl":"https://support.logi.com/hc/en-us/articles/24668087532823-Specification-PRO-X-SUPERLIGHT-2-DEX","checkedAt":"2026-10-03","selectionBasis":"価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 40位 / ProSettings.net プロ使用率 13位(2026-10-03 取得)","note":"日本公式 https://www.logicool.co.jp/ja-jp/shop/p/pro-x-superlight-2-dex でも同じ数値。形状は日本公式の「非対称の右手デザイン」で right。ワイヤレス機。ケーブルでの有線動作は公式仕様に明記がないため connection は wireless。","discontinued":false},
+  {"id":"logicool-g-pro-x-superlight","brand":"Logicool G","name":"PRO X SUPERLIGHT","lengthMm":125,"widthMm":63.5,"heightMm":40,"weightG":63,"shape":"symmetric","connection":"wireless","sensor":"HERO","officialUrl":"https://www.logitechg.com/en-us/shop/p/pro-x-superlight-wireless-mouse.910-005878","checkedAt":"2026-10-03","selectionBasis":"価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 3位 / ProSettings.net プロ使用率 4位(2026-10-03 取得)","note":"日本公式の製品ページ(910-005882)は 404 のため米国公式で確認。形状は PRO X2 SUPERSTRIKE の日本公式ページの「PRO X SUPERLIGHT と PRO X SUPERLIGHT 2によって改良された左右対称の形状」という説明から symmetric(この機種のページ自体には形状の記載なし)。ワイヤレス機。ケーブルでの有線動作は公式仕様に明記がないため connection は wireless。","discontinued":false},
+  {"id":"logicool-g502-x-plus","brand":"Logicool G","name":"G502 X PLUS","lengthMm":131.4,"widthMm":79.2,"heightMm":41.1,"weightG":106,"shape":null,"connection":"wireless","sensor":"HERO 44K","officialUrl":"https://support.logi.com/hc/en-us/articles/7639125500183-Specification-G502-X-PLUS-Wireless-RGB-Gaming-Mouse","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 16位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 20位","note":"寸法・重さは既存どおり。センサーはサポートの仕様ページでは「HERO」、現行の日本公式(https://www.logicool.co.jp/ja-jp/shop/p/g502-x-plus-wireless-lightforce.910-007816、2026年の新色)では「HERO 44K」。現行表記を採用。ロジクール公式ページ(日本・米国)に左右対称/右手用の記載が見当たらないため shape は null。(既存は right)ワイヤレス機。ケーブルでの有線動作は公式仕様に明記がないため connection は wireless。","discontinued":false},
+  {"id":"logicool-g502-hero","brand":"Logicool G","name":"G502 HERO","lengthMm":131.2,"widthMm":75,"heightMm":40,"weightG":121,"shape":null,"connection":"wired","sensor":"HERO","officialUrl":"https://www.logicool.co.jp/ja-jp/shop/p/g502-hero-gaming-mouse.910-005866","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 10位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 17位","note":"重さは公式表記「121g(マウスのみ)」(ケーブル・追加ウェイトを除く。追加ウェイト最大18g)。URL を日本公式に変更(数値は既存と同じ)。ロジクール公式ページ(日本・米国)に左右対称/右手用の記載が見当たらないため shape は null。(既存は right)","discontinued":false},
+  {"id":"logicool-g305","brand":"Logicool G","name":"G305","lengthMm":116.6,"widthMm":62.15,"heightMm":38.2,"weightG":99,"shape":null,"connection":"wireless","sensor":"HERO","officialUrl":"https://support.logi.com/hc/en-us/articles/360023303254-G305-LIGHTSPEED-Wireless-Gaming-Mouse-Technical-Specifications","checkedAt":"2026-10-03","selectionBasis":"既存データ(src/data/mice.ts)の項目として継続(G304 の海外向けの名前。日本のランキングには G304 として載る)","note":"重さは単三電池1本込み(電池なし75g)。米国公式ページの幅は 62.1mm 表記、サポートの仕様ページは 62.15mm。ロジクール公式ページ(日本・米国)に左右対称/右手用の記載が見当たらないため shape は null。(既存は symmetric)","discontinued":false},
+  {"id":"logicool-g304","brand":"Logicool G","name":"G304","lengthMm":116.6,"widthMm":62.15,"heightMm":38.2,"weightG":99,"shape":null,"connection":"wireless","sensor":"HERO","officialUrl":"https://support.logi.com/hc/en-us/articles/360023303474-G304-LIGHTSPEED-Wireless-Gaming-Mouse-Technical-Specifications","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 1位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 1位 / BCNランキング 2026年8月 ゲーミングマウス TOP10 1位(2026-09-18 公開)(白は6位)","note":"重さは単三電池1本込み(電池なし75g)。日本公式 https://www.logicool.co.jp/ja-jp/shop/p/g304-lightspeed-wireless-gaming-mouse.910-005296 の幅は 62.1mm 表記。ロジクール公式ページ(日本・米国)に左右対称/右手用の記載が見当たらないため shape は null。(既存は symmetric)","discontinued":false},
+  {"id":"razer-deathadder-v3-pro","brand":"Razer","name":"DeathAdder V3 Pro","lengthMm":128,"widthMm":68,"heightMm":44,"weightG":63,"shape":"right","connection":"both","sensor":"Focus Pro 30K Optical Sensor","officialUrl":"https://www.razer.com/gaming-mice/razer-deathadder-v3-pro","checkedAt":"2026-10-03","selectionBasis":"価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 44位 / ProSettings.net プロ使用率 7位(2026-10-03 取得)","note":"重さはケーブル・ドングル除く。63g(白は64g)。日本公式ページは仕様が取り出せなかったため米国公式で確認。Form Factor: Right-Handed。公式の「接続仕様」に HyperSpeed Wireless と「有線」が並記されているため connection は both。(既存は wireless)","discontinued":false},
+  {"id":"razer-deathadder-v3","brand":"Razer","name":"DeathAdder V3","lengthMm":128,"widthMm":68,"heightMm":44,"weightG":59,"shape":"right","connection":"wired","sensor":"Focus Pro 30K オプティカルセンサー","officialUrl":"https://www.razer.com/jp-jp/gaming-mice/razer-deathadder-v3","checkedAt":"2026-10-03","selectionBasis":"価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 68位","note":"URL を日本公式に変更(数値は既存と同じ)。形状は米国公式の Form Factor: Right-Handed。","discontinued":false},
+  {"id":"razer-viper-v3-pro","brand":"Razer","name":"Viper V3 Pro","lengthMm":127.1,"widthMm":63.9,"heightMm":39.9,"weightG":54,"shape":"symmetric","connection":"both","sensor":"第 2 世代 Focus Pro 35K オプティカルセンサー","officialUrl":"https://www.razer.com/jp-jp/gaming-mice/razer-viper-v3-pro","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 18位 / BCNランキング 2026年8月 ゲーミングマウス TOP10 7位(2026-09-18 公開) / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 15位 / ProSettings.net プロ使用率 2位(2026-10-03 取得)","note":"重さはケーブル・ドングル除く 54g(もう一方の色は 55g の表記)。形状は米国公式の Form Factor「Ambidextrous / Right-handed Symmetrical」(左右対称・サイドボタンは左側)。公式の「接続仕様」に HyperSpeed Wireless と「有線」が並記されているため connection は both。(既存は wireless)。Amazon には 1000Hz ドングル版の Viper V3 Pro SE(17位)もある。","discontinued":false},
+  {"id":"razer-viper-mini","brand":"Razer","name":"Viper Mini","lengthMm":118.3,"widthMm":53.5,"heightMm":38.3,"weightG":61,"shape":"symmetric","connection":"wired","sensor":"8500 DPI オプティカルセンサー","officialUrl":"https://www.razer.com/gaming-mice/razer-viper-mini","checkedAt":"2026-10-03","selectionBasis":"既存データ(src/data/mice.ts)の項目として継続","note":"重さはケーブル除く。日本公式の URL は Viper シリーズの一覧へ転送され、製品ページがない。米国公式の「ambidextrous form factor」で symmetric。プロ使用率16位は別機種の Viper Mini Signature Edition。","discontinued":false},
+  {"id":"razer-basilisk-v3-pro","brand":"Razer","name":"Basilisk V3 Pro","lengthMm":130,"widthMm":75.4,"heightMm":42.5,"weightG":112,"shape":"right","connection":"both","sensor":"Focus Pro 30K オプティカルセンサー","officialUrl":"https://www.razer.com/jp-jp/gaming-mice/razer-basilisk-v3-pro/specs","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 75位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 10位","note":"重さはケーブル除く。日本公式の仕様タブ(転送先 .../RZ01-04620100-R3A1#specs)で確認。後継の Basilisk V3 Pro 35K(130×75.1または75.4×42.5mm・112g)もある。接続仕様に Bluetooth と有線も並記 → both(既存は wireless)。","discontinued":false},
+  {"id":"pulsar-x2-v2","brand":"Pulsar","name":"X2 v2 Medium","lengthMm":120.4,"widthMm":63,"heightMm":38,"weightG":53,"shape":"symmetric","connection":"wireless","sensor":"PAW3395","officialUrl":"https://www.pulsar.gg/products/x2v2-gaming-mouse","checkedAt":"2026-10-03","selectionBasis":"既存データ(src/data/mice.ts)の項目として継続(価格.com 53位は別機種の X2 Wired)","note":"重さは「53g (+- 1g)」。公式「Symmetrical Shape」。","discontinued":false},
+  {"id":"pulsar-xlite-v3","brand":"Pulsar","name":"Xlite v3 Medium","lengthMm":122,"widthMm":66,"heightMm":43,"weightG":55,"shape":"right","connection":"wireless","sensor":"PAW3395","officialUrl":"https://www.pulsar.gg/products/xlite-v3-medium-gaming-mouse","checkedAt":"2026-10-03","selectionBasis":"既存データ(src/data/mice.ts)の項目として継続(価格.com 63位は別機種の Xlite V3 Wired)","note":"重さは「55g (+- 1g)」。公式「Ergonomic Right Hand」。付属ケーブルでの有線動作の記載の読み取りが不確かなため connection は wireless のまま。","discontinued":false},
+  {"id":"endgame-gear-op1-8k","brand":"Endgame Gear","name":"OP1 8k","lengthMm":118.2,"widthMm":60.5,"heightMm":37.2,"weightG":50.5,"shape":null,"connection":"wired","sensor":"PixArt PAW3395","officialUrl":"https://endgamegear.com/products/op1-8k-gaming-mouse","checkedAt":"2026-10-03","selectionBasis":"既存データ(src/data/mice.ts)の項目として継続(現行は後継の OP1 8k v2。公式ページは「OP1 8k v1」と表記)","note":"寸法・重さは公式でも「~」付き(約)。公式に左右対称の明記がない(「Redesigned Shape for Versatile Claw Grip」のみ)ため shape は null(既存は symmetric)。","discontinued":false},
+  {"id":"endgame-gear-xm2we","brand":"Endgame Gear","name":"XM2we","lengthMm":122,"widthMm":66,"heightMm":38,"weightG":63,"shape":null,"connection":"both","sensor":"PixArt PAW3370","officialUrl":"https://endgamegear.com/products/xm2we-wireless-gaming-mouse","checkedAt":"2026-10-03","selectionBasis":"既存データ(src/data/mice.ts)の項目として継続","note":"寸法・重さは「~」付き(約)。重さは黒 ~63g、白は +0.5g。公式は「XM1 と同じ形」とだけ書き、左右対称/右手用の明記がないため shape は null(既存は symmetric)。公式の接続に wireless(2.4GHz)と wired の両方があるため both(既存は wireless)。","discontinued":false},
+  {"id":"steelseries-aerox-3-wireless","brand":"SteelSeries","name":"Aerox 3 Wireless","lengthMm":120.55,"widthMm":67.03,"heightMm":37.98,"weightG":68,"shape":"right","connection":"wireless","sensor":"SteelSeries TrueMove Air","officialUrl":"https://steelseries.com/gaming-mice/aerox-3-2022","checkedAt":"2026-10-03","selectionBasis":"価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 34位(Aerox 3 Wireless 2022 Edition)","note":"旧 URL(/gaming-mice/aerox-3-wireless)は /gaming-mice/aerox-3-2022 へ転送されるため URL を変更。幅は後ろ側の値(前側 57.91mm)。高さは後ろ側(前側 21.53mm)。Shape: Ergonomic, Right-Handed。接続は 2.4GHz / Bluetooth 5.0。","discontinued":false},
+  {"id":"steelseries-rival-3-wireless","brand":"SteelSeries","name":"Rival 3 Wireless","lengthMm":120.6,"widthMm":67,"heightMm":37.9,"weightG":106,"shape":"right","connection":"wireless","sensor":"SteelSeries TrueMove Air","officialUrl":"https://steelseries.com/gaming-mice/rival-3","checkedAt":"2026-10-03","selectionBasis":"既存データ(src/data/mice.ts)の項目として継続(価格.com 64位は後継の Rival 3 Wireless Gen 2。Gen 2 の公式ページは 404)","note":"旧 URL は /gaming-mice/rival-3 へ転送。重さは公式「106g (two batteries), 96g (one battery)」で、単四電池2本込みの値。幅は後ろ側(前側 58.3mm)。Shape: Ergonomic, Right-Handed。","discontinued":false},
+  {"id":"corsair-m75-wireless","brand":"CORSAIR","name":"M75 WIRELESS","lengthMm":128,"widthMm":65,"heightMm":42,"weightG":89,"shape":"symmetric","connection":"wireless","sensor":"CORSAIR MARKSMAN 26K","officialUrl":"https://www.corsair.com/us/en/explorer/gamer/mice/corsair-m75-and-m75-wireless-everything-you-need-to-know/","checkedAt":"2026-10-03","selectionBasis":"既存データ(src/data/mice.ts)の項目として継続","note":"寸法はコルセア公式サイトの解説記事(製品ページではない)。製品ページ https://www.corsair.com/us/en/p/gaming-mouse/ch-931d010-na/m75-wireless-lightweight-rgb-gaming-mouse-black-ch-931d010-na には寸法がなく、重さ 89g・Ambidextrous は製品ページでも確認。接続は SLIPSTREAM(2.4GHz)と Bluetooth。","discontinued":false},
+  {"id":"hyperx-pulsefire-haste-2","brand":"HyperX","name":"Pulsefire Haste 2","lengthMm":124.3,"widthMm":66.8,"heightMm":38.2,"weightG":53,"shape":"symmetric","connection":"wired","sensor":"HyperX 26K Sensor","officialUrl":"https://hyperx.com/products/hyperx-pulsefire-haste-2-gaming-mouse","checkedAt":"2026-10-03","selectionBasis":"既存データ(src/data/mice.ts)の項目として継続","note":"53g は公式の「Ultra-lightweight 53g design」。仕様欄はポンド表記のみ(ケーブルなし 0.11lb / あり 0.16lb)。Shape: Symmetrical。","discontinued":false},
+  {"id":"logicool-g-pro-x2-superstrike","brand":"Logicool G","name":"PRO X2 SUPERSTRIKE","lengthMm":125,"widthMm":63.5,"heightMm":40,"weightG":61,"shape":"symmetric","connection":"wireless","sensor":"HERO 2","officialUrl":"https://www.logicool.co.jp/ja-jp/shop/p/pro-x2-superstrike-mouse","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 7位 / BCNランキング 2026年8月 ゲーミングマウス TOP10 2位(2026-09-18 公開) / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 19位 / ProSettings.net プロ使用率 5位(2026-10-03 取得)","note":"ロジクール日本の仕様欄は「高さ/奥行き/長さ」の見出しが機種ごとに入れ替わっているため、いちばん大きい値を長さ、いちばん小さい値を高さとして読んだ。公式に「左右対称の形状」。ワイヤレス機。ケーブルでの有線動作は公式仕様に明記がないため connection は wireless。","discontinued":false},
+  {"id":"logicool-g-pro-x3-superstrike","brand":"Logicool G","name":"PRO X3 SUPERSTRIKE","lengthMm":125,"widthMm":63.5,"heightMm":40,"weightG":59,"shape":null,"connection":"wireless","sensor":"HERO 2","officialUrl":"https://www.logicool.co.jp/ja-jp/shop/p/pro-x3-superstrike-mouse.910-007883","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 3位","note":"2026年の新機種。ロジクール日本の仕様欄は「高さ/奥行き/長さ」の見出しが機種ごとに入れ替わっているため、いちばん大きい値を長さ、いちばん小さい値を高さとして読んだ。ロジクール公式ページ(日本・米国)に左右対称/右手用の記載が見当たらないため shape は null。ワイヤレス機。ケーブルでの有線動作は公式仕様に明記がないため connection は wireless。","discontinued":false},
+  {"id":"logicool-g203","brand":"Logicool G","name":"G203 LIGHTSYNC","lengthMm":116.6,"widthMm":62.1,"heightMm":38.2,"weightG":85,"shape":null,"connection":"wired","sensor":null,"officialUrl":"https://www.logicool.co.jp/ja-jp/shop/p/g203-lightsync-rgb-gaming-mouse.910-005811","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 2位 / BCNランキング 2026年8月 ゲーミングマウス TOP10 4位(2026-09-18 公開) / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 4位","note":"公式ページにセンサー名の記載がないため sensor は null。ロジクール公式ページ(日本・米国)に左右対称/右手用の記載が見当たらないため shape は null。","discontinued":false},
+  {"id":"logicool-g703","brand":"Logicool G","name":"G703 LIGHTSPEED","lengthMm":124,"widthMm":68,"heightMm":43,"weightG":95,"shape":null,"connection":"wireless","sensor":"HERO 25K","officialUrl":"https://www.logicool.co.jp/ja-jp/shop/p/g703-hero-wireless-gaming-mouse.910-005645","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 4位 / BCNランキング 2026年8月 ゲーミングマウス TOP10 3位(2026-09-18 公開) / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 7位 / ProSettings.net プロ使用率 22位(2026-10-03 取得)","note":"追加ウェイト(10g)なしの値。ロジクール公式ページ(日本・米国)に左右対称/右手用の記載が見当たらないため shape は null。ワイヤレス機。ケーブルでの有線動作は公式仕様に明記がないため connection は wireless。","discontinued":false},
+  {"id":"logicool-g-pro-2-lightspeed","brand":"Logicool G","name":"PRO 2 LIGHTSPEED","lengthMm":125,"widthMm":63.5,"heightMm":40,"weightG":80,"shape":"symmetric","connection":"wireless","sensor":"HERO 2","officialUrl":"https://www.logicool.co.jp/ja-jp/shop/p/pro-2-lightspeed.910-007307","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 5位 / BCNランキング 2026年8月 ゲーミングマウス TOP10 5位(2026-09-18 公開) / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 13位","note":"ロジクール日本の仕様欄は「高さ/奥行き/長さ」の見出しが機種ごとに入れ替わっているため、いちばん大きい値を長さ、いちばん小さい値を高さとして読んだ。米国公式に ambidextrous / symmetric の記載(左右どちらにもサイドボタンを付けられる)。ワイヤレス機。ケーブルでの有線動作は公式仕様に明記がないため connection は wireless。","discontinued":false},
+  {"id":"logicool-g-pro-x-superlight-2-se","brand":"Logicool G","name":"PRO X SUPERLIGHT 2 SE","lengthMm":125,"widthMm":63.5,"heightMm":40,"weightG":60,"shape":"symmetric","connection":"wireless","sensor":"HERO 2","officialUrl":"https://www.logicool.co.jp/ja-jp/shop/p/pro-x-superlight-2-se","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 13位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 12位","note":"ロジクール日本の仕様欄は「高さ/奥行き/長さ」の見出しが機種ごとに入れ替わっているため、いちばん大きい値を長さ、いちばん小さい値を高さとして読んだ。形状は PRO X2 SUPERSTRIKE の日本公式ページの「PRO X SUPERLIGHT と PRO X SUPERLIGHT 2によって改良された左右対称の形状」という説明から symmetric(この機種のページ自体には形状の記載なし)。ワイヤレス機。ケーブルでの有線動作は公式仕様に明記がないため connection は wireless。","discontinued":false},
+  {"id":"logicool-g-pro-x-superlight-2c","brand":"Logicool G","name":"PRO X SUPERLIGHT 2c","lengthMm":118.4,"widthMm":61.2,"heightMm":38.6,"weightG":51,"shape":null,"connection":"wireless","sensor":"HERO 2","officialUrl":"https://www.logicool.co.jp/ja-jp/shop/p/pro-x-superlight-2c.910-007543","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 28位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 57位 / ProSettings.net プロ使用率 17位(2026-10-03 取得)","note":"ロジクール日本の仕様欄は「高さ/奥行き/長さ」の見出しが機種ごとに入れ替わっているため、いちばん大きい値を長さ、いちばん小さい値を高さとして読んだ。ロジクール公式ページ(日本・米国)に左右対称/右手用の記載が見当たらないため shape は null。ワイヤレス機。ケーブルでの有線動作は公式仕様に明記がないため connection は wireless。","discontinued":false},
+  {"id":"logicool-g502-x-lightspeed","brand":"Logicool G","name":"G502 X LIGHTSPEED","lengthMm":131.4,"widthMm":79.2,"heightMm":41.1,"weightG":102,"shape":null,"connection":"wireless","sensor":"HERO 44K","officialUrl":"https://support.logi.com/hc/en-001/articles/7639086777111-Specification-G502-X-LIGHTSPEED-Gaming-Mouse","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 20位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 8位","note":"日本公式 https://www.logicool.co.jp/ja-jp/shop/p/g502-x-wireless-lightforce.910-006229 と米国公式に重さの記載がなく、重さ 102g はロジクールのサポートの仕様ページ(寸法も同じ 131.4/79.2/41.1mm)。センサーは日本・米国の製品ページが HERO 44K、サポートページは HERO。ロジクール公式ページ(日本・米国)に左右対称/右手用の記載が見当たらないため shape は null。ワイヤレス機。ケーブルでの有線動作は公式仕様に明記がないため connection は wireless。","discontinued":false},
+  {"id":"logicool-g502-x","brand":"Logicool G","name":"G502 X","lengthMm":131.4,"widthMm":79.2,"heightMm":41.1,"weightG":89,"shape":null,"connection":"wired","sensor":"HERO 25K","officialUrl":"https://www.logicool.co.jp/ja-jp/shop/p/g502-x-wired-lightforce.910-006151","checkedAt":"2026-10-03","selectionBasis":"価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 9位","note":"ロジクール公式ページ(日本・米国)に左右対称/右手用の記載が見当たらないため shape は null。","discontinued":false},
+  {"id":"logicool-g402","brand":"Logicool G","name":"G402 Hyperion Fury","lengthMm":136,"widthMm":72,"heightMm":41,"weightG":108,"shape":null,"connection":"wired","sensor":null,"officialUrl":"https://www.logicool.co.jp/ja-jp/shop/p/g402-hyperion-fury-fps-gaming-mouse.910-004072","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 19位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 26位","note":"ロジクール日本の仕様欄は「高さ/奥行き/長さ」の見出しが機種ごとに入れ替わっているため、いちばん大きい値を長さ、いちばん小さい値を高さとして読んだ。公式ページにセンサー名の記載がないため sensor は null。ロジクール公式ページ(日本・米国)に左右対称/右手用の記載が見当たらないため shape は null。","discontinued":false},
+  {"id":"logicool-g309","brand":"Logicool G","name":"G309 LIGHTSPEED","lengthMm":120,"widthMm":64,"heightMm":39,"weightG":86,"shape":null,"connection":"wireless","sensor":"HERO 25K","officialUrl":"https://www.logicool.co.jp/ja-jp/shop/p/g309-lightspeed-gaming-mouse.910-007212","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 65位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 46位","note":"重さは公式「重量(単三形乾電池含む)86g」。POWERPLAY と組み合わせると 68g。LIGHTSPEED と Bluetooth。ロジクール公式ページ(日本・米国)に左右対称/右手用の記載が見当たらないため shape は null。","discontinued":false},
+  {"id":"logicool-g304-x-superlight","brand":"Logicool G","name":"G304 X SUPERLIGHT","lengthMm":117.3,"widthMm":63.9,"heightMm":38.2,"weightG":59,"shape":null,"connection":"wireless","sensor":"HERO","officialUrl":"https://www.logicool.co.jp/ja-jp/shop/p/g304-x-superlight","checkedAt":"2026-10-03","selectionBasis":"価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 16位","note":"ロジクール日本の仕様欄は「高さ/奥行き/長さ」の見出しが機種ごとに入れ替わっているため、いちばん大きい値を長さ、いちばん小さい値を高さとして読んだ。LIGHTSPEED と Bluetooth。ロジクール公式ページ(日本・米国)に左右対称/右手用の記載が見当たらないため shape は null。","discontinued":false},
+  {"id":"razer-viper-v4-pro","brand":"Razer","name":"Viper V4 Pro","lengthMm":127.1,"widthMm":63.9,"heightMm":39.9,"weightG":49,"shape":"symmetric","connection":"both","sensor":"第 3 世代 Focus Pro 50K オプティカルセンサー","officialUrl":"https://www.razer.com/jp-jp/gaming-mice/razer-viper-v4-pro","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 6位 / BCNランキング 2026年8月 ゲーミングマウス TOP10 8位(2026-09-18 公開)(白は9位) / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 18位 / ProSettings.net プロ使用率 3位(2026-10-03 取得)","note":"重さは公式表記「ブラック: <49 g(ケーブル、ドングルを除く)」(未満の表記。白 <50g、Esports Green Edition <52g)。49 は上限の値。形状は米国公式 Form Factor「Ambidextrous / Right-handed Symmetrical」。公式の「接続仕様」に HyperSpeed Wireless と「有線」が並記されているため connection は both。","discontinued":false},
+  {"id":"razer-deathadder-v4-pro","brand":"Razer","name":"DeathAdder V4 Pro","lengthMm":128,"widthMm":68,"heightMm":44,"weightG":56,"shape":"right","connection":"both","sensor":"第 2 世代 Focus Pro 45K オプティカルセンサー","officialUrl":"https://www.razer.com/jp-jp/gaming-mice/razer-deathadder-v4-pro","checkedAt":"2026-10-03","selectionBasis":"価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 22位 / ProSettings.net プロ使用率 6位(2026-10-03 取得)","note":"重さはブラック 56g(ケーブル・ドングル除く)。白・NiKo Edition 57g、Esports Green Edition 58g。形状は米国公式 Form Factor: Right-Handed。公式の「接続仕様」に HyperSpeed Wireless と「有線」が並記されているため connection は both。","discontinued":false},
+  {"id":"razer-naga-v3-pro","brand":"Razer","name":"Naga V3 Pro","lengthMm":119.5,"widthMm":75.5,"heightMm":43.5,"weightG":117,"shape":"right","connection":"both","sensor":"第 3 世代 Focus Pro 50K オプティカルセンサー","officialUrl":"https://www.razer.com/jp-jp/gaming-mice/razer-naga-v3-pro","checkedAt":"2026-10-03","selectionBasis":"価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 2位","note":"MMO 向けの多ボタン機。重さ 117g はケーブル・ドングル除く本体で、サイドパネル(12ボタン 20g / 6ボタン 17g / 2ボタン 15g)の重さが別に書かれており、パネル込みかどうかが公式表記から読み切れない。接続仕様は HyperSpeed Wireless / Bluetooth / 有線。形状は米国公式 Right-Handed。","discontinued":false},
+  {"id":"razer-cobra","brand":"Razer","name":"Cobra","lengthMm":119.6,"widthMm":62.5,"heightMm":38.1,"weightG":58,"shape":"symmetric","connection":"wired","sensor":"8500 DPI オプティカルセンサー","officialUrl":"https://www.razer.com/jp-jp/gaming-mice/razer-cobra","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 27位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 79位","note":"重さはケーブル除く。形状は米国公式 Form Factor「Right-Handed / Right-handed Symmetrical」(左右対称の形で、サイドボタンは左側)。","discontinued":false},
+  {"id":"razer-orochi-v2","brand":"Razer","name":"Orochi V2","lengthMm":108,"widthMm":62.6,"heightMm":38.5,"weightG":60,"shape":"symmetric","connection":"wireless","sensor":"Razer Focus X 18K オプティカルセンサー","officialUrl":"https://www.razer.com/jp-jp/gaming-mice/razer-orochi-v2","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 14位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 66位","note":"重さは公式表記「60 g 未満」(電池の有無の記載なし。単三/単四電池式)。60 は上限の値。センサー欄は「オプティカル」、センサー技術欄が Focus X 18K。形状は米国公式「Right-handed Symmetrical」。接続は HyperSpeed Wireless と Bluetooth(有線の記載なし)。","discontinued":false},
+  {"id":"razer-deathadder-v3-hyperspeed","brand":"Razer","name":"DeathAdder V3 HyperSpeed","lengthMm":122.2,"widthMm":64.8,"heightMm":41.3,"weightG":55,"shape":"right","connection":"both","sensor":"Razer Focus X 26K オプティカルセンサー","officialUrl":"https://www.razer.com/jp-jp/gaming-mice/razer-deathadder-v3-hyperspeed","checkedAt":"2026-10-03","selectionBasis":"価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 56位 / ProSettings.net プロ使用率 20位(2026-10-03 取得)","note":"重さはケーブル・ドングル除く。形状は米国公式「Right-handed Ergonomic」。公式の「接続仕様」に HyperSpeed Wireless と「有線」が並記されているため connection は both。","discontinued":false},
+  {"id":"razer-naga-v2-hyperspeed","brand":"Razer","name":"Naga V2 HyperSpeed","lengthMm":119.5,"widthMm":75,"heightMm":43.5,"weightG":95,"shape":"right","connection":"wireless","sensor":"FOCUS PRO 30K オプティカルセンサー","officialUrl":"https://www.razer.com/jp-jp/gaming-mice/razer-naga-v2-hyperspeed","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 9位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 36位","note":"重さはケーブル・ドングル除く(電池の有無の記載なし)。接続は HyperSpeed Wireless と Bluetooth。形状は米国公式 Right-Handed。","discontinued":false},
+  {"id":"zowie-ec2-cw","brand":"ZOWIE","name":"EC2-CW","lengthMm":null,"widthMm":null,"heightMm":null,"weightG":77,"shape":"right","connection":"wireless","sensor":"3370","officialUrl":"https://zowie.benq.com/ja-jp/mouse/ec2-cw.html","checkedAt":"2026-10-03","selectionBasis":"ProSettings.net プロ使用率 10位(2026-10-03 取得) / src/data/devices.ts にある機種(以前は数値不足で外していたもの)","note":"公式ページの「Dimensions (HxWxD mm)」欄は見出しだけで数字がない(大きさの比較は画像のみ)ため長さ・幅・高さは null。センサーはページ内の「3370センサー」の表記。形状は公式の「左右非対称エルゴノミクスデザイン」(EC シリーズ=エルゴ)で right としたが、「右手用」の直接の文言はない。","discontinued":false},
+  {"id":"zowie-ec2-dw","brand":"ZOWIE","name":"EC2-DW","lengthMm":null,"widthMm":null,"heightMm":null,"weightG":60,"shape":"right","connection":"wireless","sensor":null,"officialUrl":"https://zowie.benq.com/ja-jp/mouse/ec2-dw.html","checkedAt":"2026-10-03","selectionBasis":"ProSettings.net プロ使用率 12位(2026-10-03 取得)","note":"Dimensions 欄に数字がないため寸法は null。センサー名の記載なし。形状は公式「非対称デザイン」「デザイン: エルゴノミック」で right としたが、「右手用」の直接の文言はない。接続は無線(2.4GHz)、4K レシーバー。","discontinued":false},
+  {"id":"zowie-za13-dw","brand":"ZOWIE","name":"ZA13-DW","lengthMm":null,"widthMm":null,"heightMm":null,"weightG":65,"shape":"symmetric","connection":"wireless","sensor":null,"officialUrl":"https://zowie.benq.com/ja-jp/mouse/za13-dw.html","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 66位","note":"Dimensions 欄に数字がないため寸法は null。センサー名の記載なし。公式「デザイン: 左右対称/右利き用/高プロファイル」(左右対称の形・右利き向けのボタン配置)。","discontinued":false},
+  {"id":"zowie-u2-dw","brand":"ZOWIE","name":"U2-DW","lengthMm":null,"widthMm":null,"heightMm":null,"weightG":60,"shape":"symmetric","connection":"wireless","sensor":null,"officialUrl":"https://zowie.benq.com/ja-jp/mouse/u2-dw.html","checkedAt":"2026-10-03","selectionBasis":"ProSettings.net プロ使用率 24位(2026-10-03 取得)","note":"Dimensions 欄に数字がないため寸法は null。センサー名の記載なし。公式「Symmetrical Right-Handed Design」。","discontinued":false},
+  {"id":"finalmouse-ultralightx","brand":"Finalmouse","name":"UltralightX (ULX) Lion (M)","lengthMm":121.3,"widthMm":null,"heightMm":37,"weightG":35,"shape":null,"connection":"wireless","sensor":null,"officialUrl":"https://finalmouse.com/products/ulx-pro-series-aceu","checkedAt":"2026-10-03","selectionBasis":"ProSettings.net プロ使用率 14位(2026-10-03 取得) / src/data/devices.ts にある機種(以前は数値不足で外していたもの)","note":"公式は S(Cheetah)/M(Lion)/L(Tiger)の3サイズで、代表として M を記載。幅は公式が「Grip Width 56.8mm」(握る位置の幅で、いちばん広いところではない)としか書かないため widthMm は null。重さは ULX Pro Series の公式表記「Lion (Medium): 35 Grams」で、「ソールなしの概算・個体差 ±2g」の注記つき。限定版ごとにページが分かれ、素の /products/ultralightx ページには仕様がない。形状・センサー名の明記なし。接続は「Finalmouse Highspeed Wireless (2.4Ghz)」。","discontinued":false},
+  {"id":"lamzu-maya-x","brand":"LAMZU","name":"MAYA X","lengthMm":124,"widthMm":64,"heightMm":40,"weightG":47,"shape":null,"connection":"wireless","sensor":null,"officialUrl":"https://lamzu.com/products/lamzu-maya-x","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 79位 / ProSettings.net プロ使用率 8位(2026-10-03 取得)","note":"重さは公式「47± 2g」。センサー名・形状は公式ページの文字情報にない(画像のみ)ため null。付属品に 8K ドングルとケーブルがあるが、有線動作の明記はないため wireless。","discontinued":false},
+  {"id":"vaxee-e1-wireless","brand":"VAXEE","name":"E1 Wireless (4K)","lengthMm":null,"widthMm":null,"heightMm":null,"weightG":null,"shape":null,"connection":"wireless","sensor":"3950","officialUrl":"https://www.vaxee.co/en/news.php?act=view&id=187","checkedAt":"2026-10-03","selectionBasis":"ProSettings.net プロ使用率 18位(2026-10-03 取得)","note":"製品ページ https://www.vaxee.co/en/product.php?act=view&id=248 は仕様が画像だけで文字の数値がない(自動取得は 403、ブラウザーで閲覧)。公式ニュースに「3950 sensor and weighs 60-61g」とあるが、重さが幅のある表記のため weightG は null。寸法・形状の文字情報なし。devices.ts の vaxee-xe(XE)は今回も数値が取れず未収録。","discontinued":false},
+  {"id":"pulsar-xlite-crazylight","brand":"Pulsar","name":"Xlite CrazyLight Medium","lengthMm":122,"widthMm":66,"heightMm":43,"weightG":44,"shape":"right","connection":"wireless","sensor":"XS-1","officialUrl":"https://www.pulsar.gg/products/xlite-crazylight-medium-gaming-mouse","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 8位(商品名「CrazyLight Series … 44グラム」。44g は Xlite CrazyLight の公式重量と一致するため同機種と判断) / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 72位","note":"重さは公式「±44g with dot skates / ±46g with regular skates w/o cable」。同梱ソールが Dot Skates のため 44g を採用。形状は公式「Ergonomic right-handed shape」。8K ドングル付属。Amazon の商品名だけでは X2 系 CrazyLight の可能性も残る。","discontinued":false},
+  {"id":"endgame-gear-op1-8k-v2","brand":"Endgame Gear","name":"OP1 8k v2","lengthMm":118.2,"widthMm":60.5,"heightMm":37.2,"weightG":49.5,"shape":null,"connection":"wired","sensor":"PixArt PAW3950","officialUrl":"https://endgamegear.com/products/op1-8k-v2-wired-gaming-mouse","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 22位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 38位","note":"寸法は「~」付き(約)、重さは 49.5g。公式に左右対称の明記がないため shape は null。","discontinued":false},
+  {"id":"vxe-dragonfly-r1-se-plus","brand":"VXE","name":"Dragonfly R1 SE+","lengthMm":120.6,"widthMm":64,"heightMm":37.8,"weightG":null,"shape":null,"connection":"wireless","sensor":null,"officialUrl":"https://www.atk.store/ja-jp/products/vxe-dragonfly-r1%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA-%E3%83%AF%E3%82%A4%E3%83%A4%E3%83%AC%E3%82%B9%E3%83%9E%E3%82%A6%E3%82%B9","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 24位(ATK R1 SE+)","note":"ATK 公式ストア(日本語)の「VXE Dragonfly R1 シリーズ」共通ページ。寸法「120.6mm x 64mm x 37.8mm」はシリーズ共通の表記。重さは「48g～55g(モデルによって異なります)」で SE+ の値が特定できないため null。センサーも「PAW3395 SE/PAW3395」とシリーズ共通表記のため null。形状・有線動作の明記なし。","discontinued":false},
+  {"id":"scyrox-v8","brand":"SCYROX","name":"V8","lengthMm":null,"widthMm":null,"heightMm":null,"weightG":null,"shape":null,"connection":null,"sensor":null,"officialUrl":"https://scyrox.com/products/scyrox-v8","checkedAt":"2026-10-03","selectionBasis":"価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 31位(V8S は50位)","note":"公式ページの仕様は画像のみで、文字の数値・センサー名・接続方式がない。日本の代理店の公式ページは見つけられなかった。すべて null。","discontinued":false},
+  {"id":"asus-tuf-gaming-m3-gen-ii","brand":"ASUS","name":"TUF Gaming M3 Gen II","lengthMm":123,"widthMm":68,"heightMm":40,"weightG":59,"shape":null,"connection":"wired","sensor":"PAW3318","officialUrl":"https://www.asus.com/jp/accessories/mice-and-mouse-pads/tuf-gaming/asus-tuf-gaming-m3-gen-ii/techspec/","checkedAt":"2026-10-03","selectionBasis":"Amazon.co.jp 売れ筋ランキング「ゲーミングマウス」(2026-10-03 取得) 23位 / 価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 30位","note":"重さはケーブル除く。寸法は公式「123 x 68 x 40mm」(長さ×幅×高さの順と読んだ)。仕様欄に形状の記載なし。接続は USB 2.0(Type-C to Type-A)。","discontinued":false},
+  {"id":"glorious-model-o-2-wireless","brand":"Glorious","name":"Model O 2 Wireless","lengthMm":null,"widthMm":null,"heightMm":null,"weightG":68,"shape":"symmetric","connection":"both","sensor":"Glorious BAMF 2.0 Optical Sensor","officialUrl":"https://www.gloriousgaming.com/pages/guide-model-o-2-wireless","checkedAt":"2026-10-03","selectionBasis":"src/data/devices.ts にある機種(以前は数値不足で外していたもの)(価格.com では同社の Model I 2 Wireless 32位・Model D 2 PRO 80位)","note":"重さは公式「68g ± 3g」。長さ・幅・高さは製品ページにも製品ガイドにもない。公式「symmetrical mice」/製品ページ「Right-handed symmetrical shape」。接続は USB 2.0 / 2.4GHz / Bluetooth 5.2 LE のため both。","discontinued":false},
+  {"id":"elecom-vm500","brand":"ELECOM","name":"V custom VM500","lengthMm":123.5,"widthMm":66.5,"heightMm":42,"weightG":75,"shape":"right","connection":"both","sensor":"PixArt PAW3311DB","officialUrl":"https://www.elecom.co.jp/products/M-VM500BK.html","checkedAt":"2026-10-03","selectionBasis":"価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 14位","note":"公式「幅約66.5mm×奥行約123.5mm×高さ約42.0mm」「重量(マウス本体)約75g」(約の表記)。形状は公式「右利きに最適化された左右非対称」。接続は公式「USB2.4GHz無線/有線両対応」。自動取得は 403 のためブラウザーで閲覧。","discontinued":false},
+  {"id":"steelseries-aerox-3-wireless-gen-2","brand":"SteelSeries","name":"Aerox 3 Wireless Gen 2","lengthMm":120.55,"widthMm":67.03,"heightMm":37.98,"weightG":68,"shape":"right","connection":"wireless","sensor":"SteelSeries TrueMove Optical Sensor","officialUrl":"https://steelseries.com/gaming-mice/aerox-3-wireless-gen-2","checkedAt":"2026-10-03","selectionBasis":"価格.com ゲーミングマウス 人気売れ筋ランキング(2026-10-03 取得) 47位","note":"幅・高さは後ろ側の値(前側 57.91mm / 21.53mm)。Shape: Ergonomic, Right-Handed。DPI は最大 26,000。接続は 2.4GHz と Bluetooth 5.0。","discontinued":false},
 ];
 
 export function mouseById(id: string): MouseSpec | undefined {
   return MICE.find((m) => m.id === id);
 }
-
-/*
- * 外したもの(メーカー公式ページに大きさの数字がない、または数字が使えないため。推測で埋めない):
- * 外したもの: zowie-ec2-cw — 公式ページの「Dimensions」欄に数字がない(重さのみ)
- * 外したもの: zowie-ec2-c — 公式ページの「Dimensions」欄に数字がない
- * 外したもの: zowie-fk2-c — 公式ページの「Dimensions」欄に数字がない
- * 外したもの: zowie-s2-c — 公式ページの「Dimensions」欄に数字がない
- * 外したもの: zowie-za13-c — 公式ページの「Dimensions」欄に数字がない
- * 外したもの: zowie-u2 — 公式ページの「Dimensions」欄に数字がない
- * 外したもの: finalmouse-ultralightx — 公式は S/M/L の3サイズで、幅は「グリップ幅」表記(いちばん広いところではない)。devices.ts にサイズの区別がない
- * 外したもの: lamzu-atlantis-mini — 初代(49g)の公式ページが現在ない。現行の Mini 4K/Pro のページにも大きさの数字が文字で載っていない
- * 外したもの: vaxee-xe — 公式の製品ページに大きさ・重さの説明文がない(画像のみ)
- * 外したもの: steelseries-aerox-3 — 有線の旧モデルは公式ページが見つからない
- * 外したもの: steelseries-rival-3 — 有線の旧モデルは公式ページが見つからない
- * 外したもの: glorious-model-o-2-wireless — 公式ページに長さ・幅・高さの数字がない(重さ 68g のみ)
- */
