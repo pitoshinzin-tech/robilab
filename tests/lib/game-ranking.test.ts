@@ -23,6 +23,13 @@ describe("GameRanking の合うキャラの行", () => {
     expect(html).toContain("意外な 1 体");
     expect(html).toContain("ウィンストンは素早く動き回るキャラ");
   });
+  it("キャラのリンクは、ロールの記号 16px+名前(ラベル「合うキャラ」は別の行)", () => {
+    const html = render(resultCharPicks(axes));
+    const links = html.match(/<a [^>]*href="\/games\/[^"]+\/chars\/[^"]+"[^>]*>.*?<\/a>/g) ?? [];
+    expect(links.length).toBeGreaterThan(0);
+    for (const a of links) expect(a).toMatch(/<svg[^>]*width="16"[^>]*height="16"/);
+    expect(html).toMatch(/<p[^>]*>合うキャラ<\/p>/);
+  });
   it("スト6 の行にはキャラのリンクを出さない", () => {
     expect(render(resultCharPicks(axes))).not.toContain("/games/sf6/");
   });

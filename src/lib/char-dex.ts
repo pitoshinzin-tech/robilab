@@ -73,9 +73,12 @@ export function latestCheckedAt(list: readonly Char[]): string {
 export const charHref = (c: { game: string; id: string }) => `/games/${c.game}/chars/${c.id}`;
 
 export type CharLink = { href: string; name: string };
-export type ResultCharPick = { fits: CharLink[]; surprise: (CharLink & { reason: string }) | null };
+/** 結果ページのキャラ:名前の横にロールの記号 16px を出すため、ゲームとロールも渡す */
+export type ResultCharLink = CharLink & { game: string; roleId: string };
+export type ResultCharPick = { fits: ResultCharLink[]; surprise: (ResultCharLink & { reason: string }) | null };
 
 const linkOf = (c: Char): CharLink => ({ href: charHref(c), name: c.nameJa });
+const resultLinkOf = (c: Char): ResultCharLink => ({ ...linkOf(c), game: c.game, roleId: c.roleId });
 
 /** 結果ページのゲームごとの行に出す分(公開していて、合うキャラを出すゲームだけ)。部品へは表示に要る文字だけを渡す */
 export function resultCharPicks(
@@ -88,8 +91,8 @@ export function resultCharPicks(
     if (pick.fits.length === 0) continue;
     const s = pick.surprise;
     out[game.id] = {
-      fits: pick.fits.map(linkOf),
-      surprise: s ? { ...linkOf(s.char), reason: surpriseReason(user, s.char, s.role, s.tag) } : null,
+      fits: pick.fits.map(resultLinkOf),
+      surprise: s ? { ...resultLinkOf(s.char), reason: surpriseReason(user, s.char, s.role, s.tag) } : null,
     };
   }
   return out;

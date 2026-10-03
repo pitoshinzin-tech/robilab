@@ -1,26 +1,40 @@
 import Link from "next/link";
 import type { GameRank } from "@/lib/role-match";
-import type { ResultCharPick } from "@/lib/char-dex";
+import type { ResultCharLink, ResultCharPick } from "@/lib/char-dex";
+import { roleSymbol } from "@/lib/role-symbols";
+import { PixelArt } from "@/components/brand/PixelArt";
 import { CHAR_REASON_TEXT } from "@/lib/char-reason";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
-const CHAR_LINK = "inline-flex min-h-11 items-center font-bold text-rl-accent underline-offset-4 hover:underline";
+const CHAR_LINK = "inline-flex min-h-11 items-center gap-2 font-bold text-rl-accent underline-offset-4 hover:underline";
 
-/** ゲームの行の下の「合うキャラ」と「手ざわりが違うかも」(設計書 6-4)。キャラは % を出さない */
+/** キャラへのリンク:ロールの記号 16px+名前(文字だけのリンクより、キャラのページへの入口の形にする) */
+function CharLink({ link }: { link: ResultCharLink }) {
+  return (
+    <Link href={link.href} className={CHAR_LINK}>
+      <PixelArt grid={roleSymbol(link.game, link.roleId)} size={16} />
+      {link.name}
+    </Link>
+  );
+}
+
+/** ゲームの行の下の「合うキャラ」と「手ざわりが違うかも」(設計書 6-4)。キャラは % を出さない。ラベルは 1 行目、キャラは 2 行目に並べる */
 function CharLines({ pick }: { pick: ResultCharPick }) {
   return (
     <div className="mt-2 grid gap-2 border-t border-rl-line pt-2">
-      <p className="flex flex-wrap items-center gap-x-4 text-sm">
-        <span className="text-rl-muted">合うキャラ</span>
-        {pick.fits.map((f) => <Link key={f.href} href={f.href} className={CHAR_LINK}>{f.name}</Link>)}
-      </p>
+      <div className="grid gap-1 text-sm">
+        <p className="text-rl-muted">合うキャラ</p>
+        <ul className="flex flex-wrap gap-x-4">
+          {pick.fits.map((f) => <li key={f.href}><CharLink link={f} /></li>)}
+        </ul>
+      </div>
       {pick.surprise && (
         <div className="grid gap-1">
           <p className="flex flex-wrap items-center gap-x-3 text-sm">
             <Badge>{CHAR_REASON_TEXT.badge}</Badge>
             <span className="text-rl-muted">{CHAR_REASON_TEXT.heading}</span>
-            <Link href={pick.surprise.href} className={CHAR_LINK}>{pick.surprise.name}</Link>
+            <CharLink link={pick.surprise} />
           </p>
           <p className="text-sm text-pretty text-rl-muted [word-break:auto-phrase]">{pick.surprise.reason}</p>
         </div>
