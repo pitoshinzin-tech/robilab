@@ -66,7 +66,7 @@ const debugParam = () => new URLSearchParams(window.location.search).get("debug"
 // 再送しても結果が変わらないエラー
 const NO_RETRY = ["NOT_LOGGED_IN", "WRONG_DATE", "WRONG_CHAR", "NOT_ACTIVE", "BANNED", "INVALID_INPUT"];
 
-export function AimClient({ char, date, rows, streakIcon }: { char: AimChar; date: string; rows: RankingRow[]; streakIcon?: ReactNode }) {
+export function AimClient({ char, date, rows, streakIcon, installHint }: { char: AimChar; date: string; rows: RankingRow[]; streakIcon?: ReactNode; installHint?: ReactNode }) {
   const router = useRouter();
   const isClient = useIsClient();
   const hasMouse = useSyncExternalStore(noSubscribe, finePointer, () => true);
@@ -216,9 +216,12 @@ export function AimClient({ char, date, rows, streakIcon }: { char: AimChar; dat
     <>
       <div id="play" className="mt-rl-ma-sm scroll-mt-4">{play}</div>
       {isClient && (
-        <AimHistory className="mt-rl-ma-md" days={days} today={date} loggedIn={loggedIn} serverError={loggedIn && serverError}
-          canClear={Object.keys(localDays).length > 0} streakIcon={streakIcon}
-          onClear={() => { clearLocal(browserStorage()); setHistoryRev((n) => n + 1); }} />
+        <>
+          <AimHistory className="mt-rl-ma-md" days={days} today={date} loggedIn={loggedIn} serverError={loggedIn && serverError}
+            canClear={Object.keys(localDays).length > 0} streakIcon={streakIcon}
+            onClear={() => { clearLocal(browserStorage()); setHistoryRev((n) => n + 1); }} />
+          {installHint}
+        </>
       )}
       <Ranking className={isClient ? "mt-rl-ma-sm" : "mt-rl-ma-md"} rows={rows} mine={mine} loggedIn={loggedIn}
         canPlay={isClient && hasMouse} decodeKey={submitted} />

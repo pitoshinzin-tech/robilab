@@ -13,6 +13,7 @@ import { PixelArt } from "@/components/brand/PixelArt";
 import { FLAME_8 } from "@/lib/pixel-art";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AimClient, PlayPlaceholder } from "./AimClient";
+import { InstallHintBlock } from "@/components/pwa/InstallHintBlock";
 
 export const dynamic = "force-dynamic";
 const TITLE = "今日の文字(エイム練習)";
@@ -54,7 +55,9 @@ function TodayTopPlaceholder() {
 
 async function AimBody({ char, date, rows }: { char: AimChar; date: string; rows: Promise<RankingRow[]> }) {
   // 連続日数の炎のドットはサーバーで描いて渡す(ドット絵のデータをブラウザの JS に入れない)
-  return <AimClient char={char} date={date} rows={await rows} streakIcon={<PixelArt grid={FLAME_8} size={16} />} />;
+  // 「ホーム画面に追加」のカードは記録の下(設計書 4-1)。今日の日付(JST)はサーバーから渡す
+  return <AimClient char={char} date={date} rows={await rows} streakIcon={<PixelArt grid={FLAME_8} size={16} />}
+    installHint={<InstallHintBlock place="aim" today={date} className="mt-rl-ma-sm" />} />;
 }
 
 /** ランキングを読み込むまでの面(AimClient のハイドレーション前と同じ遊ぶ面+ランキングの行の形) */
