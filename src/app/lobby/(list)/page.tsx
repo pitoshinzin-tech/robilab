@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { Bell as BellIcon, Check, Inbox, ShieldCheck, UserRound } from "lucide-react";
 import { createSupabaseServer } from "@/lib/supabase/server";
@@ -12,6 +13,7 @@ import { PairFigure } from "@/components/lobby/PairFigure";
 import { ButtonLink } from "@/components/ui/button-link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageShell } from "@/components/ui/page-shell";
+import { Skeleton } from "@/components/ui/skeleton";
 import { sortAndFilter } from "@/lib/lobby-sort";
 import type { Candidate } from "@/lib/lobby-types";
 import type { Axes } from "@/data/axes";
@@ -34,6 +36,11 @@ const SAFETY = [
 
 type MyProfileRow = { status: "active" | "suspended" | "banned"; axes: Axes | null };
 
+/*
+ * 表示速度(docs/design/perf.md):loading.tsx をやめた。あると直接開いたときも読み込み中の面が先に出て、
+ * 中身(ログイン前の流れの説明など)が 1 秒ほどあとに出ていた(LCP 3.0 秒)。ログイン前は読み込むデータがないので、そのまま出す。
+ * ログイン後は候補の一覧だけを Suspense で待つ(札 3 枚の形)。
+ */
 export default async function LobbyPage({ searchParams }: Props) {
   const sp = await searchParams;
   const supabase = await createSupabaseServer();
@@ -96,10 +103,6 @@ export default async function LobbyPage({ searchParams }: Props) {
   if (!me) redirect("/lobby/join");
   if (me.status !== "active") return <AccountStatusNotice status={me.status} />;
 
-  const data = assertNoRpcError(await supabase.rpc("lobby_candidates"));
-  const rows = sortAndFilter({ axes: me.axes }, (data ?? []) as Candidate[], { game: sp.game, slot: sp.slot, voice: sp.voice === "1" });
-
-  const filtered = Boolean(sp.game || sp.slot || sp.voice === "1");
 
   return (
     <PageShell
@@ -123,6 +126,22 @@ export default async function LobbyPage({ searchParams }: Props) {
           )}
           <LobbyFilters game={sp.game} slot={sp.slot} voice={sp.voice === "1"} />
         </div>
+        {/* 候補の一覧だけを待つ(見出しと絞り込みは先に出す)。札 3 枚の形は前の loading.tsx と同じ */}
+        <Suspense fallback={<div className="grid gap-4 lg:grid-cols-2">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-36 w-full rounded-rl-md" />)}</div>}>
+          <LobbyList supabase={supabase} axes={me.axes} sp={sp} />
+        </Suspense>
+      </div>
+    </PageShell>
+  );
+}
+
+/** 候補の一覧(相性の順・絞り込み)。データの読み方は今までと同じ */
+async function LobbyList({ supabase, axes, sp }: { supabase: Awaited<ReturnType<typeof createSupabaseServer>>; axes: Axes | null; sp: Awaited<Props["searchParams"]> }) {
+  const data = assertNoRpcError(await supabase.rpc("lobby_candidates"));
+  const rows = sortAndFilter({ axes }, (data ?? []) as Candidate[], { game: sp.game, slot: sp.slot, voice: sp.voice === "1" });
+  const filtered = Boolean(sp.game || sp.slot || sp.voice === "1");
+  return (
+    <>
         {rows.length === 0 ? (
           filtered ? (
             <EmptyState icon={Inbox} title="条件に合う人がまだいません" description="ゲームや時間帯を増やすと見つかりやすくなります。"
@@ -137,7 +156,6 @@ export default async function LobbyPage({ searchParams }: Props) {
             {rows.map((r) => <li key={r.candidate.id} className="min-w-0"><CandidateCard c={r.candidate} match={r.match} /></li>)}
           </ul>
         )}
-      </div>
-    </PageShell>
+    </>
   );
 }

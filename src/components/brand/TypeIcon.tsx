@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { getType } from "@/data/types";
 import { CUSTOM_TYPE_ICONS } from "@/data/type-icons";
 import { heatOf, spriteFill, spriteRows } from "@/lib/type-sprite";
+import { groupByFill } from "@/lib/pixel-path";
 
 export type TypeIconSize = 32 | 48 | 64 | 96 | 160 | 240;
 
@@ -29,20 +30,19 @@ export function TypeIcon({ code, size = 48, labelled = false, animate = false, g
   return (
     <svg viewBox="-1 -1 14 14" width={size} height={size} shapeRendering="crispEdges" className={box} {...a11y}>
       {/* 追補 S2:1 行ずつ <g data-row> にまとめる(空の行も置くので、いつも 12 個) */}
+      {/* マスは色ごとに 1 本の path(表示速度。docs/design/perf.md。見た目は <rect> を並べたときと同じ) */}
       {rows?.map((r) => (
         <g key={r.y} data-row={r.y}>
-          {r.cells.map((c) => (
-            <rect key={`${c.role}-${c.x}`} x={c.x} y={c.y} width={c.w} height={c.h} fill={spriteFill(c.role, heat)} />
-          ))}
+          {groupByFill(r.cells, (c) => spriteFill(c.role, heat)).map((p) => <path key={p.fill} d={p.d} fill={p.fill} />)}
         </g>
       ))}
       {/* 塗り替えの重ね(data-row を付けない。S2 の 12 行の数に入れない)。目は地の色のまま */}
       {dissolve && (
         <g className="rl-dissolve-lit">
-          {rows?.flatMap((r) => r.cells.map((c) => {
+          {groupByFill(rows?.flatMap((r) => r.cells) ?? [], (c) => {
             const fill = spriteFill(c.role, heat);
-            return <rect key={`${c.role}-${c.x}-${c.y}`} x={c.x} y={c.y} width={c.w} height={c.h} style={{ fill: c.role === "eye" ? fill : `color-mix(in oklab, ${fill} 60%, var(--rl-text))` }} />;
-          }))}
+            return c.role === "eye" ? fill : `color-mix(in oklab, ${fill} 60%, var(--rl-text))`;
+          }).map((p) => <path key={p.fill} d={p.d} style={{ fill: p.fill }} />)}
         </g>
       )}
     </svg>

@@ -35,6 +35,30 @@ function LoginHint() {
     </div>
   );
 }
+/**
+ * スマホ(マウスのない端末)の遊ぶ面。表示速度(docs/design/perf.md):ハイドレーションの前から CSS(pointer: fine でない)で出せるよう、
+ * page.tsx の読み込み中の面からも使う。
+ */
+export function TouchPlayCard({ loggedIn }: { loggedIn: boolean }) {
+  return (
+    <Card className="grid gap-4">
+      <p className="text-base">マウスの感度をそのまま使うので、記録は PC で。</p>
+      <div><CopyButton path="/aim" label="PC で開くリンクをコピー" /></div>
+      {!loggedIn && <LoginHint />}
+    </Card>
+  );
+}
+
+/** ハイドレーションの前の遊ぶ面:スマホは TouchPlayCard、PC は遊ぶ面の大きさの Skeleton(出し分けは CSS。hasMouse と同じ pointer: fine) */
+export function PlayPlaceholder() {
+  return (
+    <>
+      <div className="pointer-fine:hidden"><TouchPlayCard loggedIn={false} /></div>
+      <Skeleton className="hidden aspect-video w-full rounded-rl-md pointer-fine:block" />
+    </>
+  );
+}
+
 const noSubscribe = () => () => {};
 const finePointer = () => window.matchMedia("(pointer: fine)").matches;
 // ?debug=1 のときだけ、遊ぶ画面に診断を出す
@@ -158,14 +182,9 @@ export function AimClient({ char, date, rows, streakIcon }: { char: AimChar; dat
   };
 
   let play;
-  if (!isClient) play = <Skeleton className="aspect-video w-full rounded-rl-md" />;
-  else if (!hasMouse) play = (
-    <Card className="grid gap-4">
-      <p className="text-base">マウスの感度をそのまま使うので、記録は PC で。</p>
-      <div><CopyButton path="/aim" label="PC で開くリンクをコピー" /></div>
-      {!loggedIn && <LoginHint />}
-    </Card>
-  );
+  // ハイドレーションの前は、スマホの面を CSS で出しておく(ハイドレーションのあとに文が現れて LCP が遅れないように)
+  if (!isClient) play = <PlayPlaceholder />;
+  else if (!hasMouse) play = <TouchPlayCard loggedIn={loggedIn} />;
   else if (deg === null) play = <SensSetup onSaved={() => setSettingsRev((n) => n + 1)} initialGameId={settings?.mainGame} loggedIn={loggedIn} strokes={char.strokes} loginHint={<LoginHint />} />;
   else {
     play = (

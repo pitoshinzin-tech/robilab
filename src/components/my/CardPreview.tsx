@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const layer = "col-start-1 row-start-1 inline-flex items-center justify-center gap-2";
 
 /**
- * 名刺カードのプレビューと「名刺の画像を保存」。入力が止まってから 0.8 秒後に作り直す。
+ * 名刺カードのプレビューと「名刺の画像を保存」。開いた直後はすぐ作り、そのあとは入力が止まってから 0.8 秒後に作り直す。
  * 保存はタイプが入っているときだけ主ボタン。タイプがないときは「診断する」が主ボタンなので、ここは secondary にし、
  * 名刺のコードが仮の「????」であることを書き添える(本当の値に見せない)。
  * (追補 6 章)作り直した画像は上から 2 段(120ms)で重ねて出し、下に 1 つ前の画像を残す(明るさが変わらない)。
@@ -27,6 +27,8 @@ export function CardPreview({ data, rewrite = false, hasType = true }: { data: P
   const body = data ? JSON.stringify(data) : null;
   const live = useRef<string[]>([]);
 
+  // 表示速度(docs/design/perf.md):まだ 1 枚も出ていないとき(開いた直後)は待たずに作る。入力の後は 0.8 秒待つ(今までどおり)
+  const first = url === null;
   useEffect(() => {
     if (!body) return;
     const ctrl = new AbortController();
@@ -42,8 +44,10 @@ export function CardPreview({ data, rewrite = false, hasType = true }: { data: P
       } catch {
         if (!ctrl.signal.aborted) setFailed(true);
       }
-    }, 800);
+    }, first ? 0 : 800);
     return () => { clearTimeout(t); ctrl.abort(); };
+    // first は body が変わった時の値を使う(画像が届いて first が変わっても作り直さない)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [body]);
 
   // 画面を離れたら、最後に作った画像の blob URL を消す(見た目は変わらない)

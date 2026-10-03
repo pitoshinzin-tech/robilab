@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { loadSupabaseBrowser } from "@/lib/supabase/lazy";
 import { errorCodeOf } from "@/lib/lobby-errors";
 import { emptyMySettings, parseMySettings, validateMySettings, type FieldErrors, type MySettings } from "@/lib/my-settings";
 import { browserStorage, clearDirty, clearLocal, loadDirty, loadLocal, markDirty, mergeForSync, saveLocal } from "@/lib/my-settings-store";
@@ -42,7 +42,7 @@ export function useMySettings() {
   const pushToServer = useCallback((s: MySettings): Promise<boolean> => {
     setStatus("saving");
     const run = async (): Promise<boolean> => {
-      const { data, error } = await createSupabaseBrowser().rpc("save_my_settings", { p_data: s });
+      const { data, error } = await (await loadSupabaseBrowser()).rpc("save_my_settings", { p_data: s });
       if (error) {
         setStatus("server-error");
         setServerError(serverErrorMessage(errorCodeOf(error)));
@@ -73,7 +73,8 @@ export function useMySettings() {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
     let cancelled = false;
     (async () => {
-      const supabase = createSupabaseBrowser();
+      const supabase = await loadSupabaseBrowser();
+      if (cancelled) return;
       const { data: { user } } = await supabase.auth.getUser();
       if (cancelled || !user) return;
       setLoggedIn(true);
@@ -133,7 +134,7 @@ export function useMySettings() {
       if (!v.ok) return;
       if (!(await pushToServer(v.value))) return;
     }
-    const { data, error } = await createSupabaseBrowser().rpc("set_card_public", { p_public: on });
+    const { data, error } = await (await loadSupabaseBrowser()).rpc("set_card_public", { p_public: on });
     if (error) { setServerError(serverErrorMessage(errorCodeOf(error))); return; }
     setServerError(null);
     setSlug((data as string | null) ?? null);
@@ -142,7 +143,7 @@ export function useMySettings() {
   const removeAll = useCallback(async (): Promise<boolean> => {
     if (timer.current) { clearTimeout(timer.current); timer.current = null; }
     if (loggedIn) {
-      const { error } = await createSupabaseBrowser().rpc("delete_my_settings");
+      const { error } = await (await loadSupabaseBrowser()).rpc("delete_my_settings");
       if (error) { setServerError(serverErrorMessage(errorCodeOf(error))); return false; }
       hasServerRow.current = false;
       setSlug(null);

@@ -90,9 +90,19 @@ export function MouseClient({ pageUrl }: { pageUrl: string }) {
   const currentRef = settings?.devices.mouse ?? null;
   const currentMouse = currentRef && "id" in currentRef ? mouseById(currentRef.id) ?? null : null;
 
-  if (!isClient) return <Skeleton className="h-40 w-full rounded-rl-md" />;
+  /*
+   * 読み込み中の面。表示速度(docs/design/perf.md):入力画面(HandSetup)を見えないまま置いて同じ高さを取り、その上に Skeleton を重ねる。
+   * 初めての人は確かめ終わると入力画面になるので、下の段(注意書き)が動かない(高さ 160px の Skeleton のときは CLS 0.258)。
+   */
+  const pendingView = (busy: boolean) => (
+    <div aria-busy={busy || undefined} className="relative">
+      <div aria-hidden inert className="invisible"><HandSetup initial={emptyMySettings().hand} onDone={() => {}} /></div>
+      <Skeleton className="absolute inset-0 rounded-rl-md" />
+    </div>
+  );
+  if (!isClient) return pendingView(false);
   // この端末が空で、サーバーの設定を確かめ中のときだけ待つ(入力画面のちらつきを防ぐ)
-  if (!hand && !settings && serverPending) return <Skeleton aria-busy="true" className="h-40 w-full rounded-rl-md" />;
+  if (!hand && !settings && serverPending) return pendingView(true);
 
   if (!hand || editing) {
     return (
