@@ -103,7 +103,7 @@
     "nameJa": "ルーク",
     "nameEn": "Luke",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "米軍特殊部隊出身の民間警備会社の契約者。初心者に格闘技を教えている。",
+    "summary": "アメリカ出身の格闘家。軍の経験を持つ。",
     "quote": {
       "text": "米軍特殊部隊上がりで、初心者に総合格闘技を指導している。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/luke"
@@ -121,7 +121,7 @@
     "nameJa": "春麗",
     "nameEn": "Chun-Li",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "脚技で闘う元 ICPO の捜査官。いまはカンフー教室を開いている。",
+    "summary": "中国出身の女性キャラクター。シリーズ初期から続く看板的な存在。",
     "quote": {
       "text": "華麗な脚技で闘う元・ICPOの捜査官。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/chunli"
@@ -139,7 +139,7 @@
     "nameJa": "ディージェイ",
     "nameEn": "Dee Jay",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "陽気でノリの軽い、ダンスミュージックの世界的スター。",
+    "summary": "ジャマイカ出身の音楽好きな男性キャラクター。",
     "quote": {
       "text": "ダンスミュージックの世界的大スター。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/deejay"
@@ -158,7 +158,7 @@
     "nameJa": "ガイル",
     "nameEn": "Guile",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "祖国の平和のために闘う米空軍軍人。家族との平穏な日常も大切にしている。",
+    "summary": "アメリカ出身の軍人キャラクター。特徴的な髪型で知られる。",
     "quote": {
       "text": "祖国の平和のために闘う米空軍軍人。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/guile"
@@ -176,7 +176,7 @@
     "nameJa": "ダルシム",
     "nameEn": "Dhalsim",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "インドの修行僧でヨーガの達人。争いは好まないが悪事は許さない。",
+    "summary": "手足が伸びる独特の闘い方で知られる、インド出身のキャラクター。",
     "quote": {
       "text": "インドの修行僧でヨーガの達人。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/dhalsim"
@@ -194,7 +194,7 @@
     "nameJa": "JP",
     "nameEn": "JP",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "国際 NGO を組織して小国に繁栄をもたらした事業家。愛猫の名はシベール。",
+    "summary": "スト6で新しく登場した、スーツ姿の男性キャラクター。",
     "quote": {
       "text": "国際NGOを組織し多数の開発投資プロジェクトを成功させてきた事業家。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/jp"
@@ -212,7 +212,7 @@
     "nameJa": "サガット",
     "nameEn": "Sagat",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "ムエタイ界の帝王。いまは組織を離れ、山で修行を続けている。",
+    "summary": "長身で片目に傷のある、タイ出身のキャラクター。",
     "quote": {
       "text": "ムエタイ界の帝王。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/sagat"
@@ -231,7 +231,7 @@
     "nameJa": "ザンギエフ",
     "nameEn": "Zangief",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "赤きサイクロンの異名を持つプロレスラー。筋肉の理論を掲げて後進を指導する。",
+    "summary": "ロシア出身の大柄なキャラクター。投げ技の使い手として知られる。",
     "quote": {
       "text": "「赤きサイクロン」の異名を持つ巨漢のプロレスラー。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/zangief"
@@ -249,7 +249,7 @@
     "nameJa": "エドモンド本田",
     "nameEn": "E. Honda",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "相撲を世界に広めるために闘う力士。ちゃんこ鍋が得意料理。",
+    "summary": "日本出身の力士キャラクター。",
     "quote": {
       "text": "相撲を「わあるどわいど」にするため闘う力士。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/ehonda"
@@ -267,7 +267,7 @@
     "nameJa": "マノン",
     "nameEn": "Manon",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "世界大会優勝経験のある柔道家で、スーパーモデルでもある美の探求者。",
+    "summary": "スト6で新しく登場した、フランス出身の女性キャラクター。",
     "quote": {
       "text": "世界大会優勝経験を持つ柔道家にして、スーパーモデル。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/manon"
@@ -285,7 +285,7 @@
     "nameJa": "マリーザ",
     "nameEn": "Marisa",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "古代ギリシャの歴史を継ぐ闘士で、ジュエリーデザイナーでもある。",
+    "summary": "スト6で新しく登場した、大柄な女性キャラクター。",
     "quote": {
       "text": "古代ギリシャからの歴史を継ぐ闘士にして新進のジュエリーデザイナー。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/marisa"
@@ -304,7 +304,7 @@
     "nameJa": "ジェイミー",
     "nameEn": "Jamie",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "中華街を守る自称トラブルバスター。特技はダンス全般。",
+    "summary": "スト6で新しく登場した、酔拳風に闘う男性キャラクター。",
     "quote": {
       "text": "自称・中華街のトラブルバスター。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/jamie"
@@ -322,7 +322,7 @@
     "nameJa": "ブランカ",
     "nameEn": "Blanka",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "ジャングルを知り尽くした心やさしい戦士。ツアーガイドをして母を支えている。",
+    "summary": "ブラジル出身の、緑色の体をしたキャラクター。",
     "quote": {
       "text": "心やさしい大自然の戦士。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/blanka"
