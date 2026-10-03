@@ -3,7 +3,7 @@ import { CHARS, type Char } from "@/data/chars";
 import { CHAR_GAME_SETTINGS, type CharGameSetting } from "@/data/char-games";
 import type { CharGameId } from "@/data/char-types";
 import { GAMES, type Game } from "@/data/games";
-import { pickForGame } from "@/lib/char-match";
+import { pickForGame, shiftedRows } from "@/lib/char-match";
 import { surpriseReason } from "@/lib/char-reason";
 
 /**
@@ -74,11 +74,18 @@ export const charHref = (c: { game: string; id: string }) => `/games/${c.game}/c
 
 export type CharLink = { href: string; name: string };
 /** 結果ページのキャラ:名前の横にロールの記号 16px を出すため、ゲームとロールも渡す */
-export type ResultCharLink = CharLink & { game: string; roleId: string };
+export type ResultCharLink = CharLink & {
+  game: string; roleId: string;
+  /** ロールの土台からずれた軸の札を 1 つだけ(一覧と同じ言葉。札がなければ null。数字なし) */
+  shift: { left: string; right: string; word: string } | null;
+};
 export type ResultCharPick = { fits: ResultCharLink[]; surprise: (ResultCharLink & { reason: string }) | null };
 
 const linkOf = (c: Char): CharLink => ({ href: charHref(c), name: c.nameJa });
-const resultLinkOf = (c: Char): ResultCharLink => ({ ...linkOf(c), game: c.game, roleId: c.roleId });
+const resultLinkOf = (c: Char): ResultCharLink => {
+  const r = shiftedRows(c)[0];
+  return { ...linkOf(c), game: c.game, roleId: c.roleId, shift: r ? { left: r.left, right: r.right, word: r.word } : null };
+};
 
 /** 結果ページのゲームごとの行に出す分(公開していて、合うキャラを出すゲームだけ)。部品へは表示に要る文字だけを渡す */
 export function resultCharPicks(

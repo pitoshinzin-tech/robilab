@@ -30,6 +30,20 @@ describe("GameRanking の合うキャラの行", () => {
     for (const a of links) expect(a).toMatch(/<svg[^>]*width="16"[^>]*height="16"/);
     expect(html).toMatch(/<p[^>]*>合うキャラ<\/p>/);
   });
+  it("キャラのリンクに照準の印(rl-lock)と、ずれた軸の札を 1 つだけ(札のないキャラは足さない・数字なし)", () => {
+    const picks = resultCharPicks(axes);
+    const html = render(picks);
+    for (const p of Object.values(picks)) {
+      for (const f of [...p.fits, ...(p.surprise ? [p.surprise] : [])]) {
+        const i = html.indexOf(`href="${f.href}"`);
+        const a = html.slice(html.lastIndexOf("<a ", i), html.indexOf("</a>", i));
+        expect(a, f.href).toContain("rl-lock");
+        if (f.shift) expect(a, f.href).toContain(`>${f.shift.word}<`);
+        else expect(a, f.href).not.toContain("寄り<");
+        expect(a.replace(/<[^>]*>/g, ""), f.href).not.toMatch(/\d/);
+      }
+    }
+  });
   it("スト6 の行にはキャラのリンクを出さない", () => {
     expect(render(resultCharPicks(axes))).not.toContain("/games/sf6/");
   });

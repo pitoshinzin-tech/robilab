@@ -7,14 +7,23 @@ import { CHAR_REASON_TEXT } from "@/lib/char-reason";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
-const CHAR_LINK = "inline-flex min-h-11 items-center gap-2 font-bold text-rl-accent underline-offset-4 hover:underline";
+const CHAR_LINK = "rl-lock inline-flex min-h-11 flex-wrap items-center gap-x-2 font-bold text-rl-accent underline-offset-4 hover:underline";
 
-/** キャラへのリンク:ロールの記号 16px+名前(文字だけのリンクより、キャラのページへの入口の形にする) */
+/**
+ * キャラへのリンク:ロールの記号 16px+名前+ロールの土台からずれた軸の札 1 つ(札がなければ足さない。数字なし)。
+ * 乗せる・フォーカスで照準の印(S4 の rl-lock)。
+ */
 function CharLink({ link }: { link: ResultCharLink }) {
   return (
     <Link href={link.href} className={CHAR_LINK}>
       <PixelArt grid={roleSymbol(link.game, link.roleId)} size={16} />
       {link.name}
+      {link.shift && (
+        <span className="inline-flex h-6 items-center gap-1 rounded-rl-sm border border-rl-line-strong px-1.5 text-xs font-normal text-rl-text no-underline">
+          <span className="sr-only">(</span><span className="text-rl-muted">{link.shift.left}/{link.shift.right}</span>
+          <span className="font-bold">{link.shift.word}</span><span className="sr-only">)</span>
+        </span>
+      )}
     </Link>
   );
 }
