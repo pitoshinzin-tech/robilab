@@ -1,12 +1,16 @@
 import { ChevronRight } from "lucide-react";
 import type { OtherMouseRow } from "@/lib/mouse-rows";
-import { connectionLabel, shapeLabel, withUnit } from "@/lib/gear-labels";
+import { connectionLabel, shapeLabel } from "@/lib/gear-labels";
 import { skatesHrefFor } from "@/lib/skate-match";
 import { ButtonLink } from "@/components/ui/button-link";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { ShopButtons } from "@/components/gear/ShopButtons";
+import { SpecValue } from "@/components/gear/SpecValue";
 
-/** 公式の長さか幅がないマウス(設計書 3-1)。手に合う順には入れず、わかっている公式の数字と店へのリンクだけを出す(人気の順)。 */
+/**
+ * 公式の長さか幅がないマウス(設計書 3-1)。手に合う順には入れず、わかっている公式の数字と店へのリンクだけを出す(人気の順)。
+ * サーバーで描いて MouseClient に渡し、結果の右の列の最後にだけ出す(入力前は出さない。機種のデータ本体はブラウザの JS に入れない)。
+ */
 export function OtherMiceList({ items }: { items: OtherMouseRow[] }) {
   return (
     <section aria-labelledby="mouse-other" className="grid gap-4">
@@ -20,14 +24,15 @@ export function OtherMiceList({ items }: { items: OtherMouseRow[] }) {
               <h3 data-long-name className="text-xl font-bold wrap-anywhere">{m.name}</h3>
               <p className="text-sm text-rl-muted">公式に数字がない項目:{m.missing.join("・")}</p>
               <dl className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-rl-muted">
-                <div className="flex gap-1"><dt>長さ</dt><dd className="text-rl-text">{withUnit(m.lengthMm, "mm")}</dd></div>
-                <div className="flex gap-1"><dt>幅</dt><dd className="text-rl-text">{withUnit(m.widthMm, "mm")}</dd></div>
-                <div className="flex gap-1"><dt>高さ</dt><dd className="text-rl-text">{withUnit(m.heightMm, "mm")}</dd></div>
-                <div className="flex gap-1"><dt>重さ</dt><dd className="text-rl-text">{withUnit(m.weightG, "g")}</dd></div>
+                <div className="flex items-baseline gap-1"><dt>長さ</dt><SpecValue value={m.lengthMm} unit="mm" /></div>
+                <div className="flex items-baseline gap-1"><dt>幅</dt><SpecValue value={m.widthMm} unit="mm" /></div>
+                <div className="flex items-baseline gap-1"><dt>高さ</dt><SpecValue value={m.heightMm} unit="mm" /></div>
+                <div className="flex items-baseline gap-1"><dt>重さ</dt><SpecValue value={m.weightG} unit="g" /></div>
                 <div className="flex gap-1"><dt>形</dt><dd className="text-rl-text">{shapeLabel(m.shape)}</dd></div>
                 <div className="flex gap-1"><dt>接続</dt><dd className="text-rl-text">{connectionLabel(m.connection)}</dd></div>
               </dl>
-              {m.skateCount > 0 && <ButtonLink href={skatesHrefFor(m.id)} variant="ghost" size="sm" className="justify-self-start">このマウスのソール<ChevronRight aria-hidden className="size-4" /></ButtonLink>}
+              {/* ソールは左の情報の列に置く(右の店の列に足すと、右の列が広がって左の情報が押しつぶされる) */}
+              {m.skateCount > 0 && <ButtonLink href={skatesHrefFor(m.id)} variant="ghost" size="sm" className="justify-self-start px-0">このマウスのソール<ChevronRight aria-hidden className="size-4" /></ButtonLink>}
             </div>
             <ShopButtons links={m.links} className="md:justify-end" />
           </li>

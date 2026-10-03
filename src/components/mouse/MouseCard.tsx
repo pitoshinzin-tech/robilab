@@ -3,11 +3,11 @@ import type { Ranked } from "@/lib/mouse-fit";
 import type { ShopLinks } from "@/lib/shop-links";
 import { ButtonLink } from "@/components/ui/button-link";
 import { ShopButtons } from "@/components/gear/ShopButtons";
+import { SpecValue } from "@/components/gear/SpecValue";
 import { Badge, RankBadge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ChipButton } from "@/components/ui/chip-button";
-import { connectionLabel, shapeLabel, withUnit } from "@/lib/gear-labels";
-
+import { connectionLabel, shapeLabel } from "@/lib/gear-labels";
 
 /** 2 番目からのカード。店のボタンはすべて二番手(主ボタンは先頭の大きな行 TopMouseRow だけ) */
 export function MouseCard({ rank, item, brand, name, reason, compare, links, imageUrl, overlaid = false, onOverlay, skateHref = null }: {
@@ -26,10 +26,9 @@ export function MouseCard({ rank, item, brand, name, reason, compare, links, ima
 }) {
   const m = item.mouse;
   const image = imageUrl && links.rakutenIsItem ? imageUrl : null;
-  const specs: [string, string][] = [
-    ["長さ", `${m.lengthMm}mm`], ["幅", `${m.widthMm}mm`], ["高さ", withUnit(m.heightMm, "mm")], ["重さ", withUnit(m.weightG, "g")],
-    ["形", shapeLabel(m.shape)], ["接続", connectionLabel(m.connection)],
-  ];
+  // 寸法は数字(マゼンタ)、形・接続は文字(本文の色)
+  const sizes: [string, number | null, "mm" | "g"][] = [["長さ", m.lengthMm, "mm"], ["幅", m.widthMm, "mm"], ["高さ", m.heightMm, "mm"], ["重さ", m.weightG, "g"]];
+  const words: [string, string][] = [["形", shapeLabel(m.shape)], ["接続", connectionLabel(m.connection)]];
   return (
     <Card as="li" className={image ? "grid gap-4 md:grid-cols-[8rem_minmax(0,1fr)] md:items-start" : "grid gap-4"}>
       {image && (
@@ -52,12 +51,15 @@ export function MouseCard({ rank, item, brand, name, reason, compare, links, ima
           <p className="text-base">{reason}</p>
         </div>
         <dl className="grid grid-cols-3 gap-x-3 gap-y-2 text-sm text-rl-muted md:grid-cols-6">
-          {specs.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className="tabular-nums text-rl-text">{v}</dd></div>)}
+          {sizes.map(([k, v, unit]) => <div key={k}><dt>{k}</dt><SpecValue value={v} unit={unit} /></div>)}
+          {words.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className="text-rl-text">{v}</dd></div>)}
         </dl>
         {compare && <p className="text-sm text-rl-secondary-text">{compare}</p>}
         {onOverlay && <ChipButton pressed={overlaid} onClick={onOverlay} className="justify-self-start">手と重ねる</ChipButton>}
-        {skateHref && <ButtonLink href={skateHref} variant="ghost" size="sm" className="justify-self-start">このマウスのソール<ChevronRight aria-hidden className="size-4" /></ButtonLink>}
-        <ShopButtons links={links} className="border-t border-rl-line pt-4" />
+        {/* 店・公式・ソールのリンクは 1 つの並び(ghost は px-0 で左の端をそろえる) */}
+        <ShopButtons links={links} className="border-t border-rl-line pt-4">
+          {skateHref && <ButtonLink href={skateHref} variant="ghost" size="sm" className="px-0">このマウスのソール<ChevronRight aria-hidden className="size-4" /></ButtonLink>}
+        </ShopButtons>
       </div>
     </Card>
   );

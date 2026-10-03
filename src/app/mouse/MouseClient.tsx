@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
-import { SearchX, Share2, TriangleAlert } from "lucide-react";
-import { applyFilter, compareWith, DEFAULT_HAND_LENGTH_CM, fitTarget, handFrom, NO_FILTER, rankMice, targetText, type MouseFilter } from "@/lib/mouse-fit";
+import { useEffect, useState, type ReactNode } from "react";
+import { ChevronDown, SearchX, Share2, TriangleAlert } from "lucide-react";
+import { activeFilterCount, applyFilter, compareWith, DEFAULT_HAND_LENGTH_CM, fitTarget, handFrom, NO_FILTER, rankMice, targetText, type MouseFilter } from "@/lib/mouse-fit";
 import { skatesHrefFor } from "@/lib/skate-match";
 import { recommendReason } from "@/lib/mouse-reason";
 import type { MouseRow } from "@/lib/mouse-rows";
@@ -37,7 +37,11 @@ function revealFitFigure() {
   el.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
 }
 
-export function MouseClient({ pageUrl, mice }: { pageUrl: string; mice: MouseRow[] }) {
+/**
+ * other:公式の大きさがないため比べられないマウスの段(サーバーで描いたもの。page.tsx の OtherMiceList)。
+ * 結果の右の列の最後(「もっと見る」のあと)にだけ出す。入力前は出さない(手を入れる前に「比べられない」を見せない)。
+ */
+export function MouseClient({ pageUrl, mice, other = null }: { pageUrl: string; mice: MouseRow[]; other?: ReactNode }) {
   const isClient = useIsClient();
   const [rev, setRev] = useState(0);
   // 保存できない環境(プライベートモードなど)で入力した値
@@ -118,6 +122,8 @@ export function MouseClient({ pageUrl, mice }: { pageUrl: string; mice: MouseRow
   // 追補 6 章:重ね図に出すマウス(選んでいなければ、絞り込んだ一覧の先頭。0 件なら 1 位)
   const overlay = ranked.find((r) => r.mouse.id === overlayId)?.mouse ?? filtered[0]?.mouse ?? ranked[0]?.mouse;
   const overlayName = overlay?.name ?? "";
+  const filterCount = activeFilterCount(filter);
+  const onFilter = (f: MouseFilter) => { setFilter(f); setShowAll(false); };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
@@ -132,7 +138,7 @@ export function MouseClient({ pageUrl, mice }: { pageUrl: string; mice: MouseRow
           {/* 追補 6 章:実寸の重ね図(手の設定のすぐ横) */}
           {overlay && (
             <div id={FIT_FIGURE_ID} className="scroll-mt-6">
-              <FitOverlay handLengthCm={hand.lengthCm} handWidthCm={hand.widthCm} mouse={{ id: overlay.id, name: overlayName, lengthMm: overlay.lengthMm, widthMm: overlay.widthMm }} />
+              <FitOverlay svgClassName="h-40 lg:h-56" handLengthCm={hand.lengthCm} handWidthCm={hand.widthCm} mouse={{ id: overlay.id, name: overlayName, lengthMm: overlay.lengthMm, widthMm: overlay.widthMm }} />
             </div>
           )}
           {estimated && <p className="text-sm text-rl-muted">手の長さを入れていないので、平均的な大きさ({DEFAULT_HAND_LENGTH_CM}cm)で出しています。測って入れると、あなたの手に合わせられます。</p>}
@@ -140,42 +146,53 @@ export function MouseClient({ pageUrl, mice }: { pageUrl: string; mice: MouseRow
           {notSaved && <p className="flex items-start gap-2 text-sm text-rl-warning"><TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />この端末には保存できませんでした(この画面を閉じると消えます)。</p>}
           <button type="button" className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "justify-self-start")} onClick={() => setEditing(true)}>手の情報を変える</button>
         </Card>
-        <MouseFilters value={filter} onChange={(f) => { setFilter(f); setShowAll(false); }} />
+        {/* lg 以上は左の列に開いたまま。lg 未満は結果の見出しの下に畳む(1 位を上に) */}
+        <div className="hidden lg:block"><MouseFilters value={filter} onChange={onFilter} /></div>
       </div>
 
-      <section aria-labelledby="mouse-results" className="grid gap-4">
-        <SectionHeading id="mouse-results" title="あなたの手に近い順" count={filtered.length}
-          action={<ButtonAnchor href={shareUrl} target="_blank" rel="noopener noreferrer" variant="secondary" size="sm"><Share2 aria-hidden />TOP3 を X でシェア</ButtonAnchor>} />
-        <p className="flex flex-wrap items-center gap-2 text-sm text-rl-muted"><Badge variant="pr">PR</Badge>このリンクから買うと、ロビラボに紹介料が入ることがあります</p>
-        {filtered.length === 0 ? (
-          <EmptyState icon={SearchX} title="条件に合うマウスがありません" description="絞り込みを減らすと見つかります。"
-            action={<button type="button" className={buttonVariants({ variant: "secondary" })} onClick={() => setFilter(NO_FILTER)}>絞り込みを外す</button>} />
-        ) : (
-          <ol className="grid gap-4">
-            {shown.map((item) => {
-              const m = item.mouse;
-              const rank = ranked.indexOf(item) + 1;
-              const reason = recommendReason({ ...hand, estimated }, target, m, null);
-              const compare = currentMouse ? compareWith(currentMouse, m) : null;
-              const overlaid = overlay?.id === m.id;
-              const skateHref = m.skateCount > 0 ? skatesHrefFor(m.id) : null;
-              const onOverlay = () => { setOverlayId(m.id); requestAnimationFrame(revealFitFigure); };
-              // 追補 6 章:一覧の先頭は大きな行(主ボタンはここ。絞り込みで 1 位が外れても先頭が持つ)。2 番目からはカード(店のボタンは二番手)
-              if (item === shown[0]) return <TopMouseRow key={m.id} rank={rank} item={item} brand={m.brand} name={m.name} reason={reason} links={m.links} compare={compare} overlaid={overlaid} onOverlay={onOverlay} skateHref={skateHref} />;
-              return (
-                <MouseCard key={m.id} rank={rank} item={item} brand={m.brand} name={m.name}
-                  reason={reason}
-                  compare={compare}
-                  links={m.links}
-                  imageUrl={m.imageUrl} overlaid={overlaid} onOverlay={onOverlay} skateHref={skateHref} />
-              );
-            })}
-          </ol>
-        )}
-        {!showAll && filtered.length > FIRST && (
-          <button type="button" className={cn(buttonVariants({ variant: "secondary" }), "justify-self-center")} onClick={() => setShowAll(true)}>もっと見る({filtered.length - FIRST} 件)</button>
-        )}
-      </section>
+      <div className="grid min-w-0 gap-12">
+        <section aria-labelledby="mouse-results" className="grid gap-4">
+          <SectionHeading id="mouse-results" title="あなたの手に近い順" count={filtered.length}
+            action={<ButtonAnchor href={shareUrl} target="_blank" rel="noopener noreferrer" variant="secondary" size="sm"><Share2 aria-hidden />TOP3 を X でシェア</ButtonAnchor>} />
+          <details className="group rounded-rl-md border border-rl-line bg-rl-surface lg:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-4 text-sm font-bold [&::-webkit-details-marker]:hidden">
+              <span>絞り込み<span className="ml-2 font-normal text-rl-muted">{filterCount > 0 ? `${filterCount} つの条件で絞り込み中` : "すべて表示中"}</span></span>
+              <ChevronDown aria-hidden className="size-5 shrink-0 transition-transform duration-(--rl-dur-base) group-open:rotate-180" />
+            </summary>
+            <div className="p-4 pt-0"><MouseFilters bare value={filter} onChange={onFilter} /></div>
+          </details>
+          <p className="flex flex-wrap items-center gap-2 text-sm text-rl-muted"><Badge variant="pr">PR</Badge>このリンクから買うと、ロビラボに紹介料が入ることがあります</p>
+          {filtered.length === 0 ? (
+            <EmptyState icon={SearchX} title="条件に合うマウスがありません" description="絞り込みを減らすと見つかります。"
+              action={<button type="button" className={buttonVariants({ variant: "secondary" })} onClick={() => setFilter(NO_FILTER)}>絞り込みを外す</button>} />
+          ) : (
+            <ol className="grid gap-4">
+              {shown.map((item) => {
+                const m = item.mouse;
+                const rank = ranked.indexOf(item) + 1;
+                const reason = recommendReason({ ...hand, estimated }, target, m, null);
+                const compare = currentMouse ? compareWith(currentMouse, m) : null;
+                const overlaid = overlay?.id === m.id;
+                const skateHref = m.skateCount > 0 ? skatesHrefFor(m.id) : null;
+                const onOverlay = () => { setOverlayId(m.id); requestAnimationFrame(revealFitFigure); };
+                // 追補 6 章:一覧の先頭は大きな行(主ボタンはここ。絞り込みで 1 位が外れても先頭が持つ)。2 番目からはカード(店のボタンは二番手)
+                if (item === shown[0]) return <TopMouseRow key={m.id} rank={rank} item={item} brand={m.brand} name={m.name} reason={reason} links={m.links} compare={compare} overlaid={overlaid} onOverlay={onOverlay} skateHref={skateHref} />;
+                return (
+                  <MouseCard key={m.id} rank={rank} item={item} brand={m.brand} name={m.name}
+                    reason={reason}
+                    compare={compare}
+                    links={m.links}
+                    imageUrl={m.imageUrl} overlaid={overlaid} onOverlay={onOverlay} skateHref={skateHref} />
+                );
+              })}
+            </ol>
+          )}
+          {!showAll && filtered.length > FIRST && (
+            <button type="button" className={cn(buttonVariants({ variant: "secondary" }), "justify-self-center")} onClick={() => setShowAll(true)}>もっと見る({filtered.length - FIRST} 件)</button>
+          )}
+        </section>
+        {other}
+      </div>
     </div>
   );
 }

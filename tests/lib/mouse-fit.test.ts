@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { FitMouse } from "@/lib/mouse-fit";
 import {
-  applyFilter, compareWith, DEFAULT_HAND_LENGTH_CM, fitDistance, fitScore, fitTarget, handFrom, isFitMouse, NO_FILTER, previewHand, rankMice, targetText,
+  activeFilterCount, applyFilter, compareWith, DEFAULT_HAND_LENGTH_CM, fitDistance, fitScore, fitTarget, handFrom, isFitMouse, NO_FILTER, previewHand, rankMice, targetText,
 } from "@/lib/mouse-fit";
 
 const m = (id: string, lengthMm: number, widthMm: number, weightG: number, extra: Partial<FitMouse> = {}): FitMouse => ({
@@ -162,5 +162,13 @@ describe("公式にない数字(null)", () => {
     expect(compareWith(cur, m("x", 130, 63.5, 0, { heightMm: null, weightG: null }))).toBe("今のマウスより 長さ +5mm・幅 ほぼ同じ");
     expect(compareWith(cur, m("y", 125.5, 63, 0, { heightMm: null, weightG: null }))).toBe("今のマウスと長さ・幅がほぼ同じ");
     expect(compareWith({ id: "n", lengthMm: null, widthMm: null, heightMm: null, weightG: null }, cur)).toBeNull();
+  });
+});
+
+describe("activeFilterCount", () => {
+  it("「すべて」ではない条件の数を数える(畳んだ絞り込みの見出しに出す)", () => {
+    expect(activeFilterCount(NO_FILTER)).toBe(0);
+    expect(activeFilterCount({ ...NO_FILTER, weight: "le55" })).toBe(1);
+    expect(activeFilterCount({ weight: "gt70", shape: "symmetric", connection: "wired" })).toBe(3);
   });
 });

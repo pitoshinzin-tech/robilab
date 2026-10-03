@@ -40,6 +40,11 @@ export type MouseFilter = {
 };
 export const NO_FILTER: MouseFilter = { weight: "all", shape: "all", connection: "all" };
 
+/** 「すべて」ではない絞り込みの数(畳んだ絞り込みの見出しに出す) */
+export function activeFilterCount(f: MouseFilter): number {
+  return (Object.keys(NO_FILTER) as (keyof MouseFilter)[]).filter((k) => f[k] !== NO_FILTER[k]).length;
+}
+
 const round1 = (x: number) => Math.round(x * 10) / 10;
 
 export function fitTarget(h: Hand): Target {

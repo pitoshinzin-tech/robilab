@@ -31,8 +31,8 @@ export default function MousePage() {
     <PageShell width="wide" title="マウス探し" description="手の大きさと持ち方から、ちょうどいい大きさのマウスを探します。"
       subnav={<SubNav label="感度・マウス" items={subnavFor("mouse", PROS_READY)} />}>
       <div className="grid gap-8">
-        <MouseClient pageUrl={`${getSiteUrl()}/mouse`} mice={comparable} />
-        {other.length > 0 && <OtherMiceList items={other} />}
+        {/* 比べられない段はサーバーで描いて渡し、結果の右の列の最後にだけ出す(入力前は出さない) */}
+        <MouseClient pageUrl={`${getSiteUrl()}/mouse`} mice={comparable} other={other.length > 0 ? <OtherMiceList items={other} /> : null} />
         <p className="text-xs text-rl-muted">
           大きさ・重さは各メーカー公式サイトの表記です(確認日はデータに記録)。公式に数字がない項目は「公式の記載なし」と出します。目安は一般的な考え方を元にした参考の値です。
           価格や在庫は各ショップでご確認ください。Amazon・楽天のリンクには広告(PR)が含まれる場合があります(<Link href="/disclosure" className="text-rl-accent underline">広告表記</Link>)。

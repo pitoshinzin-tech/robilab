@@ -31,11 +31,11 @@ export function TopMouseRow({ rank, item, brand, name, reason, links, overlaid, 
         <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-rl-muted">
           <span>長さ <NumUnit value={m.lengthMm} unit="mm" className="text-rl-title" /></span>
           <span>幅 <NumUnit value={m.widthMm} unit="mm" className="text-rl-title" /></span>
-          <span>重さ {m.weightG === null ? NO_DATA : <NumUnit value={m.weightG} unit="g" className="text-rl-title" />}</span>
+          <span>重さ {m.weightG === null ? <span className="text-rl-text">{NO_DATA}</span> : <NumUnit value={m.weightG} unit="g" className="text-rl-title" />}</span>
         </p>
         {compare && <p className="text-sm text-rl-secondary-text">{compare}</p>}
         <ChipButton pressed={overlaid} onClick={onOverlay} className="justify-self-start">手と重ねる</ChipButton>
-        {skateHref && <ButtonLink href={skateHref} variant="ghost" size="sm" className="justify-self-start">このマウスのソール<ChevronRight aria-hidden className="size-4" /></ButtonLink>}
+        {skateHref && <ButtonLink href={skateHref} variant="ghost" size="sm" className="justify-self-start px-0">このマウスのソール<ChevronRight aria-hidden className="size-4" /></ButtonLink>}
       </div>
       <ShopButtons links={links} primary className="flex-col items-start md:items-end" />
     </li>
