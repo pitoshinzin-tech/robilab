@@ -97,3 +97,25 @@ describe("手順(番号・アイコン・読み上げ)", () => {
     expect(h).toMatch(/<span class="min-w-0 text-sm leading-6 text-rl-text">/);
   });
 });
+
+describe("2 回目の直し", () => {
+  it("アイコンの角の丸みは icon.svg・offline.html と同じ(8 マスのうち 1.5)、線の四角はそれにそろえた 12px", () => {
+    const rx = (s: string) => s.match(/<rect width="8" height="8" rx="([\d.]+)"/)?.[1];
+    const mine = renderToStaticMarkup(createElement(AppIconMark));
+    expect(rx(mine)).toBe(rx(readFileSync("src/app/icon.svg", "utf8")));
+    expect(rx(mine)).toBe(rx(readFileSync("public/offline.html", "utf8")));
+    expect(renderToStaticMarkup(createElement(HomeRowArt))).toContain("rounded-[12px]");
+  });
+  it.each(["lg", "xl"] as const)("wide=%s:その幅から右の列で、アイコンを右の端に(四角は左へ伸びる)", (bp) => {
+    const h = renderToStaticMarkup(createElement(HomeRowArt, { wide: bp }));
+    expect(h).toContain(`${bp}:col-start-2`);
+    expect(h).toContain(`${bp}:justify-items-end`);
+    expect(h).toContain(`${bp}:flex-row-reverse`);
+    expect(h).toContain(`${bp}:text-right`);
+  });
+  it("/aim のカードは lg、/my の段は xl(左の列が狭いので)から 2 列", () => {
+    const src = readFileSync("src/components/pwa/InstallHint.tsx", "utf8");
+    expect(src).toContain('wide={place === "aim" ? "lg" : "xl"}');
+    expect(src).toContain("xl:grid-cols-[minmax(0,1fr)_auto]");
+  });
+});

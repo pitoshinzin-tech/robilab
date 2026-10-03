@@ -9,12 +9,12 @@ const CELLS = GRID.flatMap((row, y) => [...row].flatMap((key, x) => (FILL[key] ?
 
 /**
  * ホーム画面に並ぶアプリのアイコンそのもの(ドット絵の「ロ」。public/icons と同じ絵)。飾りなので読み上げない。
- * 角の丸みは 8 マスのうち 2(64px で 16px = rounded-rl-md)。地は --rl-bg、縁は --rl-line の 1px。
+ * 角の丸みは 8 マスのうち 1.5(src/app/icon.svg・offline.html と同じ。64px で 12px)。地は --rl-bg、縁は --rl-line の 1px。
  */
 export function AppIconMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 8 8" shapeRendering="crispEdges" aria-hidden className={cn("block shrink-0", className)} data-app-icon="">
-      <rect width="8" height="8" rx="2" className="fill-rl-bg stroke-rl-line" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+      <rect width="8" height="8" rx="1.5" className="fill-rl-bg stroke-rl-line" strokeWidth="1" vectorEffect="non-scaling-stroke" />
       {CELLS.map((c) => (
         <rect key={`${c.x}-${c.y}`} x={c.x} y={c.y} width="1" height="1" className={c.fill} />
       ))}
@@ -22,16 +22,25 @@ export function AppIconMark({ className }: { className?: string }) {
   );
 }
 
+/** PC の幅で右の列に置くときのクラス(Tailwind が拾えるよう、文字のまま書く) */
+const WIDE = {
+  lg: { figure: "lg:col-start-2 lg:row-start-1 lg:justify-items-end", row: "lg:flex-row-reverse", caption: "lg:text-right" },
+  xl: { figure: "xl:col-start-2 xl:row-start-1 xl:justify-items-end", row: "xl:flex-row-reverse", caption: "xl:text-right" },
+} as const;
+
 /**
  * 「ホームの列」:アイコン+線の四角 3 つ(ほかのアプリの場所)の 4×1。1 マス 64px(8px × 8)、間 8px。
  * 幅 280px より狭い画面(320px の端末の /aim のカード)では、線の四角だけが縮む(アイコンは 64px のまま)。
  * 四角は場所を取ったまま隠しておき(開いても並びがずれない)、`group/hint` の中の `<details>` が開いたときだけ見せる。CSS だけ・動きなし。
+ * wide を渡すと、その幅から右の列に置き、アイコンを右の端にして、四角はその左に並ぶ(開くと左へ伸びる)。
+ * 四角の角の丸み 12px はアイコン(8 マスのうち 1.5)にそろえた値。
  * showRow = false(手順を開けない端末)のときは、アイコンだけ。
  */
-export function HomeRowArt({ showRow = true, className }: { showRow?: boolean; className?: string }) {
+export function HomeRowArt({ showRow = true, wide, className }: { showRow?: boolean; wide?: keyof typeof WIDE; className?: string }) {
+  const w = wide ? WIDE[wide] : undefined;
   return (
-    <figure className={cn("m-0 grid content-start gap-2", className)}>
-      <div className="flex items-start gap-2">
+    <figure className={cn("m-0 grid content-start gap-2", w?.figure, className)}>
+      <div className={cn("flex items-start gap-2", w?.row)}>
         <AppIconMark className="size-16" />
         {showRow &&
           [0, 1, 2].map((i) => (
@@ -39,11 +48,11 @@ export function HomeRowArt({ showRow = true, className }: { showRow?: boolean; c
               key={i}
               aria-hidden
               data-home-slot=""
-              className="invisible aspect-square w-16 min-w-0 rounded-rl-md border border-dashed border-rl-line-strong group-has-[details[open]]/hint:visible"
+              className="invisible aspect-square w-16 min-w-0 rounded-[12px] border border-dashed border-rl-line-strong group-has-[details[open]]/hint:visible"
             />
           ))}
       </div>
-      <figcaption className="text-xs text-rl-muted">ホームに並ぶアイコン</figcaption>
+      <figcaption className={cn("text-xs text-rl-muted", w?.caption)}>ホームに並ぶアイコン</figcaption>
     </figure>
   );
 }

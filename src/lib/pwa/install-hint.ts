@@ -1,6 +1,8 @@
 // 「ホーム画面に追加」の案内を出すか・どの手順を見せるか(設計書 4 章)。ブラウザに触らない純粋な関数だけ。
 // 記録はこの端末の localStorage だけ(日付と真偽。個人の情報は入れない・サーバーに送らない)。
 
+import { APP_SHORTCUTS } from "./manifest-data";
+
 export type HintPlatform = "ios" | "android" | "desktop" | "other" | "installed";
 export type StepsPlatform = Exclude<HintPlatform, "installed">;
 export type HintPlace = "my" | "aim";
@@ -85,4 +87,19 @@ export function hintView(input: { place: HintPlace; platform: HintPlatform; stor
   }
   const next = nextHintState(state, today);
   return { show: shouldShowHint(next, today, platform), platform, next: next === state ? null : next };
+}
+
+/** manifest のショートカットの名前(「今日の文字・仲間・マウス探し」)。manifest と同じ表から作る */
+export const SHORTCUT_NAMES = APP_SHORTCUTS.map((s) => s.name).join("・");
+
+/**
+ * 案内の 1 行目。/aim は今日の文字の画面にいる理由とつなげる。/my は、追加するとできるようになることを端末ごとに言う
+ * (長押し・右クリックのショートカットは Android と PC だけ。iPhone のホーム画面のアイコンにはショートカットがない)。
+ */
+export function hintLead(place: HintPlace, platform: HintPlatform): string {
+  if (place === "aim") return "アイコンから、毎日の今日の文字にワンタップで。";
+  if (platform === "android") return `アプリのように全画面で開けます。アイコンを長押しすると、${SHORTCUT_NAMES}にすぐ行けます。`;
+  if (platform === "desktop") return `アプリのように別のウインドウで開けます。アイコンを右クリックすると、${SHORTCUT_NAMES}にすぐ行けます。`;
+  if (platform === "ios") return "ホーム画面のアイコンから 1 回で、アプリのように全画面で開けます。";
+  return "アプリのように全画面で開けます。";
 }

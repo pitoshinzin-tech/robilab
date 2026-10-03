@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } fr
 import { ChevronDown, Download, X } from "lucide-react";
 import { useIsClient } from "@/lib/use-is-client";
 import { installPromptStore, SERVER_SNAPSHOT } from "@/lib/pwa/install-prompt";
-import { HINT_STORAGE_KEY, detectPlatform, dismissHint, hintView, parseHintState, type HintPlace, type StepsPlatform } from "@/lib/pwa/install-hint";
+import { HINT_STORAGE_KEY, detectPlatform, dismissHint, hintLead, hintView, parseHintState, type HintPlace, type StepsPlatform } from "@/lib/pwa/install-hint";
 import { Card } from "@/components/ui/card";
 import { PlainButton } from "@/components/ui/plain-button";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -51,10 +51,6 @@ function readEnv(place: HintPlace, today: string | undefined) {
   return { storage, view: hintView({ place, platform, stored: place === "aim" ? readStored(storage) : null, today }) };
 }
 
-const LEAD: Record<HintPlace, string> = {
-  aim: "アイコンから、毎日の今日の文字にワンタップで。",
-  my: "アプリのように全画面で開けます。",
-};
 
 /**
  * 「ホーム画面に追加」の静かな案内(設計書 4 章)。手順の文はサーバーで描いた steps を受け取り、JS が決めるのは
@@ -80,13 +76,14 @@ export function InstallHint({ place, today, steps, className }: { place: HintPla
   const canPrompt = prompt.event !== null && (platform === "android" || platform === "desktop");
 
   const hasSteps = platform !== "other";
-  // 左(スマホは上)にホームに並ぶアイコン。/aim のカードは PC の幅で右の空きに置く(文は 720px まで)。
+  // スマホは上にホームに並ぶアイコン。PC の幅(/aim のカードは lg、/my は左の列が狭いので xl)では右の列に置き、
+  // 閉じた形はアイコンを右の端に、開くと左へ線の四角 3 つが伸びる(文は 720px まで)。
   // 「追加のしかた」を開くと、アイコンの横に「ホームの列」の線の四角が出る(HomeRowArt。group/hint の has で CSS だけ)
   const body = (
-    <div className={cn("group/hint grid gap-4", place === "aim" && "lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-x-8")}>
-      <HomeRowArt showRow={hasSteps} className={cn(place === "aim" && "lg:col-start-2 lg:row-start-1")} />
+    <div className={cn("group/hint grid gap-4", place === "aim" ? "lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-x-8" : "xl:grid-cols-[minmax(0,1fr)_auto] xl:gap-x-8")}>
+      <HomeRowArt showRow={hasSteps} wide={place === "aim" ? "lg" : "xl"} />
       <div className="grid min-w-0 max-w-[720px] content-start gap-4">
-        <p className="text-sm text-pretty text-rl-muted [word-break:auto-phrase]">{LEAD[place]}</p>
+        <p className="text-sm text-pretty text-rl-muted [word-break:auto-phrase]">{hintLead(place, platform)}</p>
         {canPrompt && (
           <div>
             <PlainButton variant="secondary" size="sm" onClick={() => void installPromptStore.prompt()}>
