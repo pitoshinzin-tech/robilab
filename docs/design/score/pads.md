@@ -26,3 +26,27 @@
 9. (P2)空の説明の 1 文字の行:`src/components/ui/empty-state.tsx:15` に `text-balance [word-break:auto-phrase]`。
 
 - 見込み:1・2 で Creativity 8.0・Usability 8.0、4〜6 で Design 8.0 → 平均 8.0。3 と 7〜9 まで入れて Design 8.5・Usability 8.5 → **約 8.35**。
+
+---
+
+## デバイスの広がり 2 回目(d7bfcca・2026-10-03)
+
+- 見たもの:`shots/gear/pads-normal-r2-{375,1440}*.png`・`pads-normal-r2-1440-scale.png`・`pads-normal-r2-375-scale.png`・`pads-filter-r2-375*.png`(2 枚)・`pads-zero-r2-375*.png`(0 枚)。横のはみ出しなし。
+
+| 観点 | 重み | 点 | 1 回目 | 満たしていない条件 | 根拠 |
+|---|---|---|---|---|---|
+| Design | 40% | 7.5 | 7.0 | ③ | ① 41 枚 120px。② 表の数字がマゼンタ(本文の書体)。③ **0 件の上の大きな「0」が四角に斜線の記号に見える**(Orbitron の 0、0 件の画面で一番大きい要素)。**選んでいないチップの文字が右に寄る**(チェックの場所を `invisible` で取るため、左に空き)。375 の縮尺図で「Medium」「Small」の札が重なり、マウスの面を隠す。表の列はそろい、「公式ページ」の下がりは直った。 |
+| Usability | 30% | 8.0 | 7.5 | —(⑤ 仮) | ① 上の数字が絞った数(2 枚・0 枚)と「絞り込みに合う数(全 41 枚)」。375 の絞り込みが畳まれ、summary に「2 つの条件で絞り込み中」、一覧は約 600px から。③ 0 件・データなしの空。気になる所:375 の全体 33,920px(図の説明が 41 行すべてに出る)。 |
+| Creativity | 20% | 8.0 | 6.5 | — | ① 縮尺図「パッドの上のマウス」(線の外形+面のマウス)。② サイズの違いとマウスとの大きさが一目で分かる。③ 大きさ・厚さで絞ると、合うサイズの線だけパープルになる。行ごとの縮尺で、行をまたいだ比べは弱い(加点なし)。 |
+| Content | 10% | 8.0 | 8.0 | — | 比べる相手(平均のマウス 120×63mm)が図に入った。速さは原文だけ。0 件で外すボタン。 |
+| **重みつき平均** | | **7.80** | 7.15 | | **不合格**(Design 7.5) |
+
+### 直すこと(優先順)
+
+1. (P0・Design ③)**0 件の大きな数字**:`src/app/pads/page.tsx:63` で `matches.length === 0` のときは `NumUnit` の代わりに本文の書体の太字(`text-rl-display-1 font-bold text-rl-highlight`)で「0」、単位「枚」はそのまま。または `src/components/ui/num-unit.tsx` に `value === 0` のとき `font-display` を外す分かれを足す(`/skates` と 2 画面まとめて直る。こちらがおすすめ)。
+2. (P0・Design ③)**チップの左の空き**:`src/components/ui/chip-link.tsx:16` の `invisible` のチェックをやめ、選んでいないときは同じ 16px の場所に 8px の線の四角(`size-2 border border-rl-line-strong`、選んだらチェック)を出す。幅は変わらず、文字の前に「マス」が見えて空きに理由ができる。`/mouse` の `ChipButton`(`src/components/ui/chip-button.tsx`)も同じ形に。
+3. (P1・Design ③)**縮尺図の札の重なり**:`src/components/gear/PadScale.tsx:31-33` で、外形の幅が図の幅の 20% 未満のサイズは札を出さない(表で名前が分かる)か、札を外形の外の上に積む。マウスの面の上には札を置かない。
+4. (P1・Usability)**図の説明を 1 回だけ**:`PadScale.tsx:37-40` の `figcaption` は先頭の行だけに出し、ほかの行は `sr-only`(読み上げのために残す)。375 の全体が数千 px 短くなる。
+5. (P2・Creativity)縮尺を全行で同じに(1px = 4mm など)すると、行をまたいで大きさが比べられ、一覧をスクロールするだけで「大きいパッド」が分かる。
+
+- 見込み:1・2 で Design 8.0 → 平均 8.0。3・4 まで入れて Design 8.5・Usability 8.5 → **約 8.4**。
