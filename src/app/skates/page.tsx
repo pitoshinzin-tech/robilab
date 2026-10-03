@@ -8,8 +8,8 @@ import type { SkateSpec } from "@/data/gear-types";
 import { firstParam, type SearchParams } from "@/lib/gear-query";
 import { subnavFor } from "@/lib/nav";
 import { affiliateEnv, shopLinks, type AffiliateEnv } from "@/lib/shop-links";
-import { limitRows, parseShowAll, shownNote } from "@/lib/list-limit";
-import { groupByBrand, mouseOptionGroups, parseSkateFilter, skateCountCaption, skateCounts, skateChipHref, skateFilterCount, skateGridSource, skateView, type SkateFilter } from "@/lib/skate-match";
+import { limitPerGroup, limitRows, parseShowAll, shownNote } from "@/lib/list-limit";
+import { mouseOptionGroups, parseSkateFilter, skateCountCaption, skateCounts, skateChipHref, skateFilterCount, skateGridSource, skateView, type SkateFilter } from "@/lib/skate-match";
 import { PageShell } from "@/components/ui/page-shell";
 import { SubNav } from "@/components/brand/SubNav";
 import { NumUnit } from "@/components/ui/num-unit";
@@ -70,9 +70,8 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
   const showAllHref = skateChipHref(filter, {}, true);
   const dedicated = limitRows(view.kind === "mouse" ? view.dedicated : [], showAll);
   const universal = limitRows(view.kind === "mouse" ? view.universal : [], showAll);
-  const allList = limitRows(view.kind === "all" ? view.groups.flatMap((g) => g.items) : [], showAll);
-  const brandTotals = new Map(view.kind === "all" ? view.groups.map((g) => [g.brand, g.items.length] as const) : []);
-  const shownGroups = groupByBrand(allList.shown);
+  // マウスを選ばないときは、ブランドの段ごとに上位 2 件(ブランドの並びはそのまま。全体が 12 件以下なら全部)
+  const allList = limitPerGroup(view.kind === "all" ? view.groups : [], showAll);
   const filterCount = skateFilterCount(filter);
   const filtered = filterCount > 0;
   // 上の数字の説明の「全 N 件」:マウスを選んでいればそのマウスに使える数(素材・形で絞る前)、選んでいなければ全件
@@ -155,18 +154,15 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
               <>
                 <div className="grid gap-1">
                   <p className="text-base">マウスを選ぶと、合うソールだけに絞り込めます。</p>
-                  {allList.cut && <p className="text-sm text-rl-muted">人気の順(ブランドの順)の{shownNote(allList.shown.length)}(全 {allList.total} 件)</p>}
+                  {allList.cut && <p className="text-sm text-rl-muted">ブランドごとに上位 2 件を表示中(全 {allList.total} 件)</p>}
                 </div>
-                {shownGroups.map((g, i) => {
-                  const total = brandTotals.get(g.brand) ?? g.items.length;
-                  return (
-                    <section key={g.brand} aria-labelledby={`skates-brand-${i}`} className="grid gap-4">
-                      <SectionHeading id={`skates-brand-${i}`} title={g.brand} count={total}
-                        description={g.items.length < total ? `このうち ${g.items.length} 件を表示中` : undefined} />
-                      <SkateList skates={g.items} env={env} primaryFirst={false} />
-                    </section>
-                  );
-                })}
+                {allList.groups.map((g, i) => (
+                  <section key={g.brand} aria-labelledby={`skates-brand-${i}`} className="grid gap-4">
+                    <SectionHeading id={`skates-brand-${i}`} title={g.brand} count={g.total}
+                      description={g.items.length < g.total ? shownNote(g.items.length) : undefined} />
+                    <SkateList skates={g.items} env={env} primaryFirst={false} />
+                  </section>
+                ))}
                 {allList.cut && <ShowAllLink href={showAllHref} total={allList.total} />}
               </>
             )}

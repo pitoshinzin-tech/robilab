@@ -17,6 +17,21 @@ export function limitRows<T>(items: readonly T[], showAll: boolean, limit: numbe
   return { shown: cut ? items.slice(0, limit) : [...items], total: items.length, cut };
 }
 
+/** /skates でマウスを選ばないときの、ブランドの段ごとの上限 */
+export const GROUP_LIMIT = 2;
+
+/**
+ * 段(ブランド)ごとに上位を切る(段の並び・段の中の並びは変えない)。全体が LIST_LIMIT 以下・どの段も上限以下・すべて見るのときは切らない。
+ * total は段の全件(見出しの件数に使う)。
+ */
+export function limitPerGroup<T>(groups: readonly { brand: string; items: readonly T[] }[], showAll: boolean, perGroup: number = GROUP_LIMIT): {
+  groups: { brand: string; items: T[]; total: number }[]; total: number; cut: boolean;
+} {
+  const total = groups.reduce((n, g) => n + g.items.length, 0);
+  const cut = !showAll && total > LIST_LIMIT && groups.some((g) => g.items.length > perGroup);
+  return { groups: groups.map((g) => ({ brand: g.brand, items: cut ? g.items.slice(0, perGroup) : [...g.items], total: g.items.length })), total, cut };
+}
+
 /** 見出しの近くに出す説明 */
 export function shownNote(shown: number): string {
   return `上位 ${shown} 件を表示中`;
