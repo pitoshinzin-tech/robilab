@@ -14,7 +14,7 @@ const render = (skateHref: string | null) =>
 describe("MouseCard", () => {
   const html = render("/skates?mouse=x");
   it("長さ・幅・高さの数字はマゼンタの display、重さがなければ「公式の記載なし」を本文の色で", () => {
-    for (const n of [120, 61, 40]) expect(html).toContain(`<span class="font-display tabular-nums text-rl-highlight">${n}</span>`);
+    for (const n of [120, 61, 40]) expect(html).toContain(`<span class="font-bold tabular-nums text-rl-highlight">${n}</span>`);
     expect(html).toMatch(/<dd class="text-rl-text">公式の記載なし<\/dd>/);
     expect(html).toMatch(/<dd class="text-rl-text">右手用<\/dd>/);
   });

@@ -19,7 +19,7 @@ describe("OtherMiceList", () => {
   });
   it("寸法の数字はマゼンタの display、「公式の記載なし」・形・接続は本文の色", () => {
     const withLength = other.find((r) => r.lengthMm !== null)!;
-    expect(html).toContain(`<span class="font-display tabular-nums text-rl-highlight">${withLength.lengthMm}</span>`);
+    expect(html).toContain(`<span class="font-bold tabular-nums text-rl-highlight">${withLength.lengthMm}</span>`);
     expect(html).toMatch(/<dd class="text-rl-text">公式の記載なし<\/dd>/);
     expect(html).not.toMatch(/text-rl-highlight">公式の記載なし/);
   });
