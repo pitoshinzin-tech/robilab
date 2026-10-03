@@ -40,3 +40,28 @@
 
 1. (P1)欄の高さ:`src/components/mouse/HandSetup.tsx:80` の `grid grid-cols-2 gap-4` に `items-start`。注意の文を「空欄でも OK」に短くし `text-balance`(`NumberField` の `note`)。Design 8.5 → 平均 8.5。
 2. (コントローラー)手のデータを入れた状態(結果・0 件)の写真。
+
+---
+
+## デバイスの広がり 1 回目(b72cefa・2026-10-03)
+
+- 見たもの:`shots/gear/mouse-before-{375,1440}.png`(入力前、全体)・`-first.png`・`mouse-before-375-below.png`(入力の下)・**`mouse-result-375-first.png`・`mouse-result-375.png`・`mouse-result-1440.png`・`mouse-result-1440-first.png`(手 18.5cm・かぶせ持ちを保存して開き直した結果。画面に「かぶせ持ち・手の長さ:18.5cm」が出ているのを確かめた)**・`mouse-result-375-top1.png`(1 位の行)・`mouse-zero-375.png`(70g より重い・左右対称・有線で 0 件)・`mouse-other-{375,1440}.png`(比べられない段)。本番の形、reduced-motion オン、横のはみ出しなし。
+- 合格の線:4 観点すべて 8 以上、重みつき平均 8.2 以上。
+
+| 観点 | 重み | 点 | 満たしていない条件 | 根拠 |
+|---|---|---|---|---|
+| Design | 40% | 7.0 | ②・③ | ① 結果:1 位の「1」と寸法の `NumUnit`(display)、入力前:「18 cm」(display-2)。② `MouseCard` の寸法(長さ・幅・高さ・重さ)と比べられない段の寸法が白のまま(前回 P2 から残っている)。件数の「0」「8」が ⊠ ⊟ に見える(0 件の見出し・比べられない段の「8」)。③ **入力前、「合うマウスを見る」のすぐ下に「公式の大きさがないため比べられません」の 8 件が出る**(375 で入力の箱の直後)。1440 の結果では、この段だけ 2 列の外に幅いっぱいで出て、左の列とそろわない。`MouseCard` の「公式ページ」「このマウスのソール」が 1 行ずつ独立し、左に 16px 下がる。④ 2 位からのカードは同じ種類の一覧。⑤ 実寸の重ね図(線と面)。⑥ 段の外なし。前回 P1(欄の高さ)は直った。 |
+| Usability | 30% | 7.5 | ①(⑤ 仮) | ① 375 の結果で、1 位が約 1,700px(2 画面下。目安の箱と絞り込みの箱のあと)。入力前は、入力のあとに最初に見えるリストが「比べられないもの」。② 44px・フォーカス・コントラストの違反は見つからない。③ 0 件は `EmptyState`+「絞り込みを外す」、結果・入力前・比べられない段は崩れない。④ はみ出しなし。⑥ 自動の動きなし(手と重ねるは押したときだけ)。 |
+| Creativity | 20% | 8.5 | — | 実寸の重ね図が入力前から見え、結果では「手と重ねる」で行ごとに入れ替わる(触ると答える・中身を伝える)。 |
+| Content | 10% | 8.5 | — | 理由の文、寸法に単位、目安「長さ 114〜122mm くらい」と合う度、比べられない理由(公式に数字がない項目を名指し)、0 件の行き先。 |
+| **重みつき平均** | | **7.60** | | **不合格**(Design 7.0・Usability 7.5) |
+
+### 直すこと(優先順)
+
+1. (P0・Design ③・Usability ①)**比べられない段を結果の中へ**:`src/app/mouse/page.tsx:35` の `OtherMiceList` をページから外し、`MouseClient` に `other` を渡して、結果の右の列の最後(`src/app/mouse/MouseClient.tsx` の「もっと見る」(:174-176)のあと)にだけ出す。入力前は出さない(手を入れる前に「比べられない」を見せない)。1440 でも 2 列のグリッドの中に入る。
+2. (P0・Design ②)**寸法の数字をマゼンタ**:`src/components/mouse/MouseCard.tsx:54` の `dd` を `font-display tabular-nums text-rl-highlight`(「公式の記載なし」・形・接続の文字は `text-rl-text` のまま)。`src/components/mouse/OtherMiceList.tsx:22-25` の数の `dd` も同じ。
+3. (P1・Usability ①)**375 で 1 位を上に**:`MouseClient.tsx:142` の `MouseFilters` を、`lg` 未満では結果の見出しの下に `<details>`(summary「絞り込み」)で畳む。目安の箱は重ね図の高さを `h-40` に。1 位が約 1 画面上がる。
+4. (P1・Design ③)**店のリンクを 1 行に**:`MouseCard.tsx:61-65` の「公式ページ」を `flex flex-wrap gap-2` の中へ入れ、ghost は `px-0`。`:58` の「このマウスのソール」も `px-0`。
+5. (P1・全画面)件数の 0 と 8:`src/components/ui/section-heading.tsx:15-17` の「件」を見える形に(`pads.md` の 6)。
+
+- 見込み:1・2 だけでは Design 7.5(③ の店のリンクが残る)・Usability 7.5(375 の位置が残る)→ 平均 7.85。3・4・5 まで入れて Design 8.5・Usability 8.5 → **約 8.5**。
