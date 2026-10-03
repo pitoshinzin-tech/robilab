@@ -34,7 +34,7 @@ export function PageShell({ width = "narrow", title, description, back, subnav, 
         <header className="mb-6 flex flex-wrap items-start justify-between gap-4 md:mb-8">
           <div className="grid min-w-0 gap-2">
             <h1 className="text-rl-title font-bold tracking-[0.01em] wrap-anywhere">{title}</h1>
-            {description && <p className="max-w-[38em] text-base text-rl-muted">{description}</p>}
+            {description && <p className="max-w-[38em] text-base text-rl-muted text-balance [word-break:auto-phrase]">{description}</p>}
           </div>
           {actions && <div className="flex shrink-0 gap-2">{actions}</div>}
         </header>

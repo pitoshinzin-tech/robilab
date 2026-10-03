@@ -64,21 +64,47 @@ const drawable = (s: PadSize): s is PadSize & { widthMm: number; depthMm: number
  * matched:絞り込みで残ったサイズ(pad.sizes と同じもの)。絞り込んでいないときは null。
  * 描けるサイズがなければ null(図を出さない。作った数字を出さない)。
  */
-export function padScale(sizes: readonly PadSize[], matched: readonly PadSize[] | null): PadScaleGeometry | null {
-  const hit = matched === null ? null : new Set(matched);
+const sizeKey = (s: { widthMm: number; depthMm: number }) => `${s.widthMm}x${s.depthMm}`;
+
+/** 外形(同じ大きさは 1 本にまとめる)を大きい順に。padScale と padOutlineIndexer で同じ並びを使う */
+function outlineGroups(sizes: readonly PadSize[], hit: ReadonlySet<PadSize> | null) {
   // 同じ大きさは 1 本の線にまとめる(硬さ違いなど)
   const groups = new Map<string, { labels: string[]; widthMm: number; depthMm: number; matched: boolean }>();
   for (const s of sizes) {
     if (!drawable(s)) continue;
-    const key = `${s.widthMm}x${s.depthMm}`;
+    const key = sizeKey(s);
     const g = groups.get(key) ?? { labels: [], widthMm: s.widthMm, depthMm: s.depthMm, matched: false };
     if (!g.labels.includes(s.label)) g.labels.push(s.label);
     if (hit?.has(s)) g.matched = true;
     groups.set(key, g);
   }
-  if (groups.size === 0) return null;
+  return [...groups.values()].sort((a, b) => b.widthMm * b.depthMm - a.widthMm * a.depthMm || b.widthMm - a.widthMm);
+}
 
-  const list = [...groups.values()].sort((a, b) => b.widthMm * b.depthMm - a.widthMm * a.depthMm || b.widthMm - a.widthMm);
+/**
+ * 表の行と図の外形をつなぐ番号の数(globals.css の .rl-size-link の決まりを 0〜PAD_LINK_SLOTS-1 まで書いている)。
+ * データでいちばん多いパッドは外形 8 本。これより多い番号の行・外形には番号を付けない(つながらないだけで壊れない)。
+ */
+export const PAD_LINK_SLOTS = 10;
+
+/**
+ * 表の行(サイズ)→ 図の外形の番号(padScale の outlines の添え字)。数字がないサイズ・PAD_LINK_SLOTS を超える番号は null。
+ * sizes は図に渡すものと同じ(pad.sizes)。サイズの名前は自由な文字なので、番号で CSS の :has() に照らし合わせる。
+ */
+export function padOutlineIndexer(sizes: readonly PadSize[]): (s: PadSize) => number | null {
+  const index = new Map(outlineGroups(sizes, null).map((g, i) => [sizeKey(g), i]));
+  return (s) => {
+    if (!drawable(s)) return null;
+    const i = index.get(sizeKey(s));
+    return i === undefined || i >= PAD_LINK_SLOTS ? null : i;
+  };
+}
+
+export function padScale(sizes: readonly PadSize[], matched: readonly PadSize[] | null): PadScaleGeometry | null {
+  const hit = matched === null ? null : new Set(matched);
+  const list = outlineGroups(sizes, hit);
+  if (list.length === 0) return null;
+
   const widthMm = Math.max(...list.map((g) => g.widthMm));
   const depthMm = Math.max(...list.map((g) => g.depthMm));
   const pxPerMm = Math.min(SCALE_FRAME.maxWidthPx / widthMm, SCALE_FRAME.heightPx / depthMm);

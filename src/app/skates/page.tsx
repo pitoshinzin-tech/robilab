@@ -8,8 +8,7 @@ import type { SkateSpec } from "@/data/gear-types";
 import { firstParam, type SearchParams } from "@/lib/gear-query";
 import { subnavFor } from "@/lib/nav";
 import { affiliateEnv, shopLinks, type AffiliateEnv } from "@/lib/shop-links";
-import { mouseOptionGroups, parseSkateFilter, skateCountCaption, skateCounts, skateChipHref, skateFilterCount, skateView, type SkateFilter } from "@/lib/skate-match";
-import { skateGrid } from "@/lib/skate-grid";
+import { mouseOptionGroups, parseSkateFilter, skateCountCaption, skateCounts, skateChipHref, skateFilterCount, skateGridSource, skateView, type SkateFilter } from "@/lib/skate-match";
 import { PageShell } from "@/components/ui/page-shell";
 import { SubNav } from "@/components/brand/SubNav";
 import { NumUnit } from "@/components/ui/num-unit";
@@ -21,7 +20,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { FilterGroup, type FilterOption } from "@/components/gear/FilterGroup";
 import { SkateRow } from "@/components/gear/SkateRow";
-import { SkateGrid } from "@/components/gear/SkateGrid";
+import { SkateGridLive } from "@/components/gear/SkateGridLive";
 import { MyMousePreselect } from "@/components/gear/MyMousePreselect";
 import { FilterDisclosure } from "@/components/gear/FilterDisclosure";
 
@@ -60,7 +59,8 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
   const fromMy = firstParam(sp, "from") === "my" && selected !== undefined;
   const env = affiliateEnv();
   const optionGroups = mouseOptionGroups(mice, counts);
-  const grid = skateGrid(view);
+  // 選ぶ欄を変えたら送る前にマスを描き直すための数(ソールのデータ本体はブラウザに入れない)
+  const gridSource = skateGridSource(SKATES, filter);
   const shownCount = view.kind === "mouse" ? view.dedicated.length + view.universal.length : view.total;
   const clearHref = skateChipHref(filter, { material: "all", shape: "all" });
   const filterCount = skateFilterCount(filter);
@@ -99,7 +99,8 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
                 {filter.shape !== "all" && <input type="hidden" name="shape" value={filter.shape} />}
                 <button type="submit" className={buttonVariants({ variant: selected ? "secondary" : "primary" })}>このマウスで絞り込む</button>
               </form>
-              <SkateGrid grid={grid} mouseName={selected ? `${selected.brand} ${selected.name}` : null} />
+              <SkateGridLive key={`${filter.mouse ?? ""}|${filter.material}|${filter.shape}`} selectId="skate-mouse-select" source={gridSource}
+                mouseId={filter.mouse} mouseName={selected ? `${selected.brand} ${selected.name}` : null} />
               {fromMy && <p className="text-sm text-rl-muted">マイ設定のマウス({selected.brand} {selected.name})で絞り込みました。</p>}
               <MyMousePreselect />
             </Card>

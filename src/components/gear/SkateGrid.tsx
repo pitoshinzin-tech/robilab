@@ -23,9 +23,10 @@ export function SkateCellMark({ kind, className }: { kind: SkateCellKind; classN
 /**
  * マス「このマウスに使えるソール」(サーバーの部品・JS 0)。1 製品 = 1 マス。
  * 選んだマウスの専用は面、どのマウスにも使える汎用のドットは線。選ばないときは全製品をブランドの順に。
- * マウスを選び直す・絞り込むと、マスの数と塗りが変わる。
+ * マウスを選び直す・絞り込むと、マスの数と塗りが変わる。/skates では SkateGridLive が包み、選ぶ欄を変えたら送る前に描き直す。
+ * live:描き直す所で使うとき true(下の「専用 N・汎用 M」を aria-live で読み上げる)。
  */
-export function SkateGrid({ grid, mouseName }: { grid: SkateGridModel; mouseName: string | null }) {
+export function SkateGrid({ grid, mouseName, live = false }: { grid: SkateGridModel; mouseName: string | null; live?: boolean }) {
   return (
     <figure className="grid content-start gap-3">
       {grid.cells.length > 0 && (
@@ -33,7 +34,7 @@ export function SkateGrid({ grid, mouseName }: { grid: SkateGridModel; mouseName
           {grid.cells.map((c) => <Cell key={c.id} kind={c.kind} x={c.x} y={c.y} />)}
         </svg>
       )}
-      <figcaption className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+      <figcaption aria-live={live ? "polite" : undefined} className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
         <span className="inline-flex items-center gap-2">
           <SkateCellMark kind="dedicated" />{grid.mode === "mouse" ? "専用" : "機種専用の形"}
           <span className="text-base font-bold tabular-nums text-rl-highlight">{grid.dedicated}</span>

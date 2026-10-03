@@ -326,6 +326,178 @@ body {
   }
 }
 
+/*
+ * /pads の 1 行(PadRow):表のサイズの行(data-size-i)と縮尺図の外形・札(data-outline-i)を同じ番号でつなぐ(JS 0)。
+ * 行に乗せると外形の線が --rl-selected で 3px に太り、札が強調される。外形(の中)や札に乗せると表の行に --rl-selected-bg と左の 2px。
+ * 絞り込みで合うサイズの線(--rl-selected の 2px)とは、太さと表の行の光で見分ける。番号は 0〜9(PAD_LINK_SLOTS。データの最大は 8)。
+ * 乗せられる端末だけ(hover: hover)。フォーカスの順は増やさない(行に tabindex を付けない)。reduced-motion では即時。
+ */
+@media (hover: hover) {
+  .rl-size-link rect[data-outline-i] {
+    pointer-events: all;
+    transition: stroke var(--rl-dur-fast) var(--rl-ease-line), stroke-width var(--rl-dur-fast) var(--rl-ease-line);
+  }
+  .rl-size-link tr[data-size-i] {
+    transition: background-color var(--rl-dur-fast) var(--rl-ease-line);
+  }
+  .rl-size-link:has([data-size-i="0"]:hover, [data-outline-i="0"]:hover) rect[data-outline-i="0"] {
+    stroke: var(--rl-selected);
+    stroke-width: 3px;
+  }
+  .rl-size-link:has([data-size-i="0"]:hover, [data-outline-i="0"]:hover) span[data-outline-i="0"] {
+    color: var(--rl-secondary-text);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="0"]:hover, [data-outline-i="0"]:hover) tr[data-size-i="0"] {
+    background-color: var(--rl-selected-bg);
+  }
+  .rl-size-link:has([data-size-i="0"]:hover, [data-outline-i="0"]:hover) tr[data-size-i="0"] > td:first-child {
+    box-shadow: inset 2px 0 0 var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="1"]:hover, [data-outline-i="1"]:hover) rect[data-outline-i="1"] {
+    stroke: var(--rl-selected);
+    stroke-width: 3px;
+  }
+  .rl-size-link:has([data-size-i="1"]:hover, [data-outline-i="1"]:hover) span[data-outline-i="1"] {
+    color: var(--rl-secondary-text);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="1"]:hover, [data-outline-i="1"]:hover) tr[data-size-i="1"] {
+    background-color: var(--rl-selected-bg);
+  }
+  .rl-size-link:has([data-size-i="1"]:hover, [data-outline-i="1"]:hover) tr[data-size-i="1"] > td:first-child {
+    box-shadow: inset 2px 0 0 var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="2"]:hover, [data-outline-i="2"]:hover) rect[data-outline-i="2"] {
+    stroke: var(--rl-selected);
+    stroke-width: 3px;
+  }
+  .rl-size-link:has([data-size-i="2"]:hover, [data-outline-i="2"]:hover) span[data-outline-i="2"] {
+    color: var(--rl-secondary-text);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="2"]:hover, [data-outline-i="2"]:hover) tr[data-size-i="2"] {
+    background-color: var(--rl-selected-bg);
+  }
+  .rl-size-link:has([data-size-i="2"]:hover, [data-outline-i="2"]:hover) tr[data-size-i="2"] > td:first-child {
+    box-shadow: inset 2px 0 0 var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="3"]:hover, [data-outline-i="3"]:hover) rect[data-outline-i="3"] {
+    stroke: var(--rl-selected);
+    stroke-width: 3px;
+  }
+  .rl-size-link:has([data-size-i="3"]:hover, [data-outline-i="3"]:hover) span[data-outline-i="3"] {
+    color: var(--rl-secondary-text);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="3"]:hover, [data-outline-i="3"]:hover) tr[data-size-i="3"] {
+    background-color: var(--rl-selected-bg);
+  }
+  .rl-size-link:has([data-size-i="3"]:hover, [data-outline-i="3"]:hover) tr[data-size-i="3"] > td:first-child {
+    box-shadow: inset 2px 0 0 var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="4"]:hover, [data-outline-i="4"]:hover) rect[data-outline-i="4"] {
+    stroke: var(--rl-selected);
+    stroke-width: 3px;
+  }
+  .rl-size-link:has([data-size-i="4"]:hover, [data-outline-i="4"]:hover) span[data-outline-i="4"] {
+    color: var(--rl-secondary-text);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="4"]:hover, [data-outline-i="4"]:hover) tr[data-size-i="4"] {
+    background-color: var(--rl-selected-bg);
+  }
+  .rl-size-link:has([data-size-i="4"]:hover, [data-outline-i="4"]:hover) tr[data-size-i="4"] > td:first-child {
+    box-shadow: inset 2px 0 0 var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="5"]:hover, [data-outline-i="5"]:hover) rect[data-outline-i="5"] {
+    stroke: var(--rl-selected);
+    stroke-width: 3px;
+  }
+  .rl-size-link:has([data-size-i="5"]:hover, [data-outline-i="5"]:hover) span[data-outline-i="5"] {
+    color: var(--rl-secondary-text);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="5"]:hover, [data-outline-i="5"]:hover) tr[data-size-i="5"] {
+    background-color: var(--rl-selected-bg);
+  }
+  .rl-size-link:has([data-size-i="5"]:hover, [data-outline-i="5"]:hover) tr[data-size-i="5"] > td:first-child {
+    box-shadow: inset 2px 0 0 var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="6"]:hover, [data-outline-i="6"]:hover) rect[data-outline-i="6"] {
+    stroke: var(--rl-selected);
+    stroke-width: 3px;
+  }
+  .rl-size-link:has([data-size-i="6"]:hover, [data-outline-i="6"]:hover) span[data-outline-i="6"] {
+    color: var(--rl-secondary-text);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="6"]:hover, [data-outline-i="6"]:hover) tr[data-size-i="6"] {
+    background-color: var(--rl-selected-bg);
+  }
+  .rl-size-link:has([data-size-i="6"]:hover, [data-outline-i="6"]:hover) tr[data-size-i="6"] > td:first-child {
+    box-shadow: inset 2px 0 0 var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="7"]:hover, [data-outline-i="7"]:hover) rect[data-outline-i="7"] {
+    stroke: var(--rl-selected);
+    stroke-width: 3px;
+  }
+  .rl-size-link:has([data-size-i="7"]:hover, [data-outline-i="7"]:hover) span[data-outline-i="7"] {
+    color: var(--rl-secondary-text);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="7"]:hover, [data-outline-i="7"]:hover) tr[data-size-i="7"] {
+    background-color: var(--rl-selected-bg);
+  }
+  .rl-size-link:has([data-size-i="7"]:hover, [data-outline-i="7"]:hover) tr[data-size-i="7"] > td:first-child {
+    box-shadow: inset 2px 0 0 var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="8"]:hover, [data-outline-i="8"]:hover) rect[data-outline-i="8"] {
+    stroke: var(--rl-selected);
+    stroke-width: 3px;
+  }
+  .rl-size-link:has([data-size-i="8"]:hover, [data-outline-i="8"]:hover) span[data-outline-i="8"] {
+    color: var(--rl-secondary-text);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="8"]:hover, [data-outline-i="8"]:hover) tr[data-size-i="8"] {
+    background-color: var(--rl-selected-bg);
+  }
+  .rl-size-link:has([data-size-i="8"]:hover, [data-outline-i="8"]:hover) tr[data-size-i="8"] > td:first-child {
+    box-shadow: inset 2px 0 0 var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="9"]:hover, [data-outline-i="9"]:hover) rect[data-outline-i="9"] {
+    stroke: var(--rl-selected);
+    stroke-width: 3px;
+  }
+  .rl-size-link:has([data-size-i="9"]:hover, [data-outline-i="9"]:hover) span[data-outline-i="9"] {
+    color: var(--rl-secondary-text);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-size-link:has([data-size-i="9"]:hover, [data-outline-i="9"]:hover) tr[data-size-i="9"] {
+    background-color: var(--rl-selected-bg);
+  }
+  .rl-size-link:has([data-size-i="9"]:hover, [data-outline-i="9"]:hover) tr[data-size-i="9"] > td:first-child {
+    box-shadow: inset 2px 0 0 var(--rl-selected);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rl-size-link rect[data-outline-i],
+  .rl-size-link tr[data-size-i] {
+    transition: none;
+  }
+}
+
 /* 動きの参考 012(Stroke-Draw):入口の行のホバー・フォーカスで、下の線が左から右へ引かれる(transform: scaleX だけ) */
 .rl-draw-line {
   transform: scaleX(0);

@@ -22,9 +22,31 @@ export function skateGrid(view: SkateView): SkateGridModel {
   const items: { id: string; kind: SkateCellKind }[] = view.kind === "mouse"
     ? [...view.dedicated.map((s) => ({ id: s.id, kind: "dedicated" as const })), ...view.universal.map((s) => ({ id: s.id, kind: "universal" as const }))]
     : view.groups.flatMap((g) => g.items.map((s) => ({ id: s.id, kind: skateCellKind(s) })));
+  return layoutSkateCells(view.kind, items, view.kind === "mouse" ? view.dedicated.length : 0);
+}
+
+/**
+ * ブラウザでマスを描き直すための数(サーバーの skateGridSource で作って props で渡す。ソールのデータ本体は渡さない)。
+ * dedicatedByMouse:絞り込みのあとの、マウスの id ごとの専用の数。universal:絞り込みのあとの汎用のドットの数。
+ * allKinds:選ばないときのマス(ブランドの順)の種類を 1 文字ずつ(d = 専用・u = 汎用)。
+ */
+export type SkateGridSource = { dedicatedByMouse: Record<string, number>; universal: number; allKinds: string };
+
+/** 選ぶ欄の値(マウスの id。選ばないは null)から、skateGrid と同じマスを作る(製品の id は持たないので番号を id にする) */
+export function skateGridFromSource(src: SkateGridSource, mouseId: string | null): SkateGridModel {
+  if (mouseId === null) return layoutSkateCells("all", [...src.allKinds].map((k, i) => ({ id: `c${i}`, kind: k === "u" ? "universal" : "dedicated" })), 0);
+  const d = Object.hasOwn(src.dedicatedByMouse, mouseId) ? src.dedicatedByMouse[mouseId] : 0;
+  const items = [
+    ...Array.from({ length: d }, (_, i) => ({ id: `d${i}`, kind: "dedicated" as const })),
+    ...Array.from({ length: src.universal }, (_, i) => ({ id: `u${i}`, kind: "universal" as const })),
+  ];
+  return layoutSkateCells("mouse", items, d);
+}
+
+function layoutSkateCells(mode: SkateGridModel["mode"], items: { id: string; kind: SkateCellKind }[], dedicatedCount: number): SkateGridModel {
   const step = SKATE_CELL.sizePx + SKATE_CELL.gapPx;
   // マウスを選んだときは、汎用のドットを新しい段から始める(専用の面と線の 2 つのまとまりに見えるように)
-  const breakAt = view.kind === "mouse" && view.dedicated.length > 0 ? view.dedicated.length : -1;
+  const breakAt = mode === "mouse" && dedicatedCount > 0 ? dedicatedCount : -1;
   const offset = breakAt > 0 && breakAt % SKATE_CELL.columns !== 0 ? SKATE_CELL.columns - (breakAt % SKATE_CELL.columns) : 0;
   const cells = items.map((c, i) => {
     const slot = breakAt > 0 && i >= breakAt ? i + offset : i;
@@ -34,7 +56,7 @@ export function skateGrid(view: SkateView): SkateGridModel {
   const cols = Math.min(slots, SKATE_CELL.columns);
   const rows = Math.ceil(slots / SKATE_CELL.columns);
   return {
-    mode: view.kind,
+    mode,
     cells,
     dedicated: items.filter((c) => c.kind === "dedicated").length,
     universal: items.filter((c) => c.kind === "universal").length,

@@ -6,9 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { ShopButtons } from "@/components/gear/ShopButtons";
 import { SpecNum } from "@/components/gear/SpecValue";
 import { PadScale } from "@/components/gear/PadScale";
+import { padOutlineIndexer } from "@/lib/pad-scale";
 
 /**
  * マウスパッドの 1 行(設計書 3-2)。箱にせず、上の線で区切る幅いっぱいの行。
+ * 表のサイズの行と縮尺図の外形は同じ番号(data-size-i ↔ data-outline-i)でつなぎ、乗せると互いに光る(CSS だけ・JS 0。行はフォーカスの順に入れない)。
  * 速さ・止めは点数にせず、メーカー公式の言葉(原文の「…」の中身だけ)を引用の形で出す(出典は公式ページ)。調べた人の注記は出さない。数字は公式の表記のまま。
  */
 export function PadRow({ pad, sizes, links, primary, narrowed }: {
@@ -18,8 +20,9 @@ export function PadRow({ pad, sizes, links, primary, narrowed }: {
   /** 大きさ・厚さで絞り込んでいて、合うサイズだけを出しているか */
   narrowed: boolean;
 }) {
+  const outlineOf = padOutlineIndexer(pad.sizes);
   return (
-    <li className="grid gap-4 border-t border-rl-line py-6">
+    <li className="rl-size-link grid gap-4 border-t border-rl-line py-6">
       <div className="grid min-w-0 gap-1">
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-rl-muted">
           {pad.brand}<span aria-hidden>・</span>{surfaceLabel(pad.surface)}
@@ -44,12 +47,12 @@ export function PadRow({ pad, sizes, links, primary, narrowed }: {
             <table className="w-full table-fixed text-sm">
               <colgroup><col className="w-[35%]" /><col className="w-[40%]" /><col className="w-[25%]" /></colgroup>
               <thead className="text-left text-rl-muted">
-                <tr><th scope="col" className="py-1 pr-3 font-bold">名前</th><th scope="col" className="py-1 pr-3 font-bold">幅×奥行き</th><th scope="col" className="py-1 font-bold">厚さ</th></tr>
+                <tr><th scope="col" className="py-1 pr-3 pl-2 font-bold">名前</th><th scope="col" className="py-1 pr-3 font-bold">幅×奥行き</th><th scope="col" className="py-1 font-bold">厚さ</th></tr>
               </thead>
               <tbody>
                 {sizes.map((s, i) => (
-                  <tr key={`${s.label}-${i}`} className="border-t border-rl-line">
-                    <td className="py-2 pr-3 wrap-anywhere">{s.label}</td>
+                  <tr key={`${s.label}-${i}`} data-size-i={outlineOf(s) ?? undefined} className="border-t border-rl-line">
+                    <td className="py-2 pr-3 pl-2 wrap-anywhere">{s.label}</td>
                     <td className="py-2 pr-3">
                       {s.widthMm === null || s.depthMm === null
                         ? <span className="text-rl-muted">{NO_DATA}</span>

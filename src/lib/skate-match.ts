@@ -1,5 +1,6 @@
 import type { SkateSpec } from "@/data/gear-types";
 import { firstParam, pick, queryHref, type SearchParams } from "@/lib/gear-query";
+import { skateCellKind, type SkateGridSource } from "@/lib/skate-grid";
 
 export type SkateFilter = {
   /** devices.ts のマウスの id(知らない id・空は null = 選ばない) */
@@ -62,6 +63,19 @@ export function skateView(skates: readonly SkateSpec[], f: SkateFilter): SkateVi
   const narrowed = filterSkates(skates, f);
   if (f.mouse !== null) return { kind: "mouse", mouseId: f.mouse, dedicated: skatesForMouse(narrowed, f.mouse), universal: universalSkates(narrowed) };
   return { kind: "all", groups: groupByBrand(narrowed), total: narrowed.length };
+}
+
+/**
+ * 選ぶ欄を変えたらすぐマスを描き直すための数(SkateGridLive に渡す)。素材・形の絞り込みのあとの数で、skateView と食い違わない。
+ * 数と種類の並びだけで、ソールの名前・出典はブラウザに入れない。
+ */
+export function skateGridSource(skates: readonly SkateSpec[], f: Pick<SkateFilter, "material" | "shape">): SkateGridSource {
+  const narrowed = filterSkates(skates, f);
+  return {
+    dedicatedByMouse: skateCounts(narrowed),
+    universal: universalSkates(narrowed).length,
+    allKinds: groupByBrand(narrowed).flatMap((g) => g.items.map((s) => (skateCellKind(s) === "universal" ? "u" : "d"))).join(""),
+  };
 }
 
 /**
