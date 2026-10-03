@@ -4,7 +4,7 @@ export type NavTab = { id: NavTabId; href: string; label: string; match: readonl
 
 export const NAV_TABS: readonly NavTab[] = [
   { id: "aim", href: "/aim", label: "今日の文字", match: ["/aim"] },
-  { id: "diagnosis", href: "/diagnosis", label: "診断", match: ["/diagnosis", "/type", "/types"] },
+  { id: "diagnosis", href: "/diagnosis", label: "診断", match: ["/diagnosis", "/type", "/types", "/games"] },
   { id: "mouse", href: "/mouse", label: "マウス", match: ["/mouse", "/pads", "/skates", "/tools/sensitivity", "/pros"] },
   { id: "lobby", href: "/lobby", label: "仲間", match: ["/lobby"] },
   { id: "my", href: "/my", label: "マイ設定", match: ["/my"] },
@@ -42,6 +42,7 @@ const SUBNAV: Record<SubnavGroup, readonly SubnavItem[]> = {
   diagnosis: [
     { href: "/diagnosis", label: "診断" },
     { href: "/types", label: "タイプ一覧" },
+    { href: "/games", label: "キャラ図鑑" },
   ],
 };
 
