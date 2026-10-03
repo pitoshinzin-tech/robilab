@@ -99,3 +99,24 @@ describe("skateChipHref(絞り込みのリンク)", () => {
     expect(skateChipHref({ mouse: "m1", material: "all", shape: "all" }, { shape: "dot" })).toBe("/skates?mouse=m1&shape=dot");
   });
 });
+
+describe("mouseOptionGroups(マウスを選ぶ欄)", () => {
+  const mice = [
+    { id: "a1", brand: "A", name: "A-One" }, { id: "b1", brand: "B", name: "B-One" }, { id: "a2", brand: "A", name: "A-Two" },
+    { id: "c1", brand: "C", name: "C-One" }, { id: "b2", brand: "B", name: "B-Two" },
+  ];
+  const counts = { a2: 3, b2: 1 };
+  const groups = skateMatch.mouseOptionGroups(mice, counts);
+  it("ブランドごとの optgroup。専用のソールがあるブランドを先に(元の順を保つ)", () => {
+    expect(groups.map((g) => g.brand)).toEqual(["A", "B", "C"]);
+  });
+  it("ブランドの中は専用があるものを先に、文字は「名前(N 件)」と短く(ブランド名を繰り返さない)", () => {
+    expect(groups[0].options).toEqual([{ id: "a2", text: "A-Two(3 件)" }, { id: "a1", text: "A-One" }]);
+    expect(groups[1].options.map((o) => o.text)).toEqual(["B-Two(1 件)", "B-One"]);
+    expect(groups[2].options).toEqual([{ id: "c1", text: "C-One" }]);
+  });
+  it("専用が 1 つもないブランドは後ろ", () => {
+    const g = skateMatch.mouseOptionGroups([{ id: "z", brand: "Z", name: "Z" }, ...mice], counts);
+    expect(g.map((x) => x.brand)).toEqual(["A", "B", "Z", "C"]);
+  });
+});

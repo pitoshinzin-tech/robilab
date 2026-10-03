@@ -37,7 +37,7 @@ export function TopMouseRow({ rank, item, brand, name, reason, links, overlaid, 
         <ChipButton pressed={overlaid} onClick={onOverlay} className="justify-self-start">手と重ねる</ChipButton>
         {skateHref && <ButtonLink href={skateHref} variant="ghost" size="sm" className="justify-self-start px-0">このマウスのソール<ChevronRight aria-hidden className="size-4" /></ButtonLink>}
       </div>
-      <ShopButtons links={links} primary className="flex-col items-start md:items-end" />
+      <ShopButtons links={links} primary className="md:flex-col md:items-end" />
     </li>
   );
 }

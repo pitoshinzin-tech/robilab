@@ -8,7 +8,8 @@ import type { SkateSpec } from "@/data/gear-types";
 import { firstParam, type SearchParams } from "@/lib/gear-query";
 import { subnavFor } from "@/lib/nav";
 import { affiliateEnv, shopLinks, type AffiliateEnv } from "@/lib/shop-links";
-import { parseSkateFilter, skateCounts, skateChipHref, skateView, type SkateFilter } from "@/lib/skate-match";
+import { mouseOptionGroups, parseSkateFilter, skateCounts, skateChipHref, skateView, type SkateFilter } from "@/lib/skate-match";
+import { skateGrid } from "@/lib/skate-grid";
 import { PageShell } from "@/components/ui/page-shell";
 import { SubNav } from "@/components/brand/SubNav";
 import { NumUnit } from "@/components/ui/num-unit";
@@ -20,6 +21,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { FilterGroup, type FilterOption } from "@/components/gear/FilterGroup";
 import { SkateRow } from "@/components/gear/SkateRow";
+import { SkateGrid } from "@/components/gear/SkateGrid";
 import { MyMousePreselect } from "@/components/gear/MyMousePreselect";
 
 const TITLE = "マウスソール探し(自分のマウスに合うソール)";
@@ -56,8 +58,8 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
   const selected = filter.mouse === null ? undefined : mice.find((m) => m.id === filter.mouse);
   const fromMy = firstParam(sp, "from") === "my" && selected !== undefined;
   const env = affiliateEnv();
-  const withSkates = mice.filter((m) => (counts[m.id] ?? 0) > 0);
-  const withoutSkates = mice.filter((m) => (counts[m.id] ?? 0) === 0);
+  const optionGroups = mouseOptionGroups(mice, counts);
+  const grid = skateGrid(view);
   const shownCount = view.kind === "mouse" ? view.dedicated.length + view.universal.length : view.total;
   const clearHref = skateChipHref(filter, { material: "all", shape: "all" });
   const filtered = filter.material !== "all" || filter.shape !== "all";
@@ -75,17 +77,17 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
                 <label htmlFor="skate-mouse-select" className="text-sm font-bold">使っているマウス</label>
                 <NativeSelect key={filter.mouse ?? ""} id="skate-mouse-select" name="mouse" defaultValue={filter.mouse ?? ""}>
                   <option value="">選ばない(ブランド別にすべて)</option>
-                  <optgroup label="専用のソールが載っているマウス">
-                    {withSkates.map((m) => <option key={m.id} value={m.id}>{`${m.brand} ${m.name}(${counts[m.id]} 件)`}</option>)}
-                  </optgroup>
-                  <optgroup label="専用のソールがまだないマウス">
-                    {withoutSkates.map((m) => <option key={m.id} value={m.id}>{`${m.brand} ${m.name}`}</option>)}
-                  </optgroup>
+                  {optionGroups.map((g) => (
+                    <optgroup key={g.brand} label={g.brand}>
+                      {g.options.map((o) => <option key={o.id} value={o.id}>{o.text}</option>)}
+                    </optgroup>
+                  ))}
                 </NativeSelect>
                 {filter.material !== "all" && <input type="hidden" name="material" value={filter.material} />}
                 {filter.shape !== "all" && <input type="hidden" name="shape" value={filter.shape} />}
                 <button type="submit" className={buttonVariants({ variant: selected ? "secondary" : "primary" })}>このマウスで絞り込む</button>
               </form>
+              <SkateGrid grid={grid} mouseName={selected ? `${selected.brand} ${selected.name}` : null} />
               {fromMy && <p className="text-sm text-rl-muted">マイ設定のマウス({selected.brand} {selected.name})で絞り込みました。</p>}
               <MyMousePreselect />
             </Card>

@@ -79,3 +79,22 @@ export function skateChipHref(f: SkateFilter, patch: Partial<SkateFilter> = {}):
 export function skatesHrefFor(mouseId: string): string {
   return skateChipHref(NO_SKATE_FILTER, { mouse: mouseId });
 }
+
+export type MouseOptionGroup = { brand: string; options: { id: string; text: string }[] };
+
+/**
+ * マウスを選ぶ欄の optgroup。ブランドごと(専用のソールがあるブランドを先に、元の順を保つ)。
+ * ブランドの中は専用があるものを先に「名前(N 件)」、ないものは名前だけ(375 で切れないよう、ブランド名は繰り返さない)。
+ */
+export function mouseOptionGroups(mice: readonly { id: string; brand: string; name: string }[], counts: Readonly<Record<string, number>>): MouseOptionGroup[] {
+  const n = (id: string) => (Object.hasOwn(counts, id) ? counts[id] : 0);
+  const groups = new Map<string, { id: string; brand: string; name: string }[]>();
+  for (const m of mice) groups.set(m.brand, [...(groups.get(m.brand) ?? []), m]);
+  const list = [...groups].map(([brand, items]) => ({
+    brand,
+    has: items.some((m) => n(m.id) > 0),
+    options: [...items.filter((m) => n(m.id) > 0), ...items.filter((m) => n(m.id) === 0)]
+      .map((m) => ({ id: m.id, text: n(m.id) > 0 ? `${m.name}(${n(m.id)} 件)` : m.name })),
+  }));
+  return [...list.filter((g) => g.has), ...list.filter((g) => !g.has)].map(({ brand, options }) => ({ brand, options }));
+}

@@ -36,6 +36,31 @@ describe("SkateRow", () => {
       expect(html).not.toContain("<details");
     }
   });
+  it("行は 1 列の縦の流れ(md の 2 列をやめる)。店のボタンは右に寄せない", () => {
+    const html = render(SKATES[0]);
+    expect(html).not.toContain("md:grid-cols-[minmax(0,1fr)_auto]");
+    expect(html).not.toContain("md:justify-end");
+  });
+  it("ブランド名の前に専用(面)・汎用(線)の印のマス", () => {
+    const full = SKATES.find((x) => x.shape === "full")!;
+    const dot = SKATES.find((x) => x.shape === "dot")!;
+    expect(render(full)).toContain('fill="var(--rl-selected)"');
+    expect(render(dot)).toContain('stroke="var(--rl-line-strong)"');
+  });
+  it("厚さが 1 つの数字のとき:数字はマゼンタ、0〜1.5mm の目盛りを出す", () => {
+    const s = SKATES.find((x) => x.thicknessMm !== null)!;
+    const html = render(s);
+    expect(html).toMatch(new RegExp(`text-rl-highlight[^>]*>${s.thicknessMm}<`));
+    expect(html).toContain('role="img"');
+  });
+  it("厚さが幅の表記・記載なしのときは、目盛りを出さない(作った数字を出さない)", () => {
+    const range = SKATES.find((x) => x.thicknessMm === null && x.thicknessOfficial)!;
+    const html = render(range);
+    expect(html).toContain("(公式の表記)");
+    expect(html).not.toContain('role="img"');
+    const none = SKATES.find((x) => x.thicknessMm === null && !x.thicknessOfficial);
+    if (none) expect(render(none)).not.toContain('role="img"');
+  });
   it("行全体に null・NaN・undefined を出さない", () => {
     for (const s of SKATES) expect(render(s)).not.toMatch(/null|NaN|undefined/);
   });
