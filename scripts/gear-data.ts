@@ -53,6 +53,32 @@ type RawSkate = {
   piecesPerPack: number | null; setsPerPack: number | null; extras: string[]; officialUrl: string; checkedAt: string; selectionBasis: string; notes: string[];
 };
 
+/** 文の中の「…」(かぎ括弧の中身 = メーカー公式の原文そのもの)だけを順に取り出す。外の文は調べた人の注記なので捨てる */
+export function extractQuotes(text: string | null): string[] {
+  if (text === null) return [];
+  return [...text.matchAll(/「([^」]*)」/g)].map((m) => m[1].trim()).filter((q) => q.length > 0);
+}
+
+/** 硬さ・付属の 1 項目:「…」があればその中身だけ。なければ末尾の「(公式…)」の注記だけ外した公式の呼び名 */
+export function officialTerm(item: string): string[] {
+  const quotes = extractQuotes(item);
+  if (quotes.length > 0) return quotes;
+  const term = item.replace(/\s*[(（]公式[^)）]*[)）]/g, "").trim();
+  return term.length > 0 ? [term] : [];
+}
+
+/** 公式ページの URL は https だけ(画面のリンクに入るので、javascript: や http: を生成時に止める) */
+export function assertHttps(url: string | null, where: string): void {
+  if (url === null) return;
+  let ok = false;
+  try {
+    ok = new URL(url).protocol === "https:";
+  } catch {
+    ok = false;
+  }
+  if (!ok) throw new Error(`${where}: 公式 URL が https ではない ${JSON.stringify(url)}`);
+}
+
 /** 決まった値のどれかか null。それ以外はデータの間違いなので止める */
 function oneOf<T extends string>(value: string | null, allowed: readonly T[], where: string): T | null {
   if (value === null) return null;
@@ -68,7 +94,9 @@ export function assertKnownIds(listed: readonly string[], known: readonly string
 
 export function toMouseSpecs(raw: RawMouse[]): MouseSpec[] {
   assertKnownIds(DISCONTINUED_MICE, raw.map((m) => m.id), "DISCONTINUED_MICE");
-  return raw.map((m) => ({
+  return raw.map((m) => {
+    assertHttps(m.officialUrl, `${m.id}.officialUrl`);
+    return {
     id: m.id,
     brand: m.brand,
     name: m.name,
@@ -84,7 +112,8 @@ export function toMouseSpecs(raw: RawMouse[]): MouseSpec[] {
     selectionBasis: m.selectionBasis,
     note: m.notes,
     discontinued: DISCONTINUED_MICE.includes(m.id),
-  }));
+  };
+  });
 }
 
 export function toPadSpecs(raw: { pads: RawPad[] }): PadSpec[] {
@@ -93,13 +122,14 @@ export function toPadSpecs(raw: { pads: RawPad[] }): PadSpec[] {
   assertKnownIds(DISCONTINUED_PADS, padIds, "DISCONTINUED_PADS");
   return raw.pads.map((p) => {
     const rename = PAD_RENAMES[p.id] ?? {};
+    assertHttps(p.officialUrl, `${p.id}.officialUrl`);
     return {
       id: p.id,
       brand: rename.brand ?? p.brand,
       name: rename.name ?? p.name,
       surface: oneOf(p.surface, SURFACES, `${p.id}.surface`),
-      speedOfficial: p.speedOfficial,
-      firmnessVariants: p.firmnessVariants,
+      speedQuotes: extractQuotes(p.speedOfficial),
+      firmnessVariants: p.firmnessVariants.flatMap(officialTerm),
       sizes: p.sizes.map((s) => ({ label: s.label, widthMm: s.widthMm, depthMm: s.depthMm, thicknessMm: s.thicknessMm })),
       base: p.base,
       stitchedEdge: p.stitchedEdge,
@@ -117,6 +147,7 @@ export function toSkateSpecs(raw: { items: RawSkate[] }): SkateSpec[] {
   assertKnownIds(DISCONTINUED_SKATES, raw.items.map((x) => x.id), "DISCONTINUED_SKATES");
   return raw.items.map((s) => {
     if (s.mouseId !== null && !s.mouseIds.includes(s.mouseId)) throw new Error(`${s.id}: mouseId が mouseIds に入っていない`);
+    assertHttps(s.officialUrl, `${s.id}.officialUrl`);
     const shape = oneOf(s.shape, SKATE_SHAPES, `${s.id}.shape`);
     if (shape === null) throw new Error(`${s.id}: shape がない`);
     return {
@@ -133,7 +164,7 @@ export function toSkateSpecs(raw: { items: RawSkate[] }): SkateSpec[] {
       thicknessOfficial: s.thicknessOfficial,
       piecesPerPack: s.piecesPerPack,
       setsPerPack: s.setsPerPack,
-      extras: s.extras,
+      extras: s.extras.flatMap(officialTerm),
       officialUrl: s.officialUrl,
       checkedAt: s.checkedAt,
       selectionBasis: s.selectionBasis,

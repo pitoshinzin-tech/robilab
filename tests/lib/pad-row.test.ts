@@ -23,7 +23,7 @@ describe("chip-style", () => {
 
 describe("PadRow", () => {
   it("公式の言葉を引用で出し、名前と確認日がある", () => {
-    const p = pads.find((x) => x.speedOfficial)!;
+    const p = pads.find((x) => x.speedQuotes.length > 0)!;
     const html = render(p);
     expect(html).toContain("<blockquote");
     expect(html).toContain(p.name);
@@ -47,7 +47,7 @@ describe("PadRow", () => {
     expect(render(pads[0], false)).not.toContain("絞り込みに合うものだけ");
   });
   it("行全体に null・NaN・undefined を出さない", () => {
-    for (const p of pads) expect(render(p).replace(/<details.*<\/details>/, "")).not.toMatch(/null|NaN|undefined/);
+    for (const p of pads) expect(render(p)).not.toMatch(/null|NaN|undefined/);
   });
 });
 

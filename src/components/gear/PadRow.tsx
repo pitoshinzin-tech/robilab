@@ -7,7 +7,7 @@ import { ShopButtons } from "@/components/gear/ShopButtons";
 
 /**
  * マウスパッドの 1 行(設計書 3-2)。箱にせず、上の線で区切る幅いっぱいの行。
- * 速さ・止めは点数にせず、メーカー公式の言葉を引用の形で出す(出典は公式ページ)。数字は公式の表記のまま。
+ * 速さ・止めは点数にせず、メーカー公式の言葉(原文の「…」の中身だけ)を引用の形で出す(出典は公式ページ)。調べた人の注記は出さない。数字は公式の表記のまま。
  */
 export function PadRow({ pad, sizes, links, primary, narrowed }: {
   pad: VisiblePad; sizes: PadSize[]; links: ShopLinks;
@@ -27,8 +27,10 @@ export function PadRow({ pad, sizes, links, primary, narrowed }: {
       </div>
       <figure className="grid gap-2">
         <figcaption className="text-sm font-bold text-rl-muted">速さ・止め(メーカー公式の言葉)</figcaption>
-        {pad.speedOfficial
-          ? <blockquote cite={pad.officialUrl} className="border-l-2 border-rl-line-strong pl-4 text-base wrap-anywhere">{pad.speedOfficial}</blockquote>
+        {pad.speedQuotes.length > 0
+          ? pad.speedQuotes.map((q, i) => (
+              <blockquote key={i} cite={pad.officialUrl} className="border-l-2 border-rl-line-strong pl-4 text-base wrap-anywhere">{q}</blockquote>
+            ))
           : <p className="text-base text-rl-muted">{NO_DATA}</p>}
       </figure>
       <div className="grid gap-2">

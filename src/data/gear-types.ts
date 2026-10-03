@@ -37,9 +37,9 @@ export type PadSpec = {
   brand: string;
   name: string;
   surface: PadSurface | null;
-  /** 滑り・止めの公式の言葉(そのまま。点数にしない) */
-  speedOfficial: string | null;
-  /** 硬さ違い(公式の呼び名) */
+  /** 滑り・止めの公式の言葉(原文の「…」の中身だけ。調べた人の注記は入れない。なければ空。点数にしない) */
+  speedQuotes: string[];
+  /** 硬さ違い(公式の呼び名。注記なし) */
   firmnessVariants: string[];
   sizes: PadSize[];
   base: string | null;
@@ -75,6 +75,7 @@ export type SkateSpec = {
   thicknessOfficial: string | null;
   piecesPerPack: number | null;
   setsPerPack: number | null;
+  /** 付属(公式の表記。注記なし) */
   extras: string[];
   officialUrl: string;
   checkedAt: string;

@@ -8,7 +8,7 @@ import { padSizeText, surfaceLabel, withUnit } from "@/lib/gear-labels";
 
 const size = (label: string, w: number | null, d: number | null, t: number | null): PadSize => ({ label, widthMm: w, depthMm: d, thicknessMm: t });
 const pad = (id: string, extra: Partial<PadSpec> = {}): VisiblePad => ({
-  id, brand: "B", name: id, surface: "cloth", speedOfficial: null, firmnessVariants: [], sizes: [size("L", 450, 400, 4)], base: null, stitchedEdge: null,
+  id, brand: "B", name: id, surface: "cloth", speedQuotes: [], firmnessVariants: [], sizes: [size("L", 450, 400, 4)], base: null, stitchedEdge: null,
   officialUrl: `https://example.com/${id}`, checkedAt: "2026-10-03", selectionBasis: "", note: "", hidden: false, discontinued: false, ...extra,
 } as VisiblePad);
 
