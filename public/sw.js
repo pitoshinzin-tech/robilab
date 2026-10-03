@@ -40,7 +40,8 @@ self.addEventListener("activate", (event) => {
       await Promise.all(keys.filter((key) => key.startsWith("robilab-") && key !== CACHE).map((key) => caches.delete(key)));
       // Navigation Preload は使わない。有効だと /auth/callback にも先行の要求が飛び、1 回しか使えない code を取り合うため。
       // すでに有効にした端末のために、ここで無効にする
-      if (self.registration.navigationPreload) await self.registration.navigationPreload.disable();
+      // 失敗しても clients.claim() は続ける
+      if (self.registration.navigationPreload) await self.registration.navigationPreload.disable().catch(() => {});
       await self.clients.claim();
     })(),
   );
