@@ -65,6 +65,13 @@ describe("dexSections", () => {
     expect(s.map((x) => x.title)).toEqual(["タンク", "ダメージ", "サポート"]);
     for (const x of s) expect(x.chars).toHaveLength(4);
   });
+  it("公開のキャラは全員どれかの段に入る(5 本すべて・予備は入らない)", () => {
+    for (const g of GAMES) {
+      const placed = dexSections(g, CHAR_GAME_SETTINGS[g.id as CharGameId]).flatMap((x) => x.chars.map((c) => c.id));
+      expect(placed.slice().sort(), g.id).toEqual(dexChars(g.id).map((c) => c.id).sort());
+      expect(new Set(placed).size, g.id).toBe(placed.length);
+    }
+  });
   it("スト6 は段を分けず「キャラ一覧」1 段に 15 体(仮のロールを出さない)", () => {
     const s = dexSections(game("sf6"), CHAR_GAME_SETTINGS.sf6);
     expect(s).toHaveLength(1);

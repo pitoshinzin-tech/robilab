@@ -58,7 +58,7 @@ export function charCrumbs(char: Char, game: Game, setting: CharGameSetting): Cr
   return setting.nameInTitle ? [...base, { name: char.nameJa, path: `/games/${game.id}/chars/${char.id}` }] : base;
 }
 
-/** パンくずの JSON-LD。Next の JSON-LD の手引きどおり、JSON.stringify のあと < を < に(script の外に出られない) */
+/** パンくずの JSON-LD。Next の JSON-LD の手引きどおり、JSON.stringify のあと `<` を `\u003c` に(script の外に出られない) */
 export function breadcrumbJsonLd(crumbs: readonly Crumb[], site: string): string {
   const data = {
     "@context": "https://schema.org",

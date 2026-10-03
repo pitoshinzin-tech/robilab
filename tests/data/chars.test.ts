@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
 import { CHARS } from "@/data/chars";
 import { CHAR_GAME_SETTINGS } from "@/data/char-games";
 import type { CharGameId } from "@/data/char-types";
@@ -100,9 +101,26 @@ describe("生成の検査(決まりに合わないデータは書き出さずに
     ["札が 3 枚", { evidence: [ev("front"), ev("mobile"), ev("ally")] }],
     ["同じ軸に 2 枚", { evidence: [ev("front"), ev("hold")] }],
     ["知らない札", { evidence: [ev("tank")] }],
+    ["roleBasis が 41 字", { roleBasis: { text: "あ".repeat(41), url: base.sourceUrl } }],
+    ["roleBasis が公式でない", { roleBasis: { text: "追跡", url: "https://wiki.example/jett" } }],
+    ["roleBasis が http", { roleBasis: { text: "追跡", url: "http://playvalorant.com/ja-jp/agents/jett/" } }],
     ["札の引用が公式でない", { evidence: [{ tag: "front", quote: "引用", url: "https://wiki.example/jett" }] }],
   ])("%s → 止まる", (_name, patch) => {
     expect(() => toChars("valorant", [{ ...base, ...patch }])).toThrow();
+  });
+});
+
+describe("調べた人のメモ(selectionBasis)は生成物に入らない", () => {
+  it("toChars の結果に selectionBasis がなく、src/data/chars.ts にも書かれない", () => {
+    const url = "https://playvalorant.com/ja-jp/agents/jett/";
+    const withMemo = {
+      id: "jett", game: "valorant", roleId: "duelist", nameJa: "ジェット", nameEn: "Jett", officialRole: "デュエリスト", summary: "要約",
+      quote: { text: "俊敏", url }, evidence: [], pickedBy: "variety", sourceUrl: url, checkedAt: "2026-10-03", matchable: true,
+      selectionBasis: "社内メモ:使用率の調査",
+    };
+    expect(toChars("valorant", [withMemo])[0]).not.toHaveProperty("selectionBasis");
+    for (const c of CHARS) expect(c, c.id).not.toHaveProperty("selectionBasis");
+    expect(readFileSync("src/data/chars.ts", "utf8")).not.toContain("selectionBasis");
   });
 });
 
@@ -123,7 +141,9 @@ describe("ゲームごとの設定(台帳)", () => {
   it("会社の求める断り書きが原文で入っている(スト6 に ©CAPCOM を書かない)", () => {
     expect(CHAR_GAME_SETTINGS.overwatch.notices).toContain("Overwatch is a trademark of Blizzard Entertainment, Inc., in the U.S. and/or other countries.");
     expect(CHAR_GAME_SETTINGS.apex.notices).toContain("This website is not endorsed by or affiliated with EA or its licensors.");
-    expect(CHAR_GAME_SETTINGS.valorant.notices.join("")).toContain("Legal Jibber Jabber");
+    expect(CHAR_GAME_SETTINGS.valorant.notices).toContain(
+      "ロビラボ was created under Riot Games' \"Legal Jibber Jabber\" policy using assets owned by Riot Games. Riot Games does not endorse or sponsor this project.",
+    );
     expect(CHAR_GAME_SETTINGS.dbd.notices.join("")).toContain("Behaviour Interactive Inc. All rights reserved.");
     expect(CHAR_GAME_SETTINGS.sf6.notices).toContain("本作品は二次創作です。");
     expect(CHAR_GAME_SETTINGS.sf6.notices.join("")).not.toMatch(/©|CAPCOM/);

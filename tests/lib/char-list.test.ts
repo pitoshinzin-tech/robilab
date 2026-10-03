@@ -9,6 +9,7 @@ import { dexChars, dexSections, latestCheckedAt, publishedGames } from "@/lib/ch
 import { CharListBody } from "@/components/chars/CharListBody";
 import { DexNotices } from "@/components/chars/DexNotices";
 import * as listPage from "@/app/games/[game]/chars/page";
+import GameRedirect from "@/app/games/[game]/page";
 
 /** 主ボタン(variant="primary")の塗りのクラスの数(hover: の付いたものは数えない) */
 const primaryCount = (html: string) => (html.match(/(?<![:\w-])bg-rl-accent(?![\w-])/g) ?? []).length;
@@ -86,6 +87,34 @@ describe("DexNotices(複数ゲーム)は会社ごとにまとめる", () => {
     expect(at(dbd.styleNote!)).toBeLessThan(at(dbd.notices[0]));
     expect(at(dbd.notices[1])).toBeLessThan(at(apex.notices[0]));
     expect(at(overwatch.notices[1])).toBeLessThan(at(dbd.styleNote!));
+  });
+});
+
+/** redirect / notFound は例外を投げる。その digest(状態コードを含む)を取り出す */
+async function digestOf(game: string): Promise<string> {
+  try {
+    await GameRedirect({ params: Promise.resolve({ game }) });
+  } catch (e) {
+    return String((e as { digest?: unknown }).digest ?? "");
+  }
+  return "";
+}
+
+describe("/games/[game](307 と 404)", () => {
+  it("公開しているゲームは図鑑の一覧へ 307", async () => {
+    for (const id of ["overwatch", "valorant", "apex", "dbd"]) {
+      const d = await digestOf(id);
+      expect(d, id).toMatch(/^NEXT_REDIRECT/);
+      expect(d, id).toContain(`/games/${id}/chars`);
+      expect(d, id).toContain(";307;");
+    }
+  });
+  it("公開していない(スト6)・知らない・大文字・__proto__ は 404 で、転送しない", async () => {
+    for (const id of ["sf6", "nope", "VALORANT", "__proto__", "constructor", ""]) {
+      const d = await digestOf(id);
+      expect(d, id).toContain("404");
+      expect(d, id).not.toMatch(/^NEXT_REDIRECT/);
+    }
   });
 });
 

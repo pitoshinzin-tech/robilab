@@ -41,6 +41,15 @@ describe("charTarget", () => {
   it("−1〜+1 に収める", () => {
     expect(charTarget(char({ evidence: [ev("ally")] })).team).toBe(1);
   });
+  it("−1 側にも収める(下限に当たる札を足しても −1 のまま)", () => {
+    // スト6 の待ち・差し返し:attack は −1。hold(守る=攻め−)を足しても −1 を下回らない
+    const t = charTarget(char({ game: "sf6", roleId: "zoner", evidence: [ev("hold")] }));
+    expect(t.attack).toBe(-1);
+    for (const v of Object.values(t)) expect(v).toBeGreaterThanOrEqual(-1);
+  });
+  it("札 2 枚(別の軸)はそれぞれの軸だけを動かし、ほかの軸は動かさない", () => {
+    expect(charTarget(char({ evidence: [ev("mobile"), ev("aggro")] }))).toEqual({ attack: 0.5, instinct: 0.3, team: 1, heat: 0.8 });
+  });
   it("games.ts にないロールは止める(データの間違い)", () => {
     expect(() => charTarget(char({ roleId: "healer" }))).toThrow();
   });

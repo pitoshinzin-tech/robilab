@@ -39,6 +39,7 @@ describe("手ざわりが違うかも の言い回し(設計書 5-2)", () => {
         const text = surpriseReason(u, s.char, s.role, s.tag);
         for (const w of BANNED_WORDS) expect(text, `${t.code} ${s.char.id}`).not.toContain(w);
         expect(text).toContain(s.char.nameJa);
+        expect(text.replace(s.char.nameJa, ""), `${t.code} ${s.char.id}`).not.toMatch(/[0-9%０-９]/);
       }
     }
     expect(shown).toBeGreaterThan(0);
