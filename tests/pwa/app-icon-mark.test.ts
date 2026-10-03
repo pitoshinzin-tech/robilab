@@ -119,3 +119,14 @@ describe("2 回目の直し", () => {
     expect(src).toContain("xl:grid-cols-[minmax(0,1fr)_auto]");
   });
 });
+
+describe("3 回目の直し", () => {
+  it("線の四角の真ん中に 8px のマス(ほかのアプリ)", () => {
+    const h = renderToStaticMarkup(createElement(HomeRowArt));
+    expect(h.match(/<span class="size-2 bg-rl-line-strong"><\/span>/g)).toHaveLength(3);
+  });
+  it("/my の xl では、手順をアイコンの列(280px + 32px)の下まで広げる", () => {
+    const src = readFileSync("src/components/pwa/InstallHint.tsx", "utf8");
+    expect(src).toContain('place === "my" && "xl:w-[calc(100%+312px)]"');
+  });
+});

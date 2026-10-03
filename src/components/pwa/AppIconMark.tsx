@@ -33,7 +33,7 @@ const WIDE = {
  * 幅 280px より狭い画面(320px の端末の /aim のカード)では、線の四角だけが縮む(アイコンは 64px のまま)。
  * 四角は場所を取ったまま隠しておき(開いても並びがずれない)、`group/hint` の中の `<details>` が開いたときだけ見せる。CSS だけ・動きなし。
  * wide を渡すと、その幅から右の列に置き、アイコンを右の端にして、四角はその左に並ぶ(開くと左へ伸びる)。
- * 四角の角の丸み 12px はアイコン(8 マスのうち 1.5)にそろえた値。
+ * 四角の角の丸み 12px はアイコン(8 マスのうち 1.5)にそろえた値。四角の真ん中に 8px のマスを 1 つ置き、「ほかのアプリ」に見せる。
  * showRow = false(手順を開けない端末)のときは、アイコンだけ。
  */
 export function HomeRowArt({ showRow = true, wide, className }: { showRow?: boolean; wide?: keyof typeof WIDE; className?: string }) {
@@ -48,8 +48,10 @@ export function HomeRowArt({ showRow = true, wide, className }: { showRow?: bool
               key={i}
               aria-hidden
               data-home-slot=""
-              className="invisible aspect-square w-16 min-w-0 rounded-[12px] border border-dashed border-rl-line-strong group-has-[details[open]]/hint:visible"
-            />
+              className="invisible grid aspect-square w-16 min-w-0 place-items-center rounded-[12px] border border-dashed border-rl-line-strong group-has-[details[open]]/hint:visible"
+            >
+              <span className="size-2 bg-rl-line-strong" />
+            </span>
           ))}
       </div>
       <figcaption className={cn("text-xs text-rl-muted", w?.caption)}>ホームに並ぶアイコン</figcaption>

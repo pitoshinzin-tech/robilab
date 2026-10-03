@@ -98,7 +98,9 @@ export function InstallHint({ place, today, steps, className }: { place: HintPla
               追加のしかた
               <ChevronDown aria-hidden className="size-4 shrink-0 group-open:rotate-180" />
             </summary>
-            <div className="pt-2">{steps[platform]}</div>
+            {/* /my の xl:手順は右のアイコンの列(280px + 間 32px)の下まで広げ、細い列で折れないようにする(ol は 40em まで)。
+                手順の上には 1 行目・ボタン・「追加のしかた」があり、アイコン(64px+説明)より下から始まるので重ならない */}
+            <div className={cn("pt-2", place === "my" && "xl:w-[calc(100%+312px)]")}>{steps[platform]}</div>
           </details>
         ) : (
           steps.other
