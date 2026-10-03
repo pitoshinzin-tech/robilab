@@ -16,6 +16,14 @@ describe("全体の CSP(設計書 3-3)", () => {
 });
 
 describe("/sw.js の見出し", () => {
+  it("/sw.js のルールは全体のルール(/(.*))より後ろ(同じキーは後ろが勝つので、sw.js の CSP と Cache-Control が効く)", async () => {
+    const sources = (await rules()).map((r) => r.source);
+    expect(sources).toContain("/(.*)");
+    expect(sources).toContain("/sw.js");
+    expect(sources.lastIndexOf("/sw.js")).toBeGreaterThan(sources.lastIndexOf("/(.*)"));
+    // 全体のルールが /sw.js の後ろにもう 1 つあると、sw.js の見出しが上書きされる
+    expect(sources.slice(sources.indexOf("/sw.js") + 1)).not.toContain("/(.*)");
+  });
   it("全体のルールより後ろにあり(同じキーは後ろが勝つ)、3 つの見出しを持つ", async () => {
     const list = await rules();
     const allIndex = list.findIndex((r) => r.source === "/(.*)");

@@ -6,24 +6,34 @@ const SRC = readFileSync("public/sw.js", "utf8");
 const ORIGIN = "https://robilab.example";
 
 type Req = { url: string; mode: string; method: string };
-type Store = { addAll: ReturnType<typeof vi.fn>; put: ReturnType<typeof vi.fn> };
+type Store = { addAll: ReturnType<typeof vi.fn>; put: ReturnType<typeof vi.fn>; match: ReturnType<typeof vi.fn> };
 type ReloadReq = { url: string; cache: string };
 type SwApi = { shouldHandle: (r: Req, origin: string) => boolean; CACHE: string; OFFLINE_URL: string; PRECACHE: string[] };
 
+const CURRENT_CACHE = SRC.match(/const CACHE = "([^"]+)"/)![1];
 const nav = (path: string, init: Partial<Req> = {}): Req => ({ url: path.startsWith("http") ? path : `${ORIGIN}${path}`, mode: "navigate", method: "GET", ...init });
 
 /** sw.js の文をそのまま、偽の self・caches・fetch で動かす(ビルドしない) */
-function loadSw(opts: { fetchImpl?: () => Promise<Response>; offlinePage?: Response | undefined; existingKeys?: string[]; noPreload?: boolean } = {}) {
+/** offlinePage = 今の版のキャッシュ(CACHE)にある offline.html。otherCachePage = ほかのキャッシュ(古い版など)にあるもの */
+function loadSw(opts: { fetchImpl?: () => Promise<Response>; offlinePage?: Response | undefined; otherCachePage?: Response; existingKeys?: string[]; noPreload?: boolean } = {}) {
   const handlers: Record<string, (event: unknown) => void> = {};
   const stores = new Map<string, Store>();
   const caches = {
     open: vi.fn(async (name: string) => {
-      if (!stores.has(name)) stores.set(name, { addAll: vi.fn(async () => {}), put: vi.fn(async () => {}) });
+      if (!stores.has(name)) {
+        const own = name === CURRENT_CACHE;
+        stores.set(name, {
+          addAll: vi.fn(async () => {}),
+          put: vi.fn(async () => {}),
+          match: vi.fn(async (url: string) => (url === "/offline.html" ? (own ? opts.offlinePage : opts.otherCachePage) : undefined)),
+        });
+      }
       return stores.get(name)!;
     }),
     keys: vi.fn(async () => opts.existingKeys ?? []),
     delete: vi.fn(async (key: string) => key.length > 0),
-    match: vi.fn(async (url: string) => (url === "/offline.html" ? opts.offlinePage : undefined)),
+    // 全部のキャッシュから探す(使わない決まり。今の版のキャッシュだけ見る)
+    match: vi.fn(async (url: string) => (url === "/offline.html" ? opts.offlinePage ?? opts.otherCachePage : undefined)),
   };
   const self = {
     addEventListener: (type: string, fn: (event: unknown) => void) => { handlers[type] = fn; },
@@ -117,7 +127,14 @@ describe("fetch", () => {
     const sw = loadSw({ fetchImpl: async () => { throw new TypeError("Failed to fetch"); }, offlinePage: new Response("offline") });
     const res = await sw.fetchEvent(nav("/mouse")).response();
     expect(await res.text()).toBe("offline");
-    expect(sw.caches.match).toHaveBeenCalledWith("/offline.html");
+    expect(sw.caches.open).toHaveBeenCalledWith(sw.api.CACHE);
+    expect(sw.stores.get(sw.api.CACHE)!.match).toHaveBeenCalledWith("/offline.html");
+  });
+  it("offline.html は今の版のキャッシュ(CACHE)からだけ探す(古い版・ほかのキャッシュのものは返さない)", async () => {
+    const sw = loadSw({ fetchImpl: async () => { throw new TypeError("Failed to fetch"); }, offlinePage: undefined, otherCachePage: new Response("old offline") });
+    const res = await sw.fetchEvent(nav("/")).response();
+    expect(res.type).toBe("error");
+    expect(sw.caches.match).not.toHaveBeenCalled();
   });
   it("キャッシュにも無いときはブラウザのいつものエラー(Response.error)", async () => {
     const sw = loadSw({ fetchImpl: async () => { throw new TypeError("Failed to fetch"); }, offlinePage: undefined });
@@ -165,6 +182,10 @@ describe("文の決まり(設計書 3-2・7 章)", () => {
     expect(SRC).not.toMatch(/navigationPreload\.enable|preloadResponse/);
     expect(SRC).not.toMatch(/importScripts/);
     expect(SRC).not.toMatch(/addEventListener\(\s*["'](message|push|sync|notificationclick)["']/);
+  });
+  it("Navigation Preload を有効にしない(enable を書かない。/auth/callback の code の取り合いを防ぐ)", () => {
+    expect(SRC).not.toMatch(/\.enable\s*\(/);
+    expect(SRC).not.toMatch(/navigationPreload\s*\??\.\s*enable/);
   });
   it("cache.add / addAll は install の中だけ", () => {
     const [install, rest] = SRC.split('addEventListener("activate"');

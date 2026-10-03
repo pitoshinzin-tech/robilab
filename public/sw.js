@@ -55,7 +55,9 @@ self.addEventListener("fetch", (event) => {
         return await fetch(event.request);
       } catch {
         // ネットにつながらないときだけ。成功した応答は保存しない
-        const offline = await caches.match(OFFLINE_URL);
+        // 探すのは今の版のキャッシュだけ(古い版や、ほかのキャッシュのものを返さない)
+        const cache = await caches.open(CACHE);
+        const offline = await cache.match(OFFLINE_URL);
         return offline || Response.error();
       }
     })(),
