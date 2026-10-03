@@ -121,3 +121,38 @@
 ## dev と本番の migration の違い
 
 dev の DB には、リポジトリにない dev 専用の migration の記録がある(`aim_daily_ranking_names`、名前で適用した `card_locks` / `aim_ranking_lazy_filter` / `my_settings_v2_shape_check`、`aim_chars_mixed_difficulty`、`aim_chars_replace_53`、`card_locks_discord_carryover`)。dev で `db push` や差分の比較をしても、これらは本番とは関係ない。**本番には `supabase/migrations/` の 0500〜1800 のファイルだけを適用する**(1400 は 5〜14 画・60 字の版に直してあるので、そのまま新規に適用すればよい)。
+
+## service worker を止めるとき
+
+壊れた `sw.js` を配ってしまった・乗っ取りが疑われるとき(設計書 `docs/superpowers/specs/2026-10-03-pwa-design.md` 3-3)。
+
+1. `public/sw.js` の中身を、下の「止める版」に丸ごと置き換える(ファイル名・場所は変えない)。
+2. 公開する(いつもの手順)。`/sw.js` は `no-store` で、登録は `updateViaCache: "none"` なので、次にサイトを開いたときに新しい `sw.js` が入り、キャッシュを消して自分の登録を外す。
+3. 原因を直したら、元の `sw.js`(`git log -- public/sw.js` で探す)に戻し、`CACHE` の数字を 1 つ上げて公開する。
+4. 自分の PC で今すぐ外したいときは、Chrome の DevTools → Application → Service workers の「Unregister」と、Storage の「Clear site data」。
+
+止める版(`fetch` を持たないので、ページはすべてブラウザがそのまま開く):
+
+```js sw-kill
+self.addEventListener("install", (event) => {
+  event.waitUntil(self.skipWaiting());
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((key) => key.startsWith("robilab-")).map((key) => caches.delete(key)));
+      await self.registration.unregister();
+    })(),
+  );
+});
+```
+
+## アプリのアイコンを本物に差し替えるとき
+
+社長のロゴ(D29 のドット絵のシンボルマーク)ができたら。**iPhone の人は「ホーム画面に追加し直す」までアイコンが変わらない**ので、できれば公開の前に差し替える。Android は manifest の更新で数日のうちに変わる。
+
+- **ドット絵のとき**:1 ドット = 1px の小さな PNG(例 16×16)か、四角だけの SVG をもらう。`scripts/app-icons.mjs` の `GRID`(1 文字 = 1 マス)と `COLORS`(文字 → 色)を差し替え、格子が 8×8 でなければ `ICONS` の `cell` を「`size` ÷ 格子の数」の切り捨てに直して、maskable はテストの「半径 205px の円の中」が通る大きさにする。`node scripts/app-icons.mjs` で作り直し、`npx vitest run tests/pwa` が通ればよい。タブの `src/app/icon.svg` も同じ絵に差し替える(`tests/pwa/app-icons.test.ts` の「icon.svg と同じ」の比べも新しい格子に合う)。
+- **ドット絵でないとき**:社長が Photoshop で `export/app-icon/` の 4 つの PNG と同じ大きさ(192・512・maskable 512・180)で書き出し、`public/icons/icon-192.png`・`icon-512.png`・`icon-maskable-512.png`・`src/app/apple-icon.png` を同じ名前で置き換える(maskable は中央の直径 80% の円の中にマークを収める。透明は使わない)。`scripts/app-icons.mjs` の `ICON_SOURCE` を `"photoshop"` にする(画素の比べのテストが止まり、大きさのテストは残る)。
+- どちらも、URL が同じなので `src/lib/pwa/manifest-data.ts` は変えない。`public/sw.js` が持つ `/icons/icon-192.png` も変わるので、`CACHE` の数字を 1 つ上げる。
