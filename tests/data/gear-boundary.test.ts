@@ -3,8 +3,8 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { posix } from "node:path";
 
-/** 出典の文・メモ・センサー名まで入った機種のデータ。ブラウザの JS に入れない */
-const HEAVY_RE = /\/data\/(mice|pads|skates|mice-rakuten)$/;
+/** 出典の文・メモ・センサー名まで入った機種のデータと、キャラ図鑑のデータ。ブラウザの JS に入れない */
+const HEAVY_RE = /\/data\/(mice|pads|skates|mice-rakuten|chars)$/;
 
 function sourceFiles(dir: string): string[] {
   return readdirSync(dir).flatMap((f) => {
@@ -95,6 +95,8 @@ describe("境界テスト自身の抜け道がない(わざと違反を書いた
     ["src/components(use client なし)", { "src/components/gear/Y.tsx": 'import { PADS } from "@/data/pads";' }],
     ["src/lib を通す間接", { ...client('import { f } from "@/lib/indirect";'), "src/lib/indirect.ts": 'import { MICE } from "@/data/mice";\nexport const f = () => MICE;' }],
     ["相対の src/lib を通す間接", { ...client('import { f } from "../../lib/indirect";'), "src/lib/indirect.ts": 'export { PADS as f } from "../data/pads";' }],
+    ["キャラのデータ", client('import { CHARS } from "@/data/chars";')],
+    ["キャラのデータを読む src/lib を通す間接", { ...client('import { dexChars } from "@/lib/char-dex";'), "src/lib/char-dex.ts": 'import { CHARS } from "@/data/chars";\nexport const dexChars = () => CHARS;' }],
   ];
   it.each(cases)("%s", (_name, files) => {
     expect(findViolations(files).length).toBeGreaterThan(0);
@@ -106,6 +108,7 @@ describe("境界テスト自身の抜け道がない(わざと違反を書いた
     ["機種のデータではない data", client('import { DEVICES } from "@/data/devices";\nimport { MICE_IDS } from "@/data/mice-ids";')],
     ["サーバーのページ(use client でも components でもない)", { "src/app/mouse/page.tsx": 'import { MICE } from "@/data/mice";' }],
     ["値で読まない src/lib を通す", { ...client('import { f } from "@/lib/ok";'), "src/lib/ok.ts": 'import type { MouseSpec } from "@/data/mice";\nexport const f = (m: MouseSpec) => m;' }],
+    ["キャラの型と設定だけ", client('import type { Char } from "@/data/chars";\nimport { CHAR_GAME_SETTINGS } from "@/data/char-games";')],
   ];
   it.each(ok)("違反にしない:%s", (_name, files) => {
     expect(findViolations(files)).toEqual([]);
