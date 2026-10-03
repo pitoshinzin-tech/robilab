@@ -85,3 +85,19 @@
 
 1. (P2)`src/components/mouse/TopMouseRow.tsx:28` の「合う度」の数を `font-display` から本文の太字(`font-bold tabular-nums text-rl-highlight`)へ(CEO の決まり「小さい数字は本文の書体」に合わせる)。
 2. (P2)チップの形を `/pads` `/skates` とそろえる(`pads.md` 2 回目の P0-2 を入れるとき、`ChipButton` も同じ左のマスに)。
+
+---
+
+## デバイスの広がり 3 回目(最後の回・7c87255・2026-10-03)
+
+- 見たもの:`shots/gear/mouse-before-r3-*`・`mouse-result-r3-*`(手 18.5cm・かぶせ持ちが画面に出ている)・`mouse-result-r3-1440-first.png`・`mouse-result-r3-375-top1row.png`・`mouse-zero-r3-375.png`・`mouse-other-r3-1440.png`。横のはみ出しなし。
+
+| 観点 | 重み | 点 | 2 回目 | 満たしていない条件 | 根拠 |
+|---|---|---|---|---|---|
+| Design | 40% | 8.0 | 8.0 | — | 2 回目の P2(合う度の小さな Orbitron)が本文の太字に。チップが `/pads` `/skates` と同じ形(線の四角)。加点の理由はない。 |
+| Usability | 30% | 8.5 | 8.5 | —(⑤ 仮) | 畳んだ絞り込みに今の状態、0 件の行き先。 |
+| Creativity | 20% | 8.5 | 8.5 | — | 実寸の重ね図(入力するたび・手と重ねる)。 |
+| Content | 10% | 8.5 | 8.5 | — | 変わらず。 |
+| **重みつき平均** | | **8.30** | 8.30 | | **合格**(Usability ⑤ は Lighthouse の計測まで仮) |
+
+- 残り:なし(合否に響くもの)。
