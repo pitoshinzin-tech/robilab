@@ -1478,7 +1478,7 @@
       "mouseId": null,
       "mouseIds": [],
       "material": "other",
-      "materialOfficial": "PTFE または UHMW-PE(選択式。公式の選択肢: UHMW-PE / Black / Neutral, UHMW-PE / Black / Silent, PTFE / Black / Neutral, PTFE / Black / Silent, PTFE / Yellow / Neutral)",
+      "materialOfficial": "UHMW-PE / Black / Neutral, UHMW-PE / Black / Silent, PTFE / Black / Neutral, PTFE / Black / Silent, PTFE / Yellow / Neutral",
       "shape": "dot",
       "thicknessMm": null,
       "thicknessOfficial": null,
