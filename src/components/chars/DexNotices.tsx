@@ -25,12 +25,17 @@ export function DexNotices({ settings, checkedAt, sources }: { settings: readonl
         </ul>
       )}
       {checkedAt && <p className="text-sm text-rl-muted">確認日 {checkedAt}(公式の内容は変わることがあります)</p>}
-      {settings.map((s) => s.styleNote && <p key={`${s.id}-style`} className="text-sm text-rl-muted">{s.styleNote}</p>)}
-      <ul className="grid gap-2 text-sm text-rl-muted">
-        {settings.flatMap((s) => s.notices.map((n) => (
-          <li key={`${s.id}-${n}`} lang={isLatinText(n) ? "en" : undefined} className="wrap-anywhere">{n}</li>
-        )))}
-      </ul>
+      {/* 会社ごとにまとめる(そのゲームの注記は、そのゲームの断り書きの上) */}
+      {settings.map((s) => (
+        <div key={s.id} data-notice-game={s.id} className="grid gap-2">
+          {s.styleNote && <p className="text-sm text-rl-muted">{s.styleNote}</p>}
+          <ul className="grid gap-2 text-sm text-rl-muted">
+            {s.notices.map((n) => (
+              <li key={n} lang={isLatinText(n) ? "en" : undefined} className="wrap-anywhere">{n}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
       <p className="text-sm text-rl-muted">公式の画像・ロゴは使っていません。キャラの強さ・使用率・勝率は載せていません。</p>
     </section>
   );

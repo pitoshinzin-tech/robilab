@@ -77,6 +77,18 @@ describe("DexNotices", () => {
   });
 });
 
+describe("DexNotices(複数ゲーム)は会社ごとにまとめる", () => {
+  it("DbD の注記は DbD の断り書きの直前で、ほかの会社の断り書きをまたがない", () => {
+    const { overwatch, dbd, apex } = CHAR_GAME_SETTINGS;
+    const html = renderToStaticMarkup(createElement(DexNotices, { settings: [overwatch, dbd, apex] }));
+    const at = (s: string) => html.indexOf(s);
+    expect(at(dbd.styleNote!)).toBeGreaterThan(at(overwatch.notices[1]));
+    expect(at(dbd.styleNote!)).toBeLessThan(at(dbd.notices[0]));
+    expect(at(dbd.notices[1])).toBeLessThan(at(apex.notices[0]));
+    expect(at(overwatch.notices[1])).toBeLessThan(at(dbd.styleNote!));
+  });
+});
+
 describe("一覧のページ(静的に作る)", () => {
   it("知らない値は 404(dynamicParams = false)で、params は公開しているゲームだけ", () => {
     expect(listPage.dynamicParams).toBe(false);
