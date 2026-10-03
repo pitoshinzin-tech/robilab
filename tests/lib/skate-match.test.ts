@@ -1,8 +1,9 @@
 import { describe, it, expect } from "vitest";
+import * as skateMatch from "@/lib/skate-match";
 import type { SkateSpec } from "@/data/gear-types";
 import { SKATES } from "@/data/skates";
 import {
-  NO_SKATE_FILTER, filterSkates, skateChipHref, groupByBrand, parseSkateFilter, skateCounts, skateFilterHref, skateView, skatesForMouse, universalSkates,
+  NO_SKATE_FILTER, filterSkates, skateChipHref, groupByBrand, parseSkateFilter, skateCounts, skateView, skatesHrefFor, skatesForMouse, universalSkates,
 } from "@/lib/skate-match";
 import { materialLabel, packText, skateThicknessText } from "@/lib/gear-labels";
 
@@ -13,7 +14,7 @@ const skate = (id: string, extra: Partial<SkateSpec> = {}): SkateSpec => ({
 });
 const KNOWN = new Set(["m1", "m2"]);
 
-describe("parseSkateFilter / skateFilterHref", () => {
+describe("parseSkateFilter / skateChipHref", () => {
   it("知っているマウスの id だけ読む。空・知らない id は選ばない", () => {
     expect(parseSkateFilter({ mouse: "m1", material: "glass", shape: "dot" }, KNOWN)).toEqual({ mouse: "m1", material: "glass", shape: "dot" });
     expect(parseSkateFilter({ mouse: "", material: "ceramic", shape: "other" }, KNOWN)).toEqual(NO_SKATE_FILTER);
@@ -29,8 +30,15 @@ describe("parseSkateFilter / skateFilterHref", () => {
     expect(parseSkateFilter({}, KNOWN)).toEqual(NO_SKATE_FILTER);
   });
   it("リンクは今の絞り込みに 1 つだけ変えたもの", () => {
-    expect(skateFilterHref({ mouse: "m1", material: "all", shape: "all" }, { shape: "dot" })).toBe("/skates?mouse=m1&shape=dot");
-    expect(skateFilterHref(NO_SKATE_FILTER)).toBe("/skates");
+    expect(skateChipHref({ mouse: "m1", material: "all", shape: "all" }, { shape: "dot" })).toBe("/skates?mouse=m1&shape=dot");
+    expect(skateChipHref({ mouse: "m1", material: "all", shape: "all" }, { mouse: null })).toBe("/skates?mouse=");
+  });
+  it("素の skateFilterHref は外に出さない(リンクに使うとマイ設定に選び直される)", () => {
+    expect("skateFilterHref" in skateMatch).toBe(false);
+  });
+  it("skatesHrefFor は /mouse からのリンク(選んだマウスつき)", () => {
+    expect(skatesHrefFor("m1")).toBe("/skates?mouse=m1");
+    expect(skatesHrefFor("a b")).toBe("/skates?mouse=a+b");
   });
 });
 
@@ -49,6 +57,9 @@ describe("結び付け", () => {
     expect(filterSkates(list, { material: "glass", shape: "all" }).map((s) => s.id)).toEqual(["b"]);
     expect(filterSkates(list, { material: "all", shape: "dot" }).map((s) => s.id)).toEqual(["u", "n"]);
     expect(filterSkates(list, { material: "PTFE", shape: "dot" }).map((s) => s.id)).toEqual(["u"]);
+  });
+  it("マウスと素材の両方で絞る(マウス m1 + ガラス)と、専用はガラスだけ・汎用は素材が合わず空", () => {
+    expect(skateView(list, { mouse: "m1", material: "glass", shape: "all" })).toEqual({ kind: "mouse", mouseId: "m1", dedicated: [list[1]], universal: [] });
   });
   it("マウスを選んだら専用と汎用、選ばなければブランド別(最初に出た順)", () => {
     expect(skateView(list, { mouse: "m1", material: "all", shape: "all" })).toEqual({ kind: "mouse", mouseId: "m1", dedicated: [list[0], list[1]], universal: [list[2], list[4]] });
@@ -84,7 +95,7 @@ describe("skateChipHref(絞り込みのリンク)", () => {
     expect(skateChipHref(NO_SKATE_FILTER, { material: "PTFE" })).toBe("/skates?mouse=&material=PTFE");
     expect(skateChipHref({ mouse: null, material: "PTFE", shape: "all" }, { material: "all" })).toBe("/skates?mouse=");
   });
-  it("マウスを選んでいるときは skateFilterHref と同じ", () => {
+  it("マウスを選んでいるときは素のリンクと同じ", () => {
     expect(skateChipHref({ mouse: "m1", material: "all", shape: "all" }, { shape: "dot" })).toBe("/skates?mouse=m1&shape=dot");
   });
 });

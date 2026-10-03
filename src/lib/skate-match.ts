@@ -18,7 +18,8 @@ export function parseSkateFilter(sp: SearchParams, knownMouseIds: ReadonlySet<st
   };
 }
 
-export function skateFilterHref(f: SkateFilter, patch: Partial<SkateFilter> = {}): string {
+/** 素のリンク(この中だけで使う。画面のリンクは skateChipHref か skatesHrefFor。マウス未選択のとき mouse= を付けないので、そのまま使うとマイ設定に選び直される) */
+function skateFilterHref(f: SkateFilter, patch: Partial<SkateFilter> = {}): string {
   const n = { ...f, ...patch };
   return queryHref("/skates", [["mouse", n.mouse], ["material", n.material], ["shape", n.shape]]);
 }
@@ -69,6 +70,12 @@ export function skateView(skates: readonly SkateSpec[], f: SkateFilter): SkateVi
  */
 export function skateChipHref(f: SkateFilter, patch: Partial<SkateFilter> = {}): string {
   const href = skateFilterHref(f, patch);
-  if ((patch.mouse ?? f.mouse) !== null) return href;
+  const mouse = "mouse" in patch ? patch.mouse : f.mouse;
+  if (mouse !== null && mouse !== undefined) return href;
   return href.includes("?") ? href.replace("?", "?mouse=&") : `${href}?mouse=`;
+}
+
+/** /mouse などから「このマウスのソール」へ。選んだマウスつき(画面のリンクはこの関数にそろえる) */
+export function skatesHrefFor(mouseId: string): string {
+  return skateChipHref(NO_SKATE_FILTER, { mouse: mouseId });
 }

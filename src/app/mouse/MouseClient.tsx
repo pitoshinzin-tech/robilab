@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { SearchX, Share2, TriangleAlert } from "lucide-react";
 import { applyFilter, compareWith, DEFAULT_HAND_LENGTH_CM, fitTarget, handFrom, NO_FILTER, rankMice, targetText, type MouseFilter } from "@/lib/mouse-fit";
+import { skatesHrefFor } from "@/lib/skate-match";
 import { recommendReason } from "@/lib/mouse-reason";
 import type { MouseRow } from "@/lib/mouse-rows";
 import { buildMouseShareText } from "@/lib/mouse-share";
@@ -157,7 +158,7 @@ export function MouseClient({ pageUrl, mice }: { pageUrl: string; mice: MouseRow
               const reason = recommendReason({ ...hand, estimated }, target, m, null);
               const compare = currentMouse ? compareWith(currentMouse, m) : null;
               const overlaid = overlay?.id === m.id;
-              const skateHref = m.skateCount > 0 ? `/skates?mouse=${m.id}` : null;
+              const skateHref = m.skateCount > 0 ? skatesHrefFor(m.id) : null;
               const onOverlay = () => { setOverlayId(m.id); requestAnimationFrame(revealFitFigure); };
               // 追補 6 章:一覧の先頭は大きな行(主ボタンはここ。絞り込みで 1 位が外れても先頭が持つ)。2 番目からはカード(店のボタンは二番手)
               if (item === shown[0]) return <TopMouseRow key={m.id} rank={rank} item={item} brand={m.brand} name={m.name} reason={reason} links={m.links} compare={compare} overlaid={overlaid} onOverlay={onOverlay} skateHref={skateHref} />;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { MOUSE_ID_RE, MY_SETTINGS_STORAGE_KEY, myMouseIdFrom, shouldPreselect } from "@/lib/my-mouse";
+import { MOUSE_ID_RE, MY_SETTINGS_STORAGE_KEY, myMouseIdFrom, preselectQuery, shouldPreselect } from "@/lib/my-mouse";
 import { MY_SETTINGS_KEY } from "@/lib/my-settings-store";
 import { CATALOG_ID_RE } from "@/lib/my-settings";
 
@@ -31,5 +31,16 @@ describe("my-mouse", () => {
     expect(shouldPreselect("?material=glass")).toBe(true);
     expect(shouldPreselect("?mouse=")).toBe(false);
     expect(shouldPreselect("?mouse=razer-viper-v3-pro")).toBe(false);
+  });
+});
+
+describe("preselectQuery(選び直しの URL に写すもの)", () => {
+  it("mouse と from=my に、決まった material・shape だけを写す", () => {
+    expect(preselectQuery("?material=glass&shape=dot", "m1")).toBe("mouse=m1&material=glass&shape=dot&from=my");
+    expect(preselectQuery("", "m1")).toBe("mouse=m1&from=my");
+  });
+  it("決まっていない値・ほかのキー・元の from は捨てる", () => {
+    expect(preselectQuery("?material=ceramic&shape=<x>&utm_source=a&next=//evil.example&from=evil&foo=1", "m1")).toBe("mouse=m1&from=my");
+    expect(preselectQuery("?material=GLASS&shape=dot&shape=full", "m1")).toBe("mouse=m1&shape=dot&from=my");
   });
 });

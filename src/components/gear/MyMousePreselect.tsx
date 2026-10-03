@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { MY_SETTINGS_STORAGE_KEY, myMouseIdFrom, shouldPreselect } from "@/lib/my-mouse";
+import { MY_SETTINGS_STORAGE_KEY, myMouseIdFrom, preselectQuery, shouldPreselect } from "@/lib/my-mouse";
 
 /**
  * URL にマウスの指定がまったくないときだけ、マイ設定(この端末の保存)のマウスで選び直す(設計書 3-3)。何も描かない。
@@ -19,10 +19,7 @@ export function MyMousePreselect() {
     }
     const id = myMouseIdFrom(raw);
     if (!id) return;
-    const q = new URLSearchParams(window.location.search);
-    q.set("mouse", id);
-    q.set("from", "my");
-    router.replace(`/skates?${q.toString()}`, { scroll: false });
+    router.replace(`/skates?${preselectQuery(window.location.search, id)}`, { scroll: false });
   }, [router]);
   return null;
 }

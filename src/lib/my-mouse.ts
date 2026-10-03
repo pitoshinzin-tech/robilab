@@ -27,3 +27,22 @@ export function myMouseIdFrom(raw: string | null): string | null {
 export function shouldPreselect(search: string): boolean {
   return !new URLSearchParams(search).has("mouse");
 }
+
+const SKATE_MATERIALS: readonly string[] = ["all", "PTFE", "glass", "UPE", "other"];
+const SKATE_SHAPES: readonly string[] = ["all", "full", "dot"];
+
+/**
+ * 選び直しの URL の query。マウス(mouse)と from=my に、決まった値の material・shape だけを写す
+ * (ほかのキー・決まっていない値・元の from は捨てる。URL に何が付いていても、そのまま router.replace に渡さない)。
+ */
+export function preselectQuery(search: string, mouseId: string): string {
+  const src = new URLSearchParams(search);
+  const q = new URLSearchParams();
+  q.set("mouse", mouseId);
+  const material = src.get("material");
+  if (material !== null && SKATE_MATERIALS.includes(material)) q.set("material", material);
+  const shape = src.get("shape");
+  if (shape !== null && SKATE_SHAPES.includes(shape)) q.set("shape", shape);
+  q.set("from", "my");
+  return q.toString();
+}
