@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { AndroidSteps, DesktopSteps, IosSteps, OtherBrowserNote } from "@/components/pwa/InstallSteps";
-import { InstallHint, openHintStorage } from "@/components/pwa/InstallHint";
+import { InstallHint } from "@/components/pwa/InstallHint";
 import { InstallHintBlock } from "@/components/pwa/InstallHintBlock";
 
 const html = (el: Parameters<typeof createElement>[0]) => renderToStaticMarkup(createElement(el));
@@ -49,23 +49,6 @@ describe("InstallHint(client)", () => {
   });
   it("主ボタン(primary)を使わない(読み替え 1)", () => {
     expect(readFileSync("src/components/pwa/InstallHint.tsx", "utf8")).not.toContain('"primary"');
-  });
-});
-
-describe("openHintStorage(プライベートモードなど)", () => {
-  afterEach(() => vi.unstubAllGlobals());
-  it("localStorage が投げるときは null", () => {
-    vi.stubGlobal("window", { get localStorage(): Storage { throw new Error("SecurityError"); } });
-    expect(openHintStorage()).toBeNull();
-  });
-  it("書き込みが投げるときも null", () => {
-    vi.stubGlobal("window", { localStorage: { getItem: () => null, setItem: () => { throw new Error("QuotaExceededError"); }, removeItem: () => {} } });
-    expect(openHintStorage()).toBeNull();
-  });
-  it("使えるときはそのまま返す", () => {
-    const ls = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
-    vi.stubGlobal("window", { localStorage: ls });
-    expect(openHintStorage()).toBe(ls);
   });
 });
 

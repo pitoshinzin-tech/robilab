@@ -3,27 +3,13 @@ import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } fr
 import { ChevronDown, Download, X } from "lucide-react";
 import { useIsClient } from "@/lib/use-is-client";
 import { installPromptStore, SERVER_SNAPSHOT } from "@/lib/pwa/install-prompt";
+import { openHintStorage, type HintStorage } from "@/lib/pwa/hint-storage";
 import { HINT_STORAGE_KEY, detectPlatform, dismissHint, hintLead, hintView, parseHintState, type HintPlace, type StepsPlatform } from "@/lib/pwa/install-hint";
 import { Card } from "@/components/ui/card";
 import { PlainButton } from "@/components/ui/plain-button";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { HomeRowArt } from "./AppIconMark";
 import { cn } from "@/lib/utils";
-
-type HintStorage = Pick<Storage, "getItem" | "setItem">;
-
-/** localStorage が使えれば返す。プライベートモードなどで読めない・書けないときは null(案内を出さない) */
-export function openHintStorage(): HintStorage | null {
-  try {
-    const s = window.localStorage;
-    const probe = "robilab:probe";
-    s.setItem(probe, "1");
-    s.removeItem(probe);
-    return s;
-  } catch {
-    return null;
-  }
-}
 
 function save(storage: HintStorage | null, value: unknown) {
   if (!storage) return;
@@ -66,10 +52,7 @@ export function InstallHint({ place, today, steps, className }: { place: HintPla
   useEffect(() => {
     if (env?.view.next) save(env.storage, env.view.next);
   }, [env]);
-  // インストールしたら二度と出さない
-  useEffect(() => {
-    if (prompt.installed && env?.storage) save(env.storage, dismissHint(parseHintState(readStored(env.storage) ?? null)));
-  }, [prompt.installed, env]);
+  // インストールした記録は layout の SwRegister が appinstalled で残す(このページにいなくても)。ここは prompt.installed で隠すだけ
 
   if (!env || !env.view.show || closed || prompt.installed || env.view.platform === "installed") return null;
   const platform = env.view.platform;

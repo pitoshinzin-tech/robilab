@@ -4,7 +4,8 @@ export type InstallPromptSnapshot = { event: InstallPromptEvent | null; installe
 type Target = Pick<EventTarget, "addEventListener">;
 
 export type InstallPromptStore = {
-  start(target: Target): void;
+  /** onInstalled:appinstalled が来たときに 1 回呼ぶ(記録を残すため。投げても知らせは止めない) */
+  start(target: Target, onInstalled?: () => void): void;
   prompt(): Promise<void>;
   subscribe(fn: () => void): () => void;
   get(): InstallPromptSnapshot;
@@ -27,11 +28,18 @@ export function createInstallPromptStore(): InstallPromptStore {
     listeners.forEach((fn) => fn());
   };
   return {
-    start(target) {
+    start(target, onInstalled) {
       if (started) return;
       started = true;
       target.addEventListener("beforeinstallprompt", (e) => set({ ...snapshot, event: e as InstallPromptEvent }));
-      target.addEventListener("appinstalled", () => set({ event: null, installed: true }));
+      target.addEventListener("appinstalled", () => {
+        try {
+          onInstalled?.();
+        } catch {
+          // 記録できなくても、案内を消す知らせは出す
+        }
+        set({ event: null, installed: true });
+      });
     },
     async prompt() {
       const e = snapshot.event;
