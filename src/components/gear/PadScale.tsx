@@ -28,13 +28,13 @@ export function PadScale({ sizes, matched, className }: { sizes: readonly PadSiz
             fill="var(--rl-selected-bg)" stroke="var(--rl-secondary-text)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
         </svg>
         {g.outlines.map((o) => (
-          <span key={o.label} className={cn("absolute pr-1 text-xs leading-4 whitespace-nowrap", o.matched ? "font-bold text-rl-secondary-text" : "text-rl-muted")}
+          <span key={o.label} className={cn("absolute mr-px bg-rl-bg px-1 text-xs leading-4 whitespace-nowrap", o.matched ? "font-bold text-rl-secondary-text" : "text-rl-muted")}
             style={{ right: `${pct((g.widthMm - o.width) / g.widthMm)}%`, top: `${pct(o.labelTopMm / g.depthMm)}%` }}>
             {o.label}
           </span>
         ))}
       </div>
-      <figcaption className="text-sm text-rl-muted">
+      <figcaption className="text-sm text-rl-muted text-balance [word-break:auto-phrase]">
         線は公式のサイズ(左下をそろえて重ねた外形)、面は平均的なマウス {AVG_MOUSE.lengthMm}×{AVG_MOUSE.widthMm}mm。同じ縮尺です。
         {g.tinyMouse && "パッドが大きいので、マウスは小さく見えます。"}
       </figcaption>
