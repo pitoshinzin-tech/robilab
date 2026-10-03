@@ -6,7 +6,7 @@
     "nameJa": "ケン",
     "nameEn": "Ken",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "元全米格闘王で、いまは嫌疑をかけられて身を隠している元財団副理事長。",
+    "summary": "リュウのライバルとして知られる、金髪の格闘家。",
     "quote": {
       "text": "元・全米格闘王、元・マスターズ財団副理事長。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/ken"
@@ -24,7 +24,7 @@
     "nameJa": "キャミィ",
     "nameEn": "Cammy",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "英国特殊部隊の隊員。優秀だが気まぐれな一面もあると公式は紹介している。",
+    "summary": "イギリス出身の特殊部隊員。蹴り技を軸に闘う女性キャラクター。",
     "quote": {
       "text": "イギリス特殊部隊デルタレッド隊員。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/cammy"
@@ -42,7 +42,7 @@
     "nameJa": "ジュリ",
     "nameEn": "Juri",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "争いや苦悩を好み、相手を壊すことを喜びとする享楽家と紹介されている。",
+    "summary": "韓国出身の女性キャラクター。脚技で闘い、シリーズの悪役側にいる。",
     "quote": {
       "text": "闘う相手を破壊し尽くすことを至高の喜びとする享楽家。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/juri"
@@ -60,7 +60,7 @@
     "nameJa": "ラシード",
     "nameEn": "Rashid",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "パルクールの身ごなしで空を駆ける砂漠の荒鷲。Year 1 の追加キャラクター。",
+    "summary": "中東出身の男性キャラクター。身軽な動きで闘う。",
     "quote": {
       "text": "風を味方に、高い機動力で相手を翻弄。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/rashid"
@@ -85,7 +85,7 @@
     "nameJa": "リュウ",
     "nameEn": "Ryu",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "真の強さを求めて修行を続ける格闘家。礼儀正しく誠実と紹介されている。",
+    "summary": "修行を続ける格闘家で、シリーズを代表する主人公格。",
     "quote": {
       "text": "礼儀正しく誠実な性格で、自分より強い相手と闘うために世界を旅する。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/ryu"
@@ -340,7 +340,7 @@
     "nameJa": "キンバリー",
     "nameEn": "Kimberly",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "武神流の伝承者ガイの弟子で、ニンジャを志す 80 年代ポップカルチャー好き。",
+    "summary": "ニンジャを目指す若い女性キャラクター。",
     "quote": {
       "text": "武神流第39代目伝承者・ガイの押し掛け弟子。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/kimberly"
@@ -358,7 +358,7 @@
     "nameJa": "リリー",
     "nameEn": "Lily",
     "officialRole": "なし(公式のロールの表記はない)",
-    "summary": "サンダーフット族の血を継ぎ、精霊と語らう力を持つ娘。",
+    "summary": "メキシコ出身の女性キャラクター。先住民の血を引く。",
     "quote": {
       "text": "天真爛漫な姿からは想像もつかない巨大な力を秘める。",
       "url": "https://www.streetfighter.com/6/ja-jp/character/lily"
