@@ -7,7 +7,8 @@
 <meta name="robots" content="noindex">
 <title>電波が届いていません|ロビラボ</title>
 <style>
-:root { --bg: #0A0C16; --text: #EAF6FF; --muted: #9FB3C8; --accent: #39F3FF; --on-accent: #0A0C16; }
+/* 色は src/app/globals.css の --rl-* と同じ値(このページは外の CSS を読まないので書き写す。tests/pwa/offline-page.test.ts が照らす)。「ロ」の色は src/lib/pwa/app-icon-grid.mjs の COLORS */
+:root { --bg: #0A0C16; --text: #EAF6FF; --muted: #9FB3C8; --accent: #39F3FF; --accent-hover: #8FF8FF; --on-accent: #0A0C16; --line: rgba(255, 255, 255, 0.4); }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--text); }
 body {
@@ -19,8 +20,16 @@ body {
   line-height: 1.7;
 }
 main { display: grid; gap: 24px; justify-items: start; max-width: 28em; }
-svg { display: block; }
-h1 { margin: 0; font-size: 24px; font-weight: 700; }
+/* ドット絵の「ロ」(1 マス 16px、PC は 24px)と、その下の真ん中が 32px 切れた線(電波が途切れた) */
+.art { display: grid; gap: 16px; width: 128px; margin-bottom: 8px; }
+.mark { display: block; width: 128px; height: 128px; }
+.cut { display: flex; height: 2px; }
+.cut span { height: 2px; background: var(--line); }
+.cut .seg { flex: 1 1 0; }
+.cut .bridge { flex: 0 0 32px; opacity: 0; transition: opacity 200ms cubic-bezier(0.2, 0, 0, 1); }
+/* 読み込み直すボタンに触れると、切れ目がつながる(CSS だけ。:has が使えないブラウザでは切れたまま) */
+main:has(a:focus-visible) .bridge { opacity: 1; }
+h1 { margin: 0; font-size: 24px; line-height: 1.5; font-weight: 700; }
 p { margin: 0; font-size: 16px; color: var(--muted); }
 a {
   display: inline-flex;
@@ -37,22 +46,37 @@ a {
 }
 a:active { transform: translateY(1px); }
 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (hover: hover) {
+  a:hover { background: var(--accent-hover); }
+  main:has(a:hover) .bridge { opacity: 1; }
+}
+@media (min-width: 768px) {
+  .art { width: 192px; gap: 24px; }
+  .mark { width: 192px; height: 192px; }
+  h1 { font-size: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cut .bridge { transition: none; }
+}
 </style>
 </head>
 <body>
 <main>
-  <svg width="64" height="64" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">
-    <rect width="8" height="8" rx="1.5" fill="#0A0C16"/>
-    <g fill="#FF4FD8">
-      <rect x="2" y="1" width="4" height="1"/>
-      <rect x="1" y="2" width="1" height="4"/>
-      <rect x="6" y="2" width="1" height="4"/>
-      <rect x="2" y="6" width="4" height="1"/>
-    </g>
-    <g fill="#A99BFF">
-      <rect x="3" y="3" width="2" height="2"/>
-    </g>
-  </svg>
+  <div class="art" aria-hidden="true">
+    <svg class="mark" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">
+      <rect width="8" height="8" rx="1.5" fill="#0A0C16"/>
+      <g fill="#FF4FD8">
+        <rect x="2" y="1" width="4" height="1"/>
+        <rect x="1" y="2" width="1" height="4"/>
+        <rect x="6" y="2" width="1" height="4"/>
+        <rect x="2" y="6" width="4" height="1"/>
+      </g>
+      <g fill="#A99BFF">
+        <rect x="3" y="3" width="2" height="2"/>
+      </g>
+    </svg>
+    <div class="cut"><span class="seg"></span><span class="bridge"></span><span class="seg"></span></div>
+  </div>
   <h1>電波が届いていません</h1>
   <p>つながったら、もう一度読み込んでください。</p>
   <a href="">もう一度読み込む</a>
