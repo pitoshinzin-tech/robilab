@@ -53,7 +53,7 @@ export function CharListBody({ game, setting, sections, checkedAt }: {
           <ul className="border-t border-rl-line">
             {s.chars.map((c) => (
               <CharRow key={c.id} char={c} href={`/games/${c.game}/chars/${c.id}`} showRole={setting.groupByRole}
-                shifts={type && c.matchable ? shiftedRows(c).map((r) => r.word) : []} />
+                shifts={type && c.matchable ? shiftedRows(c) : []} />
             ))}
           </ul>
         </section>

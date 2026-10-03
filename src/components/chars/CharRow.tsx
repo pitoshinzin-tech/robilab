@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import type { Char } from "@/data/char-types";
+import type { CharAxisRow } from "@/lib/char-match";
 
 /**
  * 図鑑の一覧の 1 行(箱にせず幅いっぱいの行。追補 5-3)。名前・英語の名前・公式のロール・ロビラボの要約。
  * 合うタイプの絵はロールの段の見出しに 1 回だけ(採点 1 回目 P0)。行には、公式の言葉の札でロールの土台からずれた軸だけを言葉の札で出す
  * (ずれがなければ何も出さない。数字は出さない)。公式の引用は一覧に出さない(1 体のページだけ)。
  */
-export function CharRow({ char, href, showRole, shifts }: { char: Char; href: string; showRole: boolean; shifts: readonly string[] }) {
+export function CharRow({ char, href, showRole, shifts }: { char: Char; href: string; showRole: boolean; shifts: readonly Pick<CharAxisRow, "axis" | "left" | "right" | "word">[] }) {
   return (
     <li className="border-b border-rl-line">
       <Link href={href} className="rl-lock group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-4">
@@ -21,8 +22,11 @@ export function CharRow({ char, href, showRole, shifts }: { char: Char; href: st
           {shifts.length > 0 && (
             <span className="flex flex-wrap gap-2 pt-1">
               <span className="sr-only">ロールの土台からずれた軸:</span>
-              {shifts.map((w) => (
-                <span key={w} className="inline-flex h-7 items-center rounded-rl-sm border border-rl-line-strong px-2 text-sm font-bold">{w}</span>
+              {shifts.map((r) => (
+                <span key={r.axis} className="inline-flex h-7 items-center gap-2 rounded-rl-sm border border-rl-line-strong px-2 text-sm">
+                  <span className="text-rl-muted">{r.left}/{r.right}</span>
+                  <span className="font-bold">{r.word}</span>
+                </span>
               ))}
             </span>
           )}

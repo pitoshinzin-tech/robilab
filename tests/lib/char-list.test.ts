@@ -58,7 +58,7 @@ describe("一覧の中身(全 5 本。スト6 も描けることを確かめる)
     const w = CHARS.find((c) => c.game === "overwatch" && c.id === "winston")!;
     expect(shiftedRows(w).map((r) => r.word)).toEqual(["直感寄り"]);
     const row = html.slice(html.indexOf('href="/games/overwatch/chars/winston"'));
-    expect(row.slice(0, row.indexOf("</li>"))).toContain(">直感寄り<");
+    expect(row.slice(0, row.indexOf("</li>"))).toMatch(/>直感\/戦略<\/span><span[^>]*>直感寄り</);
     for (const c of CHARS.filter((x) => x.game === "overwatch" && x.evidence.length === 0 && !x.reserve)) {
       const r = html.slice(html.indexOf(`href="/games/overwatch/chars/${c.id}"`));
       expect(r.slice(0, r.indexOf("</li>")), c.id).not.toContain("寄り<");
