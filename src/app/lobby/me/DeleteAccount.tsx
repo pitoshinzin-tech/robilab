@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import { deleteMeAction } from "@/app/lobby/actions";
 import { browserStorage } from "@/lib/my-settings-store";
-import { HISTORY_KEY, clearLocal as clearAimHistory } from "@/lib/aim/history";
+import { clearDeviceRecords } from "@/lib/device-records";
 import { PlainButton } from "@/components/ui/plain-button";
 import { DangerAction } from "@/components/ui/danger-zone";
 
@@ -15,18 +15,15 @@ export function DeleteAccount({ onDeleted }: { onDeleted?: () => void } = {}) {
   const [error, setError] = useState<string | null>(null);
   const confirmAndDelete = () => {
     if (confirm("退会すると、プロフィールと声かけの記録、エイムの記録がすべて消えます(この端末のエイムの記録も消えます)。退会から7日間は、同じ Discord アカウントで再登録できません。よろしいですか?")) {
-      // この端末のエイムの記録も消す(plan.md D43。同じブラウザを使うほかの人に見せないため)。
+      // この端末のエイムの記録と、ホーム画面に追加の案内の記録も消す(plan.md D43。同じブラウザを使うほかの人に見せないため)。
       // 退会できなかったとき(利用停止中・確認中の通報があるとき)は元に戻す
-      const storage = browserStorage();
-      let savedHistory: string | null = null;
-      try { savedHistory = storage?.getItem(HISTORY_KEY) ?? null; } catch { /* 読めなくても退会は進める */ }
-      clearAimHistory(storage);
+      const restoreDeviceRecords = clearDeviceRecords(browserStorage());
       onDeleted?.();
       start(async () => {
         const res = await deleteMeAction();
         if (res?.error) {
           setError(res.error);
-          try { if (savedHistory) storage?.setItem(HISTORY_KEY, savedHistory); } catch { /* 戻せなくても画面は止めない */ }
+          restoreDeviceRecords();
         }
       });
     }
