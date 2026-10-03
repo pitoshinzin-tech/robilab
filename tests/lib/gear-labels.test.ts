@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { NO_DATA, connectionLabel, materialLabel, packText, padSizeText, shapeLabel, skateThicknessText, surfaceLabel, withUnit } from "@/lib/gear-labels";
+import { skateThicknessLabel } from "@/lib/gear-labels";
 
 describe("gear-labels", () => {
   it("形・接続(null は公式の記載なし)", () => {
@@ -38,5 +39,12 @@ describe("gear-labels", () => {
     expect(skateThicknessText(0.8, null)).toBe("0.8mm");
     expect(skateThicknessText(null, "a thickness ranging from 0.7 to 0.8mm")).toBe("a thickness ranging from 0.7 to 0.8mm");
     expect(skateThicknessText(null, null)).toBe(NO_DATA);
+  });
+});
+describe("skateThicknessLabel", () => {
+  it("公式の原文はかぎ括弧と注記で原文だと分かる", () => {
+    expect(skateThicknessLabel(null, "a thickness ranging from 0.7 to 0.8mm")).toBe("「a thickness ranging from 0.7 to 0.8mm」(公式の表記)");
+    expect(skateThicknessLabel(0.8, null)).toBe("0.8mm");
+    expect(skateThicknessLabel(null, null)).toBe(NO_DATA);
   });
 });

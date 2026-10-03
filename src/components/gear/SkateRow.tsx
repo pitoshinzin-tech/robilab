@@ -1,6 +1,6 @@
 import type { SkateSpec } from "@/data/gear-types";
 import type { ShopLinks } from "@/lib/shop-links";
-import { SKATE_SHAPE_LABEL, materialLabel, packText, skateThicknessText } from "@/lib/gear-labels";
+import { SKATE_SHAPE_LABEL, materialLabel, packText, skateThicknessLabel } from "@/lib/gear-labels";
 import { Badge } from "@/components/ui/badge";
 import { ShopButtons } from "@/components/gear/ShopButtons";
 
@@ -17,7 +17,7 @@ export function SkateRow({ skate, links, primary }: { skate: SkateSpec; links: S
         <p className="text-sm text-rl-muted wrap-anywhere">対応(公式の表記):{skate.forMouse}</p>
         <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm md:grid-cols-3">
           <div className="min-w-0"><dt className="text-rl-muted">素材</dt><dd className="wrap-anywhere">{materialLabel(skate.material)}</dd></div>
-          <div className="min-w-0"><dt className="text-rl-muted">厚さ</dt><dd className="wrap-anywhere">{skateThicknessText(skate.thicknessMm, skate.thicknessOfficial)}</dd></div>
+          <div className="min-w-0"><dt className="text-rl-muted">厚さ</dt><dd className="wrap-anywhere">{skateThicknessLabel(skate.thicknessMm, skate.thicknessOfficial)}</dd></div>
           <div className="min-w-0"><dt className="text-rl-muted">入数</dt><dd className="wrap-anywhere">{packText(skate.piecesPerPack, skate.setsPerPack)}</dd></div>
         </dl>
         {skate.materialOfficial && <p className="text-sm text-rl-muted wrap-anywhere">素材の公式の表記:「{skate.materialOfficial}」</p>}

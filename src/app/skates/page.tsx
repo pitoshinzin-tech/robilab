@@ -8,7 +8,7 @@ import type { SkateSpec } from "@/data/gear-types";
 import { firstParam, type SearchParams } from "@/lib/gear-query";
 import { subnavFor } from "@/lib/nav";
 import { affiliateEnv, shopLinks, type AffiliateEnv } from "@/lib/shop-links";
-import { parseSkateFilter, skateCounts, skateFilterHref, skateView, type SkateFilter } from "@/lib/skate-match";
+import { parseSkateFilter, skateCounts, skateChipHref, skateView, type SkateFilter } from "@/lib/skate-match";
 import { PageShell } from "@/components/ui/page-shell";
 import { SubNav } from "@/components/brand/SubNav";
 import { NumUnit } from "@/components/ui/num-unit";
@@ -36,7 +36,7 @@ const MATERIALS = [["all", "すべて"], ["PTFE", "PTFE"], ["glass", "ガラス"
 const SHAPES = [["all", "すべて"], ["full", "機種専用の形"], ["dot", "汎用のドット"]] as const;
 
 function options<K extends "material" | "shape">(filter: SkateFilter, key: K, items: readonly (readonly [SkateFilter[K], string])[]): FilterOption[] {
-  return items.map(([value, text]) => ({ key: String(value), text, href: skateFilterHref(filter, { [key]: value } as Partial<SkateFilter>), current: filter[key] === value }));
+  return items.map(([value, text]) => ({ key: String(value), text, href: skateChipHref(filter, { [key]: value } as Partial<SkateFilter>), current: filter[key] === value }));
 }
 
 function SkateList({ skates, env, primaryFirst }: { skates: SkateSpec[]; env: AffiliateEnv; primaryFirst: boolean }) {
@@ -59,7 +59,7 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
   const withSkates = mice.filter((m) => (counts[m.id] ?? 0) > 0);
   const withoutSkates = mice.filter((m) => (counts[m.id] ?? 0) === 0);
   const shownCount = view.kind === "mouse" ? view.dedicated.length + view.universal.length : view.total;
-  const clearHref = skateFilterHref(filter, { material: "all", shape: "all" });
+  const clearHref = skateChipHref(filter, { material: "all", shape: "all" });
   const filtered = filter.material !== "all" || filter.shape !== "all";
 
   return (
@@ -73,7 +73,7 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
               <h2 id="skate-mouse" className="text-xl font-bold">マウスを選ぶ</h2>
               <form action="/skates" method="get" className="grid gap-3">
                 <label htmlFor="skate-mouse-select" className="text-sm font-bold">使っているマウス</label>
-                <NativeSelect id="skate-mouse-select" name="mouse" defaultValue={filter.mouse ?? ""}>
+                <NativeSelect key={filter.mouse ?? ""} id="skate-mouse-select" name="mouse" defaultValue={filter.mouse ?? ""}>
                   <option value="">選ばない(ブランド別にすべて)</option>
                   <optgroup label="専用のソールが載っているマウス">
                     {withSkates.map((m) => <option key={m.id} value={m.id}>{`${m.brand} ${m.name}(${counts[m.id]} 件)`}</option>)}

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import type { SkateSpec } from "@/data/gear-types";
 import { SKATES } from "@/data/skates";
 import {
-  NO_SKATE_FILTER, filterSkates, groupByBrand, parseSkateFilter, skateCounts, skateFilterHref, skateView, skatesForMouse, universalSkates,
+  NO_SKATE_FILTER, filterSkates, skateChipHref, groupByBrand, parseSkateFilter, skateCounts, skateFilterHref, skateView, skatesForMouse, universalSkates,
 } from "@/lib/skate-match";
 import { materialLabel, packText, skateThicknessText } from "@/lib/gear-labels";
 
@@ -77,5 +77,14 @@ describe("本物のデータ", () => {
       const text = `${materialLabel(s.material)} ${skateThicknessText(s.thicknessMm, s.thicknessOfficial)} ${packText(s.piecesPerPack, s.setsPerPack)}`;
       expect(text, s.id).not.toMatch(/null|NaN|undefined/);
     }
+  });
+});
+describe("skateChipHref(絞り込みのリンク)", () => {
+  it("マウスを選んでいないときは空の mouse= を残し、マイ設定に戻されない", () => {
+    expect(skateChipHref(NO_SKATE_FILTER, { material: "PTFE" })).toBe("/skates?mouse=&material=PTFE");
+    expect(skateChipHref({ mouse: null, material: "PTFE", shape: "all" }, { material: "all" })).toBe("/skates?mouse=");
+  });
+  it("マウスを選んでいるときは skateFilterHref と同じ", () => {
+    expect(skateChipHref({ mouse: "m1", material: "all", shape: "all" }, { shape: "dot" })).toBe("/skates?mouse=m1&shape=dot");
   });
 });

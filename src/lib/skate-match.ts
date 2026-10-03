@@ -62,3 +62,13 @@ export function skateView(skates: readonly SkateSpec[], f: SkateFilter): SkateVi
   if (f.mouse !== null) return { kind: "mouse", mouseId: f.mouse, dedicated: skatesForMouse(narrowed, f.mouse), universal: universalSkates(narrowed) };
   return { kind: "all", groups: groupByBrand(narrowed), total: narrowed.length };
 }
+
+/**
+ * ページ内の絞り込みのリンク。マウスを選んでいないときは空の `mouse=` を残す
+ * (URL に mouse がないと MyMousePreselect がマイ設定のマウスに選び直すため。チップを押したら以後は選び直さない)。
+ */
+export function skateChipHref(f: SkateFilter, patch: Partial<SkateFilter> = {}): string {
+  const href = skateFilterHref(f, patch);
+  if ((patch.mouse ?? f.mouse) !== null) return href;
+  return href.includes("?") ? href.replace("?", "?mouse=&") : `${href}?mouse=`;
+}

@@ -39,3 +39,9 @@ export function skateThicknessText(mm: number | null, official: string | null): 
   if (mm !== null) return `${mm}mm`;
   return official ?? NO_DATA;
 }
+
+/** 画面用の厚さ:1 つの数字は mm、公式の原文(幅の表記など)はかぎ括弧と注記で原文だと分かるように */
+export function skateThicknessLabel(mm: number | null, official: string | null): string {
+  if (mm !== null) return `${mm}mm`;
+  return official === null ? NO_DATA : `「${official}」(公式の表記)`;
+}

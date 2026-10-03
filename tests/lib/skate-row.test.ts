@@ -4,6 +4,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { SKATES } from "@/data/skates";
 import { shopLinks } from "@/lib/shop-links";
 import { SkateRow } from "@/components/gear/SkateRow";
+import { OtherMiceList } from "@/components/mouse/OtherMiceList";
+import { toMouseRows, type MouseSource } from "@/lib/mouse-rows";
 
 const render = (skate: (typeof SKATES)[number], primary = false) =>
   renderToStaticMarkup(createElement("ul", null, createElement(SkateRow, { skate, primary, links: shopLinks(`${skate.brand} ${skate.name}`, skate.officialUrl, {}) })));
@@ -38,10 +40,6 @@ describe("SkateRow", () => {
     for (const s of SKATES) expect(render(s)).not.toMatch(/null|NaN|undefined/);
   });
 });
-
-import { OtherMiceList } from "@/components/mouse/OtherMiceList";
-import { toMouseRows, type MouseSource } from "@/lib/mouse-rows";
-
 describe("OtherMiceList の「このマウスのソール」", () => {
   const src = (id: string): MouseSource => ({ id, lengthMm: null, widthMm: 60, heightMm: null, weightG: null, shape: null, connection: null, officialUrl: "https://example.com/" });
   const html = renderToStaticMarkup(createElement(OtherMiceList, {
