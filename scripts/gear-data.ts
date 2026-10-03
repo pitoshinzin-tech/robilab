@@ -43,7 +43,7 @@ const SKATE_SHAPES: readonly SkateShape[] = ["full", "dot", "other"];
 
 /** JSON の 1 件(JSON.parse の結果なので中身は確かめながら使う) */
 type RawPad = {
-  id: string; brand: string; name: string; surface: string | null; speedOfficial: string | null; firmnessVariants: string[];
+  id: string; brand: string; name: string; surface: string | null; speedOfficial: string | null; speedQuotes?: string[]; firmnessVariants: string[];
   sizes: { label: string; widthMm: number | null; depthMm: number | null; thicknessMm: number | null }[];
   base: string | null; stitchedEdge: boolean | null; officialUrl: string | null; checkedAt: string; selectionBasis: string; notes: string;
 };
@@ -65,6 +65,14 @@ export function officialTerm(item: string): string[] {
   if (quotes.length > 0) return quotes;
   const term = item.replace(/\s*[(（]公式[^)）]*[)）]/g, "").trim();
   return term.length > 0 ? [term] : [];
+}
+
+/**
+ * パッドの「速さ・止め」の引用。JSON に speedQuotes(原文だけを人が選んだもの)があればそれを使い、なければ speedOfficial の「…」を取り出す。
+ * 硬さ別の説明やシリーズ全体の目盛りが混ざる文は、取り出すとそのパッドの速さに見えてしまうため、JSON 側で上書きする。
+ */
+export function padSpeedQuotes(p: { speedOfficial: string | null; speedQuotes?: string[] }): string[] {
+  return Array.isArray(p.speedQuotes) ? p.speedQuotes : extractQuotes(p.speedOfficial);
 }
 
 /** 公式ページの URL は https だけ(画面のリンクに入るので、javascript: や http: を生成時に止める) */
@@ -128,7 +136,7 @@ export function toPadSpecs(raw: { pads: RawPad[] }): PadSpec[] {
       brand: rename.brand ?? p.brand,
       name: rename.name ?? p.name,
       surface: oneOf(p.surface, SURFACES, `${p.id}.surface`),
-      speedQuotes: extractQuotes(p.speedOfficial),
+      speedQuotes: padSpeedQuotes(p),
       firmnessVariants: p.firmnessVariants.flatMap(officialTerm),
       sizes: p.sizes.map((s) => ({ label: s.label, widthMm: s.widthMm, depthMm: s.depthMm, thicknessMm: s.thicknessMm })),
       base: p.base,

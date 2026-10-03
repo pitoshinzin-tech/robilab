@@ -542,6 +542,7 @@
       "name": "Razer Gigantus V2 Pro",
       "surface": "cloth",
       "speedOfficial": "5段階のスピードレーティング: マックスコントロール「超高摩擦」/コントロール「高摩擦」/バランス「中摩擦」/スピード「低摩擦」/マックススピード「超低摩擦」(公式の Slow〜Fast スケール)。",
+      "speedQuotes": [],
       "firmnessVariants": [
         "ソフトフォーム(マックスコントロール・コントロール)",
         "ミディアムフォーム(バランス・スピード)",
@@ -624,6 +625,7 @@
       "name": "G-SR",
       "surface": "cloth",
       "speedOfficial": "公式比較表のスピード「●●●○○」(5段階中3)。「安定したコントロール性と高い滑りを実現」。",
+      "speedQuotes": ["安定したコントロール性と高い滑りを実現"],
       "firmnessVariants": [],
       "sizes": [
         {
@@ -826,6 +828,7 @@
       "name": "eS Saturn Pro",
       "surface": "cloth",
       "speedOfficial": "公式の Type「Slow」(Slow/Balance/Fast の3分類)。「低速滑走特性により、精密な照準制御が求められる戦術的FPS…に最適」。ベース硬さの公式説明: XSOFT「BRAKING POWER: MOST / GLIDE SPEED: SLOWEST」、SOFT「BALANCED / BALANCED」、FIRM「LEAST / FASTEST」。",
+      "speedQuotes": ["Slow","低速滑走特性により、精密な照準制御が求められる戦術的FPS…に最適"],
       "firmnessVariants": [
         "XSOFT",
         "SOFT",
@@ -870,6 +873,7 @@
       "name": "eS Jupiter Pro",
       "surface": "cloth",
       "speedOfficial": "公式の Type「Slow」。「スローな滑走と高い制動力」「強いストッピング性能とコントロールされた滑走」。ベース硬さの公式説明: XSOFT「BRAKING POWER: MOST / GLIDE SPEED: SLOWEST」、SOFT「BALANCED / BALANCED」、FIRM「LEAST / FASTEST」。",
+      "speedQuotes": ["Slow","スローな滑走と高い制動力","強いストッピング性能とコントロールされた滑走"],
       "firmnessVariants": [
         "XSOFT",
         "SOFT",
@@ -914,6 +918,7 @@
       "name": "eS Hyperion Pro",
       "surface": "cloth",
       "speedOfficial": "公式の Type「Balance」。「バランスの取れた滑走性と安定した制動力」。ベース硬さの公式説明: XSOFT「BRAKING POWER: MOST / GLIDE SPEED: SLOWEST」、SOFT「BALANCED / BALANCED」、FIRM「LEAST / FASTEST」。",
+      "speedQuotes": ["Balance","バランスの取れた滑走性と安定した制動力"],
       "firmnessVariants": [
         "XSOFT",
         "SOFT",
@@ -958,6 +963,7 @@
       "name": "eS Mercury Pro",
       "surface": "cloth",
       "speedOfficial": "公式の Type「Fast」。「滑走速度と制動力を両立」。ベース硬さの公式説明: XSOFT「BRAKING POWER: MOST / GLIDE SPEED: SLOWEST」、SOFT「BALANCED / BALANCED」、FIRM「LEAST / FASTEST」。",
+      "speedQuotes": ["Fast","滑走速度と制動力を両立"],
       "firmnessVariants": [
         "XSOFT",
         "SOFT",
@@ -1002,6 +1008,7 @@
       "name": "eS Neptune Pro",
       "surface": "cloth",
       "speedOfficial": "公式の Type「Fast」。「シリーズ最速の表面と最小限の摩擦」。ベース硬さの公式説明: XSOFT「BRAKING POWER: MOST / GLIDE SPEED: SLOWEST」、SOFT「BALANCED / BALANCED」、FIRM「LEAST / FASTEST」。",
+      "speedQuotes": ["Fast","シリーズ最速の表面と最小限の摩擦"],
       "firmnessVariants": [
         "XSOFT",
         "SOFT",

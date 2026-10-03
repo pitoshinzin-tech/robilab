@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { extractQuotes, officialTerm, toPadSpecs, toSkateSpecs, toMouseSpecs } from "../../scripts/gear-data";
+import { extractQuotes, officialTerm, padSpeedQuotes, toPadSpecs, toSkateSpecs, toMouseSpecs } from "../../scripts/gear-data";
 import { PADS } from "@/data/pads";
 import { SKATES } from "@/data/skates";
 import { visiblePads } from "@/lib/pad-filter";
@@ -38,13 +38,22 @@ describe("officialTerm(硬さ・付属の 1 項目)", () => {
 
 describe("生成物に作業者の注記が入らない", () => {
   const rawPads = json("docs/content/gear/pads.json");
-  it("PADS は speedOfficial を持たず、speedQuotes は JSON の「…」と一致する", () => {
-    for (const r of rawPads.pads as { id: string; speedOfficial: string | null }[]) {
+  it("PADS は speedOfficial を持たず、speedQuotes は JSON の上書きか「…」と一致する", () => {
+    for (const r of rawPads.pads as { id: string; speedOfficial: string | null; speedQuotes?: string[] }[]) {
       const p = PADS.find((x) => x.id === r.id)!;
       expect("speedOfficial" in p, r.id).toBe(false);
-      expect(p.speedQuotes, r.id).toEqual(extractQuotes(r.speedOfficial));
+      expect(p.speedQuotes, r.id).toEqual(padSpeedQuotes(r));
     }
     expect(toPadSpecs(rawPads).some((p) => p.speedQuotes.length > 1)).toBe(true);
+  });
+  it("速さの引用に、硬さ別の説明・シリーズの目盛り・記号だけの評価が入らない", () => {
+    const all = PADS.flatMap((p) => p.speedQuotes);
+    expect(all.join("|")).not.toMatch(/BRAKING POWER|LEAST \/ FASTEST|BALANCED \/ BALANCED|超高摩擦|●/);
+    expect(PADS.find((p) => p.id === "pulsar-es-mercury-pro")!.speedQuotes).toEqual(["Fast", "滑走速度と制動力を両立"]);
+  });
+  it("padSpeedQuotes は上書き(空の配列も)を優先する", () => {
+    expect(padSpeedQuotes({ speedOfficial: "「A」", speedQuotes: [] })).toEqual([]);
+    expect(padSpeedQuotes({ speedOfficial: "「A」「B」" })).toEqual(["A", "B"]);
   });
   it("硬さ・付属に「(公式の硬度表記)」「センサー周りのリング」が残らない", () => {
     expect(PADS.flatMap((p) => p.firmnessVariants).join("|")).not.toMatch(/公式の硬度表記/);
