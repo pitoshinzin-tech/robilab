@@ -19,7 +19,7 @@ describe("docs/ops/launch.md の service worker の止め方", () => {
       registration: { unregister: vi.fn(async () => true) },
       clients: { matchAll: vi.fn(async () => [{ navigate: vi.fn(async () => {}), url: "https://robilab.example/" }]) },
     };
-    const caches = { keys: vi.fn(async () => ["robilab-offline-v1", "robilab-offline-v2", "other"]), delete: vi.fn(async (_key: string) => true) };
+    const caches = { keys: vi.fn(async () => ["robilab-offline-v1", "robilab-offline-v2", "other"]), delete: vi.fn(async (key: string) => key.length > 0) };
     new Function("self", "caches", src)(self, caches);
     expect(Object.keys(handlers).sort()).toEqual(["activate", "install"]);
     let p: Promise<unknown> | undefined;
