@@ -226,7 +226,26 @@ export const BOLT_12: PixelGrid = {
   ],
 };
 
-export const PIXEL_GRIDS: readonly PixelGrid[] = [FLASK_16, RULER_16, PARTY_16, FLAME_8, BROKEN_12, SHIELD_12, CROSSHAIR_12, CROSS_12, EYE_12, FLAG_12, BOLT_12];
+/** ゲームの記号(Apex):3 人の部隊。キャラ図鑑の目次で VALORANT の照準と見分けるため(採点 1 回目 P1) */
+export const SQUAD_12: PixelGrid = {
+  id: "squad", title: "ゲームの記号(3 人の部隊)", size: 12, role: "secondary",
+  rows: [
+    "............",
+    ".....##.....",
+    ".....##.....",
+    "............",
+    ".##..##..##.",
+    ".##.####.##.",
+    "....####....",
+    "####.##.####",
+    "####....####",
+    "####....####",
+    "............",
+    "############",
+  ],
+};
+
+export const PIXEL_GRIDS: readonly PixelGrid[] = [FLASK_16, RULER_16, PARTY_16, FLAME_8, BROKEN_12, SHIELD_12, CROSSHAIR_12, CROSS_12, EYE_12, FLAG_12, BOLT_12, SQUAD_12];
 
 export function pixelCells(grid: PixelGrid): { x: number; y: number }[] {
   return grid.rows.flatMap((row, y) => [...row].flatMap((ch, x) => (ch === "#" ? [{ x, y }] : [])));

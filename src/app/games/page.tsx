@@ -5,7 +5,7 @@ import { PROS_READY } from "@/data/pros";
 import { dexChars, latestCheckedAt, publishedGames, settingOf } from "@/lib/char-dex";
 import { dexIndexMeta } from "@/lib/char-seo";
 import { subnavFor } from "@/lib/nav";
-import { roleSymbol } from "@/lib/role-symbols";
+import { gameSymbol } from "@/lib/role-symbols";
 import { PixelArt } from "@/components/brand/PixelArt";
 import { SubNav } from "@/components/brand/SubNav";
 import { DexNotices } from "@/components/chars/DexNotices";
@@ -44,7 +44,7 @@ export default function GamesPage() {
             {rows.map(({ game, setting, count, checkedAt }) => (
               <li key={game.id} className="border-b border-rl-line">
                 <Link href={`/games/${game.id}/chars`} className="rl-lock group grid grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-4 py-6">
-                  <PixelArt grid={roleSymbol(game.id, setting.groupByRole ? (game.roles[0]?.id ?? null) : null)} size={48} />
+                  <PixelArt grid={gameSymbol(game.id)} size={48} />
                   <span className="grid min-w-0 gap-1">
                     <span data-long-name className="text-2xl font-bold wrap-anywhere">{game.name}{setting.nameMark}</span>
                     <span className="text-sm text-rl-muted">

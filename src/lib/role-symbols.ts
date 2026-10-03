@@ -1,4 +1,4 @@
-import { BOLT_12, CROSSHAIR_12, CROSS_12, EYE_12, FLAG_12, SHIELD_12, type PixelGrid } from "@/lib/pixel-art";
+import { BOLT_12, CROSSHAIR_12, CROSS_12, EYE_12, FLAG_12, SHIELD_12, SQUAD_12, type PixelGrid } from "@/lib/pixel-art";
 
 /** ロール → 記号(キャラ図鑑)。スト6(公式のロールなし)と型を決めていないキャラは「目」 */
 const BY_ROLE = new Map<string, PixelGrid>([
@@ -11,4 +11,13 @@ const BY_ROLE = new Map<string, PixelGrid>([
 
 export function roleSymbol(gameId: string, roleId: string | null): PixelGrid {
   return (roleId !== null && BY_ROLE.get(`${gameId}/${roleId}`)) || EYE_12;
+}
+
+/** ゲーム → 記号(キャラ図鑑の目次の行)。ゲームごとに違う絵にする(VALORANT と Apex で同じ照準を使わない) */
+const BY_GAME = new Map<string, PixelGrid>([
+  ["overwatch", SHIELD_12], ["valorant", CROSSHAIR_12], ["apex", SQUAD_12], ["dbd", BOLT_12],
+]);
+
+export function gameSymbol(gameId: string): PixelGrid {
+  return BY_GAME.get(gameId) ?? EYE_12;
 }
