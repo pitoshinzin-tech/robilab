@@ -31,9 +31,9 @@ describe("sitemap.xml", () => {
 });
 
 describe("robots.txt", () => {
-  it("開発用・名刺・ログイン・API を止め、sitemap の場所を書く", () => {
+  it("開発用・名刺・ログイン・API を止め(個人・ログインの /my/ /lobby/ も)、sitemap の場所を書く", () => {
     const r = robots();
-    expect(r.rules).toEqual({ userAgent: "*", allow: "/", disallow: ["/dev/", "/c/", "/auth/", "/api/"] });
+    expect(r.rules).toEqual({ userAgent: "*", allow: "/", disallow: ["/dev/", "/c/", "/auth/", "/api/", "/my/", "/lobby/"] });
     expect(r.sitemap).toBe(`${site}/sitemap.xml`);
   });
 });

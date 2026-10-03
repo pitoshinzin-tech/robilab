@@ -129,3 +129,10 @@ describe("ゲームごとの設定(台帳)", () => {
     expect(CHAR_GAME_SETTINGS.sf6.notices.join("")).not.toMatch(/©|CAPCOM/);
   });
 });
+
+describe("公開のスイッチの固定(誤って公開しない)", () => {
+  it("スト6 だけ published:false、ほか 4 本は true", () => {
+    expect(CHAR_GAME_SETTINGS.sf6.published).toBe(false);
+    for (const id of ["overwatch", "valorant", "apex", "dbd"] as const) expect(CHAR_GAME_SETTINGS[id].published, id).toBe(true);
+  });
+});

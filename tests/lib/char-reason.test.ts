@@ -18,7 +18,7 @@ describe("手ざわりが違うかも の言い回し(設計書 5-2)", () => {
   });
   it("理由の文は、ロール・キャラ・札の言葉・あなたの軸とキャラの向きだけで作る", () => {
     expect(surpriseReason(parseAxesParam(undefined, "ABCZ"), winston, TANK, "mobile")).toBe(
-      "タンクが合うあなたでも、ウィンストンは素早く動き回るキャラ。合わないのではなく、遊び方が違うだけ。戦略より直感寄りの日に試すと発見があるかも。",
+      "タンクが合うあなたでも、ウィンストンは素早く動き回るキャラ。相性の良し悪しではなく、遊び方が違うだけ。戦略より直感寄りの日に試すと発見があるかも。",
     );
   });
   it("8 種の札すべてに言葉と短い名前がある", () => {
@@ -28,7 +28,7 @@ describe("手ざわりが違うかも の言い回し(設計書 5-2)", () => {
       expect(TAG_LABEL[t].length, t).toBeGreaterThan(0);
     }
   });
-  it("全 16 タイプ × 全ゲームで、出る理由の文に「苦手」「向いていない」「弱い」が入らない", () => {
+  it("全 16 タイプ × 全ゲームで、出る理由の文に否定の言葉(BANNED_WORDS)が入らない", () => {
     let shown = 0;
     for (const t of TYPES) {
       const u = parseAxesParam(undefined, t.code);

@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { parseAxesParam } from "@/lib/axes-param";
 import { rankGames } from "@/lib/role-match";
 import { resultCharPicks } from "@/lib/char-dex";
+import { BANNED_WORDS } from "@/lib/char-reason";
 import { GameRanking } from "@/components/result/GameRanking";
 
 const axes = parseAxesParam(undefined, "ABCZ");
@@ -30,7 +31,14 @@ describe("GameRanking の合うキャラの行", () => {
     expect(html).toContain("合うキャラ");
     expect(html.replace(/<[^>]*>/g, " ")).not.toMatch(/\d+%/);
   });
+  it("?axes 付き(% を出す結果)でも、キャラの行(合うキャラ以降)に % が出ない", () => {
+    const html = render(resultCharPicks(axes), true);
+    expect(html).toMatch(/\d+%/); // ゲームの行の % は出ている
+    const rows = html.split("<li").filter((li) => li.includes("合うキャラ"));
+    expect(rows.length).toBeGreaterThan(0);
+    for (const li of rows) expect(li.slice(li.indexOf("合うキャラ")).replace(/<[^>]*>/g, " ")).not.toMatch(/\d+%/);
+  });
   it("理由の文に否定の言葉を出さない", () => {
-    expect(render(resultCharPicks(axes))).not.toMatch(/苦手|向いていない|弱い/);
+    for (const w of BANNED_WORDS) expect(render(resultCharPicks(axes))).not.toContain(w);
   });
 });

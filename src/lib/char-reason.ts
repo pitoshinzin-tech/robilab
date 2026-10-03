@@ -23,10 +23,10 @@ export const CHAR_REASON_TEXT = {
   heading: "ロールは同じでも、手ざわりが違うかも",
   badge: "意外な 1 体",
   sentence: (p: { roleName: string; charName: string; tagPhrase: string; yours: string; theirs: string }) =>
-    `${p.roleName}が合うあなたでも、${p.charName}は${p.tagPhrase}キャラ。合わないのではなく、遊び方が違うだけ。${p.yours}より${p.theirs}寄りの日に試すと発見があるかも。`,
+    `${p.roleName}が合うあなたでも、${p.charName}は${p.tagPhrase}キャラ。相性の良し悪しではなく、遊び方が違うだけ。${p.yours}より${p.theirs}寄りの日に試すと発見があるかも。`,
 };
 
-export const BANNED_WORDS = ["苦手", "向いていない", "弱い"] as const;
+export const BANNED_WORDS = ["苦手", "向いていない", "弱い", "合わない"] as const;
 
 /** tag はあなたの軸と逆向きの札(char-match の opposingTags の先頭) */
 export function surpriseReason(user: Axes, char: Char, role: Role, tag: CharTagId): string {
