@@ -7,45 +7,52 @@ import { CHAR_REASON_TEXT } from "@/lib/char-reason";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
-const CHAR_LINK = "rl-lock inline-flex min-h-11 flex-wrap items-center gap-x-2 font-bold text-rl-accent underline-offset-4 hover:underline";
+const CHAR_LINK = "rl-lock group grid min-h-11 content-start gap-1 py-2";
+const CHAR_GRID = "grid gap-x-4 sm:grid-cols-3";
 
 /**
- * キャラへのリンク:ロールの記号 16px+名前+ロールの土台からずれた軸の札 1 つ(札がなければ足さない。数字なし)。
- * 乗せる・フォーカスで照準の印(S4 の rl-lock)。
+ * キャラの 1 マス:1 行目にロールの記号 16px+名前、2 行目にロールの土台からずれた軸の札 1 つ(札がなければ「ロールのとおり」。数字なし)。
+ * sm 以上は 3 列のそろった並び、375 は 1 人 1 行。乗せる・フォーカスで照準の印(S4 の rl-lock)。
  */
 function CharLink({ link }: { link: ResultCharLink }) {
   return (
     <Link href={link.href} className={CHAR_LINK}>
-      <PixelArt grid={roleSymbol(link.game, link.roleId)} size={16} />
-      {link.name}
-      {link.shift && (
-        <span className="inline-flex h-6 items-center gap-1 rounded-rl-sm border border-rl-line-strong px-1.5 text-xs font-normal text-rl-text no-underline">
-          <span className="sr-only">(</span><span className="text-rl-muted">{link.shift.left}/{link.shift.right}</span>
-          <span className="font-bold">{link.shift.word}</span><span className="sr-only">)</span>
+      <span className="inline-flex min-w-0 items-center gap-2 font-bold text-rl-accent underline-offset-4 group-hover:underline">
+        <PixelArt grid={roleSymbol(link.game, link.roleId)} size={16} />
+        <span className="min-w-0 wrap-anywhere">{link.name}</span>
+      </span>
+      {link.shift ? (
+        <span className="inline-flex h-6 w-fit items-center gap-1 rounded-rl-sm border border-rl-line-strong px-1.5 text-xs text-rl-text">
+          <span className="text-rl-muted">{link.shift.left}/{link.shift.right}</span>
+          <span className="font-bold">{link.shift.word}</span>
         </span>
+      ) : (
+        <span className="text-xs text-rl-muted">ロールのとおり</span>
       )}
     </Link>
   );
 }
 
-/** ゲームの行の下の「合うキャラ」と「手ざわりが違うかも」(設計書 6-4)。キャラは % を出さない。ラベルは 1 行目、キャラは 2 行目に並べる */
+/** ゲームの行の下の「合うキャラ」と「手ざわりが違うかも」(設計書 6-4)。キャラは % を出さない。ラベルは 1 行目、キャラは 2 行目からのマス */
 function CharLines({ pick }: { pick: ResultCharPick }) {
   return (
     <div className="mt-2 grid gap-2 border-t border-rl-line pt-2">
       <div className="grid gap-1 text-sm">
         <p className="text-rl-muted">合うキャラ</p>
-        <ul className="flex flex-wrap gap-x-4">
-          {pick.fits.map((f) => <li key={f.href}><CharLink link={f} /></li>)}
+        <ul className={CHAR_GRID}>
+          {pick.fits.map((f) => <li key={f.href} className="min-w-0"><CharLink link={f} /></li>)}
         </ul>
       </div>
       {pick.surprise && (
-        <div className="grid gap-1">
-          <p className="flex flex-wrap items-center gap-x-3 text-sm">
+        <div className="grid gap-1 text-sm">
+          <p className="flex flex-wrap items-center gap-x-3">
             <Badge>{CHAR_REASON_TEXT.badge}</Badge>
             <span className="text-rl-muted">{CHAR_REASON_TEXT.heading}</span>
-            <CharLink link={pick.surprise} />
           </p>
-          <p className="text-sm text-pretty text-rl-muted [word-break:auto-phrase]">{pick.surprise.reason}</p>
+          <div className={CHAR_GRID}>
+            <div className="min-w-0"><CharLink link={pick.surprise} /></div>
+          </div>
+          <p className="text-pretty text-rl-muted [word-break:auto-phrase]">{pick.surprise.reason}</p>
         </div>
       )}
     </div>

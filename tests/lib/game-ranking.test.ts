@@ -29,8 +29,9 @@ describe("GameRanking の合うキャラの行", () => {
     expect(links.length).toBeGreaterThan(0);
     for (const a of links) expect(a).toMatch(/<svg[^>]*width="16"[^>]*height="16"/);
     expect(html).toMatch(/<p[^>]*>合うキャラ<\/p>/);
+    expect(html).toContain("sm:grid-cols-3");
   });
-  it("キャラのリンクに照準の印(rl-lock)と、ずれた軸の札を 1 つだけ(札のないキャラは足さない・数字なし)", () => {
+  it("キャラのマスに照準の印(rl-lock)と、ずれた軸の札を 1 つだけ(札のないキャラは「ロールのとおり」・数字なし)。sm 以上で 3 列", () => {
     const picks = resultCharPicks(axes);
     const html = render(picks);
     for (const p of Object.values(picks)) {
@@ -39,7 +40,7 @@ describe("GameRanking の合うキャラの行", () => {
         const a = html.slice(html.lastIndexOf("<a ", i), html.indexOf("</a>", i));
         expect(a, f.href).toContain("rl-lock");
         if (f.shift) expect(a, f.href).toContain(`>${f.shift.word}<`);
-        else expect(a, f.href).not.toContain("寄り<");
+        else expect(a, f.href).toContain(">ロールのとおり<");
         expect(a.replace(/<[^>]*>/g, ""), f.href).not.toMatch(/\d/);
       }
     }
