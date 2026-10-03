@@ -3,8 +3,10 @@ import Link from "next/link";
 import { DEVICES } from "@/data/devices";
 import { MICE } from "@/data/mice";
 import { MICE_RAKUTEN } from "@/data/mice-rakuten";
+import { SKATES } from "@/data/skates";
 import { PROS_READY } from "@/data/pros";
 import { toMouseRows } from "@/lib/mouse-rows";
+import { skateCounts } from "@/lib/skate-match";
 import { subnavFor } from "@/lib/nav";
 import { getSiteUrl } from "@/lib/site-url";
 import { PageShell } from "@/components/ui/page-shell";
@@ -24,7 +26,7 @@ export const metadata: Metadata = {
 
 export default function MousePage() {
   // 表示に要る分だけの行にして渡す(機種のデータ本体・出典の文はブラウザの JS に入れない)
-  const { comparable, other } = toMouseRows(MICE, (id) => DEVICES.find((d) => d.id === id), MICE_RAKUTEN);
+  const { comparable, other } = toMouseRows(MICE, (id) => DEVICES.find((d) => d.id === id), MICE_RAKUTEN, skateCounts(SKATES));
   return (
     <PageShell width="wide" title="マウス探し" description="手の大きさと持ち方から、ちょうどいい大きさのマウスを探します。"
       subnav={<SubNav label="感度・マウス" items={subnavFor("mouse", PROS_READY)} />}>

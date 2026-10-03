@@ -1,5 +1,7 @@
+import { ChevronRight } from "lucide-react";
 import type { OtherMouseRow } from "@/lib/mouse-rows";
 import { connectionLabel, shapeLabel, withUnit } from "@/lib/gear-labels";
+import { ButtonLink } from "@/components/ui/button-link";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { ShopButtons } from "@/components/gear/ShopButtons";
 
@@ -24,6 +26,7 @@ export function OtherMiceList({ items }: { items: OtherMouseRow[] }) {
                 <div className="flex gap-1"><dt>形</dt><dd className="text-rl-text">{shapeLabel(m.shape)}</dd></div>
                 <div className="flex gap-1"><dt>接続</dt><dd className="text-rl-text">{connectionLabel(m.connection)}</dd></div>
               </dl>
+              {m.skateCount > 0 && <ButtonLink href={`/skates?mouse=${m.id}`} variant="ghost" size="sm" className="justify-self-start">このマウスのソール<ChevronRight aria-hidden className="size-4" /></ButtonLink>}
             </div>
             <ShopButtons links={m.links} className="md:justify-end" />
           </li>

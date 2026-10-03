@@ -1,7 +1,7 @@
-import { ExternalLink } from "lucide-react";
+import { ChevronRight, ExternalLink } from "lucide-react";
 import type { Ranked } from "@/lib/mouse-fit";
 import type { ShopLinks } from "@/lib/shop-links";
-import { ButtonAnchor } from "@/components/ui/button-link";
+import { ButtonAnchor, ButtonLink } from "@/components/ui/button-link";
 import { Badge, RankBadge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ChipButton } from "@/components/ui/chip-button";
@@ -9,7 +9,7 @@ import { connectionLabel, shapeLabel, withUnit } from "@/lib/gear-labels";
 
 
 /** 2 番目からのカード。店のボタンはすべて二番手(主ボタンは先頭の大きな行 TopMouseRow だけ) */
-export function MouseCard({ rank, item, brand, name, reason, compare, links, imageUrl, overlaid = false, onOverlay }: {
+export function MouseCard({ rank, item, brand, name, reason, compare, links, imageUrl, overlaid = false, onOverlay, skateHref = null }: {
   rank: number;
   item: Ranked; brand: string; name: string;
   /** おすすめの理由(src/lib/mouse-reason.ts。手の情報と公式の数字だけから作る) */
@@ -20,6 +20,8 @@ export function MouseCard({ rank, item, brand, name, reason, compare, links, ima
   /** (追補 6 章)実寸の重ね図に出しているか、と「手と重ねる」を押したとき */
   overlaid?: boolean;
   onOverlay?: () => void;
+  /** このマウス専用のソールがあるときだけ(/skates?mouse=<id>) */
+  skateHref?: string | null;
 }) {
   const m = item.mouse;
   const image = imageUrl && links.rakutenIsItem ? imageUrl : null;
@@ -53,6 +55,7 @@ export function MouseCard({ rank, item, brand, name, reason, compare, links, ima
         </dl>
         {compare && <p className="text-sm text-rl-secondary-text">{compare}</p>}
         {onOverlay && <ChipButton pressed={overlaid} onClick={onOverlay} className="justify-self-start">手と重ねる</ChipButton>}
+        {skateHref && <ButtonLink href={skateHref} variant="ghost" size="sm" className="justify-self-start">このマウスのソール<ChevronRight aria-hidden className="size-4" /></ButtonLink>}
         <div className="grid gap-4 border-t border-rl-line pt-4">
           {(links.amazonPr || links.rakutenPr) && <Badge variant="pr" className="justify-self-start">PR</Badge>}
           <div className="flex flex-wrap gap-2">
