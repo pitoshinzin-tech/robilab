@@ -50,6 +50,13 @@ describe("parseHintState(壊れた値でも落ちない)", () => {
   it.each([null, "", "{", "null", "1", '"x"', "[]", '{"v":2,"days":["2026-10-01"],"dismissed":false}', '{"v":1,"days":"2026-10-01"}'])("読めない値は空にする: %s", (raw) => {
     expect(parseHintState(raw)).toEqual(EMPTY_HINT);
   });
+  it("days が壊れていても、閉じた記録(dismissed: true)は消さない", () => {
+    for (const days of ["2026-10-01", null, 3, { a: 1 }]) {
+      expect(parseHintState(JSON.stringify({ v: 1, days, dismissed: true }))).toEqual({ v: 1, days: [], dismissed: true });
+    }
+    expect(parseHintState(JSON.stringify({ v: 1, dismissed: true }))).toEqual({ v: 1, days: [], dismissed: true });
+    expect(parseHintState(JSON.stringify({ v: 1, days: "x", dismissed: false }))).toEqual(EMPTY_HINT);
+  });
   it("日付でない要素・重なりを捨て、最初の 4 件だけ。dismissed は true のときだけ", () => {
     const raw = JSON.stringify({ v: 1, days: ["2026-10-01", "x", 3, "2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04", "2026-10-05"], dismissed: "yes" });
     expect(parseHintState(raw)).toEqual({ v: 1, days: ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"], dismissed: false });

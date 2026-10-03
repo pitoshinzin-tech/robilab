@@ -28,7 +28,7 @@ export function detectPlatform(input: { userAgent: string; maxTouchPoints: numbe
   return "other";
 }
 
-/** 読めない値は空にする。日付でない要素・重なりは捨て、最初の 4 件だけ */
+/** 読めない値は空にする(days だけ壊れていて dismissed が true のときは、閉じた記録を残す)。日付でない要素・重なりは捨て、最初の 4 件だけ */
 export function parseHintState(raw: string | null): HintState {
   if (!raw) return EMPTY_HINT;
   let data: unknown;
@@ -39,9 +39,10 @@ export function parseHintState(raw: string | null): HintState {
   }
   if (typeof data !== "object" || data === null || Array.isArray(data)) return EMPTY_HINT;
   const o = data as { v?: unknown; days?: unknown; dismissed?: unknown };
-  if (o.v !== 1 || !Array.isArray(o.days)) return EMPTY_HINT;
+  if (o.v !== 1) return EMPTY_HINT;
   const days: string[] = [];
-  for (const d of o.days) {
+  // days が壊れていても、「閉じた」の記録は消さない(閉じた人に案内がまた出ないように)
+  for (const d of Array.isArray(o.days) ? o.days : []) {
     if (typeof d === "string" && DATE_RE.test(d) && !days.includes(d)) days.push(d);
     if (days.length >= HINT_MAX_DAYS) break;
   }
