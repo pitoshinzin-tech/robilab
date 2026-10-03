@@ -34,8 +34,8 @@ describe("手順の文(サーバーで HTML に入れる)", () => {
 describe("InstallHint(client)", () => {
   it("サーバーの描画では何も出さない(ハイドレーションのあとに出す。最初の画面の外なので CLS を起こさない)", () => {
     const steps = { ios: "i", android: "a", desktop: "d", other: "o" };
-    expect(renderToStaticMarkup(createElement(InstallHint, { place: "aim", today: "2026-10-03", steps }))).toBe("");
-    expect(renderToStaticMarkup(createElement(InstallHint, { place: "my", steps }))).toBe("");
+    expect(renderToStaticMarkup(createElement(InstallHint, { place: "aim", today: "2026-10-03", lead: steps, steps }))).toBe("");
+    expect(renderToStaticMarkup(createElement(InstallHint, { place: "my", lead: steps, steps }))).toBe("");
     expect(renderToStaticMarkup(createElement(InstallHintBlock, { place: "my" }))).toBe("");
   });
   it("base-ui と今日の文字のデータを読まない(JS を増やさない)", () => {

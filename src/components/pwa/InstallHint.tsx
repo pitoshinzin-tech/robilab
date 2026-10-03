@@ -4,7 +4,7 @@ import { ChevronDown, Download, X } from "lucide-react";
 import { useIsClient } from "@/lib/use-is-client";
 import { installPromptStore, SERVER_SNAPSHOT } from "@/lib/pwa/install-prompt";
 import { openHintStorage, type HintStorage } from "@/lib/pwa/hint-storage";
-import { HINT_STORAGE_KEY, detectPlatform, dismissHint, hintLead, hintView, parseHintState, type HintPlace, type StepsPlatform } from "@/lib/pwa/install-hint";
+import { HINT_STORAGE_KEY, detectPlatform, dismissHint, hintView, parseHintState, type HintPlace, type StepsPlatform } from "@/lib/pwa/install-hint";
 import { Card } from "@/components/ui/card";
 import { PlainButton } from "@/components/ui/plain-button";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -42,7 +42,7 @@ function readEnv(place: HintPlace, today: string | undefined) {
  * 「ホーム画面に追加」の静かな案内(設計書 4 章)。手順の文はサーバーで描いた steps を受け取り、JS が決めるのは
  * 「出すか」「どの手順か」「追加する(prompt)」だけ。ハイドレーションのあとに出す(置き場所はどちらも最初の画面の外)。
  */
-export function InstallHint({ place, today, steps, className }: { place: HintPlace; today?: string; steps: Record<StepsPlatform, ReactNode>; className?: string }) {
+export function InstallHint({ place, today, lead, steps, className }: { place: HintPlace; today?: string; lead: Record<StepsPlatform, ReactNode>; steps: Record<StepsPlatform, ReactNode>; className?: string }) {
   const isClient = useIsClient();
   const prompt = useSyncExternalStore(installPromptStore.subscribe, installPromptStore.get, () => SERVER_SNAPSHOT);
   const [closed, setClosed] = useState(false);
@@ -66,7 +66,7 @@ export function InstallHint({ place, today, steps, className }: { place: HintPla
     <div className={cn("group/hint grid gap-4", place === "aim" ? "lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-x-8" : "xl:grid-cols-[minmax(0,1fr)_auto] xl:gap-x-8")}>
       <HomeRowArt showRow={hasSteps} wide={place === "aim" ? "lg" : "xl"} />
       <div className="grid min-w-0 max-w-[720px] content-start gap-4">
-        <p className="text-sm text-pretty text-rl-muted [word-break:auto-phrase]">{hintLead(place, platform)}</p>
+        <p className="text-sm text-pretty text-rl-muted [word-break:auto-phrase]">{lead[platform]}</p>
         {canPrompt && (
           <div>
             <PlainButton variant="secondary" size="sm" onClick={() => void installPromptStore.prompt()}>

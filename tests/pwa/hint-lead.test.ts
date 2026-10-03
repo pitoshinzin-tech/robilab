@@ -25,3 +25,15 @@ describe("hintLead(案内の 1 行目)", () => {
     }
   });
 });
+
+describe("1 行目はサーバーで描く(client の JS に文を入れない)", () => {
+  it("InstallHint(client)は hintLead・SHORTCUT_NAMES を読まず、InstallHintBlock(サーバー)が 4 通りを渡す", async () => {
+    const { readFileSync } = await import("node:fs");
+    const client = readFileSync("src/components/pwa/InstallHint.tsx", "utf8");
+    expect(client).not.toMatch(/hintLead|SHORTCUT_NAMES/);
+    expect(client).toContain("{lead[platform]}");
+    const server = readFileSync("src/components/pwa/InstallHintBlock.tsx", "utf8");
+    expect(server).not.toContain("use client");
+    expect(server).toContain("hintLead(place, p)");
+  });
+});
