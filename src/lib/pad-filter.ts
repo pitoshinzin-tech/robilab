@@ -81,3 +81,13 @@ export function filterPads(pads: readonly VisiblePad[], f: PadFilter): PadMatch[
   }
   return out;
 }
+
+/** 「すべて」でない条件の数(375 の畳んだ絞り込みの見出しに出す) */
+export function padFilterCount(f: PadFilter): number {
+  return [f.surface, f.size, f.thickness, f.firmness].filter((v) => v !== "all").length;
+}
+
+/** 上の大きな数字(絞り込みの結果の数)の説明。/skates と同じふるまい */
+export function padCountCaption(f: PadFilter, total: number): string {
+  return isPadFilterEmpty(f) ? "公式の数字で比べられる数" : `絞り込みに合う数(全 ${total} 枚)`;
+}

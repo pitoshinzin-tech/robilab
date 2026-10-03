@@ -1,9 +1,11 @@
 import type { PadSize } from "@/data/gear-types";
 import type { VisiblePad } from "@/lib/pad-filter";
 import type { ShopLinks } from "@/lib/shop-links";
-import { NO_DATA, padSizeText, surfaceLabel, withUnit } from "@/lib/gear-labels";
+import { NO_DATA, surfaceLabel } from "@/lib/gear-labels";
 import { Badge } from "@/components/ui/badge";
 import { ShopButtons } from "@/components/gear/ShopButtons";
+import { SpecNum } from "@/components/gear/SpecValue";
+import { PadScale } from "@/components/gear/PadScale";
 
 /**
  * マウスパッドの 1 行(設計書 3-2)。箱にせず、上の線で区切る幅いっぱいの行。
@@ -38,20 +40,28 @@ export function PadRow({ pad, sizes, links, primary, narrowed }: {
         {sizes.length === 0 ? (
           <p className="text-base text-rl-muted">{NO_DATA}</p>
         ) : (
-          <table className="w-full max-w-[560px] text-sm">
-            <thead className="text-left text-rl-muted">
-              <tr><th scope="col" className="py-1 pr-3 font-bold">名前</th><th scope="col" className="py-1 pr-3 font-bold">幅×奥行き</th><th scope="col" className="py-1 font-bold">厚さ</th></tr>
-            </thead>
-            <tbody>
-              {sizes.map((s, i) => (
-                <tr key={`${s.label}-${i}`} className="border-t border-rl-line">
-                  <td className="py-2 pr-3 wrap-anywhere">{s.label}</td>
-                  <td className="py-2 pr-3 tabular-nums">{padSizeText(s.widthMm, s.depthMm)}</td>
-                  <td className="py-2 tabular-nums">{withUnit(s.thicknessMm, "mm")}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,400px)] md:items-start">
+            <table className="w-full table-fixed text-sm">
+              <colgroup><col className="w-[35%]" /><col className="w-[40%]" /><col className="w-[25%]" /></colgroup>
+              <thead className="text-left text-rl-muted">
+                <tr><th scope="col" className="py-1 pr-3 font-bold">名前</th><th scope="col" className="py-1 pr-3 font-bold">幅×奥行き</th><th scope="col" className="py-1 font-bold">厚さ</th></tr>
+              </thead>
+              <tbody>
+                {sizes.map((s, i) => (
+                  <tr key={`${s.label}-${i}`} className="border-t border-rl-line">
+                    <td className="py-2 pr-3 wrap-anywhere">{s.label}</td>
+                    <td className="py-2 pr-3">
+                      {s.widthMm === null || s.depthMm === null
+                        ? <span className="text-rl-muted">{NO_DATA}</span>
+                        : <><SpecNum value={s.widthMm} /><span className="px-0.5 text-rl-muted">×</span><SpecNum value={s.depthMm} unit="mm" /></>}
+                    </td>
+                    <td className="py-2">{s.thicknessMm === null ? <span className="text-rl-muted">{NO_DATA}</span> : <SpecNum value={s.thicknessMm} unit="mm" />}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <PadScale sizes={pad.sizes} matched={narrowed ? sizes : null} />
+          </div>
         )}
       </div>
       {pad.firmnessVariants.length > 0 && (

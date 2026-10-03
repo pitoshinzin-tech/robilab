@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PackageOpen, SearchX } from "lucide-react";
+import { ChevronDown, PackageOpen, SearchX } from "lucide-react";
 import { PADS } from "@/data/pads";
 import { PROS_READY } from "@/data/pros";
 import { byPopularity, POPULARITY_NOTE } from "@/lib/gear-popularity";
@@ -8,7 +8,7 @@ import type { SearchParams } from "@/lib/gear-query";
 import { SURFACE_LABEL } from "@/lib/gear-labels";
 import { subnavFor } from "@/lib/nav";
 import {
-  SIZE_CLASSES, THICKNESS_CLASSES, filterPads, isPadFilterEmpty, padFilterHref, parsePadFilter, visiblePads, type PadFilter,
+  SIZE_CLASSES, THICKNESS_CLASSES, filterPads, isPadFilterEmpty, padCountCaption, padFilterCount, padFilterHref, parsePadFilter, visiblePads, type PadFilter,
 } from "@/lib/pad-filter";
 import { affiliateEnv, shopLinks } from "@/lib/shop-links";
 import { PageShell } from "@/components/ui/page-shell";
@@ -44,26 +44,40 @@ export default async function PadsPage({ searchParams }: { searchParams: Promise
   const matches = filterPads(all, filter);
   const env = affiliateEnv();
   const narrowed = filter.size !== "all" || filter.thickness !== "all";
+  const filterCount = padFilterCount(filter);
+  const filters = (
+    <>
+      <FilterGroup label="面" options={options(filter, "surface", [["all", "すべて"], ...SURFACES.map((s) => [s, SURFACE_LABEL[s]] as const)])} />
+      <FilterGroup label="大きさ" hint={`公式の横幅で分けた目安です(${SIZE_CLASSES.map((c) => `${c.id} ${c.hint}`).join("・")})。`}
+        options={options(filter, "size", [["all", "すべて"], ...SIZE_CLASSES.map((c) => [c.id, c.id] as const)])} />
+      <FilterGroup label="厚さ" hint={`公式の厚さがあるサイズだけで分けます(${THICKNESS_CLASSES.map((c) => `${c.label} ${c.hint}`).join("・")})。`}
+        options={options(filter, "thickness", [["all", "すべて"], ...THICKNESS_CLASSES.map((c) => [c.id, c.label] as const)])} />
+      <FilterGroup label="硬さ" options={options(filter, "firmness", [["all", "すべて"], ["variants", "硬さを選べる"]])} />
+      {!isPadFilterEmpty(filter) && <ButtonLink href="/pads" scroll={false} variant="ghost" size="sm" className="justify-self-start">絞り込みを外す</ButtonLink>}
+    </>
+  );
 
   return (
     <PageShell width="wide" title="マウスパッド探し" description="面・大きさ・厚さで絞り込み、メーカー公式の言葉で「速さ・止め」を読めます。"
       subnav={<SubNav label="感度・マウス" items={subnavFor("mouse", PROS_READY)} />}
-      actions={<p className="grid justify-items-start md:justify-items-end"><NumUnit value={all.length} unit="枚" className="text-rl-display-2" /><span className="text-sm text-rl-muted">公式の数字で比べられる数</span></p>}>
+      actions={<p className="grid justify-items-start md:justify-items-end"><NumUnit value={matches.length} unit="枚" className="text-rl-display-2" /><span className="text-sm text-rl-muted">{padCountCaption(filter, all.length)}</span></p>}>
       <div className="grid gap-8">
         <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
-          <Card as="section" aria-labelledby="pads-filters" className="grid gap-4 lg:sticky lg:top-6">
+          {/* lg 以上は左の列に開いたまま。lg 未満は結果の見出しの下に畳む(一覧を上に。/mouse と同じ) */}
+          <Card as="section" aria-labelledby="pads-filters" className="hidden gap-4 lg:sticky lg:top-6 lg:grid">
             <h2 id="pads-filters" className="text-xl font-bold">絞り込み</h2>
-            <FilterGroup label="面" options={options(filter, "surface", [["all", "すべて"], ...SURFACES.map((s) => [s, SURFACE_LABEL[s]] as const)])} />
-            <FilterGroup label="大きさ" hint={`公式の横幅で分けた目安です(${SIZE_CLASSES.map((c) => `${c.id} ${c.hint}`).join("・")})。`}
-              options={options(filter, "size", [["all", "すべて"], ...SIZE_CLASSES.map((c) => [c.id, c.id] as const)])} />
-            <FilterGroup label="厚さ" hint={`公式の厚さがあるサイズだけで分けます(${THICKNESS_CLASSES.map((c) => `${c.label} ${c.hint}`).join("・")})。`}
-              options={options(filter, "thickness", [["all", "すべて"], ...THICKNESS_CLASSES.map((c) => [c.id, c.label] as const)])} />
-            <FilterGroup label="硬さ" options={options(filter, "firmness", [["all", "すべて"], ["variants", "硬さを選べる"]])} />
-            {!isPadFilterEmpty(filter) && <ButtonLink href="/pads" scroll={false} variant="ghost" size="sm" className="justify-self-start">絞り込みを外す</ButtonLink>}
+            {filters}
           </Card>
 
           <section aria-labelledby="pads-results" className="grid gap-4">
             <SectionHeading id="pads-results" title="人気の順" count={matches.length} />
+            <details className="group rounded-rl-md border border-rl-line bg-rl-surface lg:hidden">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-4 text-sm font-bold [&::-webkit-details-marker]:hidden">
+                <span>絞り込み<span className="ml-2 font-normal text-rl-muted">{filterCount > 0 ? `${filterCount} つの条件で絞り込み中` : "すべて表示中"}</span></span>
+                <ChevronDown aria-hidden className="size-5 shrink-0 transition-transform duration-(--rl-dur-base) group-open:rotate-180" />
+              </summary>
+              <div className="grid gap-4 p-4 pt-0">{filters}</div>
+            </details>
             {matches.length > 0 && <p className="flex flex-wrap items-center gap-2 text-sm text-rl-muted"><Badge variant="pr">PR</Badge>このリンクから買うと、ロビラボに紹介料が入ることがあります</p>}
             {all.length === 0 ? (
               <EmptyState icon={PackageOpen} title="マウスパッドのデータがまだありません" description="先にマウス探しで、手に合うマウスを見られます。"

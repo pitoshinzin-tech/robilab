@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import type { PadSize, PadSpec } from "@/data/gear-types";
 import { PADS } from "@/data/pads";
 import {
-  NO_PAD_FILTER, filterPads, isPadFilterEmpty, padFilterHref, parsePadFilter, sizeClass, thicknessClass, visiblePads, type VisiblePad,
+  NO_PAD_FILTER, filterPads, isPadFilterEmpty, padFilterHref, parsePadFilter, sizeClass, thicknessClass, visiblePads, type VisiblePad, padFilterCount, padCountCaption,
 } from "@/lib/pad-filter";
 import { padSizeText, surfaceLabel, withUnit } from "@/lib/gear-labels";
 
@@ -99,5 +99,16 @@ describe("本物のデータ", () => {
       const text = [surfaceLabel(p.surface), ...p.sizes.map((s) => `${s.label} ${padSizeText(s.widthMm, s.depthMm)} ${withUnit(s.thicknessMm, "mm")}`)].join(" ");
       expect(text, p.id).not.toMatch(/null|NaN|undefined/);
     }
+  });
+});
+
+describe("padFilterCount・padCountCaption(上の大きな数字の説明)", () => {
+  it("すべてのときは 0、条件の数を数える", () => {
+    expect(padFilterCount(NO_PAD_FILTER)).toBe(0);
+    expect(padFilterCount({ ...NO_PAD_FILTER, surface: "glass", size: "XL" })).toBe(2);
+  });
+  it("絞り込みがないときは「公式の数字で比べられる数」、あるときは全体の数を添える", () => {
+    expect(padCountCaption(NO_PAD_FILTER, 41)).toBe("公式の数字で比べられる数");
+    expect(padCountCaption({ ...NO_PAD_FILTER, thickness: "thick" }, 41)).toBe("絞り込みに合う数(全 41 枚)");
   });
 });

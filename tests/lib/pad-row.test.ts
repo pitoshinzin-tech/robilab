@@ -60,3 +60,23 @@ describe("FilterGroup", () => {
     expect(html).toContain('href="/pads?surface=glass"');
   });
 });
+
+describe("PadRow のサイズ表", () => {
+  const withSizes = pads.find((x) => x.sizes.some((s) => s.widthMm !== null && s.depthMm !== null && s.thicknessMm !== null))!;
+  it("列の幅を colgroup で固定する(名前 35%・幅×奥行き 40%・厚さ 25%)", () => {
+    const html = render(withSizes);
+    expect(html).toContain("table-fixed");
+    expect(html).toContain('<colgroup><col class="w-[35%]"/><col class="w-[40%]"/><col class="w-[25%]"/></colgroup>');
+  });
+  it("数字はマゼンタ、公式の記載なしは別の色", () => {
+    const html = render(withSizes);
+    expect(html).toContain("text-rl-highlight");
+    const p = { ...withSizes, sizes: [{ label: "M", widthMm: null, depthMm: 280, thicknessMm: null }] };
+    const none = renderToStaticMarkup(createElement("ul", null, createElement(PadRow, { pad: p, sizes: p.sizes, narrowed: false, primary: false, links: shopLinks("x", p.officialUrl, {}) })));
+    expect(none).not.toContain("text-rl-highlight");
+    expect(none).toContain("text-rl-muted\">公式の記載なし");
+  });
+  it("縮尺図を表の横に置く(描けるサイズがあるとき)", () => {
+    expect(render(withSizes)).toContain('role="img"');
+  });
+});
