@@ -1,28 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Zen_Kaku_Gothic_New, Orbitron } from "next/font/google";
+import { Orbitron } from "next/font/google";
 import "./globals.css";
 import { BRAND } from "@/lib/brand";
 import { getSiteUrl } from "@/lib/site-url";
 import { SiteHeader } from "@/components/brand/SiteHeader";
 import { SiteFooter } from "@/components/brand/SiteFooter";
 import { BottomTabBar } from "@/components/brand/BottomTabBar";
+import { ZenFontLoader } from "@/components/brand/ZenFontLoader";
 
 /*
- * 表示速度(docs/design/perf.md):日本語のフォントは先読み(preload)しない。
- * Google の日本語のフォントは約 120 の小さなファイルに分かれていて、next/font の先読みの判定がずれ、
- * 700・900 の全部(240 ファイル・約 2.8MB)を毎ページ先読みしていた(CSS と HTML の読み込みを押しのけ、最初の描画が遅れていた)。
- * 先読みをやめると、ページで実際に使う字のファイルだけを、描画のあとに読む(display: swap なので文字は先に出る)。
- * 読み込むまでの間の日本語の書体は globals.css の --font-sans(かなが全角の幅の書体を system-ui より先に置く)。
- * ここで fallback を書くと、英数字の寸法を合わせた代わりの書体(Zen Kaku Gothic New Fallback)が消えるので書かない。
+ * 表示速度(docs/design/perf.md):日本語のフォント Zen Kaku Gothic New は、ここ(最初の描画を止める CSS)では読まない。
+ * Google の日本語のフォントは 1 つの太さが約 120 の小さなファイル(文字の範囲ごとの @font-face)に分かれていて、
+ * その CSS(gzip 64KB)が回線を JS と取り合い、最初のレイアウトも重くしていた。
+ * @font-face は ZenFontLoader が最初の描画のあとに読み、書体の名前と英数字の代わりの書体は globals.css に置く。
+ * 前の経緯:先読み(preload)は 240 ファイルを毎ページ読んでいたのでやめた・900 は読まない(.rl-black)。
  */
-const zen = Zen_Kaku_Gothic_New({
-  // 900 は読まない(フォントの CSS の 1/3・gzip 約 32KB が描画を止めていた)。日本語の 900 の 2 か所は globals.css の .rl-black(700 + 縁)
-  weight: ["500", "700"],
-  subsets: ["latin"],
-  variable: "--font-zen",
-  display: "swap",
-  preload: false,
-});
 // 追補 4-3:weight を書かないと 400〜900 の可変の 1 ファイルになる(表示用の数字 800・コード 900・ROBILAB 600 を 1 つで出す)
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron", display: "swap" });
 
@@ -36,12 +28,13 @@ export const viewport: Viewport = { themeColor: "#0A0C16", colorScheme: "dark" }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" className={`${zen.variable} ${orbitron.variable}`}>
+    <html lang="ja" className={orbitron.variable}>
       <body className="min-h-dvh pb-[calc(64px+env(safe-area-inset-bottom))] antialiased md:pb-0">
         <SiteHeader />
         {children}
         <SiteFooter />
         <BottomTabBar />
+        <ZenFontLoader />
       </body>
     </html>
   );

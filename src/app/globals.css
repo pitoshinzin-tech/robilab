@@ -124,7 +124,18 @@ body {
  * 英数字は next/font の寸法合わせ済みの代わり(Zen Kaku Gothic New Fallback = Arial)が --font-zen の中で先に効く。
  * テーマの変数(@theme)にすると font-ja-fallback の道具が増えるので、ふつうの変数にする。
  */
+/* next/font が作る英数字の寸法合わせの代わり(Arial を Zen Kaku の寸法に。next/font の出力と同じ値)。字のファイルが届くまで英数字はこれで出る */
+@font-face {
+  font-family: "Zen Kaku Gothic New Fallback";
+  src: local(Arial);
+  ascent-override: 117%;
+  descent-override: 29.05%;
+  line-gap-override: 0%;
+  size-adjust: 99.15%;
+}
 :root {
+  /* Zen Kaku の名前(@font-face は ZenFontFaces が最初の描画のあとに読む。docs/design/perf.md) */
+  --font-zen: "Zen Kaku Gothic New", "Zen Kaku Gothic New Fallback";
   --rl-font-ja-fallback: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, "Noto Sans JP", "Noto Sans CJK JP", Meiryo;
 }
 
