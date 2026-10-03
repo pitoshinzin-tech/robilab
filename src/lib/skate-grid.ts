@@ -10,9 +10,9 @@ export const SKATE_CELL = { sizePx: 16, gapPx: 8, columns: 10, strokePx: 2 } as 
 
 export type SkateCellKind = "dedicated" | "universal";
 
-/** 機種専用の形 = 専用(面)、ドット = 汎用(線) */
-export function skateCellKind(s: Pick<SkateSpec, "shape">): SkateCellKind {
-  return s.shape === "dot" ? "universal" : "dedicated";
+/** 汎用(線)= ドットで、どのマウスにも結び付いていないもの(skateView の汎用と同じ)。ほかは専用(面) */
+export function skateCellKind(s: Pick<SkateSpec, "shape" | "mouseIds">): SkateCellKind {
+  return s.shape === "dot" && s.mouseIds.length === 0 ? "universal" : "dedicated";
 }
 
 export type SkateCell = { id: string; kind: SkateCellKind; x: number; y: number };

@@ -18,6 +18,10 @@ describe("skateCellKind", () => {
     expect(skateCellKind(skate("a", { shape: "full" }))).toBe("dedicated");
     expect(skateCellKind(skate("b", { shape: "dot" }))).toBe("universal");
   });
+  it("ドットでも特定のマウスに結び付いていれば専用(skateView の「汎用 = ドットで mouseIds が空」とそろえる)", () => {
+    expect(skateCellKind(skate("c", { shape: "dot", mouseIds: ["pulsar-x2-v2-medium"] }))).toBe("dedicated");
+    for (const s of SKATES) expect(skateCellKind(s), s.id).toBe(s.shape === "dot" && s.mouseIds.length === 0 ? "universal" : "dedicated");
+  });
 });
 
 describe("skateGrid(マスの数と種類)", () => {
