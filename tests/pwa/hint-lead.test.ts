@@ -3,7 +3,7 @@ import { SHORTCUT_NAMES, hintLead } from "@/lib/pwa/install-hint";
 import { APP_SHORTCUTS } from "@/lib/pwa/manifest-data";
 
 describe("hintLead(案内の 1 行目)", () => {
-  it("ショートカットの名前は manifest と同じ表から作る", () => {
+  it("ショートカットの名前は manifest の表(APP_SHORTCUTS)と同じ", () => {
     expect(SHORTCUT_NAMES).toBe(APP_SHORTCUTS.map((s) => s.name).join("・"));
     expect(SHORTCUT_NAMES).toBe("今日の文字・仲間・マウス探し");
   });

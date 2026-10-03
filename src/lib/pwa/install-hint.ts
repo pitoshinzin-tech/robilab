@@ -1,8 +1,6 @@
 // 「ホーム画面に追加」の案内を出すか・どの手順を見せるか(設計書 4 章)。ブラウザに触らない純粋な関数だけ。
 // 記録はこの端末の localStorage だけ(日付と真偽。個人の情報は入れない・サーバーに送らない)。
 
-import { APP_SHORTCUTS } from "./manifest-data";
-
 export type HintPlatform = "ios" | "android" | "desktop" | "other" | "installed";
 export type StepsPlatform = Exclude<HintPlatform, "installed">;
 export type HintPlace = "my" | "aim";
@@ -89,8 +87,11 @@ export function hintView(input: { place: HintPlace; platform: HintPlatform; stor
   return { show: shouldShowHint(next, today, platform), platform, next: next === state ? null : next };
 }
 
-/** manifest のショートカットの名前(「今日の文字・仲間・マウス探し」)。manifest と同じ表から作る */
-export const SHORTCUT_NAMES = APP_SHORTCUTS.map((s) => s.name).join("・");
+/**
+ * manifest のショートカットの名前(manifest-data.ts の APP_SHORTCUTS と同じ並び。tests/pwa/hint-lead.test.ts が照らす)。
+ * manifest-data を import しないのは、BRAND などをブラウザの JS に入れないため
+ */
+export const SHORTCUT_NAMES = "今日の文字・仲間・マウス探し";
 
 /**
  * 案内の 1 行目。/aim は今日の文字の画面にいる理由とつなげる。/my は、追加するとできるようになることを端末ごとに言う
