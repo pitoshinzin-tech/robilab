@@ -90,7 +90,15 @@ export function pickForGame(user: Axes, game: Game, chars: readonly Char[]): Gam
 
 /** このキャラが合うタイプ:16 タイプの既定の軸(各軸 ±0.6)と近い順に 3 つ。同点はタイプの並び順 */
 export function fitTypes(char: Char, types: readonly GamerType[] = TYPES): GamerType[] {
-  const target = charTarget(char);
+  return nearestTypes(charTarget(char), types);
+}
+
+/** ロールの土台(札なし)に一番合うタイプ。一覧のロールの段の見出しに 1 回だけ出す */
+export function roleFitType(role: Role, types: readonly GamerType[] = TYPES): GamerType {
+  return nearestTypes(role.target, types)[0];
+}
+
+function nearestTypes(target: Axes, types: readonly GamerType[]): GamerType[] {
   return types
     .map((t, index) => ({ t, index, score: roleScore(parseAxesParam(undefined, t.code), target) }))
     .sort((a, b) => b.score - a.score || a.index - b.index)
@@ -126,4 +134,11 @@ export function charAxisRows(char: Char): CharAxisRow[] {
     const basis: CharAxisRow["basis"] = ev ? { kind: "tag", tag: ev.tag, quote: ev.quote, url: ev.url } : { kind: "role", roleName: role.name };
     return { axis: a.id, left: a.left, right: a.right, lean, word, basis };
   });
+}
+
+/** 一覧の行の札:公式の言葉の札で、ロールの土台の言葉から変わった軸だけ(変わらなければ空) */
+export function shiftedRows(char: Char): CharAxisRow[] {
+  if (char.evidence.length === 0) return [];
+  const base = charAxisRows({ ...char, evidence: [] });
+  return charAxisRows(char).filter((r, i) => r.basis.kind === "tag" && r.word !== base[i].word);
 }

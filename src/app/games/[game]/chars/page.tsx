@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { fitTypes } from "@/lib/char-match";
 import { dexChars, dexSections, latestCheckedAt, publishedGame, publishedGames } from "@/lib/char-dex";
 import { breadcrumbJsonLd, listCrumbs, listLead, listMeta } from "@/lib/char-seo";
 import { getSiteUrl } from "@/lib/site-url";
 import { SubNav } from "@/components/brand/SubNav";
 import { CharListBody } from "@/components/chars/CharListBody";
 import { JsonLd } from "@/components/chars/JsonLd";
+import { DexCount } from "@/components/chars/DexCount";
 import { PageShell } from "@/components/ui/page-shell";
 
 type Props = { params: Promise<{ game: string }> };
@@ -33,13 +33,15 @@ export default async function CharListPage({ params }: Props) {
   if (!found) notFound();
   const { game, setting } = found;
   const list = dexChars(game.id);
-  const fits = Object.fromEntries(list.map((c) => [c.id, setting.matching && c.matchable ? fitTypes(c)[0] : null]));
+  const sections = dexSections(game, setting);
+  const roleCount = sections.filter((s) => s.roleId !== null).length;
   const games = publishedGames();
   return (
     <PageShell width="wide" title={`${game.name}${setting.nameMark} のキャラ図鑑`} description={listLead(setting, list.length)}
       back={{ href: "/games", label: "キャラ図鑑" }}
+      actions={<DexCount value={list.length} caption={roleCount > 0 ? `${roleCount} つのロールの代表キャラ` : "代表キャラ"} />}
       subnav={games.length > 1 ? <SubNav label="ゲームの切り替え" items={games.map((g) => ({ href: `/games/${g.id}/chars`, label: g.shortName }))} /> : undefined}>
-      <CharListBody game={game} setting={setting} sections={dexSections(game, setting)} fits={fits} checkedAt={latestCheckedAt(list)} />
+      <CharListBody game={game} setting={setting} sections={sections} checkedAt={latestCheckedAt(list)} />
       <JsonLd json={breadcrumbJsonLd(listCrumbs(game), getSiteUrl())} />
     </PageShell>
   );

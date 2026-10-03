@@ -5,7 +5,7 @@ import { GAMES } from "@/data/games";
 import { TYPES } from "@/data/types";
 import { parseAxesParam } from "@/lib/axes-param";
 import { roleScore } from "@/lib/role-match";
-import { LEAN, TAG_AXIS, TAG_SHIFT, charAxisRows, charTarget, fitTypes, leanOf, opposingTags, pickForGame, rankChars } from "@/lib/char-match";
+import { LEAN, TAG_AXIS, TAG_SHIFT, charAxisRows, charTarget, fitTypes, leanOf, opposingTags, pickForGame, rankChars, roleFitType, shiftedRows } from "@/lib/char-match";
 import { TAGS, TAG_AXIS_ID } from "../../scripts/char-data";
 
 const OW = GAMES.find((g) => g.id === "overwatch")!;
@@ -152,6 +152,30 @@ describe("fitTypes(このキャラが合うタイプ)", () => {
       const scored = TYPES.map((t, i) => ({ code: t.code, i, s: roleScore(parseAxesParam(undefined, t.code), target) }))
         .sort((a, b) => b.s - a.s || a.i - b.i);
       expect(fits.map((t) => t.code), c.id).toEqual(scored.slice(0, 3).map((x) => x.code));
+    }
+  });
+});
+
+describe("ロールに合うタイプと、土台からずれた軸(一覧)", () => {
+  it("札のないキャラの一番合うタイプは、ロールに合うタイプと同じ", () => {
+    for (const c of CHARS.filter((x) => x.matchable && x.evidence.length === 0)) {
+      const role = GAMES.find((g) => g.id === c.game)!.roles.find((r) => r.id === c.roleId)!;
+      expect(fitTypes(c)[0].code, c.id).toBe(roleFitType(role).code);
+    }
+  });
+  it("札のないキャラはずれた軸なし、ウィンストンは「直感寄り」だけ", () => {
+    for (const c of CHARS.filter((x) => x.evidence.length === 0)) expect(shiftedRows(c), c.id).toEqual([]);
+    const w = CHARS.find((c) => c.game === "overwatch" && c.id === "winston")!;
+    expect(shiftedRows(w).map((r) => r.word)).toEqual(["直感寄り"]);
+  });
+  it("ずれた軸は、札が根拠で、ロールの土台の言葉と違うものだけ(数字なし)", () => {
+    for (const c of CHARS.filter((x) => x.matchable)) {
+      const base = charAxisRows({ ...c, evidence: [] });
+      for (const r of shiftedRows(c)) {
+        expect(r.basis.kind, c.id).toBe("tag");
+        expect(r.word, c.id).not.toBe(base.find((b) => b.axis === r.axis)!.word);
+        expect(r.word).not.toMatch(/\d/);
+      }
     }
   });
 });

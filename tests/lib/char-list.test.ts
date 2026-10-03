@@ -4,12 +4,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { CHARS } from "@/data/chars";
 import { CHAR_GAME_SETTINGS } from "@/data/char-games";
 import { GAMES } from "@/data/games";
-import { fitTypes } from "@/lib/char-match";
+import { roleFitType, shiftedRows } from "@/lib/char-match";
 import { dexChars, dexSections, latestCheckedAt, publishedGames } from "@/lib/char-dex";
 import { CharListBody } from "@/components/chars/CharListBody";
 import { DexNotices } from "@/components/chars/DexNotices";
 import * as listPage from "@/app/games/[game]/chars/page";
 import GameRedirect from "@/app/games/[game]/page";
+import { DexCount } from "@/components/chars/DexCount";
 
 /** 主ボタン(variant="primary")の塗りのクラスの数(hover: の付いたものは数えない) */
 const primaryCount = (html: string) => (html.match(/(?<![:\w-])bg-rl-accent(?![\w-])/g) ?? []).length;
@@ -20,8 +21,7 @@ function renderList(gameId: string) {
   const game = GAMES.find((g) => g.id === gameId)!;
   const setting = { ...CHAR_GAME_SETTINGS[game.id as keyof typeof CHAR_GAME_SETTINGS], published: true };
   const sections = dexSections(game, setting);
-  const fits = Object.fromEntries(dexChars(game.id).map((c) => [c.id, setting.matching && c.matchable ? fitTypes(c)[0] : null]));
-  return renderToStaticMarkup(createElement(CharListBody, { game, setting, sections, fits, checkedAt: latestCheckedAt(dexChars(game.id)) }));
+  return renderToStaticMarkup(createElement(CharListBody, { game, setting, sections, checkedAt: latestCheckedAt(dexChars(game.id)) }));
 }
 
 describe("一覧の中身(全 5 本。スト6 も描けることを確かめる)", () => {
@@ -46,6 +46,23 @@ describe("一覧の中身(全 5 本。スト6 も描けることを確かめる)
     expect(html).toContain(">キャラ一覧</h2>");
     for (const r of GAMES.find((g) => g.id === "sf6")!.roles) expect(html).not.toContain(`>${r.name}</h2>`);
     expect(html).not.toContain("合うタイプ");
+  });
+  it("OW:合うタイプの絵はロールの段ごとに 1 回だけ(行ごとに並べない)", () => {
+    const html = renderList("overwatch");
+    const ow = GAMES.find((g) => g.id === "overwatch")!;
+    for (const r of ow.roles) expect(html, r.id).toContain(roleFitType(r).code);
+    expect((html.match(/このロールに合うタイプ/g) ?? []).length).toBe(dexSections(ow, { ...CHAR_GAME_SETTINGS.overwatch, published: true }).filter((s) => s.roleId).length);
+  });
+  it("行の札は、ロールの土台からずれた軸だけ(ウィンストンは「直感寄り」、札のないキャラは札なし)", () => {
+    const html = renderList("overwatch");
+    const w = CHARS.find((c) => c.game === "overwatch" && c.id === "winston")!;
+    expect(shiftedRows(w).map((r) => r.word)).toEqual(["直感寄り"]);
+    const row = html.slice(html.indexOf('href="/games/overwatch/chars/winston"'));
+    expect(row.slice(0, row.indexOf("</li>"))).toContain(">直感寄り<");
+    for (const c of CHARS.filter((x) => x.game === "overwatch" && x.evidence.length === 0 && !x.reserve)) {
+      const r = html.slice(html.indexOf(`href="/games/overwatch/chars/${c.id}"`));
+      expect(r.slice(0, r.indexOf("</li>")), c.id).not.toContain("寄り<");
+    }
   });
   it("DbD は「型を決めていないキャラ」の段と、型がロビラボの分け方である注記", () => {
     const html = renderList("dbd");
@@ -131,5 +148,16 @@ describe("一覧のページ(静的に作る)", () => {
   });
   it("公開していないゲームの metadata は空", async () => {
     expect(await listPage.generateMetadata({ params: Promise.resolve({ game: "nope" }) })).toEqual({});
+  });
+});
+
+describe("表示の段の数", () => {
+  it("/games の数は公開している代表の数(スト6・予備を数えない。いまは 4 本で 51 体)", () => {
+    expect(publishedGames().reduce((n, g) => n + dexChars(g.id).length, 0)).toBe(51);
+  });
+  it("数は Orbitron の display-2 で「N 体」", () => {
+    const html = renderToStaticMarkup(createElement(DexCount, { value: 12, caption: "3 つのロールの代表キャラ" }));
+    expect(html).toContain("text-rl-display-2");
+    expect(html).toMatch(/font-display[^>]*>12<\/span><span[^>]*>体</);
   });
 });

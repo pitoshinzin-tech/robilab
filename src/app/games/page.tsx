@@ -11,6 +11,7 @@ import { SubNav } from "@/components/brand/SubNav";
 import { DexNotices } from "@/components/chars/DexNotices";
 import { ButtonLink } from "@/components/ui/button-link";
 import { EmptyState } from "@/components/ui/empty-state";
+import { DexCount } from "@/components/chars/DexCount";
 import { PageShell } from "@/components/ui/page-shell";
 
 const meta = dexIndexMeta(publishedGames().length);
@@ -30,8 +31,10 @@ export default function GamesPage() {
     const list = dexChars(game.id);
     return { game, setting, count: list.length, checkedAt: latestCheckedAt(list) };
   });
+  const total = rows.reduce((n, r) => n + r.count, 0);
   return (
     <PageShell width="wide" title="キャラ図鑑" description={meta.description}
+      actions={rows.length > 0 ? <DexCount value={total} caption={`${rows.length} 本のゲームの代表キャラ`} /> : undefined}
       subnav={<SubNav label="診断" items={subnavFor("diagnosis", PROS_READY)} />}>
       <div className="grid gap-rl-ma-sm">
         {rows.length === 0 ? (
