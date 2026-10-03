@@ -12,7 +12,8 @@ export function ChipLink({ href, current, children, className }: { href: string;
   return (
     <Link href={href} scroll={false} aria-current={current ? "true" : undefined}
       className={cn(chipClassName, "aria-[current=true]:border-rl-selected aria-[current=true]:bg-rl-selected-bg", className)}>
-      {current && <Check aria-hidden className="size-4 shrink-0" />}
+      {/* 選んでいないときも場所を取る(選ぶと並びが入れ替わらない) */}
+      <Check aria-hidden className={cn("size-4 shrink-0", !current && "invisible")} />
       {children}
     </Link>
   );

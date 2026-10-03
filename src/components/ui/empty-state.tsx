@@ -12,7 +12,7 @@ export function EmptyState({ icon: Icon, title, description, action, className }
         <Icon aria-hidden className="size-8 text-rl-muted" />
       </span>
       <p className="text-base font-bold">{title}</p>
-      {description && <p className="text-sm text-rl-muted">{description}</p>}
+      {description && <p className="text-sm text-rl-muted text-balance [word-break:auto-phrase]">{description}</p>}
       {action}
     </div>
   );

@@ -1,8 +1,8 @@
-import { ChevronRight, ExternalLink } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import type { Ranked } from "@/lib/mouse-fit";
 import type { ShopLinks } from "@/lib/shop-links";
-import { ButtonAnchor, ButtonLink } from "@/components/ui/button-link";
-import { Badge } from "@/components/ui/badge";
+import { ButtonLink } from "@/components/ui/button-link";
+import { ShopButtons } from "@/components/gear/ShopButtons";
 import { ChipButton } from "@/components/ui/chip-button";
 import { NumUnit } from "@/components/ui/num-unit";
 import { NO_DATA } from "@/lib/gear-labels";
@@ -37,12 +37,7 @@ export function TopMouseRow({ rank, item, brand, name, reason, links, overlaid, 
         <ChipButton pressed={overlaid} onClick={onOverlay} className="justify-self-start">手と重ねる</ChipButton>
         {skateHref && <ButtonLink href={skateHref} variant="ghost" size="sm" className="justify-self-start">このマウスのソール<ChevronRight aria-hidden className="size-4" /></ButtonLink>}
       </div>
-      <div className="grid gap-2 md:justify-items-end">
-        {(links.amazonPr || links.rakutenPr) && <Badge variant="pr" className="justify-self-start md:justify-self-end">PR</Badge>}
-        <ButtonAnchor href={links.amazon} target="_blank" rel="sponsored noopener noreferrer" variant="primary">Amazon で探す<ExternalLink aria-hidden className="size-4" /></ButtonAnchor>
-        <ButtonAnchor href={links.rakuten} target="_blank" rel="sponsored noopener noreferrer" variant="secondary" size="sm">{links.rakutenIsItem ? "楽天で見る" : "楽天で探す"}<ExternalLink aria-hidden className="size-4" /></ButtonAnchor>
-        <ButtonAnchor href={links.official} target="_blank" rel="noopener noreferrer" variant="ghost" size="sm">公式ページ<ExternalLink aria-hidden className="size-4" /></ButtonAnchor>
-      </div>
+      <ShopButtons links={links} primary className="flex-col items-start md:items-end" />
     </li>
   );
 }

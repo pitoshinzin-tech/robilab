@@ -14,7 +14,7 @@ export function SectionHeading({ title, description, action, count, as: Tag = "h
           {count !== undefined && (
             <span className="font-display text-xl tabular-nums text-rl-highlight">
               {count}
-              <span className="sr-only">件</span>
+              <span className="ml-1 text-sm text-rl-muted">件</span>
             </span>
           )}
         </Tag>

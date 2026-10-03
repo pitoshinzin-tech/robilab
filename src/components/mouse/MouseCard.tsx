@@ -1,7 +1,8 @@
-import { ChevronRight, ExternalLink } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import type { Ranked } from "@/lib/mouse-fit";
 import type { ShopLinks } from "@/lib/shop-links";
-import { ButtonAnchor, ButtonLink } from "@/components/ui/button-link";
+import { ButtonLink } from "@/components/ui/button-link";
+import { ShopButtons } from "@/components/gear/ShopButtons";
 import { Badge, RankBadge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ChipButton } from "@/components/ui/chip-button";
@@ -56,14 +57,7 @@ export function MouseCard({ rank, item, brand, name, reason, compare, links, ima
         {compare && <p className="text-sm text-rl-secondary-text">{compare}</p>}
         {onOverlay && <ChipButton pressed={overlaid} onClick={onOverlay} className="justify-self-start">手と重ねる</ChipButton>}
         {skateHref && <ButtonLink href={skateHref} variant="ghost" size="sm" className="justify-self-start">このマウスのソール<ChevronRight aria-hidden className="size-4" /></ButtonLink>}
-        <div className="grid gap-4 border-t border-rl-line pt-4">
-          {(links.amazonPr || links.rakutenPr) && <Badge variant="pr" className="justify-self-start">PR</Badge>}
-          <div className="flex flex-wrap gap-2">
-            <ButtonAnchor href={links.amazon} target="_blank" rel="sponsored noopener noreferrer" variant="secondary" size="sm">Amazon で探す<ExternalLink aria-hidden className="size-4" /></ButtonAnchor>
-            <ButtonAnchor href={links.rakuten} target="_blank" rel="sponsored noopener noreferrer" variant="secondary" size="sm">{links.rakutenIsItem ? "楽天で見る" : "楽天で探す"}<ExternalLink aria-hidden className="size-4" /></ButtonAnchor>
-          </div>
-          <ButtonAnchor href={links.official} target="_blank" rel="noopener noreferrer" variant="ghost" size="sm" className="justify-self-start">公式ページ<ExternalLink aria-hidden className="size-4" /></ButtonAnchor>
-        </div>
+        <ShopButtons links={links} className="border-t border-rl-line pt-4" />
       </div>
     </Card>
   );

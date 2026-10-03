@@ -18,7 +18,7 @@ export function ShopButtons({ links, primary = false, className }: { links: Shop
       <ButtonAnchor href={links.rakuten} target="_blank" rel="sponsored noopener noreferrer" variant="secondary" size="sm">
         {links.rakutenIsItem ? "楽天で見る" : "楽天で探す"}<ExternalLink aria-hidden className="size-4" />
       </ButtonAnchor>
-      <ButtonAnchor href={links.official} target="_blank" rel="noopener noreferrer" variant="ghost" size="sm">
+      <ButtonAnchor href={links.official} target="_blank" rel="noopener noreferrer" variant="ghost" size="sm" className="px-0">
         公式ページ<ExternalLink aria-hidden className="size-4" />
       </ButtonAnchor>
     </div>
