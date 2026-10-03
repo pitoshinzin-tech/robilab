@@ -30,7 +30,7 @@
 4. **電波がないとき**、ホームのアイコンから開くと(またはページを移ると)、ブラウザの恐竜の画面ではなく、ロビラボの「オフラインです」の画面が出る。電波が戻って「もう一度読み込む」を押すと元に戻る。
 5. **ログインのページ・Supabase の応答・個人のデータを一切キャッシュしない**(service worker が持つのはオフラインの画面とアイコン 1 つだけ)。
 6. アプリとして開いた状態(standalone)で、Discord のログイン → 戻ってくる、Amazon・楽天・X のリンク、下のタブバー、各ページの「戻る」が使える(iPhone のアプリ表示にはブラウザの戻るボタンがないため)。
-7. ページごとの JS の増えが 4KB 以内(gzip)。スマホの LCP が今より悪くならない(service worker の起動の遅れを Navigation Preload で打ち消す)。
+7. ページごとの JS の増えが 4KB 以内(gzip)。スマホの LCP が今より悪くならない(Navigation Preload は使わないので、service worker の起動の遅れは実測で見る)。
 8. 差分のセキュリティ監査(public-web-security-gate)で confirmed の critical / high が 0。
 
 ### やらないこと
@@ -101,17 +101,17 @@
 
 ### 3-2. ファイルと動き
 - `public/sw.js`(手書きの素の JS。ビルドを通さない。`/sw.js` で配る。スコープは `/`)。
-- `public/offline.html`(静的な 1 枚。JS なし、外のフォント・CSS なし、CSS は中に書く。色はデザインシステムの値を直書き:背景 #0A0C16・文字 #EAF6FF・押せるものだけシアン #39F3FF。ドット絵の「ロ」の SVG を中に書く。文:「電波が届いていません」「つながったら、もう一度読み込んでください。」ボタン「もう一度読み込む」は `<a href="/">`(JS なし)。システムの書体。44px 以上の押せる高さ、フォーカスの線、コントラスト 4.5:1 以上)。
+- `public/offline.html`(静的な 1 枚。JS なし、外のフォント・CSS なし、CSS は中に書く。色はデザインシステムの値を直書き:背景 #0A0C16・文字 #EAF6FF・押せるものだけシアン #39F3FF。ドット絵の「ロ」の SVG を中に書く。文:「電波が届いていません」「つながったら、もう一度読み込んでください。」ボタン「もう一度読み込む」は `<a href="">`(今の URL を読み直す。JS なし。電波が切れたときに開こうとしていたページに戻る)。システムの書体。44px 以上の押せる高さ、フォーカスの線、コントラスト 4.5:1 以上)。
   - Next.js のページ(`/offline`)にしない理由:ページの HTML は名前にハッシュの付いた JS を読み、それはキャッシュしないので、オフラインでは壊れる。
 - `sw.js` の中身(全部で 40 行くらい):
   - `const CACHE = "robilab-offline-v1";`(`offline.html` を変えたら数字を上げる)
-  - `install`:`/offline.html` と `/icons/icon-192.png` だけを `cache.addAll` → `self.skipWaiting()`。
-  - `activate`:`CACHE` 以外の自分のキャッシュを消す → `self.registration.navigationPreload?.enable()` → `self.clients.claim()`。
+  - `install`:`/offline.html` と `/icons/icon-192.png` だけを(`new Request(url, { cache: "reload" })` で HTTP キャッシュを通さず)`cache.addAll` → `self.skipWaiting()`。
+  - `activate`:`CACHE` 以外の自分のキャッシュを消す → `self.registration.navigationPreload?.disable()`(すでに有効にした端末のため。**有効にはしない**。理由:有効だと `/auth/callback` にもブラウザが先行の要求を送り、`/auth` は `respondWith` しないので新しい要求がもう 1 本飛ぶ。`exchangeCodeForSession` の code は 1 回しか使えず、取り合いでログインに失敗しうる)→ `self.clients.claim()`。
   - `fetch`:次の全部に当てはまるときだけ `respondWith` する。それ以外は何もしない(ブラウザにそのまま任せる)。
     1. `request.mode === "navigate"`(ページを開く・移るとき)で `method === "GET"`
     2. 同じ origin
     3. パスが `/auth/` で始まらない(Discord ログインの往復はブラウザに任せる)
-  - 応答:`event.preloadResponse` があればそれ、なければ `fetch(request)`。**失敗したとき(ネットにつながらない)だけ** `caches.match("/offline.html")`。成功した応答は保存しない(`cache.put` を書かない)。
+  - 応答:`fetch(event.request)`(Navigation Preload は使わない)。**失敗したとき(ネットにつながらない)だけ** `caches.match("/offline.html")`。成功した応答は保存しない(`cache.put` を書かない)。
   - `message`・`push`・`sync`・`importScripts` は書かない。
 - 登録:`src/components/pwa/SwRegister.tsx`(`"use client"`、何も描かない)を layout に置く。本番のビルドのときだけ(`process.env.NODE_ENV === "production"`)、`window` の `load` のあとに `navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" })`。`serviceWorker` がないブラウザでは何もしない。失敗しても画面には何も出さない。
 
@@ -121,7 +121,7 @@
 |---|---|
 | 古い版が残る | ページも JS もキャッシュしないので、古いページが出ることはない。残りうるのは `offline.html` だけで、`CACHE` の数字を上げれば次の起動で入れ替わる。`/sw.js` には `Cache-Control: no-cache, no-store, must-revalidate` を付け、登録は `updateViaCache: "none"`(ブラウザがページを開くたびに新しい `sw.js` を確かめる) |
 | ログインのページ・Supabase の応答をキャッシュする | 保存するのはインストールのときの 2 ファイルだけ。`cache.put` を書かない。`/auth/` は触らない。Supabase は別の origin で、ページを開く(navigate)の通信でもないので触らない。ログアウト・退会のときに消すべきものが何も残らない |
-| ページを開くのが遅くなる(service worker の起動の待ち) | Navigation Preload で、起動の待ちと通信を同時に進める。実装の前後でスマホの Lighthouse(遅い回線の条件、perf.md と同じ)の LCP を比べ、悪くなったら止める |
+| ページを開くのが遅くなる(service worker の起動の待ち) | Navigation Preload は **使わない**(`/auth/callback` の code の取り合いになるため)。実装の前後でスマホの Lighthouse(遅い回線の条件、perf.md と同じ)の LCP を比べ、悪くなったら止める |
 | 壊れた `sw.js` を配ってしまった | 「止める版」の `sw.js`(`install` で `skipWaiting`、`activate` で全部のキャッシュを消して `self.registration.unregister()`、`fetch` は書かない)を同じ場所に配れば、次に開いたときに外れる。手順を `docs/ops/launch.md` に書く |
 | CSP | `next.config.ts` の CSP に `worker-src 'self'` と `manifest-src 'self'` を足す(今は `default-src` / `script-src` からの引き継ぎで動くが、はっきり書く。`blob:` は許さない)。`/sw.js` の応答だけ、Next.js の説明どおり `Content-Security-Policy: default-src 'self'; script-src 'self'` にする(service worker の中の通信の決まりはこの応答の CSP で決まる)。`headers()` で `/sw.js` 用のルールを足す。全体の `/(.*)` のルールも `/sw.js` に当たるので、同じキーは後ろのルールが勝つことを実装のときに `curl -I` で確かめる |
 | `/sw.js` の置き場所 | ルートに置かないとスコープが `/` にならない。`public/sw.js` で `/sw.js`。`Service-Worker-Allowed` は付けない。Proxy の matcher に入れない |

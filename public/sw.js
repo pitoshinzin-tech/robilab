@@ -5,7 +5,8 @@
  * offline.html かアイコンを変えたら CACHE の数字を上げる。cache.put・message・push・sync と外部スクリプトの読み込みは書かない
  * (段 2 のプッシュ通知を足すときも、このファイルに足す。スコープ / の service worker は 1 つだけ)。
  */
-const CACHE = "robilab-offline-v1";
+// ASSETS-HASH: bcd0e53e69f2(offline.html とアイコンの中身の印。tests/pwa/sw.test.ts が教える値に直す)
+const CACHE = "robilab-offline-v2";
 const OFFLINE_URL = "/offline.html";
 const PRECACHE = [OFFLINE_URL, "/icons/icon-192.png"];
 
@@ -26,7 +27,8 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(PRECACHE))
+      // HTTP キャッシュの古いものを拾わないよう、毎回ネットから取り直す
+      .then((cache) => cache.addAll(PRECACHE.map((url) => new Request(url, { cache: "reload" }))))
       .then(() => self.skipWaiting()),
   );
 });
@@ -36,8 +38,9 @@ self.addEventListener("activate", (event) => {
     (async () => {
       const keys = await caches.keys();
       await Promise.all(keys.filter((key) => key.startsWith("robilab-") && key !== CACHE).map((key) => caches.delete(key)));
-      // service worker の起動を待つ間に、ページの通信を先に始める(開くのが遅くならないように)
-      if (self.registration.navigationPreload) await self.registration.navigationPreload.enable();
+      // Navigation Preload は使わない。有効だと /auth/callback にも先行の要求が飛び、1 回しか使えない code を取り合うため。
+      // すでに有効にした端末のために、ここで無効にする
+      if (self.registration.navigationPreload) await self.registration.navigationPreload.disable();
       await self.clients.claim();
     })(),
   );
@@ -48,8 +51,6 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     (async () => {
       try {
-        const preloaded = await event.preloadResponse;
-        if (preloaded) return preloaded;
         return await fetch(event.request);
       } catch {
         // ネットにつながらないときだけ。成功した応答は保存しない

@@ -24,7 +24,8 @@ describe("offline.html(設計書 3-2)", () => {
     expect(HTML).toContain('<meta name="robots" content="noindex">');
     expect(HTML).toContain("電波が届いていません");
     expect(HTML).toContain("つながったら、もう一度読み込んでください。");
-    expect(HTML).toMatch(/<a href="\/"[^>]*>もう一度読み込む<\/a>/);
+    // href="" は今の URL(電波が切れたときに開こうとしていたページ)を読み直す。トップには戻さない
+    expect(HTML).toMatch(/<a href=""[^>]*>もう一度読み込む<\/a>/);
   });
   it("色はデザインシステムの値で、コントラストは 4.5:1 以上", () => {
     expect(tokens["--bg"].toUpperCase()).toBe("#0A0C16");
