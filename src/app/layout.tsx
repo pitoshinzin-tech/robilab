@@ -7,6 +7,8 @@ import { SiteHeader } from "@/components/brand/SiteHeader";
 import { SiteFooter } from "@/components/brand/SiteFooter";
 import { BottomTabBar } from "@/components/brand/BottomTabBar";
 import { ZenFontLoader } from "@/components/brand/ZenFontLoader";
+import { SwRegister } from "@/components/pwa/SwRegister";
+import { APPLE_WEB_APP, SITE_VIEWPORT } from "@/lib/pwa/head";
 
 /*
  * 表示速度(docs/design/perf.md):日本語のフォント Zen Kaku Gothic New は、ここ(最初の描画を止める CSS)では読まない。
@@ -22,9 +24,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: { default: `${BRAND.name}|${BRAND.tagline}`, template: `%s|${BRAND.name}` },
   description: BRAND.description,
+  // manifest は src/app/manifest.ts を置けば <link rel="manifest"> が自動で付くので書かない
+  appleWebApp: APPLE_WEB_APP,
 };
 
-export const viewport: Viewport = { themeColor: "#0A0C16", colorScheme: "dark" };
+export const viewport: Viewport = SITE_VIEWPORT;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -36,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteFooter />
         <BottomTabBar />
         <ZenFontLoader />
+        <SwRegister />
       </body>
     </html>
   );
