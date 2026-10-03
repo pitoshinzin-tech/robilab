@@ -1,0 +1,334 @@
+[
+  {
+    "id": "reinhardt",
+    "game": "overwatch",
+    "roleId": "tank",
+    "nameJa": "ラインハルト",
+    "nameEn": "Reinhardt",
+    "officialRole": "タンク / ストールワート",
+    "summary": "前方にバリアを張り、突進やハンマーで戦う騎士道精神のタンク。公式のサブロールはストールワート。",
+    "quote": {
+      "text": "武勲、正義、勇気といった騎士道精神を重んじている",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/reinhardt/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/reinhardt/",
+    "checkedAt": "2026-10-03",
+    "matchable": true
+  },
+  {
+    "id": "winston",
+    "game": "overwatch",
+    "roleId": "tank",
+    "nameJa": "ウィンストン",
+    "nameEn": "Winston",
+    "officialRole": "タンク / イニシエーター",
+    "summary": "跳躍で敵陣へ飛び込み、バリアと電撃で戦うゴリラの科学者。公式のサブロールはイニシエーター。",
+    "quote": {
+      "text": "遺伝子改良により生まれた、高い知能を持つゴリラの科学者。",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/winston/"
+    },
+    "evidence": [
+      {
+        "tag": "mobile",
+        "quote": "空中から敵陣へと素早く突撃することが可能",
+        "url": "https://overwatch.blizzard.com/ja-jp/news/24243646/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/winston/",
+    "checkedAt": "2026-10-03",
+    "matchable": true
+  },
+  {
+    "id": "dva",
+    "game": "overwatch",
+    "roleId": "tank",
+    "nameJa": "D.Va",
+    "nameEn": "D.Va",
+    "officialRole": "タンク / イニシエーター",
+    "summary": "メックに乗って戦い、メックが壊れても脱出して戦い続けるタンク。公式のサブロールはイニシエーター。",
+    "quote": {
+      "text": "元・プロゲーマーのD.Vaは最新鋭のメックを操り、故郷を守るために戦う。",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/dva/"
+    },
+    "evidence": [
+      {
+        "tag": "mobile",
+        "quote": "空中から敵陣へと素早く突撃することが可能",
+        "url": "https://overwatch.blizzard.com/ja-jp/news/24243646/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/dva/",
+    "checkedAt": "2026-10-03",
+    "matchable": true
+  },
+  {
+    "id": "orisa",
+    "game": "overwatch",
+    "roleId": "tank",
+    "nameJa": "オリーサ",
+    "nameEn": "Orisa",
+    "officialRole": "タンク / ブルーザー",
+    "summary": "槍とフォーティファイを使い、前線で耐えながら敵を押しのけるロボットのタンク。公式のサブロールはブルーザー。",
+    "quote": {
+      "text": "街の新たな希望だ。だが、まだまだ学ぶべきことは多い。",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/orisa/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/orisa/",
+    "checkedAt": "2026-10-03",
+    "matchable": true
+  },
+  {
+    "id": "roadhog",
+    "game": "overwatch",
+    "roleId": "tank",
+    "nameJa": "ロードホッグ",
+    "nameEn": "Roadhog",
+    "officialRole": "タンク / ブルーザー",
+    "summary": "フックで敵を引き寄せ、散弾で戦うタンク。公式のサブロールはブルーザー。",
+    "quote": {
+      "text": "無情、気まぐれ、無慈悲な壊し屋。それがロードホッグ。",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/roadhog/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/roadhog/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "reserve": true
+  },
+  {
+    "id": "tracer",
+    "game": "overwatch",
+    "roleId": "damage",
+    "nameJa": "トレーサー",
+    "nameEn": "Tracer",
+    "officialRole": "ダメージ / フランカー",
+    "summary": "テレポートと時間の巻き戻しで素早く動き回るダメージ。公式のサブロールはフランカー。",
+    "quote": {
+      "text": "時空を超える冒険家にして根っからの正義の味方。",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/tracer/"
+    },
+    "evidence": [
+      {
+        "tag": "mobile",
+        "quote": "持ち前の機動力で奇襲を仕掛けたり、敵の注意を引くことに特化",
+        "url": "https://overwatch.blizzard.com/ja-jp/news/24243646/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/tracer/",
+    "checkedAt": "2026-10-03",
+    "matchable": true
+  },
+  {
+    "id": "widowmaker",
+    "game": "overwatch",
+    "roleId": "damage",
+    "nameJa": "ウィドウメイカー",
+    "nameEn": "Widowmaker",
+    "officialRole": "ダメージ / シャープシューター",
+    "summary": "遠距離狙撃モードのライフルと、毒ガスの罠を使うダメージ。公式のサブロールはシャープシューター。",
+    "quote": {
+      "text": "ひとかけらの感情も見せず、淡々と標的を始末する。",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/widowmaker/"
+    },
+    "evidence": [
+      {
+        "tag": "setup",
+        "quote": "毒ガスを放出する罠を展開",
+        "url": "https://overwatch.blizzard.com/ja-jp/heroes/widowmaker/"
+      },
+      {
+        "tag": "calm",
+        "quote": "craves the precision of assassination",
+        "url": "https://overwatch.blizzard.com/en-us/heroes/widowmaker/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/widowmaker/",
+    "checkedAt": "2026-10-03",
+    "matchable": true
+  },
+  {
+    "id": "echo",
+    "game": "overwatch",
+    "roleId": "damage",
+    "nameJa": "エコー",
+    "nameEn": "Echo",
+    "officialRole": "ダメージ / リコン",
+    "summary": "空を飛び回りながら、3連射の弾とビームで戦うロボットのダメージ。公式のサブロールはリコン。",
+    "quote": {
+      "text": "世界最先端の人工知能を持つ多機能汎用型ロボット「エコー」",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/echo/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/echo/",
+    "checkedAt": "2026-10-03",
+    "matchable": true
+  },
+  {
+    "id": "mei",
+    "game": "overwatch",
+    "roleId": "damage",
+    "nameJa": "メイ",
+    "nameEn": "Mei",
+    "officialRole": "ダメージ / スペシャリスト",
+    "summary": "冷気のスプレーと氷の壁で敵の動きを鈍らせる科学者のダメージ。公式のサブロールはスペシャリスト。",
+    "quote": {
+      "text": "自らの手で環境を守るため戦いに身を投じた科学者、メイ。",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/mei/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/mei/",
+    "checkedAt": "2026-10-03",
+    "matchable": true
+  },
+  {
+    "id": "sojourn",
+    "game": "overwatch",
+    "roleId": "damage",
+    "nameJa": "ソジョーン",
+    "nameEn": "Sojourn",
+    "officialRole": "ダメージ / シャープシューター",
+    "summary": "溜めたエネルギーを放つレールガンと、滑走で動くダメージ。公式のサブロールはシャープシューター。",
+    "quote": {
+      "text": "命中するとエネルギーが充電される高速弾",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/sojourn/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/sojourn/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "reserve": true
+  },
+  {
+    "id": "mercy",
+    "game": "overwatch",
+    "roleId": "support",
+    "nameJa": "マーシー",
+    "nameEn": "Mercy",
+    "officialRole": "サポート / メディック",
+    "summary": "味方を回復・強化し、倒れた味方を生き返らせるサポート。公式のサブロールはメディック。",
+    "quote": {
+      "text": "稀代の癒し手、優秀な科学者、平和の唱道者。",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/mercy/"
+    },
+    "evidence": [
+      {
+        "tag": "ally",
+        "quote": "長押しで味方のライフを回復",
+        "url": "https://overwatch.blizzard.com/ja-jp/heroes/mercy/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/mercy/",
+    "checkedAt": "2026-10-03",
+    "matchable": true
+  },
+  {
+    "id": "lucio",
+    "game": "overwatch",
+    "roleId": "support",
+    "nameJa": "ルシオ",
+    "nameEn": "Lúcio",
+    "officialRole": "サポート / タクティシャン",
+    "summary": "音楽で付近の味方を回復したり速くしたりし、壁を走って動くサポート。公式のサブロールはタクティシャン。",
+    "quote": {
+      "text": "自分の音楽と活動で社会を変えたいと願っている。",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/lucio/"
+    },
+    "evidence": [
+      {
+        "tag": "ally",
+        "quote": "一定時間、付近の味方を守る追加ライフを展開する",
+        "url": "https://overwatch.blizzard.com/ja-jp/heroes/lucio/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/lucio/",
+    "checkedAt": "2026-10-03",
+    "matchable": true
+  },
+  {
+    "id": "ana",
+    "game": "overwatch",
+    "roleId": "support",
+    "nameJa": "アナ",
+    "nameEn": "Ana",
+    "officialRole": "サポート / タクティシャン",
+    "summary": "長射程のライフルで味方を回復し、眠らせる矢で敵を止めるサポート。公式のサブロールはタクティシャン。",
+    "quote": {
+      "text": "アナは自らの技能と知識を使い、故郷と大切な人々を守ろうとしている。",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/ana/"
+    },
+    "evidence": [
+      {
+        "tag": "ally",
+        "quote": "味方を回復し、敵にダメージを与える長射程ライフル",
+        "url": "https://overwatch.blizzard.com/ja-jp/heroes/ana/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/ana/",
+    "checkedAt": "2026-10-03",
+    "matchable": true
+  },
+  {
+    "id": "brigitte",
+    "game": "overwatch",
+    "roleId": "support",
+    "nameJa": "ブリギッテ",
+    "nameEn": "Brigitte",
+    "officialRole": "サポート / サバイバー",
+    "summary": "近接武器とバリアで前に出つつ、味方を回復するサポート。公式のサブロールはサバイバー。",
+    "quote": {
+      "text": "すべては、人々を守るために。",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/brigitte/"
+    },
+    "evidence": [
+      {
+        "tag": "ally",
+        "quote": "一定時間、味方1人を回復する",
+        "url": "https://overwatch.blizzard.com/ja-jp/heroes/brigitte/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/brigitte/",
+    "checkedAt": "2026-10-03",
+    "matchable": true
+  },
+  {
+    "id": "kiriko",
+    "game": "overwatch",
+    "roleId": "support",
+    "nameJa": "キリコ",
+    "nameEn": "Kiriko",
+    "officialRole": "サポート / メディック",
+    "summary": "回復のお札と瞬間移動で味方を支える巫女のサポート。公式のサブロールはメディック。",
+    "quote": {
+      "text": "神秘の力と忍術で傷ついた故郷を癒やす。",
+      "url": "https://overwatch.blizzard.com/ja-jp/heroes/kiriko/"
+    },
+    "evidence": [
+      {
+        "tag": "ally",
+        "quote": "味方を自動追尾する回復のお札を展開する",
+        "url": "https://overwatch.blizzard.com/ja-jp/heroes/kiriko/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://overwatch.blizzard.com/ja-jp/heroes/kiriko/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "reserve": true
+  }
+]

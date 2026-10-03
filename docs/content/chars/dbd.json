@@ -1,0 +1,488 @@
+[
+  {
+    "id": "hillbilly",
+    "game": "dbd",
+    "roleId": "killer-chase",
+    "nameJa": "ヒルビリー",
+    "nameEn": "The Hillbilly",
+    "officialRole": "殺人鬼(難易度:普通)",
+    "summary": "チェーンソーのダッシュで長い距離を一気に詰める殺人鬼。公式は暴力で一気に片をつける効率の良さを紹介している。",
+    "quote": {
+      "text": "チェーンソーダッシュを発動し、猛烈なスピードで長距離を移動する",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-hillbilly/"
+    },
+    "evidence": [],
+    "pickedBy": "free",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/the-hillbilly/",
+    "checkedAt": "2026-10-03",
+    "matchable": false
+  },
+  {
+    "id": "huntress",
+    "game": "dbd",
+    "roleId": "killer-chase",
+    "nameJa": "ハントレス",
+    "nameEn": "The Huntress",
+    "officialRole": "殺人鬼(難易度:普通)",
+    "summary": "投げ斧で離れた相手を狙う殺人鬼。公式は忍耐強さと精度で追跡を早く終わらせられると紹介している。",
+    "quote": {
+      "text": "忍耐強さと精度を武器に、開始早々に追跡を終わらせることもできるだろう",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-huntress/"
+    },
+    "evidence": [
+      {
+        "tag": "calm",
+        "quote": "With patience and precision",
+        "url": "https://deadbydaylight.com/game/characters/the-huntress/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/the-huntress/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "開始早々に追跡を終わらせることもできるだろう",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-huntress/"
+    }
+  },
+  {
+    "id": "nurse",
+    "game": "dbd",
+    "roleId": "killer-chase",
+    "nameJa": "ナース",
+    "nameEn": "The Nurse",
+    "officialRole": "殺人鬼(難易度:かなり難しい)",
+    "summary": "ブリンクで長い距離を一気に移動し、相手の動きを読んで追跡を終える殺人鬼。",
+    "quote": {
+      "text": "ブリンクの能力で長距離を高速移動し、生存者の動きを読んで逃げ場を潰すことができる",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-nurse/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/the-nurse/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "外科医並みの正確さで追跡を終える力を持っている",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-nurse/"
+    },
+    "reserve": true
+  },
+  {
+    "id": "blight",
+    "game": "dbd",
+    "roleId": "killer-chase",
+    "nameJa": "ブライト",
+    "nameEn": "The Blight",
+    "officialRole": "殺人鬼(難易度:かなり難しい)",
+    "summary": "トークンを使った高速の突進を連続で出し、相手にプレッシャーをかける殺人鬼。",
+    "quote": {
+      "text": "トークンを使って高速で突進する",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-blight/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/the-blight/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "連続突進ができるため、プレッシャーを与えるのに最適な手札だ",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-blight/"
+    },
+    "reserve": true
+  },
+  {
+    "id": "wraith",
+    "game": "dbd",
+    "roleId": "killer-stealth",
+    "nameJa": "レイス",
+    "nameEn": "The Wraith",
+    "officialRole": "殺人鬼(難易度:簡単)",
+    "summary": "鐘で姿を消し、気配を悟られずに近づいて奇襲する殺人鬼。",
+    "quote": {
+      "text": "気配をほとんど悟られることなく獲物の追跡し攻撃することができる",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-wraith/"
+    },
+    "evidence": [
+      {
+        "tag": "mobile",
+        "quote": "奇襲に特化したレイス",
+        "url": "https://deadbydaylight.com/ja/game/characters/the-wraith/"
+      }
+    ],
+    "pickedBy": "free",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/the-wraith/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "気配をほとんど悟られることなく獲物の追跡し攻撃することができる",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-wraith/"
+    }
+  },
+  {
+    "id": "spirit",
+    "game": "dbd",
+    "roleId": "killer-stealth",
+    "nameJa": "スピリット",
+    "nameEn": "The Spirit",
+    "officialRole": "殺人鬼(難易度:難しい)",
+    "summary": "フェイズウォークで互いに姿が見えない状態になり、気づかれないまま攻撃する殺人鬼。",
+    "quote": {
+      "text": "「山岡の祟り」を発動中は、スピリットも生存者も互いに姿が見えない",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-spirit/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/the-spirit/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "生存者は知らぬ間に攻撃を受けることになるだろう",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-spirit/"
+    }
+  },
+  {
+    "id": "dredge",
+    "game": "dbd",
+    "roleId": "killer-stealth",
+    "nameJa": "ドレッジ",
+    "nameEn": "The Dredge",
+    "officialRole": "殺人鬼(難易度:難しい)",
+    "summary": "ロッカーからロッカーへ移動して不意に現れる殺人鬼。",
+    "quote": {
+      "text": "ロッカーをマップ上の通路として活用し、いつでもどこでも瞬時に姿を表すことができる",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-dredge/"
+    },
+    "evidence": [
+      {
+        "tag": "mobile",
+        "quote": "素早い移動と奇襲攻撃が可能になる",
+        "url": "https://deadbydaylight.com/ja/game/characters/the-dredge/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/the-dredge/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "脅威範囲が消失して不意打ちのチャンスが増え",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-dredge/"
+    },
+    "reserve": true
+  },
+  {
+    "id": "trapper",
+    "game": "dbd",
+    "roleId": "killer-setup",
+    "nameJa": "トラッパー",
+    "nameEn": "The Trapper",
+    "officialRole": "殺人鬼(難易度:簡単)",
+    "summary": "マップにトラバサミを仕掛けて、相手が慎重にならざるを得ない場所を作る殺人鬼。",
+    "quote": {
+      "text": "生存者が頻繁に通る場所や背の高い草に覆われたエリアなどに罠を仕掛け",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-trapper/"
+    },
+    "evidence": [
+      {
+        "tag": "setup",
+        "quote": "エリアなどに罠を仕掛け",
+        "url": "https://deadbydaylight.com/ja/game/characters/the-trapper/"
+      }
+    ],
+    "pickedBy": "free",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/the-trapper/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "エリアなどに罠を仕掛け、彼らが慎重にならざるを得ない危険地帯を作り出す",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-trapper/"
+    }
+  },
+  {
+    "id": "hag",
+    "game": "dbd",
+    "roleId": "killer-setup",
+    "nameJa": "ハグ",
+    "nameEn": "The Hag",
+    "officialRole": "殺人鬼(難易度:かなり難しい)",
+    "summary": "幻像の罠を張り巡らせ、踏まれた場所へ瞬時に移動して攻撃する殺人鬼。",
+    "quote": {
+      "text": "幻像の罠で危険な包囲網を張り巡らせ、生存者たちをうっかり自ら罠にはまらせる殺人鬼",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-hag/"
+    },
+    "evidence": [
+      {
+        "tag": "setup",
+        "quote": "幻像の罠で危険な包囲網を張り巡らせ",
+        "url": "https://deadbydaylight.com/ja/game/characters/the-hag/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/the-hag/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "最大10個の幻像の罠を仕掛けることができ",
+      "url": "https://deadbydaylight.com/ja/game/characters/the-hag/"
+    }
+  },
+  {
+    "id": "skull-merchant",
+    "game": "dbd",
+    "roleId": "killer-setup",
+    "nameJa": "スカルマーチャント",
+    "nameEn": "The Skull Merchant",
+    "officialRole": "殺人鬼(難易度:難しい)",
+    "summary": "ドローンを置いて監視網を作り、生存者を探して追う殺人鬼。",
+    "quote": {
+      "text": "不気味なドローンを駆使して恐怖の監視網を張り巡らせ",
+      "url": "https://deadbydaylight.com/ja/game/characters/skull-merchant/"
+    },
+    "evidence": [
+      {
+        "tag": "setup",
+        "quote": "ドローンは偵察モードに切り替わる",
+        "url": "https://deadbydaylight.com/ja/game/characters/skull-merchant/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/skull-merchant/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "複数のドローンをマップ上に配置できる",
+      "url": "https://deadbydaylight.com/ja/game/characters/skull-merchant/"
+    },
+    "reserve": true
+  },
+  {
+    "id": "meg",
+    "game": "dbd",
+    "roleId": "survivor-chase",
+    "nameJa": "メグ・トーマス",
+    "nameEn": "Meg Thomas",
+    "officialRole": "生存者",
+    "summary": "体育会系で、追跡をあえて長引かせて味方の時間を稼ぐ生存者。",
+    "quote": {
+      "text": "追跡を長引かせて殺人鬼を煽ることでスリルを味わいつつ",
+      "url": "https://deadbydaylight.com/ja/game/characters/meg-thomas/"
+    },
+    "evidence": [
+      {
+        "tag": "front",
+        "quote": "ピンチの時には進んで前に出ることの多いメグ",
+        "url": "https://deadbydaylight.com/ja/game/characters/meg-thomas/"
+      }
+    ],
+    "pickedBy": "free",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/meg-thomas/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "味方にとって必要な時間稼ぎをする",
+      "url": "https://deadbydaylight.com/ja/game/characters/meg-thomas/"
+    }
+  },
+  {
+    "id": "nea",
+    "game": "dbd",
+    "roleId": "survivor-chase",
+    "nameJa": "ネア・カールソン",
+    "nameEn": "Nea Karlsson",
+    "officialRole": "生存者",
+    "summary": "猫のようなすばしっこさで、ピンチをうまく切り抜けてきた生存者。",
+    "quote": {
+      "text": "ピンチの時でもうまく切り抜ける猫のようなすばしっこさ",
+      "url": "https://deadbydaylight.com/ja/game/characters/nea-karlsson/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/nea-karlsson/",
+    "checkedAt": "2026-10-03",
+    "matchable": false
+  },
+  {
+    "id": "david-king",
+    "game": "dbd",
+    "roleId": "survivor-chase",
+    "nameJa": "デイビッド・キング",
+    "nameEn": "David King",
+    "officialRole": "生存者",
+    "summary": "ケンカ好きの荒っぽい男。ダッシュで攻撃をかわすパークがある生存者。",
+    "quote": {
+      "text": "負傷時、一気にダッシュして殺人鬼の攻撃を積極的にかわす",
+      "url": "https://deadbydaylight.com/ja/game/characters/david-king/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/david-king/",
+    "checkedAt": "2026-10-03",
+    "matchable": false,
+    "reserve": true
+  },
+  {
+    "id": "claudette",
+    "game": "dbd",
+    "roleId": "survivor-support",
+    "nameJa": "クローデット・モレル",
+    "nameEn": "Claudette Morel",
+    "officialRole": "生存者",
+    "summary": "植物学の知識を生かして、自分と味方を治療する生存者。",
+    "quote": {
+      "text": "自身と他者を治療するプロであるクローデットのサポート",
+      "url": "https://deadbydaylight.com/ja/game/characters/claudette-morel/"
+    },
+    "evidence": [
+      {
+        "tag": "ally",
+        "quote": "An expert healer to herself and others",
+        "url": "https://deadbydaylight.com/game/characters/claudette-morel/"
+      }
+    ],
+    "pickedBy": "free",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/claudette-morel/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "負傷した味方を効率的に治療する",
+      "url": "https://deadbydaylight.com/ja/game/characters/claudette-morel/"
+    }
+  },
+  {
+    "id": "dwight",
+    "game": "dbd",
+    "roleId": "survivor-support",
+    "nameJa": "ドワイト・フェアフィールド",
+    "nameEn": "Dwight Fairfield",
+    "officialRole": "生存者",
+    "summary": "チームの効率を高めるのが得意な、リーダー役の生存者。",
+    "quote": {
+      "text": "チームの効率性を見いだしてそれを高めるのが得意だ",
+      "url": "https://deadbydaylight.com/ja/game/characters/dwight-fairfield/"
+    },
+    "evidence": [],
+    "pickedBy": "free",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/dwight-fairfield/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "付近にいる味方に対し、治療、フックの破壊、フックから救助",
+      "url": "https://deadbydaylight.com/ja/game/characters/dwight-fairfield/"
+    }
+  },
+  {
+    "id": "adam",
+    "game": "dbd",
+    "roleId": "survivor-support",
+    "nameJa": "アダム・フランシス",
+    "nameEn": "Adam Francis",
+    "officialRole": "生存者",
+    "summary": "命懸けで他者を救う英雄のような教師。素早く戦略を練る生存者。",
+    "quote": {
+      "text": "果敢にも命懸けで他者を救う英雄のような男だ",
+      "url": "https://deadbydaylight.com/ja/game/characters/adam-francis/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/adam-francis/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "仲間の生存者をフックから救助すると",
+      "url": "https://deadbydaylight.com/ja/game/characters/adam-francis/"
+    },
+    "reserve": true
+  },
+  {
+    "id": "jane",
+    "game": "dbd",
+    "roleId": "survivor-support",
+    "nameJa": "ジェーン・ロメロ",
+    "nameEn": "Jane Romero",
+    "officialRole": "生存者",
+    "summary": "周りと協力する才能を持つ生存者。パークで他の生存者を治療できる。",
+    "quote": {
+      "text": "周りと協力する才能は貴重な財産だ",
+      "url": "https://deadbydaylight.com/ja/game/characters/jane-romero/"
+    },
+    "evidence": [
+      {
+        "tag": "ally",
+        "quote": "When injured, healing another Survivor",
+        "url": "https://deadbydaylight.com/game/characters/jane-romero/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/jane-romero/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "負傷時に他の生存者を治療すると",
+      "url": "https://deadbydaylight.com/ja/game/characters/jane-romero/"
+    },
+    "reserve": true
+  },
+  {
+    "id": "jake",
+    "game": "dbd",
+    "roleId": "survivor-stealth",
+    "nameJa": "ジェイク・パーク",
+    "nameEn": "Jake Park",
+    "officialRole": "生存者",
+    "summary": "自然の中で生存本能を磨いた、気配を隠すのが得意な生存者。",
+    "quote": {
+      "text": "自然の中で過ごしたことで生存本能が研ぎ澄まされた",
+      "url": "https://deadbydaylight.com/ja/game/characters/jake-park/"
+    },
+    "evidence": [],
+    "pickedBy": "free",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/jake-park/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "あなたの発見と追跡が困難になる",
+      "url": "https://deadbydaylight.com/ja/game/characters/jake-park/"
+    }
+  },
+  {
+    "id": "feng-min",
+    "game": "dbd",
+    "roleId": "survivor-stealth",
+    "nameJa": "フェン・ミン",
+    "nameEn": "Feng Min",
+    "officialRole": "生存者",
+    "summary": "効率重視のeスポーツ選手。発電機の修理中の音を抑えるパークがある。",
+    "quote": {
+      "text": "機械の取り扱い時は最大限慎重に、かつ正確に行う",
+      "url": "https://deadbydaylight.com/ja/game/characters/feng-min/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/feng-min/",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "roleBasis": {
+      "text": "発電機の修理時の音が低減され",
+      "url": "https://deadbydaylight.com/ja/game/characters/feng-min/"
+    }
+  },
+  {
+    "id": "yui",
+    "game": "dbd",
+    "roleId": "survivor-stealth",
+    "nameJa": "木村結衣",
+    "nameEn": "Yui Kimura",
+    "officialRole": "生存者",
+    "summary": "素早い決断力を持つ生存者。パークで追跡から逃れやすくなる。",
+    "quote": {
+      "text": "殺人鬼の追跡から完全に逃れることが可能になる",
+      "url": "https://deadbydaylight.com/ja/game/characters/yui-kimura/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://deadbydaylight.com/ja/game/characters/yui-kimura/",
+    "checkedAt": "2026-10-03",
+    "matchable": false,
+    "reserve": true
+  }
+]

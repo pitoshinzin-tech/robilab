@@ -1,0 +1,429 @@
+[
+  {
+    "id": "bangalore",
+    "game": "apex",
+    "roleId": "assault",
+    "nameJa": "バンガロール",
+    "nameEn": "Bangalore",
+    "officialRole": "アサルト",
+    "summary": "スモークで視界を切りつつ、撃たれても足を止めずに戦場を動けるアサルト。まず試すのに向く。",
+    "quote": {
+      "text": "スプリント中に被弾すると一時的に速度が上昇する。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [],
+    "pickedBy": "official-beginner",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/bangalore",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "公式ヘルプ「初心者用ヒント」8 に初心者向けとして挙げられている (https://help.ea.com/jp/articles/apex-legends/how-to-play/)。初期解放でもある"
+  },
+  {
+    "id": "fuse",
+    "game": "apex",
+    "roleId": "assault",
+    "nameJa": "ヒューズ",
+    "nameEn": "Fuse",
+    "officialRole": "アサルト",
+    "summary": "グレネードを多く持ち、広い範囲を爆発物で押していくアサルト。",
+    "quote": {
+      "text": "インベントリの各スロットで所有できるグレネードが1個増加する。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [],
+    "pickedBy": "official-beginner",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/fuse",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "公式ヘルプ「初心者用ヒント」8 に初心者向けとして挙げられている (https://help.ea.com/jp/articles/apex-legends/how-to-play/)"
+  },
+  {
+    "id": "mad-maggie",
+    "game": "apex",
+    "roleId": "assault",
+    "nameJa": "マッドマギー",
+    "nameEn": "Mad Maggie",
+    "officialRole": "アサルト",
+    "summary": "ドリルとショットガンで敵に詰め寄る近距離型のアサルト。",
+    "quote": {
+      "text": "障害物越しに敵を焼き払うドリルを放つ。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/mad-maggie",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)"
+  },
+  {
+    "id": "ballistic",
+    "game": "apex",
+    "roleId": "assault",
+    "nameJa": "バリスティック",
+    "nameEn": "Ballistic",
+    "officialRole": "アサルト",
+    "summary": "3つ目の武器を持ち歩き、味方の戦闘も後押しするアサルト。",
+    "quote": {
+      "text": "スリングに3つ目の武器を収納すると",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/ballistic",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)(予備)",
+    "reserve": true
+  },
+  {
+    "id": "pathfinder",
+    "game": "apex",
+    "roleId": "skirmisher",
+    "nameJa": "パスファインダー",
+    "nameEn": "Pathfinder",
+    "officialRole": "スカーミッシャー",
+    "summary": "グラップルで高所や遠くへ素早く動き、動きで状況を作るスカーミッシャー。",
+    "quote": {
+      "text": "グラップリングで、移動の難しい場所へ素早く移動できる。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [
+      {
+        "tag": "mobile",
+        "quote": "グラップリングで、移動の難しい場所へ素早く移動できる。",
+        "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+      }
+    ],
+    "pickedBy": "official-beginner",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/pathfinder",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "公式ヘルプ「初心者用ヒント」8 に初心者向けとして挙げられている (https://help.ea.com/jp/articles/apex-legends/how-to-play/)。ウェルカムパスで解放"
+  },
+  {
+    "id": "wraith",
+    "game": "apex",
+    "roleId": "skirmisher",
+    "nameJa": "レイス",
+    "nameEn": "Wraith",
+    "officialRole": "スカーミッシャー",
+    "summary": "虚空を抜けて素早く動き、危険を事前に知らせてもらえるスカーミッシャー。",
+    "quote": {
+      "text": "虚空を抜けて素早く新しい場所に移動する。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [
+      {
+        "tag": "mobile",
+        "quote": "虚空を抜けて素早く新しい場所に移動する。",
+        "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+      }
+    ],
+    "pickedBy": "free",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/wraith",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "公式ヘルプで初めてプレイするとアンロックされる 3 人(バンガロール・ライフライン・レイス)のひとり (https://help.ea.com/jp/articles/apex-legends/how-to-play/)"
+  },
+  {
+    "id": "octane",
+    "game": "apex",
+    "roleId": "skirmisher",
+    "nameJa": "オクタン",
+    "nameEn": "Octane",
+    "officialRole": "スカーミッシャー",
+    "summary": "体力を使って加速し、自動回復で前へ出続けるスカーミッシャー。",
+    "quote": {
+      "text": "時間経過で体力が自動回復。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/octane",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)"
+  },
+  {
+    "id": "horizon",
+    "game": "apex",
+    "roleId": "skirmisher",
+    "nameJa": "ホライゾン",
+    "nameEn": "Horizon",
+    "officialRole": "スカーミッシャー",
+    "summary": "重力を操って仲間を持ち上げ、空中の動きに強みがあるスカーミッシャー。",
+    "quote": {
+      "text": "空気制御を向上させて、落下の衝撃を軽減する。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/horizon",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)(予備)",
+    "reserve": true
+  },
+  {
+    "id": "bloodhound",
+    "game": "apex",
+    "roleId": "recon",
+    "nameJa": "ブラッドハウンド",
+    "nameEn": "Bloodhound",
+    "officialRole": "リコン",
+    "summary": "敵の痕跡をたどって位置を読み、次の動きを決めるリコン。",
+    "quote": {
+      "text": "敵が残した痕跡を確認できる。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/bloodhound",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)。ウェルカムパスで解放(初期解放ではない)"
+  },
+  {
+    "id": "crypto",
+    "game": "apex",
+    "roleId": "recon",
+    "nameJa": "クリプト",
+    "nameEn": "Crypto",
+    "officialRole": "リコン",
+    "summary": "ドローンで上空から状況を見て、味方に敵の位置を共有するリコン。",
+    "quote": {
+      "text": "周囲を上空から見渡せる飛行ドローンを展開する。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/crypto",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)。公式日本語の表記は「クリプト」(ea.com の日本語ページのタイトルと本文・公式ヘルプのレジェンドガイド)"
+  },
+  {
+    "id": "vantage",
+    "game": "apex",
+    "roleId": "recon",
+    "nameJa": "ヴァンテージ",
+    "nameEn": "Vantage",
+    "officialRole": "リコン",
+    "summary": "遠くを偵察しながら狙撃で味方を支えるリコン。",
+    "quote": {
+      "text": "接眼レンズでエイムしながら、周囲を偵察できる。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [
+      {
+        "tag": "setup",
+        "quote": "接眼レンズでエイムしながら、周囲を偵察できる。",
+        "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/vantage",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)"
+  },
+  {
+    "id": "seer",
+    "game": "apex",
+    "roleId": "recon",
+    "nameJa": "シア",
+    "nameEn": "Seer",
+    "officialRole": "リコン",
+    "summary": "心拍や壁越しの探知で、敵の居場所を暴くリコン。",
+    "quote": {
+      "text": "エイム時に周辺の敵の心拍を捉えて視覚化する。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/seer",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)(予備)",
+    "reserve": true
+  },
+  {
+    "id": "caustic",
+    "game": "apex",
+    "roleId": "controller",
+    "nameJa": "コースティック",
+    "nameEn": "Caustic",
+    "officialRole": "コントローラー",
+    "summary": "毒ガスで場所を縛り、敵の動きを制限するコントローラー。",
+    "quote": {
+      "text": "ガスを通して敵が見える。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/caustic",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)"
+  },
+  {
+    "id": "wattson",
+    "game": "apex",
+    "roleId": "controller",
+    "nameJa": "ワットソン",
+    "nameEn": "Wattson",
+    "officialRole": "コントローラー",
+    "summary": "電気フェンスと迎撃で、陣地を固めて守るコントローラー。",
+    "quote": {
+      "text": "ノードを接続して電気フェンスを作り、敵にダメージを与えて行動を遅らせる。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [
+      {
+        "tag": "setup",
+        "quote": "飛んでくる軍需品を破壊して、シールドの損傷を修復する電気パイロンを設置する。",
+        "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/wattson",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)"
+  },
+  {
+    "id": "rampart",
+    "game": "apex",
+    "roleId": "controller",
+    "nameJa": "ランパート",
+    "nameEn": "Rampart",
+    "officialRole": "コントローラー",
+    "summary": "壁と据え置きの機関銃で、拠点を作って撃ち合うコントローラー。",
+    "quote": {
+      "text": "誰でも使用できる装弾数の多い銃を設置する。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [
+      {
+        "tag": "setup",
+        "quote": "遮蔽物を設置すると全体を覆う増幅バリケードが出現し",
+        "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/rampart",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)"
+  },
+  {
+    "id": "catalyst",
+    "game": "apex",
+    "roleId": "controller",
+    "nameJa": "カタリスト",
+    "nameEn": "Catalyst",
+    "officialRole": "コントローラー",
+    "summary": "ドアを補強し、壁とスパイクで通り道を絞るコントローラー。",
+    "quote": {
+      "text": "最大4つのドアを補強して敵を寄せ付けない。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/catalyst",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)(予備)",
+    "reserve": true
+  },
+  {
+    "id": "lifeline",
+    "game": "apex",
+    "roleId": "support",
+    "nameJa": "ライフライン",
+    "nameEn": "Lifeline",
+    "officialRole": "サポート",
+    "summary": "ドローンで味方を回復・蘇生し、仲間の生存を支えるサポート。",
+    "quote": {
+      "text": "D.O.C.を展開し仲間を復活させ",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [
+      {
+        "tag": "ally",
+        "quote": "D.O.Cは付近の味方を回復する。",
+        "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+      }
+    ],
+    "pickedBy": "official-beginner",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/lifeline",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "公式ヘルプ「初心者用ヒント」8 に初心者向けとして挙げられている (https://help.ea.com/jp/articles/apex-legends/how-to-play/)。初期解放でもある"
+  },
+  {
+    "id": "conduit",
+    "game": "apex",
+    "roleId": "support",
+    "nameJa": "コンジット",
+    "nameEn": "Conduit",
+    "officialRole": "サポート",
+    "summary": "味方にシールドを送り、仲間の近くで速く動くサポート。",
+    "quote": {
+      "text": "敵にダメージを与えて動きを鈍らせる、シールド妨害デバイスを複数展開する。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [],
+    "pickedBy": "official-beginner",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/conduit",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "公式ヘルプ「初心者用ヒント」8 に初心者向けとして挙げられている (https://help.ea.com/jp/articles/apex-legends/how-to-play/)"
+  },
+  {
+    "id": "gibraltar",
+    "game": "apex",
+    "roleId": "support",
+    "nameJa": "ジブラルタル",
+    "nameEn": "Gibraltar",
+    "officialRole": "サポート",
+    "summary": "ドームと銃の盾で、仲間を守る壁になるサポート。",
+    "quote": {
+      "text": "攻撃をブロックするドームシールドを作り出す。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/gibraltar",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)。ウェルカムパスで解放(初期解放ではない)"
+  },
+  {
+    "id": "newcastle",
+    "game": "apex",
+    "roleId": "support",
+    "nameJa": "ニューキャッスル",
+    "nameEn": "Newcastle",
+    "officialRole": "サポート",
+    "summary": "ダウンした味方を引き起こし、盾で守りながら復活させるサポート。",
+    "quote": {
+      "text": "移動エネルギーシールドを生成する操作可能なドローンを投げる。",
+      "url": "https://help.ea.com/jp/articles/apex-legends/abilities/"
+    },
+    "evidence": [
+      {
+        "tag": "ally",
+        "quote": "Protect downed allies as you revive them",
+        "url": "https://help.ea.com/en/articles/apex-legends/abilities/"
+      }
+    ],
+    "pickedBy": "variety",
+    "sourceUrl": "https://www.ea.com/ja/games/apex-legends/apex-legends/characters-hub/newcastle",
+    "checkedAt": "2026-10-03",
+    "matchable": true,
+    "selectionBasis": "ロールの中で公式の説明の向きが違うキャラとして選択(公式の初心者向け・初期解放に該当なし)(予備)",
+    "reserve": true
+  }
+]
