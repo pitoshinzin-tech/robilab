@@ -1,5 +1,5 @@
 import { MY_SETTINGS_LIMITS, type Grip, type MySettings } from "@/lib/my-settings";
-import type { MouseSpec } from "@/data/mice";
+import type { MouseConnection, MouseShape } from "@/data/gear-types";
 
 /**
  * 手の大きさ × 係数 = ちょうどいいマウスの長さ・幅の目安(docs/superpowers/specs/2026-09-29-mouse-finder-design.md 4.1)。
@@ -19,11 +19,24 @@ const ZERO_AT = 3;
 
 export type Hand = { lengthCm: number; widthCm: number | null; grip: Grip };
 export type Target = { lengthMm: number; widthMm: number | null };
-export type Ranked = { mouse: MouseSpec; distance: number; score: number; reasons: string[] };
+/** 手に合う順に並べられるマウス(公式の長さと幅があるもの)。高さ・重さ・形・接続は公式にないことがある(null) */
+export type FitMouse = {
+  id: string;
+  lengthMm: number;
+  widthMm: number;
+  heightMm: number | null;
+  weightG: number | null;
+  shape: MouseShape | null;
+  connection: MouseConnection | null;
+};
+/** 今のマウスとの比べに使う数字(どれも公式にないことがある) */
+export type CompareMouse = { id: string; lengthMm: number | null; widthMm: number | null; heightMm: number | null; weightG: number | null };
+export type Ranked<M extends FitMouse = FitMouse> = { mouse: M; distance: number; score: number; reasons: string[] };
 export type MouseFilter = {
   weight: "all" | "le55" | "le70" | "gt70";
-  shape: "all" | MouseSpec["shape"];
-  connection: "all" | MouseSpec["connection"];
+  shape: "all" | MouseShape;
+  /** both(有線・無線)のマウスは wired にも wireless にも入る */
+  connection: "all" | "wired" | "wireless";
 };
 export const NO_FILTER: MouseFilter = { weight: "all", shape: "all", connection: "all" };
 
@@ -40,7 +53,7 @@ export function targetText(t: Target): string {
   return t.widthMm === null ? length : `${length}・幅 ${range(t.widthMm, RANGE_MM.width)}`;
 }
 
-export function fitDistance(t: Target, m: Pick<MouseSpec, "lengthMm" | "widthMm">): number {
+export function fitDistance(t: Target, m: Pick<FitMouse, "lengthMm" | "widthMm">): number {
   const dl = (m.lengthMm - t.lengthMm) / SCALE_MM.length;
   const dw = t.widthMm === null ? 0 : (m.widthMm - t.widthMm) / SCALE_MM.width;
   return Math.sqrt(dl * dl + dw * dw);
@@ -63,8 +76,21 @@ const REASON: Record<"length" | "width", Record<Verdict, string>> = {
   width: { ok: "幅が目安どおり", small: "幅がやや狭め", large: "幅がやや広め" },
 };
 
-/** 目安に近い順(同じなら軽い順、それも同じなら id 順)。 */
-export function rankMice(h: Hand, mice: MouseSpec[]): Ranked[] {
+/** 公式の長さと幅があるか(ないものは順位に入れず「比べられません」へ) */
+export function isFitMouse<M extends { lengthMm: number | null; widthMm: number | null }>(m: M): m is M & { lengthMm: number; widthMm: number } {
+  return m.lengthMm !== null && m.widthMm !== null;
+}
+
+/** 小さい順。null は後ろ */
+function nullLast(a: number | null, b: number | null): number {
+  if (a === b) return 0;
+  if (a === null) return 1;
+  if (b === null) return -1;
+  return a - b;
+}
+
+/** 目安に近い順(同じなら軽い順・重さが公式にないものは後ろ、それも同じなら id 順)。 */
+export function rankMice<M extends FitMouse>(h: Hand, mice: readonly M[]): Ranked<M>[] {
   const t = fitTarget(h);
   return mice
     .map((mouse) => {
@@ -73,31 +99,39 @@ export function rankMice(h: Hand, mice: MouseSpec[]): Ranked[] {
       if (t.widthMm !== null) reasons.push(REASON.width[verdict(mouse.widthMm, t.widthMm, RANGE_MM.width)]);
       return { mouse, distance, score: fitScore(distance), reasons };
     })
-    .sort((a, b) => a.distance - b.distance || a.mouse.weightG - b.mouse.weightG || (a.mouse.id < b.mouse.id ? -1 : a.mouse.id > b.mouse.id ? 1 : 0));
+    .sort((a, b) => a.distance - b.distance || nullLast(a.mouse.weightG, b.mouse.weightG) || (a.mouse.id < b.mouse.id ? -1 : a.mouse.id > b.mouse.id ? 1 : 0));
 }
 
-/** 絞り込み(並び順は変えない)。 */
-export function applyFilter(list: Ranked[], f: MouseFilter): Ranked[] {
+/** 絞り込み(並び順は変えない)。重さ・形が公式にないものは、その絞り込みでは外れる。 */
+export function applyFilter<M extends FitMouse>(list: readonly Ranked<M>[], f: MouseFilter): Ranked<M>[] {
   return list.filter(({ mouse: m }) => {
-    if (f.weight === "le55" && m.weightG > 55) return false;
-    if (f.weight === "le70" && m.weightG > 70) return false;
-    if (f.weight === "gt70" && m.weightG <= 70) return false;
+    if (f.weight !== "all") {
+      if (m.weightG === null) return false;
+      if (f.weight === "le55" && m.weightG > 55) return false;
+      if (f.weight === "le70" && m.weightG > 70) return false;
+      if (f.weight === "gt70" && m.weightG <= 70) return false;
+    }
     if (f.shape !== "all" && m.shape !== f.shape) return false;
-    if (f.connection !== "all" && m.connection !== f.connection) return false;
+    if (f.connection !== "all" && m.connection !== f.connection && m.connection !== "both") return false;
     return true;
   });
 }
 
-/** 今のマウスとの差。差の絶対値が 1 以下は「ほぼ同じ」。 */
-export function compareWith(current: MouseSpec, m: MouseSpec): string {
+/** 今のマウスとの差(両方に公式の数字がある項目だけ)。差の絶対値が 1 以下は「ほぼ同じ」。比べられる項目がなければ null。 */
+export function compareWith(current: CompareMouse, m: CompareMouse): string | null {
   if (current.id === m.id) return "今使っているマウス";
-  const items: [string, number, string][] = [
-    ["長さ", m.lengthMm - current.lengthMm, "mm"],
-    ["幅", m.widthMm - current.widthMm, "mm"],
-    ["高さ", m.heightMm - current.heightMm, "mm"],
-    ["重さ", m.weightG - current.weightG, "g"],
+  const all: [string, number | null, number | null, string][] = [
+    ["長さ", m.lengthMm, current.lengthMm, "mm"],
+    ["幅", m.widthMm, current.widthMm, "mm"],
+    ["高さ", m.heightMm, current.heightMm, "mm"],
+    ["重さ", m.weightG, current.weightG, "g"],
   ];
-  if (items.every(([, d]) => Math.abs(d) <= 1)) return "今のマウスとほぼ同じ大きさ・重さ";
+  const items: [string, number, string][] = [];
+  for (const [label, a, b, unit] of all) if (a !== null && b !== null) items.push([label, a - b, unit]);
+  if (items.length === 0) return null;
+  if (items.every(([, d]) => Math.abs(d) <= 1)) {
+    return items.length === all.length ? "今のマウスとほぼ同じ大きさ・重さ" : `今のマウスと${items.map(([label]) => label).join("・")}がほぼ同じ`;
+  }
   const fmt = (d: number, unit: string) => {
     if (Math.abs(d) <= 1) return "ほぼ同じ";
     const v = round1(Math.abs(d));

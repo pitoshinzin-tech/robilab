@@ -1,12 +1,11 @@
 import { describe, it, expect } from "vitest";
-import type { MouseSpec } from "@/data/mice";
+import type { FitMouse } from "@/lib/mouse-fit";
 import {
-  applyFilter, compareWith, DEFAULT_HAND_LENGTH_CM, fitDistance, fitScore, fitTarget, handFrom, NO_FILTER, previewHand, rankMice, targetText,
+  applyFilter, compareWith, DEFAULT_HAND_LENGTH_CM, fitDistance, fitScore, fitTarget, handFrom, isFitMouse, NO_FILTER, previewHand, rankMice, targetText,
 } from "@/lib/mouse-fit";
 
-const m = (id: string, lengthMm: number, widthMm: number, weightG: number, extra: Partial<MouseSpec> = {}): MouseSpec => ({
-  id, lengthMm, widthMm, heightMm: 38, weightG, shape: "symmetric", connection: "wireless",
-  officialUrl: "https://example.com/" + id, checkedAt: "2026-09-29", ...extra,
+const m = (id: string, lengthMm: number, widthMm: number, weightG: number, extra: Partial<FitMouse> = {}): FitMouse => ({
+  id, lengthMm, widthMm, heightMm: 38, weightG, shape: "symmetric", connection: "wireless", ...extra,
 });
 
 describe("fitTarget", () => {
@@ -131,5 +130,37 @@ describe("previewHand", () => {
       hand: { lengthCm: DEFAULT_HAND_LENGTH_CM, widthCm: null, grip: "fingertip" }, estimated: true,
     });
     expect(previewHand({ lengthCm: 25, widthCm: 5, grip: null }).hand).toEqual({ lengthCm: 25, widthCm: 5, grip: "palm" });
+  });
+});
+
+describe("公式にない数字(null)", () => {
+  const hand = { lengthCm: 18.5, widthCm: 9, grip: "palm" as const };
+  it("isFitMouse は長さと幅がそろうときだけ true", () => {
+    expect(isFitMouse({ lengthMm: 120, widthMm: 60 })).toBe(true);
+    expect(isFitMouse({ lengthMm: null, widthMm: 60 })).toBe(false);
+    expect(isFitMouse({ lengthMm: 120, widthMm: null })).toBe(false);
+  });
+  it("同じ距離なら重さのあるものが先、重さのないもの同士は id 順。距離は数のまま", () => {
+    const list = rankMice(hand, [m("z-null", 118, 56, 0, { weightG: null }), m("a-null", 118, 56, 0, { weightG: null }), m("w", 118, 56, 80)]);
+    expect(list.map((r) => r.mouse.id)).toEqual(["w", "a-null", "z-null"]);
+    for (const r of list) expect(Number.isFinite(r.distance)).toBe(true);
+  });
+  it("重さのないものは重さの絞り込みで外れ、形のないものは形の絞り込みで外れる(すべてなら入る)", () => {
+    const list = rankMice(hand, [m("nw", 118, 56, 0, { weightG: null }), m("ns", 120, 57, 50, { shape: null })]);
+    expect(applyFilter(list, NO_FILTER).map((r) => r.mouse.id).sort()).toEqual(["ns", "nw"]);
+    expect(applyFilter(list, { ...NO_FILTER, weight: "le70" }).map((r) => r.mouse.id)).toEqual(["ns"]);
+    expect(applyFilter(list, { ...NO_FILTER, weight: "gt70" })).toEqual([]);
+    expect(applyFilter(list, { ...NO_FILTER, shape: "symmetric" }).map((r) => r.mouse.id)).toEqual(["nw"]);
+  });
+  it("有線・無線(both)は、有線でも無線でも絞り込みに入る。接続のないものはどちらにも入らない", () => {
+    const list = rankMice(hand, [m("both", 118, 56, 60, { connection: "both" }), m("none", 119, 56, 60, { connection: null })]);
+    expect(applyFilter(list, { ...NO_FILTER, connection: "wired" }).map((r) => r.mouse.id)).toEqual(["both"]);
+    expect(applyFilter(list, { ...NO_FILTER, connection: "wireless" }).map((r) => r.mouse.id)).toEqual(["both"]);
+  });
+  it("今のマウスとの比べは、両方に公式の数字がある項目だけ。1 つもなければ null", () => {
+    const cur = m("cur", 125, 63.5, 60, { heightMm: 40 });
+    expect(compareWith(cur, m("x", 130, 63.5, 0, { heightMm: null, weightG: null }))).toBe("今のマウスより 長さ +5mm・幅 ほぼ同じ");
+    expect(compareWith(cur, m("y", 125.5, 63, 0, { heightMm: null, weightG: null }))).toBe("今のマウスと長さ・幅がほぼ同じ");
+    expect(compareWith({ id: "n", lengthMm: null, widthMm: null, heightMm: null, weightG: null }, cur)).toBeNull();
   });
 });

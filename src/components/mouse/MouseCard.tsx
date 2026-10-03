@@ -5,9 +5,8 @@ import { ButtonAnchor } from "@/components/ui/button-link";
 import { Badge, RankBadge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ChipButton } from "@/components/ui/chip-button";
+import { connectionLabel, shapeLabel, withUnit } from "@/lib/gear-labels";
 
-const SHAPE = { symmetric: "左右対称", right: "右手用" } as const;
-const CONNECTION = { wired: "有線", wireless: "無線" } as const;
 
 /** 2 番目からのカード。店のボタンはすべて二番手(主ボタンは先頭の大きな行 TopMouseRow だけ) */
 export function MouseCard({ rank, item, brand, name, reason, compare, links, imageUrl, overlaid = false, onOverlay }: {
@@ -24,7 +23,10 @@ export function MouseCard({ rank, item, brand, name, reason, compare, links, ima
 }) {
   const m = item.mouse;
   const image = imageUrl && links.rakutenIsItem ? imageUrl : null;
-  const specs: [string, string][] = [["長さ", `${m.lengthMm}mm`], ["幅", `${m.widthMm}mm`], ["高さ", `${m.heightMm}mm`], ["重さ", `${m.weightG}g`], ["形", SHAPE[m.shape]], ["接続", CONNECTION[m.connection]]];
+  const specs: [string, string][] = [
+    ["長さ", `${m.lengthMm}mm`], ["幅", `${m.widthMm}mm`], ["高さ", withUnit(m.heightMm, "mm")], ["重さ", withUnit(m.weightG, "g")],
+    ["形", shapeLabel(m.shape)], ["接続", connectionLabel(m.connection)],
+  ];
   return (
     <Card as="li" className={image ? "grid gap-4 md:grid-cols-[8rem_minmax(0,1fr)] md:items-start" : "grid gap-4"}>
       {image && (

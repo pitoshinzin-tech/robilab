@@ -1,6 +1,6 @@
 import type { Grip } from "@/lib/my-settings";
-import type { MouseSpec } from "@/data/mice";
-import { DEFAULT_HAND_LENGTH_CM, RANGE_MM, type Hand, type Target } from "@/lib/mouse-fit";
+import type { MouseConnection, MouseShape } from "@/data/gear-types";
+import { DEFAULT_HAND_LENGTH_CM, RANGE_MM, type CompareMouse, type FitMouse, type Hand, type Target } from "@/lib/mouse-fit";
 
 /**
  * 「おすすめの理由」の文言(本人が言い回しを直せるように、ここにまとめる)。
@@ -46,7 +46,9 @@ export const REASON_TEXT = {
   shape: {
     symmetric: "左右対称で持ち方を選ばない形です",
     right: "右手用(かぶせ・つかみ持ち向き)の形です",
-  } as Record<MouseSpec["shape"], string>,
+  } as Record<MouseShape, string>,
+  /** 形が公式にないとき */
+  shapeUnknown: "形は公式の記載がありません",
   /** 3 文目:重さの区分(g)。light 以下は軽い、mid 以下は標準、それより上は重め */
   weightMax: { light: 55, mid: 75 },
   weight: {
@@ -58,7 +60,12 @@ export const REASON_TEXT = {
   connection: {
     wireless: "ケーブルが引っかからない無線です",
     wired: "充電のいらない有線です",
-  } as Record<MouseSpec["connection"], string>,
+    both: "有線でも無線でも使えるタイプです",
+  } as Record<MouseConnection, string>,
+  /** 重さ・接続が公式にないとき */
+  weightUnknown: "重さは公式の記載がなく",
+  connectionUnknownTail: "マウスです",
+  noWeightNoConnection: "重さ・接続は公式の記載がありません",
   /** 今のマウスとの比べ(差の絶対値がこれ以下は書かない) */
   compareMin: 1,
 } as const;
@@ -80,7 +87,7 @@ function verdict(actual: number, target: number, range: number): Verdict {
   return "ok";
 }
 
-function sizeSentence(hand: Hand, estimated: boolean, t: Target, m: MouseSpec): string {
+function sizeSentence(hand: Hand, estimated: boolean, t: Target, m: FitMouse): string {
   const g = REASON_TEXT.gripLabel[hand.grip];
   const who = estimated
     ? `平均的な手(${DEFAULT_HAND_LENGTH_CM}cm)として、${g}には`
@@ -90,7 +97,7 @@ function sizeSentence(hand: Hand, estimated: boolean, t: Target, m: MouseSpec): 
   return `${who}長さ ${num(m.lengthMm)}mm ${tail}。`;
 }
 
-function widthSentence(hand: Hand, t: Target, m: MouseSpec): string {
+function widthSentence(hand: Hand, t: Target, m: FitMouse): string {
   const W = REASON_TEXT.width;
   let part: string;
   if (t.widthMm !== null) {
@@ -99,40 +106,46 @@ function widthSentence(hand: Hand, t: Target, m: MouseSpec): string {
   } else if (m.widthMm <= REASON_TEXT.widthAbsolute.narrowMax) part = W.narrow[hand.grip];
   else if (m.widthMm >= REASON_TEXT.widthAbsolute.wideMin) part = W.wide[hand.grip];
   else part = W.normal;
-  return `幅は ${num(m.widthMm)}mm と${part}、${REASON_TEXT.shape[m.shape]}。`;
+  const shape = m.shape === null ? REASON_TEXT.shapeUnknown : REASON_TEXT.shape[m.shape];
+  return `幅は ${num(m.widthMm)}mm と${part}、${shape}。`;
 }
 
-function weightSentence(m: MouseSpec): string {
-  const { light, mid } = REASON_TEXT.weightMax;
-  const w = m.weightG <= light ? REASON_TEXT.weight.light : m.weightG <= mid ? REASON_TEXT.weight.mid : REASON_TEXT.weight.heavy;
-  return `${w(m.weightG)}、${REASON_TEXT.connection[m.connection]}。`;
+function weightSentence(m: FitMouse): string {
+  const T = REASON_TEXT;
+  if (m.weightG === null) return m.connection === null ? `${T.noWeightNoConnection}。` : `${T.weightUnknown}、${T.connection[m.connection]}。`;
+  const { light, mid } = T.weightMax;
+  const w = m.weightG <= light ? T.weight.light : m.weightG <= mid ? T.weight.mid : T.weight.heavy;
+  return m.connection === null ? `${w(m.weightG)}${T.connectionUnknownTail}。` : `${w(m.weightG)}、${T.connection[m.connection]}。`;
 }
 
-/** 今のマウスとの比べ(長さ・幅・重さ)。同じマウス・ほぼ同じなら空。 */
-export function compareClause(current: MouseSpec, m: MouseSpec): string {
+/** 今のマウスとの比べ(長さ・幅・重さのうち、両方に公式の数字があるもの)。同じマウス・ほぼ同じなら空。 */
+export function compareClause(current: CompareMouse, m: CompareMouse): string {
   if (current.id === m.id) return "";
-  const items: [number, string, string, string][] = [
-    [m.lengthMm - current.lengthMm, "mm", "短", "長"],
-    [m.widthMm - current.widthMm, "mm", "細", "太"],
-    [m.weightG - current.weightG, "g", "軽", "重"],
+  const all: [number | null, number | null, string, string, string][] = [
+    [m.lengthMm, current.lengthMm, "mm", "短", "長"],
+    [m.widthMm, current.widthMm, "mm", "細", "太"],
+    [m.weightG, current.weightG, "g", "軽", "重"],
   ];
-  const parts = items
-    .filter(([d]) => Math.abs(d) > REASON_TEXT.compareMin)
-    .map(([d, unit, less, more]) => ({ v: `${num(Math.abs(d))}${unit}`, stem: d < 0 ? less : more }));
+  const parts: { v: string; stem: string }[] = [];
+  for (const [a, b, unit, less, more] of all) {
+    if (a === null || b === null) continue;
+    const d = a - b;
+    if (Math.abs(d) > REASON_TEXT.compareMin) parts.push({ v: `${num(Math.abs(d))}${unit}`, stem: d < 0 ? less : more });
+  }
   if (parts.length === 0) return "";
   const body = parts.map((p, i) => `${p.v} ${p.stem}${i === parts.length - 1 ? "いです" : "く"}`).join("、");
   return `今のマウスより ${body}。`;
 }
 
 /**
- * 結果のカードに出す「おすすめの理由」(2〜3 文 + 今のマウスとの比べ)。
- * 手の情報(持ち方・長さ・幅)とマウスの公式の数字だけから、決まった規則で作る。
+ * 結果のカードに出す「おすすめの理由」(3 文 + 今のマウスとの比べ)。
+ * 手の情報(持ち方・長さ・幅)とマウスの公式の数字だけから、決まった規則で作る。公式にない数字は「公式の記載がありません」と書く。
  */
 export function recommendReason(
   hand: Hand & { estimated?: boolean },
   target: Target,
-  mouse: MouseSpec,
-  current?: MouseSpec | null,
+  mouse: FitMouse,
+  current?: CompareMouse | null,
 ): string {
   const text = sizeSentence(hand, hand.estimated ?? false, target, mouse) + widthSentence(hand, target, mouse) + weightSentence(mouse);
   return current ? text + compareClause(current, mouse) : text;

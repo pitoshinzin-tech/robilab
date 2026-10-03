@@ -5,6 +5,7 @@ import { ButtonAnchor } from "@/components/ui/button-link";
 import { Badge } from "@/components/ui/badge";
 import { ChipButton } from "@/components/ui/chip-button";
 import { NumUnit } from "@/components/ui/num-unit";
+import { NO_DATA } from "@/lib/gear-labels";
 
 /**
  * 追補 6 章:先頭は箱ではなく大きな行。左に順位(display-2・Orbitron・マゼンタ。ふだんは「1」、絞り込みで 1 位が外れたときは残った先頭の本当の順位)、真ん中に名前と理由、右に店のボタン(主ボタンはここだけ)。
@@ -28,7 +29,7 @@ export function TopMouseRow({ rank, item, brand, name, reason, links, overlaid, 
         <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-rl-muted">
           <span>長さ <NumUnit value={m.lengthMm} unit="mm" className="text-rl-title" /></span>
           <span>幅 <NumUnit value={m.widthMm} unit="mm" className="text-rl-title" /></span>
-          <span>重さ <NumUnit value={m.weightG} unit="g" className="text-rl-title" /></span>
+          <span>重さ {m.weightG === null ? NO_DATA : <NumUnit value={m.weightG} unit="g" className="text-rl-title" />}</span>
         </p>
         {compare && <p className="text-sm text-rl-secondary-text">{compare}</p>}
         <ChipButton pressed={overlaid} onClick={onOverlay} className="justify-self-start">手と重ねる</ChipButton>

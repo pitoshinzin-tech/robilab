@@ -1,16 +1,14 @@
 import { describe, it, expect } from "vitest";
-import type { MouseSpec } from "@/data/mice";
 import { MICE } from "@/data/mice";
-import { fitTarget, type Hand } from "@/lib/mouse-fit";
+import { fitTarget, isFitMouse, type FitMouse, type Hand } from "@/lib/mouse-fit";
 import { BANNED_WORDS, compareClause, recommendReason } from "@/lib/mouse-reason";
 import { GRIPS } from "@/lib/my-settings";
 
-const m = (lengthMm: number, widthMm: number, weightG: number, extra: Partial<MouseSpec> = {}): MouseSpec => ({
-  id: "x", lengthMm, widthMm, heightMm: 38, weightG, shape: "symmetric", connection: "wireless",
-  officialUrl: "https://example.com/x", checkedAt: "2026-10-01", ...extra,
+const m = (lengthMm: number, widthMm: number, weightG: number, extra: Partial<FitMouse> = {}): FitMouse => ({
+  id: "x", lengthMm, widthMm, heightMm: 38, weightG, shape: "symmetric", connection: "wireless", ...extra,
 });
 const palm: Hand = { lengthCm: 18.5, widthCm: null, grip: "palm" }; // 目安の長さ 118.4mm
-const reason = (h: Hand & { estimated?: boolean }, mouse: MouseSpec, current?: MouseSpec | null) =>
+const reason = (h: Hand & { estimated?: boolean }, mouse: FitMouse, current?: FitMouse | null) =>
   recommendReason(h, fitTarget(h), mouse, current);
 
 describe("recommendReason", () => {
@@ -87,11 +85,39 @@ describe("recommendReason", () => {
   it("stays short and never uses exaggerated words (every mouse × grip × hand)", () => {
     for (const grip of GRIPS) {
       for (const widthCm of [null, 9]) {
-        for (const mouse of MICE) {
+        for (const mouse of MICE.filter(isFitMouse)) {
           const r = reason({ lengthCm: 18.5, widthCm, grip }, mouse);
           expect(r.split("。").filter(Boolean)).toHaveLength(3);
           expect(r.length).toBeLessThanOrEqual(145);
           for (const w of BANNED_WORDS) expect(r).not.toContain(w);
+        }
+      }
+    }
+  });
+});
+
+describe("公式にない数字(null)", () => {
+  it("形がないときは「形は公式の記載がありません」", () => {
+    expect(reason(palm, m(118, 60, 61, { shape: null }))).toContain("、形は公式の記載がありません。");
+  });
+  it("接続が有線・無線の両方のとき・重さがないとき", () => {
+    expect(reason(palm, m(118, 60, 50, { connection: "both" }))).toMatch(/重さは 50g と軽く、素早い振り向き・細かい操作向きの、有線でも無線でも使えるタイプです。$/);
+    expect(reason(palm, m(118, 60, 0, { weightG: null, connection: "both" }))).toMatch(/重さは公式の記載がなく、有線でも無線でも使えるタイプです。$/);
+  });
+  it("接続がないとき・重さも接続もないとき", () => {
+    expect(reason(palm, m(118, 60, 80, { connection: null }))).toMatch(/重さは 80g と重めで、狙いを止めやすいマウスです。$/);
+    expect(reason(palm, m(118, 60, 0, { weightG: null, connection: null }))).toMatch(/重さ・接続は公式の記載がありません。$/);
+  });
+  it("今のマウスとの比べは、両方にある数字だけ", () => {
+    expect(compareClause(m(125, 60, 0, { id: "cur", weightG: null }), m(128, 60, 70))).toBe("今のマウスより 3mm 長いです。");
+  });
+  it("どの組み合わせでも 3 文で、null・NaN・undefined を書かない", () => {
+    for (const shape of ["symmetric", "right", null] as const) {
+      for (const connection of ["wired", "wireless", "both", null] as const) {
+        for (const weightG of [50, 70, 90, null]) {
+          const r = reason(palm, m(118, 60, 0, { shape, connection, weightG }));
+          expect(r.split("。").filter(Boolean)).toHaveLength(3);
+          expect(r).not.toMatch(/null|NaN|undefined/);
         }
       }
     }
