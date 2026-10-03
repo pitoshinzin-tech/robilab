@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { MICE } from "@/data/mice";
 import { toMouseRows, type MouseSource } from "@/lib/mouse-rows";
 
 const src = (id: string, lengthMm: number | null, widthMm: number | null, extra: Partial<MouseSource> = {}): MouseSource => ({
@@ -48,5 +50,23 @@ describe("toMouseRows", () => {
     );
     expect(comparable.map((r) => r.id)).toEqual(["c", "a"]);
     expect(other.map((r) => r.id)).toEqual(["d", "b"]);
+  });
+});
+
+describe("本物の 54 機種の「比べられません」の行", () => {
+  const json = JSON.parse(readFileSync("docs/content/gear/mice.json", "utf8")) as (MouseSource & { brand: string; name: string })[];
+  const { other } = toMouseRows(MICE, (id) => MICE.find((m) => m.id === id), {}, {}, {});
+  it("8 機種で、missing があり、出典の文・メモ・公式 URL の生の値を持たない", () => {
+    expect(other).toHaveLength(8);
+    for (const r of other) {
+      expect(r.missing.length, r.id).toBeGreaterThan(0);
+      expect(Object.keys(r).sort(), r.id).toEqual(["brand", "connection", "heightMm", "id", "imageUrl", "lengthMm", "links", "missing", "name", "shape", "skateCount", "weightG", "widthMm"]);
+    }
+  });
+  it("長さ・幅・高さ・重さは JSON どおり(null も同じ)", () => {
+    for (const r of other) {
+      const j = json.find((x) => x.id === r.id)!;
+      expect([r.lengthMm, r.widthMm, r.heightMm, r.weightG], r.id).toEqual([j.lengthMm, j.widthMm, j.heightMm, j.weightG]);
+    }
   });
 });

@@ -17,6 +17,9 @@ export function OtherMiceList({ items }: { items: OtherMouseRow[] }) {
               <h3 data-long-name className="text-xl font-bold wrap-anywhere">{m.name}</h3>
               <p className="text-sm text-rl-muted">公式に数字がない項目:{m.missing.join("・")}</p>
               <dl className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-rl-muted">
+                <div className="flex gap-1"><dt>長さ</dt><dd className="text-rl-text">{withUnit(m.lengthMm, "mm")}</dd></div>
+                <div className="flex gap-1"><dt>幅</dt><dd className="text-rl-text">{withUnit(m.widthMm, "mm")}</dd></div>
+                <div className="flex gap-1"><dt>高さ</dt><dd className="text-rl-text">{withUnit(m.heightMm, "mm")}</dd></div>
                 <div className="flex gap-1"><dt>重さ</dt><dd className="text-rl-text">{withUnit(m.weightG, "g")}</dd></div>
                 <div className="flex gap-1"><dt>形</dt><dd className="text-rl-text">{shapeLabel(m.shape)}</dd></div>
                 <div className="flex gap-1"><dt>接続</dt><dd className="text-rl-text">{connectionLabel(m.connection)}</dd></div>
