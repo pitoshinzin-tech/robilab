@@ -161,10 +161,10 @@ describe("install / activate", () => {
     expect(sw.self.skipWaiting).toHaveBeenCalled();
   });
   it("activate で古い robilab-* だけ消し、Navigation Preload は有効にせず(すでに有効な端末では無効にし)、clients.claim", async () => {
-    const sw = loadSw({ existingKeys: ["robilab-offline-v1", "robilab-offline-v2", "robilab-offline-v3", "other-app-cache"] });
+    const sw = loadSw({ existingKeys: ["robilab-offline-v2", "robilab-offline-v3", "robilab-offline-v4", "other-app-cache"] });
     await sw.extendable("activate");
-    expect(sw.api.CACHE).toBe("robilab-offline-v3");
-    expect(sw.caches.delete.mock.calls.map((c) => c[0]).sort()).toEqual(["robilab-offline-v1", "robilab-offline-v2"]);
+    expect(sw.api.CACHE).toBe("robilab-offline-v4");
+    expect(sw.caches.delete.mock.calls.map((c) => c[0]).sort()).toEqual(["robilab-offline-v2", "robilab-offline-v3"]);
     expect(sw.self.registration.navigationPreload!.enable).not.toHaveBeenCalled();
     expect(sw.self.registration.navigationPreload!.disable).toHaveBeenCalled();
     expect(sw.self.clients.claim).toHaveBeenCalled();

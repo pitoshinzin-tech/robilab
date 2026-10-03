@@ -32,7 +32,8 @@ describe("offline.html(設計書 3-2)", () => {
     expect(HTML).toContain('<meta name="viewport"');
     expect(HTML).toContain('<meta name="robots" content="noindex">');
     expect(HTML).toContain("電波が届いていません");
-    expect(HTML).toContain("つながったら、もう一度読み込んでください。");
+    // href="" で今の URL を読み直すので、開こうとしていたページに戻るのは本当のこと(採点 2 回目の P1)
+    expect(HTML).toContain("つながったら、もう一度読み込むと、開こうとしていたページに戻ります。");
     // href="" は今の URL(電波が切れたときに開こうとしていたページ)を読み直す。トップには戻さない
     expect(HTML).toMatch(/<a href=""[^>]*>もう一度読み込む<\/a>/);
   });
@@ -87,6 +88,16 @@ describe("offline.html(設計書 3-2)", () => {
     expect(reduced).toMatch(/\.cut \.bridge \{ transition: none; \}/);
     // 色・大きさ・位置は動かさない(opacity だけ)
     expect(CSS).not.toMatch(/transition:\s*(all|transform|width)/);
+  });
+  it("中身のまとまりは画面の真ん中(幅は中身に合わせる)、縦の間は 8 の倍数", () => {
+    expect(CSS).toMatch(/main \{[^}]*width: fit-content;[^}]*margin: 0 auto;/);
+    // gap・margin・padding の px はすべて 8 の倍数
+    for (const m of CSS.matchAll(/(?:gap|margin(?:-bottom|-top)?):\s*([^;]+);/g)) {
+      for (const px of m[1].matchAll(/(\d+)px/g)) expect(Number(px[1]) % 8, m[0]).toBe(0);
+    }
+    expect(CSS).toMatch(/\.art \{[^}]*margin-bottom: 32px;/);
+    expect(CSS).toMatch(/h1 \{ margin: 0 0 16px;/);
+    expect(CSS).toMatch(/p \{ margin: 0 0 32px;/);
   });
   it("絵文字と文字の矢印を使わない", () => {
     expect(HTML).not.toMatch(/\p{Extended_Pictographic}/u);

@@ -5,8 +5,8 @@
  * offline.html かアイコンを変えたら CACHE の数字を上げる。cache.put・message・push・sync と外部スクリプトの読み込みは書かない
  * (段 2 のプッシュ通知を足すときも、このファイルに足す。スコープ / の service worker は 1 つだけ)。
  */
-// ASSETS-HASH: df51a4bad1e7(offline.html とアイコンの中身の印。tests/pwa/sw.test.ts が教える値に直す)
-const CACHE = "robilab-offline-v3";
+// ASSETS-HASH: 9badc1a53b91(offline.html とアイコンの中身の印。tests/pwa/sw.test.ts が教える値に直す)
+const CACHE = "robilab-offline-v4";
 const OFFLINE_URL = "/offline.html";
 const PRECACHE = [OFFLINE_URL, "/icons/icon-192.png"];
 
