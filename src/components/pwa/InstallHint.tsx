@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
-import { Download, X } from "lucide-react";
+import { ChevronDown, Download, X } from "lucide-react";
 import { useIsClient } from "@/lib/use-is-client";
 import { installPromptStore, SERVER_SNAPSHOT } from "@/lib/pwa/install-prompt";
 import { HINT_STORAGE_KEY, detectPlatform, dismissHint, hintView, parseHintState, type HintPlace, type StepsPlatform } from "@/lib/pwa/install-hint";
 import { Card } from "@/components/ui/card";
 import { PlainButton } from "@/components/ui/plain-button";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { HomeRowArt } from "./AppIconMark";
 import { cn } from "@/lib/utils";
 
 type HintStorage = Pick<Storage, "getItem" | "setItem">;
@@ -78,25 +79,34 @@ export function InstallHint({ place, today, steps, className }: { place: HintPla
   const platform = env.view.platform;
   const canPrompt = prompt.event !== null && (platform === "android" || platform === "desktop");
 
+  const hasSteps = platform !== "other";
+  // 左(スマホは上)にホームに並ぶアイコン。/aim のカードは PC の幅で右の空きに置く(文は 720px まで)。
+  // 「追加のしかた」を開くと、アイコンの横に「ホームの列」の線の四角が出る(HomeRowArt。group/hint の has で CSS だけ)
   const body = (
-    <div className="grid gap-4">
-      <p className="text-sm text-pretty text-rl-muted [word-break:auto-phrase]">{LEAD[place]}</p>
-      {canPrompt && (
-        <div>
-          <PlainButton variant="secondary" size="sm" onClick={() => void installPromptStore.prompt()}>
-            <Download aria-hidden />
-            追加する
-          </PlainButton>
-        </div>
-      )}
-      {platform === "other" ? (
-        steps.other
-      ) : (
-        <details className="group">
-          <summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-bold text-rl-accent underline-offset-4 hover:underline">追加のしかた</summary>
-          <div className="pt-2">{steps[platform]}</div>
-        </details>
-      )}
+    <div className={cn("group/hint grid gap-4", place === "aim" && "lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-x-8")}>
+      <HomeRowArt showRow={hasSteps} className={cn(place === "aim" && "lg:col-start-2 lg:row-start-1")} />
+      <div className="grid min-w-0 max-w-[720px] content-start gap-4">
+        <p className="text-sm text-pretty text-rl-muted [word-break:auto-phrase]">{LEAD[place]}</p>
+        {canPrompt && (
+          <div>
+            <PlainButton variant="secondary" size="sm" onClick={() => void installPromptStore.prompt()}>
+              <Download aria-hidden />
+              追加する
+            </PlainButton>
+          </div>
+        )}
+        {hasSteps ? (
+          <details className="group">
+            <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1 text-sm font-bold text-rl-accent underline-offset-4 hover:underline [&::-webkit-details-marker]:hidden">
+              追加のしかた
+              <ChevronDown aria-hidden className="size-4 shrink-0 group-open:rotate-180" />
+            </summary>
+            <div className="pt-2">{steps[platform]}</div>
+          </details>
+        ) : (
+          steps.other
+        )}
+      </div>
     </div>
   );
 

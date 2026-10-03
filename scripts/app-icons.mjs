@@ -1,27 +1,19 @@
 // アプリのアイコン(PWA・iPhone)を、8×8 のドット絵の色の表から作る。Node の標準(zlib)だけ(パッケージを足さない)。
 // 使い方: node scripts/app-icons.mjs
-// 絵は src/app/icon.svg(タブのアイコン)と同じ。社長のロゴができたら GRID と COLORS を差し替えて作り直す(docs/ops/launch.md)。
+// 絵は src/app/icon.svg(タブのアイコン)と同じ。社長のロゴができたら src/lib/pwa/app-icon-grid.mjs の GRID と COLORS を差し替えて作り直す(docs/ops/launch.md)。
 // ドット絵でないロゴを Photoshop で書き出して置き換えたときは ICON_SOURCE を "photoshop" にする(画素の比べのテストが止まる)。
 import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
+import { COLORS, GRID } from "../src/lib/pwa/app-icon-grid.mjs";
 
 /** "grid" = このスクリプトの GRID から作る / "photoshop" = 社長が書き出した PNG を置いた */
 export const ICON_SOURCE = "grid";
 
-export const COLORS = { ".": "#0A0C16", M: "#FF4FD8", P: "#A99BFF" };
+// 絵(GRID)と色(COLORS)は src/lib/pwa/app-icon-grid.mjs に置く(画面の案内の AppIconMark と同じものを使う)
+export { COLORS, GRID };
 export const BG = COLORS["."];
-export const GRID = [
-  "........",
-  "..MMMM..",
-  ".M....M.",
-  ".M.PP.M.",
-  ".M.PP.M.",
-  ".M....M.",
-  "..MMMM..",
-  "........",
-];
 
 /** maskable のアイコンで、マークを収める円の半径(512 の中央 80%) */
 export const MASKABLE_SAFE_RADIUS = 205;

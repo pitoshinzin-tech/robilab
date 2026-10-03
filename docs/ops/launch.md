@@ -155,6 +155,6 @@ self.addEventListener("activate", (event) => {
 
 社長のロゴ(D29 のドット絵のシンボルマーク)ができたら。**iPhone の人は「ホーム画面に追加し直す」までアイコンが変わらない**ので、できれば公開の前に差し替える。Android は manifest の更新で数日のうちに変わる。
 
-- **ドット絵のとき**:1 ドット = 1px の小さな PNG(例 16×16)か、四角だけの SVG をもらう。`scripts/app-icons.mjs` の `GRID`(1 文字 = 1 マス)と `COLORS`(文字 → 色)を差し替え、格子が 8×8 でなければ `ICONS` の `cell` を「`size` ÷ 格子の数」の切り捨てに直して、maskable はテストの「半径 205px の円の中」が通る大きさにする。`node scripts/app-icons.mjs` で作り直し、`npx vitest run tests/pwa` が通ればよい。タブの `src/app/icon.svg` も同じ絵に差し替える(`tests/pwa/app-icons.test.ts` の「icon.svg と同じ」の比べも新しい格子に合う)。
+- **ドット絵のとき**:1 ドット = 1px の小さな PNG(例 16×16)か、四角だけの SVG をもらう。`src/lib/pwa/app-icon-grid.mjs` の `GRID`(1 文字 = 1 マス)と `COLORS`(文字 → 色)を差し替え(`scripts/app-icons.mjs` と、画面の案内のアイコン `AppIconMark` が読む)、格子が 8×8 でなければ `ICONS` の `cell` を「`size` ÷ 格子の数」の切り捨てに直して、maskable はテストの「半径 205px の円の中」が通る大きさにする。`node scripts/app-icons.mjs` で作り直し、`npx vitest run tests/pwa` が通ればよい。タブの `src/app/icon.svg` と `public/offline.html` の中の SVG も同じ絵に差し替える(offline.html を変えたら `public/sw.js` の CACHE の数字と `ASSETS-HASH` も直す)(`tests/pwa/app-icons.test.ts` の「icon.svg と同じ」の比べも新しい格子に合う)。
 - **ドット絵でないとき**:社長が Photoshop で `export/app-icon/` の 4 つの PNG と同じ大きさ(192・512・maskable 512・180)で書き出し、`public/icons/icon-192.png`・`icon-512.png`・`icon-maskable-512.png`・`src/app/apple-icon.png` を同じ名前で置き換える(maskable は中央の直径 80% の円の中にマークを収める。透明は使わない)。`scripts/app-icons.mjs` の `ICON_SOURCE` を `"photoshop"` にする(画素の比べのテストが止まり、大きさのテストは残る)。
 - どちらも、URL が同じなので `src/lib/pwa/manifest-data.ts` は変えない。`public/sw.js` が持つ `/icons/icon-192.png` も変わるので、`CACHE` の数字を 1 つ上げる。
