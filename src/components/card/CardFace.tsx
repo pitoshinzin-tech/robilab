@@ -3,7 +3,12 @@ import type { CardView } from "@/lib/card-view";
 import { CARD_ACCENT, CARD_FALLBACK_GAMES, cardMainLines } from "@/lib/card-face";
 
 /** 1200×630 の画像の 1px を、入れ物の幅に対する cqw にする(入れ物の幅が変わっても同じ割合で描く) */
+/** 「ロビラボ マイ設定」の文字(画像では #eaf6ff を不透明度 0.7 で描く) */
+const TITLE_TEXT = "rgba(234, 246, 255, 0.7)";
+
 const u = (px: number) => `${Math.round((px / 12) * 10000) / 10000}cqw`;
+/** 「ロビラボ マイ設定」の影(画像の textShadow のうち、実際に描かれるシアンの分) */
+const TITLE_SHADOW = `${u(-2)} 0 0 rgba(57, 243, 255, 0.7)`;
 
 /**
  * 名刺カードを HTML で描く(/my のプレビュー。表示速度:docs/design/perf.md)。
@@ -40,7 +45,16 @@ export function CardFace({ view, label }: { view: CardView; label: string }) {
         <div style={{ ...text, fontSize: u(26) }}>{typeName}</div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
-        <div style={{ ...text, fontSize: u(22), opacity: 0.7, textShadow: `${u(2)} 0 0 #FF4FD8, ${u(-2)} 0 0 #39F3FF` }}>ロビラボ マイ設定</div>
+        {/*
+          * 色ズレの影は、画像(satori → resvg)で実際に描かれる形に合わせる。画像の画素を読むと、
+          * 「不透明度 0.7 の文字 + 左に 2px ずれたシアンの影(0.7)」が 2 枚重なった形で、マゼンタの影は出ていない
+          * (satori は影ごとに結果を作って重ねる作りだが、resvg ではシアンの結果が 2 回重なる)。
+          * そこで同じ 2 枚を重ねて描く(文字の縁のシアンが約 0.91、文字が #eaf6ff の約 0.91 になり、画像の画素と同じ)。
+          */}
+        <div style={{ ...text, fontSize: u(22), position: "relative" }}>
+          <span style={{ color: TITLE_TEXT, textShadow: TITLE_SHADOW }}>ロビラボ マイ設定</span>
+          <span aria-hidden style={{ position: "absolute", left: 0, top: 0, color: TITLE_TEXT, textShadow: TITLE_SHADOW }}>ロビラボ マイ設定</span>
+        </div>
         <div style={{ ...text, fontSize: u(56), marginTop: u(8) }}>{view.cardName ?? ""}</div>
         {main && (
           <div style={{ display: "flex", flexDirection: "column", marginTop: u(16), color: "#39F3FF" }}>
@@ -59,7 +73,8 @@ export function CardFace({ view, label }: { view: CardView; label: string }) {
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: u(10), marginTop: u(18) }}>
           {games.map((g) => (
-            <div key={g} style={{ ...text, fontSize: u(20), padding: `${u(4)} ${u(14)}`, borderRadius: u(999), border: `${u(2)} solid #7B61FF` }}>{g}</div>
+            // 札の線は画像と同じ 2px(1200 の幅で)。border は 1 物理ピクセルより細くできず太く見えるので、細さがそのまま縮む内側の影で描く(内側の大きさは同じ)
+            <div key={g} style={{ ...text, fontSize: u(20), padding: `${u(6)} ${u(16)}`, borderRadius: u(999), boxShadow: `inset 0 0 0 ${u(2)} #7B61FF` }}>{g}</div>
           ))}
         </div>
       </div>
