@@ -34,3 +34,31 @@ export function clearDeviceRecords(storage: SettingsStorage | null): () => void 
     }
   };
 }
+
+/** action が例外で失敗した(通信が切れたなど)ときの文。謝らない・次にやることを言う */
+export const DELETE_FAILED_MESSAGE = "退会の手続きができませんでした。電波のよい所で、もう一度お試しください。";
+
+/**
+ * 退会の action を動かし、できなかったときはこの端末の記録を戻す(restore)。
+ * - `{ error }` が返ったとき:戻して、その文を返す
+ * - 例外(通信が切れた・サーバーが落ちた):戻して、DELETE_FAILED_MESSAGE を返す
+ * - 退会できたときの redirect は、クライアントでは例外として届く。rethrow(next/navigation の unstable_rethrow)で投げ直し、戻さない
+ */
+export async function deleteWithRestore(
+  run: () => Promise<{ error?: string } | void | undefined>,
+  restore: () => void,
+  rethrow: (e: unknown) => void,
+): Promise<{ error: string | null }> {
+  try {
+    const res = await run();
+    if (res?.error) {
+      restore();
+      return { error: res.error };
+    }
+    return { error: null };
+  } catch (e) {
+    rethrow(e);
+    restore();
+    return { error: DELETE_FAILED_MESSAGE };
+  }
+}

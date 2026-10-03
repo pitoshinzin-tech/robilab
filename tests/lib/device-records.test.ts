@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { readFileSync } from "node:fs";
-import { DEVICE_RECORD_KEYS, clearDeviceRecords } from "@/lib/device-records";
+import { DEVICE_RECORD_KEYS, DELETE_FAILED_MESSAGE, clearDeviceRecords, deleteWithRestore } from "@/lib/device-records";
 import { HISTORY_KEY } from "@/lib/aim/history";
 import { HINT_STORAGE_KEY } from "@/lib/pwa/install-hint";
 
@@ -40,5 +40,35 @@ describe("退会のときに消すこの端末の記録", () => {
     const src = readFileSync("src/app/lobby/me/DeleteAccount.tsx", "utf8");
     expect(src).toContain("clearDeviceRecords(");
     expect(src).not.toContain("HISTORY_KEY");
+    expect(src).toContain("deleteWithRestore(");
+    expect(src).toContain("unstable_rethrow");
+  });
+});
+
+describe("deleteWithRestore(退会の手続きと、失敗したときに端末の記録を戻す)", () => {
+  const redirectError = Object.assign(new Error("NEXT_REDIRECT"), { digest: "NEXT_REDIRECT;push;/;303;" });
+  /** next/navigation の unstable_rethrow の代わり:Next のリダイレクトだけ投げ直す */
+  const rethrow = (e: unknown) => {
+    if (e === redirectError) throw e;
+  };
+  it("{ error } が返ったら戻して、その文を返す", async () => {
+    const restore = vi.fn();
+    expect(await deleteWithRestore(async () => ({ error: "いまは退会の手続きができません。" }), restore, rethrow)).toEqual({ error: "いまは退会の手続きができません。" });
+    expect(restore).toHaveBeenCalledTimes(1);
+  });
+  it("action が例外で失敗した(通信が切れた)ときも戻して、決まった文を返す", async () => {
+    const restore = vi.fn();
+    expect(await deleteWithRestore(async () => { throw new TypeError("Failed to fetch"); }, restore, rethrow)).toEqual({ error: DELETE_FAILED_MESSAGE });
+    expect(restore).toHaveBeenCalledTimes(1);
+  });
+  it("退会できてトップへ移る(redirect の例外)ときは戻さず、そのまま投げ直す(Next が移動を受け持つ)", async () => {
+    const restore = vi.fn();
+    await expect(deleteWithRestore(async () => { throw redirectError; }, restore, rethrow)).rejects.toBe(redirectError);
+    expect(restore).not.toHaveBeenCalled();
+  });
+  it("何も返らない(成功)ときは戻さない", async () => {
+    const restore = vi.fn();
+    expect(await deleteWithRestore(async () => undefined, restore, rethrow)).toEqual({ error: null });
+    expect(restore).not.toHaveBeenCalled();
   });
 });

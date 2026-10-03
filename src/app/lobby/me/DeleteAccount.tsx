@@ -2,7 +2,8 @@
 import { useState, useTransition } from "react";
 import { deleteMeAction } from "@/app/lobby/actions";
 import { browserStorage } from "@/lib/my-settings-store";
-import { clearDeviceRecords } from "@/lib/device-records";
+import { unstable_rethrow } from "next/navigation";
+import { clearDeviceRecords, deleteWithRestore } from "@/lib/device-records";
 import { PlainButton } from "@/components/ui/plain-button";
 import { DangerAction } from "@/components/ui/danger-zone";
 
@@ -16,15 +17,13 @@ export function DeleteAccount({ onDeleted }: { onDeleted?: () => void } = {}) {
   const confirmAndDelete = () => {
     if (confirm("退会すると、プロフィールと声かけの記録、エイムの記録がすべて消えます(この端末のエイムの記録も消えます)。退会から7日間は、同じ Discord アカウントで再登録できません。よろしいですか?")) {
       // この端末のエイムの記録と、ホーム画面に追加の案内の記録も消す(plan.md D43。同じブラウザを使うほかの人に見せないため)。
-      // 退会できなかったとき(利用停止中・確認中の通報があるとき)は元に戻す
+      // 退会できなかったとき(利用停止中・確認中の通報があるとき・通信が切れたとき)は元に戻す
       const restoreDeviceRecords = clearDeviceRecords(browserStorage());
       onDeleted?.();
       start(async () => {
-        const res = await deleteMeAction();
-        if (res?.error) {
-          setError(res.error);
-          restoreDeviceRecords();
-        }
+        // {error} のときも、通信が切れて action が例外で終わったときも、記録を戻す。退会できたときの移動(redirect)は投げ直す
+        const { error: message } = await deleteWithRestore(() => deleteMeAction(), restoreDeviceRecords, unstable_rethrow);
+        if (message) setError(message);
       });
     }
   };
