@@ -50,7 +50,18 @@ export function CharProfile({ char, game, role, setting, axisRows, fits, sameRol
   const matched = axisRows !== null;
   return (
     <div className="grid gap-rl-ma-sm lg:grid-cols-12 lg:grid-rows-[auto_1fr_auto] lg:gap-x-6">
-      <section aria-label="ロール" className="flex items-center gap-4 lg:col-span-5 lg:row-start-1 lg:self-start">
+      <div className="grid content-start gap-rl-ma-sm lg:col-span-5 lg:row-start-1 lg:self-start">
+      {matched && fits[0] && (
+        <Link href={`/type/${fits[0].code}`} className="rl-lock group grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 border-b border-rl-line pb-6">
+          <span className="grid min-w-0 gap-2">
+            <span className="text-sm text-rl-muted">一番合うタイプ</span>
+            <span className="font-display text-rl-display-1 font-extrabold text-rl-highlight">{fits[0].code}</span>
+            <span className="text-xl font-bold wrap-anywhere group-hover:underline group-hover:underline-offset-4">{fits[0].name}</span>
+          </span>
+          <TypeIcon code={fits[0].code} size={160} className="size-24 md:size-40" />
+        </Link>
+      )}
+      <section aria-label="ロール" className="flex items-center gap-4">
         <PixelArt grid={roleSymbol(game.id, setting.groupByRole && char.matchable ? char.roleId : null)} size={96} className="size-12 lg:size-24" />
         <div className="grid min-w-0 gap-1">
           <p className="text-sm text-rl-muted">{game.name}{setting.nameMark}</p>
@@ -58,6 +69,7 @@ export function CharProfile({ char, game, role, setting, axisRows, fits, sameRol
           {setting.groupByRole && setting.styleNote && role && char.matchable && <p className="text-sm text-rl-muted">ロビラボの分け方:{role.name}</p>}
         </div>
       </section>
+      </div>
 
       <div className="grid min-w-0 content-start gap-rl-ma-sm lg:col-span-7 lg:col-start-6 lg:row-span-2 lg:row-start-1">
         {setting.showQuotes ? (
@@ -77,11 +89,11 @@ export function CharProfile({ char, game, role, setting, axisRows, fits, sameRol
         )}
 
         {axisRows ? (
-          <section aria-labelledby="char-lean" className="grid gap-4">
+          <section aria-labelledby="char-lean" className="rl-axis-link grid gap-4">
             <SectionHeading id="char-lean" title="このキャラの傾向" description={setting.showQuotes ? "4 つの軸を、数字でなく言葉で。土台はロールで、公式の言葉に手がかりがある軸だけ少しずらしています。" : "4 つの軸を、数字でなく言葉で。土台は型で、公式ページの内容に手がかりがある軸だけ少しずらしています(出典は各行のリンクから)。"} />
             <ul className="flex flex-wrap gap-2">
               {axisRows.map((r) => (
-                <li key={r.axis} className="inline-flex h-11 items-center gap-2 rounded-rl-sm border border-rl-line px-3 text-sm">
+                <li key={r.axis} data-axis={r.axis} className="inline-flex h-11 items-center gap-2 rounded-rl-sm border border-rl-line px-3 text-sm">
                   <span className="text-rl-muted">{r.left}/{r.right}</span>
                   <span className="font-bold">{r.word}</span>
                 </li>
@@ -89,7 +101,7 @@ export function CharProfile({ char, game, role, setting, axisRows, fits, sameRol
             </ul>
             <table className="w-full text-sm">
               <caption className="sr-only">傾向の根拠</caption>
-              <thead className="text-left text-rl-muted">
+              <thead className="text-left text-rl-muted max-md:sr-only">
                 <tr>
                   <th scope="col" className="py-2 pr-3 font-bold">軸</th>
                   <th scope="col" className="py-2 pr-3 font-bold">傾向</th>
@@ -98,10 +110,10 @@ export function CharProfile({ char, game, role, setting, axisRows, fits, sameRol
               </thead>
               <tbody>
                 {axisRows.map((r) => (
-                  <tr key={r.axis} className="border-t border-rl-line align-top">
+                  <tr key={r.axis} data-axis={r.axis} className="border-t border-rl-line align-top max-md:grid max-md:grid-cols-[auto_minmax(0,1fr)] max-md:gap-x-3">
                     <th scope="row" className="py-2 pr-3 text-left font-normal whitespace-nowrap text-rl-muted">{r.left}/{r.right}</th>
                     <td className="py-2 pr-3 font-bold whitespace-nowrap">{r.word}</td>
-                    <td className="py-2 wrap-anywhere"><Basis row={r} showQuotes={setting.showQuotes} /></td>
+                    <td className="py-2 wrap-anywhere max-md:col-span-2 max-md:pt-0"><Basis row={r} showQuotes={setting.showQuotes} /></td>
                   </tr>
                 ))}
               </tbody>

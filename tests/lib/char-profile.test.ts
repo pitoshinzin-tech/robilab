@@ -51,12 +51,23 @@ describe("1 体のページの中身(代表 66 体すべて。スト6 も描け�
       for (const t of fitTypes(c)) expect(html, c.id).toContain(`href="/type/${t.code}"`);
     }
   });
+  it("相性に入るキャラ:左の列の頭に一番合うタイプのコード(display-1)と絵、札と表の行は同じ軸で data-axis がつながる", () => {
+    for (const c of shown.filter((x) => x.matchable && CHAR_GAME_SETTINGS[x.game].matching)) {
+      const html = render(c);
+      const top = fitTypes(c)[0];
+      expect(html, c.id).toContain("一番合うタイプ");
+      expect(html, c.id).toMatch(new RegExp(`text-rl-display-1[^"]*"[^>]*>${top.code}<`));
+      expect(html, c.id).toContain("rl-axis-link");
+      for (const r of charAxisRows(c)) expect((html.match(new RegExp(`data-axis="${r.axis}"`, "g")) ?? []).length, c.id).toBe(2);
+    }
+  });
   it("相性に入らないキャラ(ヒルビリー・ネア・スト6):一文だけで、傾向・合うタイプ・同じロールを出さない", () => {
     for (const c of shown.filter((x) => !x.matchable || !CHAR_GAME_SETTINGS[x.game].matching)) {
       const html = render(c);
       expect(html, c.id).toContain(CHAR_GAME_SETTINGS[c.game].unmatchableNote);
       expect(html, c.id).not.toContain('href="/type/');
       expect(html, c.id).not.toContain("このキャラの傾向");
+      expect(html, c.id).not.toContain("一番合うタイプ");
     }
   });
   it("引用を出すゲーム:公式の言葉をかぎ括弧で・英語の根拠に lang=\"en\"", () => {

@@ -1102,3 +1102,71 @@ html.rl-fresh [data-rl-pending="ssr"] > .invisible {
 html.rl-fresh [data-rl-pending="ssr"] > [data-slot="skeleton"] {
   display: none;
 }
+
+/*
+ * 1 体のページの「このキャラの傾向」:根拠の表の行(tr[data-axis])に乗せる・行の中の出典リンクにフォーカスすると、
+ * 上の言葉の札(li[data-axis])の同じ軸が --rl-selected の枠になり、表の行に --rl-selected-bg(JS 0。/pads の表と図と同じ :has())。
+ * 行に tabindex は付けない(フォーカスの順を増やさない)。
+ */
+.rl-axis-link li[data-axis],
+.rl-axis-link tr[data-axis] {
+  transition: border-color var(--rl-dur-fast) var(--rl-ease-line), box-shadow var(--rl-dur-fast) var(--rl-ease-line), background-color var(--rl-dur-fast) var(--rl-ease-line);
+}
+.rl-axis-link:has(tr[data-axis="attack"]:focus-within) li[data-axis="attack"] {
+  border-color: var(--rl-selected);
+  box-shadow: inset 0 0 0 1px var(--rl-selected);
+}
+.rl-axis-link:has(tr[data-axis="attack"]:focus-within) tr[data-axis="attack"] {
+  background-color: var(--rl-selected-bg);
+}
+.rl-axis-link:has(tr[data-axis="instinct"]:focus-within) li[data-axis="instinct"] {
+  border-color: var(--rl-selected);
+  box-shadow: inset 0 0 0 1px var(--rl-selected);
+}
+.rl-axis-link:has(tr[data-axis="instinct"]:focus-within) tr[data-axis="instinct"] {
+  background-color: var(--rl-selected-bg);
+}
+.rl-axis-link:has(tr[data-axis="team"]:focus-within) li[data-axis="team"] {
+  border-color: var(--rl-selected);
+  box-shadow: inset 0 0 0 1px var(--rl-selected);
+}
+.rl-axis-link:has(tr[data-axis="team"]:focus-within) tr[data-axis="team"] {
+  background-color: var(--rl-selected-bg);
+}
+.rl-axis-link:has(tr[data-axis="heat"]:focus-within) li[data-axis="heat"] {
+  border-color: var(--rl-selected);
+  box-shadow: inset 0 0 0 1px var(--rl-selected);
+}
+.rl-axis-link:has(tr[data-axis="heat"]:focus-within) tr[data-axis="heat"] {
+  background-color: var(--rl-selected-bg);
+}
+@media (hover: hover) {
+  .rl-axis-link:has(tr[data-axis="attack"]:hover) li[data-axis="attack"] {
+    border-color: var(--rl-selected);
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-axis-link:has(tr[data-axis="attack"]:hover) tr[data-axis="attack"] {
+    background-color: var(--rl-selected-bg);
+  }
+  .rl-axis-link:has(tr[data-axis="instinct"]:hover) li[data-axis="instinct"] {
+    border-color: var(--rl-selected);
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-axis-link:has(tr[data-axis="instinct"]:hover) tr[data-axis="instinct"] {
+    background-color: var(--rl-selected-bg);
+  }
+  .rl-axis-link:has(tr[data-axis="team"]:hover) li[data-axis="team"] {
+    border-color: var(--rl-selected);
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-axis-link:has(tr[data-axis="team"]:hover) tr[data-axis="team"] {
+    background-color: var(--rl-selected-bg);
+  }
+  .rl-axis-link:has(tr[data-axis="heat"]:hover) li[data-axis="heat"] {
+    border-color: var(--rl-selected);
+    box-shadow: inset 0 0 0 1px var(--rl-selected);
+  }
+  .rl-axis-link:has(tr[data-axis="heat"]:hover) tr[data-axis="heat"] {
+    background-color: var(--rl-selected-bg);
+  }
+}
