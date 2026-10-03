@@ -1,7 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Check, Download } from "lucide-react";
-import type { PublicCardData } from "@/lib/card-view";
+import { toPublicCardData, type PublicCardData } from "@/lib/card-view";
+import { browserStorage, loadLocal } from "@/lib/my-settings-store";
+import { emptyMySettings } from "@/lib/my-settings";
+import { startEarlyCardImage, takeEarlyCardImage } from "@/lib/card-early";
 import { cn } from "@/lib/utils";
 import { ButtonAnchor } from "@/components/ui/button-link";
 import { Card } from "@/components/ui/card";
@@ -9,6 +12,16 @@ import { FieldError } from "@/components/ui/field";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const layer = "col-start-1 row-start-1 inline-flex items-center justify-center gap-2";
+
+// 表示速度(docs/design/perf.md):このファイルが読み込まれた時に、最初の名刺の画像を頼み始める(src/lib/card-early.ts)。
+// 本文は useMySettings の最初の値(この端末の保存、なければ空)と同じ作り方。画面の部品が描かれるのを待たない分、画像が早く届く。
+if (typeof window !== "undefined") {
+  try {
+    startEarlyCardImage(JSON.stringify(toPublicCardData(loadLocal(browserStorage()) ?? emptyMySettings())));
+  } catch {
+    // 保存が読めない環境では、今までどおり描かれてから頼む
+  }
+}
 
 /**
  * 名刺カードのプレビューと「名刺の画像を保存」。開いた直後はすぐ作り、そのあとは入力が止まってから 0.8 秒後に作り直す。
@@ -32,11 +45,18 @@ export function CardPreview({ data, rewrite = false, hasType = true }: { data: P
   useEffect(() => {
     if (!body) return;
     const ctrl = new AbortController();
+    // 開いた直後は、先に頼んでおいた画像(本文が同じとき)を使う
+    const early = first ? takeEarlyCardImage(body) : null;
     const t = setTimeout(async () => {
       try {
-        const res = await fetch("/api/card-image", { method: "POST", body, headers: { "Content-Type": "application/json" }, signal: ctrl.signal });
-        if (!res.ok) throw new Error(String(res.status));
-        const next = URL.createObjectURL(await res.blob());
+        let blob = early ? await early : null;
+        if (ctrl.signal.aborted) return;
+        if (!blob) {
+          const res = await fetch("/api/card-image", { method: "POST", body, headers: { "Content-Type": "application/json" }, signal: ctrl.signal });
+          if (!res.ok) throw new Error(String(res.status));
+          blob = await res.blob();
+        }
+        const next = URL.createObjectURL(blob);
         // 画面に残っている 2 つ(今と 1 つ前)を覚えておき、閉じたときに消す。それより古いものは下の setPair で消している
         live.current = [...live.current.slice(-1), next];
         setPair((p) => { if (p.prev) URL.revokeObjectURL(p.prev); return { url: next, prev: p.url }; });
