@@ -22,7 +22,7 @@ export function PadRow({ pad, sizes, links, primary, narrowed }: {
 }) {
   const outlineOf = padOutlineIndexer(pad.sizes);
   return (
-    <li className="rl-size-link grid gap-4 border-t border-rl-line py-6">
+    <li className="rl-size-link rl-row-lazy grid gap-4 border-t border-rl-line py-6 [--rl-row-h:720px]">
       <div className="grid min-w-0 gap-1">
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-rl-muted">
           {pad.brand}<span aria-hidden>・</span>{surfaceLabel(pad.surface)}

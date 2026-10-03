@@ -15,7 +15,7 @@ import { skateCellKind } from "@/lib/skate-grid";
  */
 export function SkateRow({ skate, links, primary }: { skate: SkateSpec; links: ShopLinks; primary: boolean }) {
   return (
-    <li className="grid gap-4 border-t border-rl-line py-6">
+    <li className="rl-row-lazy grid gap-4 border-t border-rl-line py-6">
       <div className="grid min-w-0 gap-2">
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-rl-muted">
           <SkateCellMark kind={skateCellKind(skate)} />

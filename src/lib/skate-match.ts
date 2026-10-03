@@ -20,9 +20,9 @@ export function parseSkateFilter(sp: SearchParams, knownMouseIds: ReadonlySet<st
 }
 
 /** 素のリンク(この中だけで使う。画面のリンクは skateChipHref か skatesHrefFor。マウス未選択のとき mouse= を付けないので、そのまま使うとマイ設定に選び直される) */
-function skateFilterHref(f: SkateFilter, patch: Partial<SkateFilter> = {}): string {
+function skateFilterHref(f: SkateFilter, patch: Partial<SkateFilter> = {}, showAll = false): string {
   const n = { ...f, ...patch };
-  return queryHref("/skates", [["mouse", n.mouse], ["material", n.material], ["shape", n.shape]]);
+  return queryHref("/skates", [["mouse", n.mouse], ["material", n.material], ["shape", n.shape], ["all", showAll ? "1" : null]]);
 }
 
 /** そのマウス専用のソール(公式の対応表から結び付けたもの) */
@@ -81,9 +81,10 @@ export function skateGridSource(skates: readonly SkateSpec[], f: Pick<SkateFilte
 /**
  * ページ内の絞り込みのリンク。マウスを選んでいないときは空の `mouse=` を残す
  * (URL に mouse がないと MyMousePreselect がマイ設定のマウスに選び直すため。チップを押したら以後は選び直さない)。
+ * showAll:すべて見る(?all=1)の状態を保つか(src/lib/list-limit.ts)。
  */
-export function skateChipHref(f: SkateFilter, patch: Partial<SkateFilter> = {}): string {
-  const href = skateFilterHref(f, patch);
+export function skateChipHref(f: SkateFilter, patch: Partial<SkateFilter> = {}, showAll = false): string {
+  const href = skateFilterHref(f, patch, showAll);
   const mouse = "mouse" in patch ? patch.mouse : f.mouse;
   if (mouse !== null && mouse !== undefined) return href;
   return href.includes("?") ? href.replace("?", "?mouse=&") : `${href}?mouse=`;

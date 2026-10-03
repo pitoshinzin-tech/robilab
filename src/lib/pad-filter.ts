@@ -47,9 +47,10 @@ export function parsePadFilter(sp: SearchParams): PadFilter {
   };
 }
 
-export function padFilterHref(f: PadFilter, patch: Partial<PadFilter> = {}): string {
+/** showAll:すべて見る(?all=1)の状態を保つか(絞り込みの条件には入れない。src/lib/list-limit.ts) */
+export function padFilterHref(f: PadFilter, patch: Partial<PadFilter> = {}, showAll = false): string {
   const n = { ...f, ...patch };
-  return queryHref("/pads", [["surface", n.surface], ["size", n.size], ["thickness", n.thickness], ["firmness", n.firmness]]);
+  return queryHref("/pads", [["surface", n.surface], ["size", n.size], ["thickness", n.thickness], ["firmness", n.firmness], ["all", showAll ? "1" : null]]);
 }
 
 export function isPadFilterEmpty(f: PadFilter): boolean {

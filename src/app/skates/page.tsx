@@ -8,7 +8,8 @@ import type { SkateSpec } from "@/data/gear-types";
 import { firstParam, type SearchParams } from "@/lib/gear-query";
 import { subnavFor } from "@/lib/nav";
 import { affiliateEnv, shopLinks, type AffiliateEnv } from "@/lib/shop-links";
-import { mouseOptionGroups, parseSkateFilter, skateCountCaption, skateCounts, skateChipHref, skateFilterCount, skateGridSource, skateView, type SkateFilter } from "@/lib/skate-match";
+import { limitRows, parseShowAll, shownNote } from "@/lib/list-limit";
+import { groupByBrand, mouseOptionGroups, parseSkateFilter, skateCountCaption, skateCounts, skateChipHref, skateFilterCount, skateGridSource, skateView, type SkateFilter } from "@/lib/skate-match";
 import { PageShell } from "@/components/ui/page-shell";
 import { SubNav } from "@/components/brand/SubNav";
 import { NumUnit } from "@/components/ui/num-unit";
@@ -23,6 +24,7 @@ import { SkateRow } from "@/components/gear/SkateRow";
 import { SkateGridLive } from "@/components/gear/SkateGridLive";
 import { MyMousePreselect } from "@/components/gear/MyMousePreselect";
 import { FilterDisclosure } from "@/components/gear/FilterDisclosure";
+import { ShowAllLink } from "@/components/gear/ShowAllLink";
 
 const TITLE = "マウスソール探し(自分のマウスに合うソール)";
 const DESCRIPTION = "使っているマウスに合うマウスソール(マウスフィート)を、メーカー公式の素材・厚さ・入数で一覧します。";
@@ -37,8 +39,8 @@ export const metadata: Metadata = {
 const MATERIALS = [["all", "すべて"], ["PTFE", "PTFE"], ["glass", "ガラス"], ["UPE", "UPE"], ["other", "その他"]] as const;
 const SHAPES = [["all", "すべて"], ["full", "機種専用の形"], ["dot", "汎用のドット"]] as const;
 
-function options<K extends "material" | "shape">(filter: SkateFilter, key: K, items: readonly (readonly [SkateFilter[K], string])[]): FilterOption[] {
-  return items.map(([value, text]) => ({ key: String(value), text, href: skateChipHref(filter, { [key]: value } as Partial<SkateFilter>), current: filter[key] === value }));
+function options<K extends "material" | "shape">(filter: SkateFilter, showAll: boolean, key: K, items: readonly (readonly [SkateFilter[K], string])[]): FilterOption[] {
+  return items.map(([value, text]) => ({ key: String(value), text, href: skateChipHref(filter, { [key]: value } as Partial<SkateFilter>, showAll), current: filter[key] === value }));
 }
 
 function SkateList({ skates, env, primaryFirst }: { skates: SkateSpec[]; env: AffiliateEnv; primaryFirst: boolean }) {
@@ -54,6 +56,7 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
   const mice = DEVICES.filter((d) => d.category === "mouse");
   const counts = skateCounts(SKATES);
   const filter = parseSkateFilter(sp, new Set(mice.map((m) => m.id)));
+  const showAll = parseShowAll(sp);
   const view = skateView(SKATES, filter);
   const selected = filter.mouse === null ? undefined : mice.find((m) => m.id === filter.mouse);
   const fromMy = firstParam(sp, "from") === "my" && selected !== undefined;
@@ -62,7 +65,14 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
   // 選ぶ欄を変えたら送る前にマスを描き直すための数(ソールのデータ本体はブラウザに入れない)
   const gridSource = skateGridSource(SKATES, filter);
   const shownCount = view.kind === "mouse" ? view.dedicated.length + view.universal.length : view.total;
-  const clearHref = skateChipHref(filter, { material: "all", shape: "all" });
+  const clearHref = skateChipHref(filter, { material: "all", shape: "all" }, showAll);
+  // 最初は人気の順の上位 12 行だけ描く(HTML を軽く。?all=1 で全件)。マウスを選んだら専用・汎用の段ごとに、多いときだけ切る。数の表示は全件のまま
+  const showAllHref = skateChipHref(filter, {}, true);
+  const dedicated = limitRows(view.kind === "mouse" ? view.dedicated : [], showAll);
+  const universal = limitRows(view.kind === "mouse" ? view.universal : [], showAll);
+  const allList = limitRows(view.kind === "all" ? view.groups.flatMap((g) => g.items) : [], showAll);
+  const brandTotals = new Map(view.kind === "all" ? view.groups.map((g) => [g.brand, g.items.length] as const) : []);
+  const shownGroups = groupByBrand(allList.shown);
   const filterCount = skateFilterCount(filter);
   const filtered = filterCount > 0;
   // 上の数字の説明の「全 N 件」:マウスを選んでいればそのマウスに使える数(素材・形で絞る前)、選んでいなければ全件
@@ -70,8 +80,8 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
   const baseCount = unfiltered.kind === "mouse" ? unfiltered.dedicated.length + unfiltered.universal.length : unfiltered.total;
   const filters = (
     <>
-      <FilterGroup label="素材" options={options(filter, "material", MATERIALS)} />
-      <FilterGroup label="形" options={options(filter, "shape", SHAPES)} />
+      <FilterGroup label="素材" options={options(filter, showAll, "material", MATERIALS)} />
+      <FilterGroup label="形" options={options(filter, showAll, "shape", SHAPES)} />
       {filtered && <ButtonLink href={clearHref} scroll={false} variant="ghost" size="sm" className="justify-self-start px-0">絞り込みを外す</ButtonLink>}
     </>
   );
@@ -97,6 +107,7 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
                 </NativeSelect>
                 {filter.material !== "all" && <input type="hidden" name="material" value={filter.material} />}
                 {filter.shape !== "all" && <input type="hidden" name="shape" value={filter.shape} />}
+                {showAll && <input type="hidden" name="all" value="1" />}
                 <button type="submit" className={buttonVariants({ variant: selected ? "secondary" : "primary" })}>このマウスで絞り込む</button>
               </form>
               <SkateGridLive key={`${filter.mouse ?? ""}|${filter.material}|${filter.shape}`} selectId="skate-mouse-select" source={gridSource}
@@ -117,20 +128,24 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
             {view.kind === "mouse" ? (
               <>
                 <section aria-labelledby="skates-dedicated" className="grid gap-4">
-                  <SectionHeading id="skates-dedicated" title={`${selected?.brand ?? ""} ${selected?.name ?? ""} 専用`} count={view.dedicated.length} />
+                  <SectionHeading id="skates-dedicated" title={`${selected?.brand ?? ""} ${selected?.name ?? ""} 専用`} count={view.dedicated.length}
+                    description={dedicated.cut ? shownNote(dedicated.shown.length) : undefined} />
                   {view.dedicated.length === 0 ? (
                     <EmptyState icon={SearchX} title={filtered ? "条件に合う専用のソールがありません" : "このマウス専用のソールはまだ載っていません"}
                       description={filtered ? "絞り込みを外すと見つかることがあります。" : "下の汎用のドットなら、どのマウスにも貼れます。"}
                       action={filtered ? <ButtonLink href={clearHref} scroll={false} variant="secondary">絞り込みを外す</ButtonLink> : undefined} />
                   ) : (
-                    <SkateList skates={view.dedicated} env={env} primaryFirst />
+                    <SkateList skates={dedicated.shown} env={env} primaryFirst />
                   )}
+                  {dedicated.cut && <ShowAllLink href={showAllHref} total={dedicated.total} />}
                 </section>
                 <section aria-labelledby="skates-universal" className="grid gap-4">
-                  <SectionHeading id="skates-universal" title="どのマウスにも使える汎用のドット" count={view.universal.length} />
+                  <SectionHeading id="skates-universal" title="どのマウスにも使える汎用のドット" count={view.universal.length}
+                    description={universal.cut ? shownNote(universal.shown.length) : undefined} />
                   {view.universal.length === 0
                     ? <p className="text-sm text-rl-muted">この絞り込みでは、汎用のドットはありません。</p>
-                    : <SkateList skates={view.universal} env={env} primaryFirst={view.dedicated.length === 0} />}
+                    : <SkateList skates={universal.shown} env={env} primaryFirst={view.dedicated.length === 0} />}
+                  {universal.cut && <ShowAllLink href={showAllHref} total={universal.total} />}
                 </section>
               </>
             ) : view.total === 0 ? (
@@ -138,13 +153,21 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
                 action={<ButtonLink href={clearHref} scroll={false} variant="secondary">絞り込みを外す</ButtonLink>} />
             ) : (
               <>
-                <p className="text-base">マウスを選ぶと、合うソールだけに絞り込めます。</p>
-                {view.groups.map((g, i) => (
-                  <section key={g.brand} aria-labelledby={`skates-brand-${i}`} className="grid gap-4">
-                    <SectionHeading id={`skates-brand-${i}`} title={g.brand} count={g.items.length} />
-                    <SkateList skates={g.items} env={env} primaryFirst={false} />
-                  </section>
-                ))}
+                <div className="grid gap-1">
+                  <p className="text-base">マウスを選ぶと、合うソールだけに絞り込めます。</p>
+                  {allList.cut && <p className="text-sm text-rl-muted">人気の順(ブランドの順)の{shownNote(allList.shown.length)}(全 {allList.total} 件)</p>}
+                </div>
+                {shownGroups.map((g, i) => {
+                  const total = brandTotals.get(g.brand) ?? g.items.length;
+                  return (
+                    <section key={g.brand} aria-labelledby={`skates-brand-${i}`} className="grid gap-4">
+                      <SectionHeading id={`skates-brand-${i}`} title={g.brand} count={total}
+                        description={g.items.length < total ? `このうち ${g.items.length} 件を表示中` : undefined} />
+                      <SkateList skates={g.items} env={env} primaryFirst={false} />
+                    </section>
+                  );
+                })}
+                {allList.cut && <ShowAllLink href={showAllHref} total={allList.total} />}
               </>
             )}
           </div>

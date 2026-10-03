@@ -8,8 +8,9 @@ import type { SearchParams } from "@/lib/gear-query";
 import { SURFACE_LABEL } from "@/lib/gear-labels";
 import { subnavFor } from "@/lib/nav";
 import {
-  SIZE_CLASSES, THICKNESS_CLASSES, filterPads, isPadFilterEmpty, padCountCaption, padFilterCount, padFilterHref, parsePadFilter, visiblePads, type PadFilter,
+  NO_PAD_FILTER, SIZE_CLASSES, THICKNESS_CLASSES, filterPads, isPadFilterEmpty, padCountCaption, padFilterCount, padFilterHref, parsePadFilter, visiblePads, type PadFilter,
 } from "@/lib/pad-filter";
+import { limitRows, parseShowAll, shownNote } from "@/lib/list-limit";
 import { affiliateEnv, shopLinks } from "@/lib/shop-links";
 import { PageShell } from "@/components/ui/page-shell";
 import { SubNav } from "@/components/brand/SubNav";
@@ -22,6 +23,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { FilterGroup, type FilterOption } from "@/components/gear/FilterGroup";
 import { PadRow } from "@/components/gear/PadRow";
 import { FilterDisclosure } from "@/components/gear/FilterDisclosure";
+import { ShowAllLink } from "@/components/gear/ShowAllLink";
 
 const TITLE = "マウスパッド探し(面・大きさ・厚さで選ぶ)";
 const DESCRIPTION = "人気のゲーミングマウスパッドを、メーカー公式の大きさ・厚さと、公式の言葉の「速さ・止め」で比べます。";
@@ -35,26 +37,31 @@ export const metadata: Metadata = {
 
 const SURFACES = ["cloth", "hybrid", "glass", "hard"] as const;
 
-function options<K extends keyof PadFilter>(filter: PadFilter, key: K, items: readonly (readonly [PadFilter[K], string])[]): FilterOption[] {
-  return items.map(([value, text]) => ({ key: String(value), text, href: padFilterHref(filter, { [key]: value } as Partial<PadFilter>), current: filter[key] === value }));
+function options<K extends keyof PadFilter>(filter: PadFilter, showAll: boolean, key: K, items: readonly (readonly [PadFilter[K], string])[]): FilterOption[] {
+  return items.map(([value, text]) => ({ key: String(value), text, href: padFilterHref(filter, { [key]: value } as Partial<PadFilter>, showAll), current: filter[key] === value }));
 }
 
 export default async function PadsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  const filter = parsePadFilter(await searchParams);
+  const sp = await searchParams;
+  const filter = parsePadFilter(sp);
+  const showAll = parseShowAll(sp);
   const all = byPopularity(visiblePads(PADS));
   const matches = filterPads(all, filter);
+  // 最初は人気の順の上位 12 行だけ描く(HTML を軽く。?all=1 で全件)。数の表示は全件のまま
+  const list = limitRows(matches, showAll);
+  const clearHref = padFilterHref(NO_PAD_FILTER, {}, showAll);
   const env = affiliateEnv();
   const narrowed = filter.size !== "all" || filter.thickness !== "all";
   const filterCount = padFilterCount(filter);
   const filters = (
     <>
-      <FilterGroup label="面" options={options(filter, "surface", [["all", "すべて"], ...SURFACES.map((s) => [s, SURFACE_LABEL[s]] as const)])} />
+      <FilterGroup label="面" options={options(filter, showAll, "surface", [["all", "すべて"], ...SURFACES.map((s) => [s, SURFACE_LABEL[s]] as const)])} />
       <FilterGroup label="大きさ" hint={`公式の横幅で分けた目安です(${SIZE_CLASSES.map((c) => `${c.id} ${c.hint}`).join("・")})。`}
-        options={options(filter, "size", [["all", "すべて"], ...SIZE_CLASSES.map((c) => [c.id, c.id] as const)])} />
+        options={options(filter, showAll, "size", [["all", "すべて"], ...SIZE_CLASSES.map((c) => [c.id, c.id] as const)])} />
       <FilterGroup label="厚さ" hint={`公式の厚さがあるサイズだけで分けます(${THICKNESS_CLASSES.map((c) => `${c.label} ${c.hint}`).join("・")})。`}
-        options={options(filter, "thickness", [["all", "すべて"], ...THICKNESS_CLASSES.map((c) => [c.id, c.label] as const)])} />
-      <FilterGroup label="硬さ" options={options(filter, "firmness", [["all", "すべて"], ["variants", "硬さを選べる"]])} />
-      {!isPadFilterEmpty(filter) && <ButtonLink href="/pads" scroll={false} variant="ghost" size="sm" className="justify-self-start px-0">絞り込みを外す</ButtonLink>}
+        options={options(filter, showAll, "thickness", [["all", "すべて"], ...THICKNESS_CLASSES.map((c) => [c.id, c.label] as const)])} />
+      <FilterGroup label="硬さ" options={options(filter, showAll, "firmness", [["all", "すべて"], ["variants", "硬さを選べる"]])} />
+      {!isPadFilterEmpty(filter) && <ButtonLink href={clearHref} scroll={false} variant="ghost" size="sm" className="justify-self-start px-0">絞り込みを外す</ButtonLink>}
     </>
   );
 
@@ -71,7 +78,7 @@ export default async function PadsPage({ searchParams }: { searchParams: Promise
           </Card>
 
           <section aria-labelledby="pads-results" className="grid gap-4">
-            <SectionHeading id="pads-results" title="人気の順" count={matches.length} />
+            <SectionHeading id="pads-results" title="人気の順" count={matches.length} description={list.cut ? shownNote(list.shown.length) : undefined} />
             <FilterDisclosure count={filterCount}>{filters}</FilterDisclosure>
             {matches.length > 0 && <p className="flex flex-wrap items-center gap-2 text-sm text-rl-muted"><Badge variant="pr">PR</Badge>このリンクから買うと、ロビラボに紹介料が入ることがあります</p>}
             {all.length === 0 ? (
@@ -79,14 +86,17 @@ export default async function PadsPage({ searchParams }: { searchParams: Promise
                 action={<ButtonLink href="/mouse" variant="secondary">マウス探しへ</ButtonLink>} />
             ) : matches.length === 0 ? (
               <EmptyState icon={SearchX} title="条件に合うマウスパッドがありません" description="絞り込みを 1 つ外すと見つかりやすくなります。"
-                action={<ButtonLink href="/pads" scroll={false} variant="secondary">絞り込みを外す</ButtonLink>} />
+                action={<ButtonLink href={clearHref} scroll={false} variant="secondary">絞り込みを外す</ButtonLink>} />
             ) : (
-              <ol className="grid">
-                {matches.map((m, i) => (
-                  <PadRow key={m.pad.id} pad={m.pad} sizes={m.sizes} narrowed={narrowed} primary={i === 0}
-                    links={shopLinks(`${m.pad.brand} ${m.pad.name}`, m.pad.officialUrl, env)} />
-                ))}
-              </ol>
+              <>
+                <ol className="grid">
+                  {list.shown.map((m, i) => (
+                    <PadRow key={m.pad.id} pad={m.pad} sizes={m.sizes} narrowed={narrowed} primary={i === 0}
+                      links={shopLinks(`${m.pad.brand} ${m.pad.name}`, m.pad.officialUrl, env)} />
+                  ))}
+                </ol>
+                {list.cut && <ShowAllLink href={padFilterHref(filter, {}, true)} total={list.total} />}
+              </>
             )}
           </section>
         </div>

@@ -1067,3 +1067,16 @@ body {
     animation-delay: 0s !important;
   }
 }
+/*
+ * 表示速度(docs/design/perf.md):/pads・/skates の一覧の行は、画面の外にある間レイアウトと描画を省く(content-visibility)。
+ * 画面に入る前に描くので見た目は同じ。行の高さは一度描いたら覚える(auto)。まだ描いていない行は --rl-row-h の高さとして数える(幅は決めない。決めると 375 で横にはみ出す)。
+ * 中身は行の箱で切り取られるので、左端のボタンのフォーカスの線(外に 4px)と主ボタンの光(16px)が切れないよう overflow-clip-margin で 24px 外まで描く。
+ * overflow-clip-margin がない環境(Safari など)では切れてしまうので、行を省くこと自体をしない。
+ */
+@supports (overflow-clip-margin: 24px) {
+  .rl-row-lazy {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto var(--rl-row-h, 480px);
+    overflow-clip-margin: 24px;
+  }
+}

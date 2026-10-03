@@ -32,7 +32,7 @@ const SKATE_MATERIALS: readonly string[] = ["all", "PTFE", "glass", "UPE", "othe
 const SKATE_SHAPES: readonly string[] = ["all", "full", "dot"];
 
 /**
- * 選び直しの URL の query。マウス(mouse)と from=my に、決まった値の material・shape だけを写す
+ * 選び直しの URL の query。マウス(mouse)と from=my に、決まった値の material・shape と all(1 だけ。すべて見る)だけを写す
  * (ほかのキー・決まっていない値・元の from は捨てる。URL に何が付いていても、そのまま router.replace に渡さない)。
  */
 export function preselectQuery(search: string, mouseId: string): string {
@@ -43,6 +43,7 @@ export function preselectQuery(search: string, mouseId: string): string {
   if (material !== null && SKATE_MATERIALS.includes(material)) q.set("material", material);
   const shape = src.get("shape");
   if (shape !== null && SKATE_SHAPES.includes(shape)) q.set("shape", shape);
+  if (src.get("all") === "1") q.set("all", "1");
   q.set("from", "my");
   return q.toString();
 }

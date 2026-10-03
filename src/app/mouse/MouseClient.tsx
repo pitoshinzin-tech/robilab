@@ -12,6 +12,7 @@ import { emptyMySettings, type MySettings } from "@/lib/my-settings";
 import { useIsClient } from "@/lib/use-is-client";
 import { cn } from "@/lib/utils";
 import { loadSupabaseBrowser } from "@/lib/supabase/lazy";
+import { mayHaveSupabaseSession } from "@/lib/auth-cookie";
 import { HandSetup, GRIP_INFO } from "@/components/mouse/HandSetup";
 import { MouseCard } from "@/components/mouse/MouseCard";
 import { MouseFilters } from "@/components/mouse/MouseFilters";
@@ -52,8 +53,9 @@ export function MouseClient({ pageUrl, mice, other = null }: { pageUrl: string; 
   const [showAll, setShowAll] = useState(false);
   // 追補 6 章:重ね図に出すマウス(なければ 1 位)
   const [overlayId, setOverlayId] = useState<string | null>(null);
-  // サーバーの設定を確かめ中か(Supabase を使う環境だけ。確かめ終わるまで入力画面を出さない)
-  const [serverPending, setServerPending] = useState(() => Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL));
+  // サーバーの設定を確かめ中か(Supabase を使う環境だけ。確かめ終わるまで入力画面を出さない)。
+  // ログインの cookie がなければ確かめるものがないので、Supabase の JS を待たずに入力画面を出す(docs/design/perf.md。この値はハイドレーションのあとにだけ使う)
+  const [serverPending, setServerPending] = useState(() => Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) && (typeof document === "undefined" || mayHaveSupabaseSession(document.cookie)));
 
   const settings = isClient ? loadLocal(browserStorage()) : null;
   void rev;
@@ -69,6 +71,7 @@ export function MouseClient({ pageUrl, mice, other = null }: { pageUrl: string; 
     (async () => {
       const storage = browserStorage();
       if (loadLocal(storage)) return; // この端末に設定がある(下の表示条件では待たない)
+      if (!mayHaveSupabaseSession(document.cookie)) return; // ログインしていない(serverPending は最初から false)
       try {
         const supabase = await loadSupabaseBrowser();
         const { data } = await supabase.auth.getUser();

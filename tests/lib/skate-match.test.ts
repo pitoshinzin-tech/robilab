@@ -138,3 +138,15 @@ describe("skateCountCaption / skateFilterCount(上の数字の説明・畳んだ
     expect(skateMatch.skateFilterCount({ mouse: null, material: "UPE", shape: "dot" })).toBe(2);
   });
 });
+
+describe("skateChipHref の all(すべて見るの状態を保つ)", () => {
+  it("showAll のときだけ all=1 を付ける(マウス未選択の空の mouse= は残す)", () => {
+    expect(skateChipHref(NO_SKATE_FILTER, {}, true)).toBe("/skates?mouse=&all=1");
+    expect(skateChipHref(NO_SKATE_FILTER, { material: "PTFE" }, true)).toBe("/skates?mouse=&material=PTFE&all=1");
+    expect(skateChipHref({ mouse: "m1", material: "all", shape: "all" }, { shape: "dot" }, true)).toBe("/skates?mouse=m1&shape=dot&all=1");
+    expect(skateChipHref({ mouse: "m1", material: "all", shape: "all" }, { shape: "dot" }, false)).toBe("/skates?mouse=m1&shape=dot");
+  });
+  it("all は絞り込みの条件に入らない", () => {
+    expect(parseSkateFilter({ all: "1" }, KNOWN)).toEqual(NO_SKATE_FILTER);
+  });
+});

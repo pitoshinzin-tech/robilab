@@ -112,3 +112,15 @@ describe("padFilterCount・padCountCaption(上の大きな数字の説明)", () 
     expect(padCountCaption({ ...NO_PAD_FILTER, thickness: "thick" }, 41)).toBe("絞り込みに合う数(全 41 枚)");
   });
 });
+
+describe("padFilterHref の all(すべて見るの状態を保つ)", () => {
+  it("showAll のときだけ all=1 を最後に付ける", () => {
+    expect(padFilterHref(NO_PAD_FILTER, {}, true)).toBe("/pads?all=1");
+    expect(padFilterHref(NO_PAD_FILTER, { surface: "glass" }, true)).toBe("/pads?surface=glass&all=1");
+    expect(padFilterHref(NO_PAD_FILTER, { surface: "glass" })).toBe("/pads?surface=glass");
+    expect(padFilterHref(NO_PAD_FILTER, { surface: "glass" }, false)).toBe("/pads?surface=glass");
+  });
+  it("all は絞り込みの条件に数えない", () => {
+    expect(parsePadFilter({ all: "1" })).toEqual(NO_PAD_FILTER);
+  });
+});

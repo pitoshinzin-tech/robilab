@@ -44,3 +44,15 @@ describe("preselectQuery(選び直しの URL に写すもの)", () => {
     expect(preselectQuery("?material=GLASS&shape=dot&shape=full", "m1")).toBe("mouse=m1&shape=dot&from=my");
   });
 });
+
+describe("preselectQuery の all", () => {
+  it("決まった値 1 の all だけ写す", () => {
+    expect(preselectQuery("?all=1", "m1")).toBe("mouse=m1&all=1&from=my");
+    expect(preselectQuery("?material=glass&all=1", "m1")).toBe("mouse=m1&material=glass&all=1&from=my");
+  });
+  it("ほかの値は捨てる", () => {
+    expect(preselectQuery("?all=true", "m1")).toBe("mouse=m1&from=my");
+    expect(preselectQuery("?all=0&all=1", "m1")).toBe("mouse=m1&from=my");
+    expect(preselectQuery("?all=", "m1")).toBe("mouse=m1&from=my");
+  });
+});
