@@ -70,7 +70,7 @@ export function Ranking({ rows, mine, loggedIn = false, canPlay = false, decodeK
           })}
         </ol>
       )}
-      {mine && <p className="text-base">今日のあなたの順位:<b className="font-display tabular-nums text-rl-highlight">{decodeKey > 0 ? <DecodeNumber key={`${decodeKey}:${mine.rank}:${mine.score}`} value={String(mine.rank)} /> : mine.rank}</b> 位({mine.score.toLocaleString("ja-JP")} 点)</p>}
+      {mine && <p className="text-base">今日のあなたの順位:<b className="tabular-nums text-rl-highlight">{decodeKey > 0 ? <DecodeNumber key={`${decodeKey}:${mine.rank}:${mine.score}`} value={String(mine.rank)} /> : mine.rank}</b> 位({mine.score.toLocaleString("ja-JP")} 点)</p>}
       {loggedIn && (
         <p className="text-sm text-rl-muted">
           ランキングの名前は、<Link href="/my" className="text-rl-accent underline">マイ設定</Link>で名刺を公開すると表示されます

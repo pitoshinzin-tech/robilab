@@ -18,7 +18,7 @@ export function StrokeBars({ perStroke, worst }: { perStroke: readonly number[];
           const isWorst = i === worst;
           return (
             <li key={i} className="grid grid-cols-[2rem_auto_3.5rem_minmax(0,1fr)] items-center gap-3">
-              <span className="font-display text-sm tabular-nums text-rl-muted">{i + 1}<span className="sr-only">画目</span></span>
+              <span className="text-sm font-bold tabular-nums text-rl-muted">{i + 1}<span className="sr-only">画目</span></span>
               <span aria-hidden className="rl-bar-fill flex gap-0.5">
                 {CELLS.map((c) => (
                   <span key={c} className={cn("h-2 w-4", c < filled ? (isWorst ? "bg-rl-warning" : "bg-rl-secondary") : "bg-rl-surface-2")} />

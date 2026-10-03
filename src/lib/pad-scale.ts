@@ -14,17 +14,29 @@ export const SCALE_FRAME = { maxWidthPx: 400, heightPx: 240, mobileMaxWidthPx: 3
 
 /** マウスの幅がこれより細く見えるとき(375 の枠で)は、図の下に「同じ縮尺」と書き添える */
 const TINY_MOUSE_PX = 16;
-/** 名前(12px)1 文字あたりの幅の目安(px)と、外形の角からの余白(px) */
+/** 名前(12px)1 文字あたりの幅の目安(px。英数字 8・全角 12)、札の左右の余白(px-1 の 4px×2)、外形の角からの余白(px) */
 const CHAR_PX = 8;
+const WIDE_CHAR_PX = 12;
+const LABEL_PAD_PX = 8;
 const LABEL_INSET_PX = 4;
+
+const labelPx = (label: string) => [...label].reduce((w, c) => w + (/[　-鿿＀-￯]/.test(c) ? WIDE_CHAR_PX : CHAR_PX), LABEL_PAD_PX);
 
 export type PadOutline = {
   label: string; widthMm: number; depthMm: number;
   x: number; y: number; width: number; height: number;
   /** 大きさ・厚さの絞り込みに合うサイズ */
   matched: boolean;
-  /** 名前を置く高さ(上からの mm。右上の角の内側。ほかの名前と重ならないように下へずらしたもの) */
+  /**
+   * 名前の札を図の中に描くか。375 の枠で外形の中に収まらない、ほかの札とずらしても置けない、マウスの面に重なるときは描かない
+   * (小さいサイズの札が重なって面を隠すため。描かない名前は hiddenLabels にまとめ、図の下に 1 行で出す)。
+   */
+  labelShown: boolean;
+  /** 札を置く高さ(上からの mm。右上の角の内側。ほかの札と重ならないように下へずらしたもの) */
   labelTopMm: number;
+  /** 札の左端と右端(左からの mm。375 の枠での文字の幅の目安) */
+  labelLeftMm: number;
+  labelRightMm: number;
 };
 
 export type PadScaleGeometry = {
@@ -32,13 +44,18 @@ export type PadScaleGeometry = {
   widthMm: number; depthMm: number;
   /** md 以上の枠での 1mm あたりの px */
   pxPerMm: number;
-  /** 375 の枠での 1mm あたりの px(名前の重なりはこちらで見る) */
+  /** 375 の枠での 1mm あたりの px(札が収まるか・重なるかはこちらで見る) */
   pxPerMmMin: number;
   outlines: PadOutline[];
+  /** 図の中に描かない名前(小さい順) */
+  hiddenLabels: string[];
   mouse: { x: number; y: number; width: number; height: number; rx: number };
   narrowed: boolean;
   tinyMouse: boolean;
 };
+
+type Box = { x: number; y: number; width: number; height: number };
+const overlaps = (a: Box, b: Box) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 
 const drawable = (s: PadSize): s is PadSize & { widthMm: number; depthMm: number } =>
   s.widthMm !== null && s.depthMm !== null && s.widthMm > 0 && s.depthMm > 0;
@@ -69,41 +86,48 @@ export function padScale(sizes: readonly PadSize[], matched: readonly PadSize[] 
   const line = SCALE_FRAME.labelLinePx / pxPerMmMin;
   const inset = LABEL_INSET_PX / pxPerMmMin;
 
-  const placed: { top: number; left: number; right: number }[] = [];
+  // 札を大きい順に右上の角へ。外形に収まらない札は描かない。横に重なる札と縦に近ければ下へずらし、外形の下に出るなら描かない
+  const placed: Box[] = [];
   const outlines: PadOutline[] = list.map((g) => {
     const label = g.labels.join("・");
     const y = depthMm - g.depthMm;
     const right = g.widthMm - inset;
-    const left = right - (label.length * CHAR_PX) / pxPerMmMin;
+    const w = labelPx(label) / pxPerMmMin;
+    const left = right - w;
     let top = y + inset;
-    // 横に重なる名前と縦に近ければ、その下へずらす(上から順に見る)
-    for (let moved = true; moved; ) {
-      moved = false;
-      for (const p of placed) {
-        if (left < p.right && p.left < right && top < p.top + line && top > p.top - line) { top = p.top + line; moved = true; }
+    let shown = left >= inset && line + 2 * inset <= g.depthMm;
+    if (shown) {
+      for (let moved = true; moved; ) {
+        moved = false;
+        for (const p of placed) {
+          if (overlaps({ x: left, y: top, width: w, height: line }, p)) { top = p.y + p.height; moved = true; }
+        }
       }
+      shown = top + line <= depthMm;
+      if (shown) placed.push({ x: left, y: top, width: w, height: line });
     }
-    top = Math.min(top, Math.max(0, depthMm - line));
-    placed.push({ top, left, right });
-    return { label, widthMm: g.widthMm, depthMm: g.depthMm, x: 0, y, width: g.widthMm, height: g.depthMm, matched: g.matched, labelTopMm: top };
+    return { label, widthMm: g.widthMm, depthMm: g.depthMm, x: 0, y, width: g.widthMm, height: g.depthMm, matched: g.matched, labelShown: shown, labelTopMm: top, labelLeftMm: left, labelRightMm: right };
   });
 
-  // マウスは一番小さいサイズの真ん中。その名前と重なるときは、左下の角に寄せる(どちらもパッドの上)
+  // マウスは一番小さいサイズの真ん中。札と重なるときは左下の角に寄せ(どちらもパッドの上)、それでも重なる札は描かない(面を隠さない)
   const smallest = list[list.length - 1];
-  const last = placed[placed.length - 1];
-  const mouse = {
+  const center = {
     x: smallest.widthMm / 2 - AVG_MOUSE.widthMm / 2,
     y: depthMm - smallest.depthMm / 2 - AVG_MOUSE.lengthMm / 2,
     width: AVG_MOUSE.widthMm,
     height: AVG_MOUSE.lengthMm,
-    rx: AVG_MOUSE.widthMm * 0.45,
   };
-  if (mouse.x < last.right && last.left < mouse.x + mouse.width && mouse.y < last.top + line) {
-    mouse.x = inset;
-    mouse.y = depthMm - inset - AVG_MOUSE.lengthMm;
-  }
+  const corner = { ...center, x: inset, y: depthMm - inset - AVG_MOUSE.lengthMm };
+  const boxOf = (o: PadOutline): Box => ({ x: o.labelLeftMm, y: o.labelTopMm, width: o.labelRightMm - o.labelLeftMm, height: line });
+  const hits = (m: Box) => outlines.filter((o) => o.labelShown && overlaps(boxOf(o), m));
+  const cornerFits = corner.x + corner.width <= smallest.widthMm && corner.y >= depthMm - smallest.depthMm;
+  const place = hits(center).length > 0 && cornerFits && hits(corner).length === 0 ? corner : center;
+  for (const o of hits(place)) o.labelShown = false;
+
   return {
-    viewBox: `0 0 ${widthMm} ${depthMm}`, widthMm, depthMm, pxPerMm, pxPerMmMin, outlines, mouse,
+    viewBox: `0 0 ${widthMm} ${depthMm}`, widthMm, depthMm, pxPerMm, pxPerMmMin, outlines,
+    hiddenLabels: outlines.filter((o) => !o.labelShown).map((o) => o.label).reverse(),
+    mouse: { ...place, rx: AVG_MOUSE.widthMm * 0.45 },
     narrowed: hit !== null,
     tinyMouse: AVG_MOUSE.widthMm * pxPerMmMin < TINY_MOUSE_PX,
   };

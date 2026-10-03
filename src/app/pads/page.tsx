@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronDown, PackageOpen, SearchX } from "lucide-react";
+import { PackageOpen, SearchX } from "lucide-react";
 import { PADS } from "@/data/pads";
 import { PROS_READY } from "@/data/pros";
 import { byPopularity, POPULARITY_NOTE } from "@/lib/gear-popularity";
@@ -21,6 +21,7 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { FilterGroup, type FilterOption } from "@/components/gear/FilterGroup";
 import { PadRow } from "@/components/gear/PadRow";
+import { FilterDisclosure } from "@/components/gear/FilterDisclosure";
 
 const TITLE = "マウスパッド探し(面・大きさ・厚さで選ぶ)";
 const DESCRIPTION = "人気のゲーミングマウスパッドを、メーカー公式の大きさ・厚さと、公式の言葉の「速さ・止め」で比べます。";
@@ -53,7 +54,7 @@ export default async function PadsPage({ searchParams }: { searchParams: Promise
       <FilterGroup label="厚さ" hint={`公式の厚さがあるサイズだけで分けます(${THICKNESS_CLASSES.map((c) => `${c.label} ${c.hint}`).join("・")})。`}
         options={options(filter, "thickness", [["all", "すべて"], ...THICKNESS_CLASSES.map((c) => [c.id, c.label] as const)])} />
       <FilterGroup label="硬さ" options={options(filter, "firmness", [["all", "すべて"], ["variants", "硬さを選べる"]])} />
-      {!isPadFilterEmpty(filter) && <ButtonLink href="/pads" scroll={false} variant="ghost" size="sm" className="justify-self-start">絞り込みを外す</ButtonLink>}
+      {!isPadFilterEmpty(filter) && <ButtonLink href="/pads" scroll={false} variant="ghost" size="sm" className="justify-self-start px-0">絞り込みを外す</ButtonLink>}
     </>
   );
 
@@ -71,13 +72,7 @@ export default async function PadsPage({ searchParams }: { searchParams: Promise
 
           <section aria-labelledby="pads-results" className="grid gap-4">
             <SectionHeading id="pads-results" title="人気の順" count={matches.length} />
-            <details className="group rounded-rl-md border border-rl-line bg-rl-surface lg:hidden">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-4 text-sm font-bold [&::-webkit-details-marker]:hidden">
-                <span>絞り込み<span className="ml-2 font-normal text-rl-muted">{filterCount > 0 ? `${filterCount} つの条件で絞り込み中` : "すべて表示中"}</span></span>
-                <ChevronDown aria-hidden className="size-5 shrink-0 transition-transform duration-(--rl-dur-base) group-open:rotate-180" />
-              </summary>
-              <div className="grid gap-4 p-4 pt-0">{filters}</div>
-            </details>
+            <FilterDisclosure count={filterCount}>{filters}</FilterDisclosure>
             {matches.length > 0 && <p className="flex flex-wrap items-center gap-2 text-sm text-rl-muted"><Badge variant="pr">PR</Badge>このリンクから買うと、ロビラボに紹介料が入ることがあります</p>}
             {all.length === 0 ? (
               <EmptyState icon={PackageOpen} title="マウスパッドのデータがまだありません" description="先にマウス探しで、手に合うマウスを見られます。"

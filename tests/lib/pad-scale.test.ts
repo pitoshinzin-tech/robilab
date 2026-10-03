@@ -101,13 +101,75 @@ describe("PadScale(部品)", () => {
 });
 
 describe("padScale(マウスの置き場所)", () => {
-  it("一番小さいサイズの名前と重なるときは、左下の角に寄せる(パッドの上からはみ出さない)", () => {
-    const g = padScale([s("5XL", 1600, 800), s("Small", 250, 210)], null)!;
-    const small = g.outlines.find((o) => o.label === "Small")!;
+  it("一番小さいサイズの名前がマウスと重なるときは、マウスを左下の角に寄せる(パッドの上からはみ出さない)", () => {
+    const g = padScale([s("L", 450, 400), s("Med", 200, 170)], null)!;
+    const med = g.outlines.find((o) => o.label === "Med")!;
+    expect(med.labelShown).toBe(true);
     expect(g.mouse.x).toBeGreaterThanOrEqual(0);
-    expect(g.mouse.x + g.mouse.width).toBeLessThanOrEqual(small.width);
-    expect(g.mouse.y + g.mouse.height).toBeLessThanOrEqual(800);
-    expect(g.mouse.y).toBeGreaterThanOrEqual(small.y);
-    expect(g.mouse.y).toBeGreaterThan(small.labelTopMm);
+    expect(g.mouse.x + g.mouse.width).toBeLessThanOrEqual(med.width);
+    expect(g.mouse.y + g.mouse.height).toBeLessThanOrEqual(400);
+    expect(g.mouse.y).toBeGreaterThanOrEqual(med.y);
+    expect(overlaps(labelBox(g, med), g.mouse)).toBe(false);
+  });
+  it("角に寄せても重なるときは、名前を描かずマウスを真ん中のまま(面を隠さない)", () => {
+    const g = padScale([s("L", 450, 400), s("Small", 200, 170)], null)!;
+    const small = g.outlines.find((o) => o.label === "Small")!;
+    expect(small.labelShown).toBe(false);
+    expect(g.mouse.x + g.mouse.width / 2).toBe(100);
+    expect(g.hiddenLabels).toEqual(["Small"]);
+  });
+});
+
+type Box = { x: number; y: number; width: number; height: number };
+const labelBox = (g: NonNullable<ReturnType<typeof padScale>>, o: (typeof g.outlines)[number]): Box => ({
+  x: o.labelLeftMm, y: o.labelTopMm, width: o.width - LABEL_INSET_MM(g) - o.labelLeftMm, height: SCALE_FRAME.labelLinePx / g.pxPerMmMin,
+});
+const LABEL_INSET_MM = (g: NonNullable<ReturnType<typeof padScale>>) => g.widthMm - g.outlines[0].labelRightMm;
+const overlaps = (a: Box, b: Box) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+describe("padScale(名前の札が重ならない・マウスの面を隠さない)", () => {
+  it("375 の枠で外形に入らない小さいサイズの名前は描かず、hiddenLabels に小さい順で残す(QcK)", () => {
+    const qck = visiblePads(PADS).find((p) => p.id === "steelseries-qck")!;
+    const g = padScale(qck.sizes, null)!;
+    const shown = g.outlines.filter((o) => o.labelShown).map((o) => o.label);
+    expect(shown).toEqual(expect.arrayContaining(["5XL", "4XL", "3XL", "XXL", "Large"]));
+    expect(shown).not.toContain("Small");
+    expect(shown).not.toContain("Medium");
+    expect(g.hiddenLabels).toEqual(["Small", "Medium"]);
+  });
+  it("本物の全パッドで、描く名前どうしが重ならず、マウスの面とも重ならず、自分の外形の中に収まる", () => {
+    for (const p of visiblePads(PADS)) {
+      const g = padScale(p.sizes, null);
+      if (g === null) continue;
+      const shown = g.outlines.filter((o) => o.labelShown);
+      for (const [i, a] of shown.entries()) {
+        const box = labelBox(g, a);
+        expect(overlaps(box, g.mouse), `${p.name} ${a.label} とマウス`).toBe(false);
+        expect(box.x, `${p.name} ${a.label} が外形の左にはみ出す`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `${p.name} ${a.label} が下にはみ出す`).toBeLessThanOrEqual(g.depthMm + 0.001);
+        for (const b of shown.slice(i + 1)) expect(overlaps(box, labelBox(g, b)), `${p.name} ${a.label} と ${b.label}`).toBe(false);
+      }
+      expect(g.hiddenLabels).toEqual(g.outlines.filter((o) => !o.labelShown).map((o) => o.label).reverse());
+    }
+  });
+});
+
+describe("PadScale(省いた名前・図の説明)", () => {
+  it("描かない名前は札にせず、図の下に「左下の小さい線」としてまとめる", () => {
+    const qck = visiblePads(PADS).find((p) => p.id === "steelseries-qck")!;
+    const html = renderToStaticMarkup(createElement(PadScale, { sizes: qck.sizes, matched: null }));
+    expect(html).toContain("左下の小さい線:Small・Medium");
+    expect(html).not.toMatch(/>Small<\/span>/);
+    expect(html).toMatch(/>5XL<\/span>/);
+  });
+  it("省く名前がなければ、まとめの行は出さない", () => {
+    const html = renderToStaticMarkup(createElement(PadScale, { sizes: [s("標準", 340, 280)], matched: null }));
+    expect(html).not.toContain("左下の小さい線");
+  });
+  it("showCaption=false のときは図の説明を sr-only(読み上げには残す)", () => {
+    const shown = renderToStaticMarkup(createElement(PadScale, { sizes: [s("標準", 340, 280)], matched: null }));
+    const hidden = renderToStaticMarkup(createElement(PadScale, { sizes: [s("標準", 340, 280)], matched: null, showCaption: false }));
+    expect(shown).toMatch(/<figcaption class="(?![^"]*sr-only)[^"]*">線は公式のサイズ/);
+    expect(hidden).toMatch(/<figcaption class="sr-only">線は公式のサイズ/);
   });
 });

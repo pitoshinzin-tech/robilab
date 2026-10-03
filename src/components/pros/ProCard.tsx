@@ -30,7 +30,7 @@ export function ProCard({ item, userCm }: { item: NearPro; userCm: number }) {
         <p className="text-sm text-rl-muted">{getSensGame(pro.game)!.name}{pro.team && ` ・ ${pro.team}`}</p>
       </div>
       <p className="text-sm">
-        振り向き <span className="font-display tabular-nums text-rl-highlight">{cm}cm</span>
+        振り向き <span className="font-bold tabular-nums text-rl-highlight">{cm}cm</span>
         <span className="ml-2 text-sm text-rl-secondary-text">{diffText(cm, userCm)}</span>
       </p>
       <p className="text-sm text-rl-muted">DPI {pro.dpi} ・ 感度 {pro.sens}</p>

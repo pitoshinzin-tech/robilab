@@ -19,7 +19,7 @@ function Slider({ id, label, value, min, max, onChange }: { id: string; label: s
     <div className="grid gap-1">
       <div className="flex items-baseline justify-between gap-3">
         <label htmlFor={id} className="text-sm font-bold">{label}</label>
-        <span aria-hidden className="font-display text-sm tabular-nums text-rl-highlight">{value}</span>
+        <span aria-hidden className="text-sm font-bold tabular-nums text-rl-highlight">{value}</span>
       </div>
       <input id={id} type="range" min={min} max={max} step={1} value={value} onChange={(e) => onChange(Number(e.target.value))}
         className="h-11 w-full cursor-pointer accent-rl-selected" />

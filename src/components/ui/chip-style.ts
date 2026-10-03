@@ -13,3 +13,6 @@ export const chipClassName =
 // (追補 S4)選んだときにチェックが線で引かれる(rl-draw-check は globals.css)。
 // 引くのは押したあと(チップに data-rl-touched があるとき)だけ。開いたときに最初から選ばれているチップは動かない
 export const chipCheckClassName = "rl-draw-check hidden size-4 shrink-0 group-aria-pressed/chip:block";
+
+// 選んでいないときの 8px の線の四角(ChipBox)。押すと消えてチェックに替わる(同じ 16px の場所なので幅は変わらない)
+export const chipBoxClassName = "group-aria-pressed/chip:hidden";

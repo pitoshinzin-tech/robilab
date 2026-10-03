@@ -98,3 +98,18 @@ export function mouseOptionGroups(mice: readonly { id: string; brand: string; na
   }));
   return [...list.filter((g) => g.has), ...list.filter((g) => !g.has)].map(({ brand, options }) => ({ brand, options }));
 }
+
+/** 素材・形で「すべて」でない条件の数(375 の畳んだ絞り込みの見出しに出す。マウスは別の箱なので数えない) */
+export function skateFilterCount(f: SkateFilter): number {
+  return [f.material, f.shape].filter((v) => v !== "all").length;
+}
+
+/**
+ * 上の大きな数字の説明(/pads の padCountCaption と同じ考え)。
+ * total:絞り込む前の数(マウスを選んでいるときはそのマウスに使える数、選んでいないときは全件)。
+ */
+export function skateCountCaption(f: SkateFilter, total: number): string {
+  const filtered = skateFilterCount(f) > 0;
+  if (f.mouse !== null) return filtered ? `絞り込みに合う数(このマウスに使える ${total} 件)` : "このマウスに使える数";
+  return filtered ? `絞り込みに合う数(全 ${total} 件)` : "公式の数字で比べられる数";
+}

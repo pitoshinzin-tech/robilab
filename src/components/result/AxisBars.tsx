@@ -16,7 +16,7 @@ export function AxisBars({ axes, fromDiagnosis }: { axes: Axes; fromDiagnosis: b
         const leftPct = Math.round(((v + 1) / 2) * 100);
         const leftWins = v > 0;
         const rightWins = v < 0;
-        const pct = (wins: boolean) => (wins ? "font-display tabular-nums text-rl-highlight" : "font-display tabular-nums");
+        const pct = (wins: boolean) => (wins ? "font-bold tabular-nums text-rl-highlight" : "font-bold tabular-nums");
         return (
           <div key={a.id} className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 text-sm">
             <span className={leftWins ? "font-bold text-rl-text" : "text-rl-muted"}>

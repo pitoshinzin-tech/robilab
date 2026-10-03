@@ -75,3 +75,12 @@ describe("OtherMiceList の「このマウスのソール」", () => {
     expect(html).not.toContain("mouse=b");
   });
 });
+
+describe("SkateRow の厚さの数字", () => {
+  it("SpecNum と同じ形(本文の書体の太字・マゼンタ・桁そろえ、単位は小さい字)。Orbitron を使わない", () => {
+    const sk = SKATES.find((x) => x.thicknessMm !== null)!;
+    const html = render(sk);
+    expect(html).toContain(`<span class="font-bold tabular-nums text-rl-highlight">${sk.thicknessMm}</span><span class="ml-0.5 text-xs font-bold">mm</span>`);
+    expect(html).not.toContain("font-display");
+  });
+});

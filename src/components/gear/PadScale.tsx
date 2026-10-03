@@ -7,9 +7,15 @@ import { cn } from "@/lib/utils";
  * 公式の幅・奥行きがあるサイズの外形を同じ縮尺で左下をそろえて重ねた線と、一番小さいサイズの真ん中に平均的なマウス(面)。
  * 大きさ・厚さで絞っているときは、合うサイズの線だけ選んだ色(--rl-selected)、ほかは薄い線。
  * 名前は 12px のまま読めるように、SVG の外の文字として外形の右上の角に重ねる(SVG の中の文字は図と一緒に縮むため)。
+ * 375 の枠で外形に収まらない・ほかの札と置けない・マウスの面に重なる名前は札にせず、図の下に「左下の小さい線:…」と 1 行でまとめる。
+ * 図の説明(figcaption)は一覧の先頭の行だけ見せ、ほかの行は sr-only(読み上げには残す。375 で 41 行すべてに出ると長くなるため)。
  * 公式の数字がないサイズは描かない。描けるサイズが 1 つもなければ何も出さない。
  */
-export function PadScale({ sizes, matched, className }: { sizes: readonly PadSize[]; matched: readonly PadSize[] | null; className?: string }) {
+export function PadScale({ sizes, matched, showCaption = true, className }: {
+  sizes: readonly PadSize[]; matched: readonly PadSize[] | null;
+  /** 図の説明を見せるか(一覧の先頭の行だけ true) */
+  showCaption?: boolean; className?: string;
+}) {
   const g = padScale(sizes, matched);
   if (g === null) return null;
   const ratio = Math.round((g.widthMm / g.depthMm) * 1000) / 1000;
@@ -27,14 +33,15 @@ export function PadScale({ sizes, matched, className }: { sizes: readonly PadSiz
           <rect x={g.mouse.x} y={g.mouse.y} width={g.mouse.width} height={g.mouse.height} rx={g.mouse.rx}
             fill="var(--rl-selected-bg)" stroke="var(--rl-secondary-text)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
         </svg>
-        {g.outlines.map((o) => (
-          <span key={o.label} className={cn("absolute mr-px bg-rl-bg px-1 text-xs leading-4 whitespace-nowrap", o.matched ? "font-bold text-rl-secondary-text" : "text-rl-muted")}
-            style={{ right: `${pct((g.widthMm - o.width) / g.widthMm)}%`, top: `${pct(o.labelTopMm / g.depthMm)}%` }}>
+        {g.outlines.filter((o) => o.labelShown).map((o) => (
+          <span key={o.label} className={cn("absolute bg-rl-bg px-1 text-xs leading-4 whitespace-nowrap", o.matched ? "font-bold text-rl-secondary-text" : "text-rl-muted")}
+            style={{ right: `${pct((g.widthMm - o.labelRightMm) / g.widthMm)}%`, top: `${pct(o.labelTopMm / g.depthMm)}%` }}>
             {o.label}
           </span>
         ))}
       </div>
-      <figcaption className="text-sm text-rl-muted text-balance [word-break:auto-phrase]">
+      {g.hiddenLabels.length > 0 && <p aria-hidden className="text-xs text-rl-muted">左下の小さい線:{g.hiddenLabels.join("・")}</p>}
+      <figcaption className={showCaption ? "text-sm text-rl-muted text-balance [word-break:auto-phrase]" : "sr-only"}>
         線は公式のサイズ(左下をそろえて重ねた外形)、面は平均的なマウス {AVG_MOUSE.lengthMm}×{AVG_MOUSE.widthMm}mm。同じ縮尺です。
         {g.tinyMouse && "パッドが大きいので、マウスは小さく見えます。"}
       </figcaption>

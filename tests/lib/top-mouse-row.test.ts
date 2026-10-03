@@ -16,3 +16,17 @@ describe("TopMouseRow の店のボタン", () => {
     expect(m![1]).toContain("md:flex-col");
   });
 });
+
+describe("TopMouseRow の合う度", () => {
+  const item = { score: 100, mouse: { id: "m", lengthMm: 120, widthMm: 63, heightMm: 40, weightG: 60 } } as unknown as Parameters<typeof TopMouseRow>[0]["item"];
+  const html = renderToStaticMarkup(createElement("ul", null, createElement(TopMouseRow, {
+    rank: 1, item, brand: "B", name: "N", reason: "r", links: shopLinks("B N", "https://example.com/", {}), overlaid: false, onOverlay: () => {},
+  })));
+  it("小さな「合う度 100」は本文の書体の太字・マゼンタ(Orbitron の小さな 0 は箱の記号に見えるため)", () => {
+    const m = html.match(/<span class="([^"]*)">100</);
+    expect(m).not.toBeNull();
+    expect(m![1]).not.toContain("font-display");
+    expect(m![1]).toContain("font-bold");
+    expect(m![1]).toContain("text-rl-highlight");
+  });
+});

@@ -27,8 +27,8 @@ function Chart({ title, label, values, max, unit, from, to }: {
       <figcaption className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm text-rl-muted">
         <span>{title}</span>
         <span className="flex flex-wrap items-baseline gap-x-4">
-          {now && <span>今日 <span className="font-display tabular-nums text-rl-highlight">{now.num}</span>{now.unit}</span>}
-          <span className="text-xs">上の端 <span className="font-display tabular-nums text-rl-text">{top.num}</span>{top.unit}</span>
+          {now && <span>今日 <span className="font-bold tabular-nums text-rl-highlight">{now.num}</span>{now.unit}</span>}
+          <span className="text-xs">上の端 <span className="font-bold tabular-nums text-rl-text">{top.num}</span>{top.unit}</span>
         </span>
       </figcaption>
       <svg viewBox={`0 0 ${CHART_W} ${CHART_H}`} className="h-auto w-full rounded-lg bg-rl-surface" role="img" aria-label={label}>
@@ -71,8 +71,8 @@ export function AimHistory({ days, today, loggedIn, serverError, canClear, onCle
       ) : (
         <>
           <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 text-base">
-            {streak > 0 && <span className="inline-flex items-center gap-2 font-bold text-rl-highlight">{streakIcon}<span className="font-display tabular-nums">{streak}</span>日連続</span>}
-            <span>最高 <b className="font-display tabular-nums">{fmt(best.day.score)}</b> 点({jpDate(best.date)})</span>
+            {streak > 0 && <span className="inline-flex items-center gap-2 font-bold text-rl-highlight">{streakIcon}<span className="tabular-nums">{streak}</span>日連続</span>}
+            <span>最高 <b className="tabular-nums">{fmt(best.day.score)}</b> 点({jpDate(best.date)})</span>
           </div>
           {/* 採点(最終)の直し:PC は 2 つを横に並べる(1 つ 約 550×185px。幅いっぱいの 370px の高さの箱にしない) */}
           <div className="grid gap-6 lg:grid-cols-2">

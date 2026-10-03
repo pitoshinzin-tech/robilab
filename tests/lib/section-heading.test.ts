@@ -18,3 +18,13 @@ describe("SectionHeading の件数", () => {
     expect(html).not.toContain("sr-only");
   });
 });
+
+describe("SectionHeading の件数を折らない", () => {
+  it("件数と「件」は 1 つのまとまり(whitespace-nowrap・縮まない)", () => {
+    const html = renderToStaticMarkup(createElement(SectionHeading, { title: "とても長い見出しのテキスト", count: 13 }));
+    const m = html.match(/<span class="([^"]*)">13/);
+    expect(m).not.toBeNull();
+    expect(m![1]).toContain("whitespace-nowrap");
+    expect(m![1]).toContain("shrink-0");
+  });
+});

@@ -13,7 +13,7 @@ import { PadScale } from "@/components/gear/PadScale";
  */
 export function PadRow({ pad, sizes, links, primary, narrowed }: {
   pad: VisiblePad; sizes: PadSize[]; links: ShopLinks;
-  /** 一覧の先頭だけ true(主ボタンは 1 画面に 1 つ) */
+  /** 一覧の先頭だけ true(主ボタンは 1 画面に 1 つ。縮尺図の説明もこの行だけ見せる) */
   primary: boolean;
   /** 大きさ・厚さで絞り込んでいて、合うサイズだけを出しているか */
   narrowed: boolean;
@@ -60,7 +60,7 @@ export function PadRow({ pad, sizes, links, primary, narrowed }: {
                 ))}
               </tbody>
             </table>
-            <PadScale sizes={pad.sizes} matched={narrowed ? sizes : null} />
+            <PadScale sizes={pad.sizes} matched={narrowed ? sizes : null} showCaption={primary} />
           </div>
         )}
       </div>

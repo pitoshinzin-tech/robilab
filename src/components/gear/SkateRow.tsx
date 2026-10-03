@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ShopButtons } from "@/components/gear/ShopButtons";
 import { SkateCellMark } from "@/components/gear/SkateGrid";
 import { ThicknessScale } from "@/components/gear/ThicknessScale";
+import { SpecNum } from "@/components/gear/SpecValue";
 import { skateCellKind } from "@/lib/skate-grid";
 
 /**
@@ -27,7 +28,7 @@ export function SkateRow({ skate, links, primary }: { skate: SkateSpec; links: S
           <div className="min-w-0"><dt className="text-rl-muted">素材</dt><dd className="wrap-anywhere">{materialLabel(skate.material)}</dd></div>
           <div className="min-w-0"><dt className="text-rl-muted">入数</dt><dd className="wrap-anywhere">{packText(skate.piecesPerPack, skate.setsPerPack)}</dd></div>
           <div className="col-span-2 min-w-0 md:col-span-1"><dt className="text-rl-muted">厚さ</dt>{skate.thicknessMm !== null ? (
-            <dd className="flex flex-wrap items-center gap-x-3 gap-y-1"><span><span className="text-base font-bold tabular-nums text-rl-highlight">{skate.thicknessMm}</span><span className="ml-0.5 text-xs font-bold">mm</span></span><ThicknessScale mm={skate.thicknessMm} /></dd>
+            <dd className="flex flex-wrap items-center gap-x-3 gap-y-1"><span className="text-base"><SpecNum value={skate.thicknessMm} unit="mm" /></span><ThicknessScale mm={skate.thicknessMm} /></dd>
           ) : (
             <dd className="wrap-anywhere">{skateThicknessLabel(skate.thicknessMm, skate.thicknessOfficial)}</dd>
           )}</div>

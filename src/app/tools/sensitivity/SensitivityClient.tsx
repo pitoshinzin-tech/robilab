@@ -114,7 +114,7 @@ export function SensitivityClient({ initial = null }: { initial?: Initial }) {
                 <li key={o.game.id} className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-rl-sm bg-rl-surface px-4 py-3">
                   <span className="min-w-0 text-base">{o.game.name}</span>
                   {isInGameRange(o.sens, o.game) ? (
-                    <span className="font-display text-base tabular-nums text-rl-highlight">{o.sens}</span>
+                    <span className="text-base font-bold tabular-nums text-rl-highlight">{o.sens}</span>
                   ) : (
                     <span className="flex items-center gap-1 text-sm text-rl-warning"><TriangleAlert aria-hidden className="size-4 shrink-0" />設定できる範囲({o.game.min}〜{o.game.max})の外です</span>
                   )}

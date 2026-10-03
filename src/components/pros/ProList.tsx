@@ -40,7 +40,7 @@ export function ProList({ pros }: { pros: ProSetting[] }) {
                 <td className="tabular-nums">{p.dpi}</td>
                 <td className="tabular-nums">{p.sens}</td>
                 <td className="tabular-nums">{proEdpi(p)}</td>
-                <td className="font-display tabular-nums text-rl-highlight">{proCm(p)}cm</td>
+                <td className="font-bold tabular-nums text-rl-highlight">{proCm(p)}cm</td>
                 <td><Mouse p={p} /></td>
                 <td><Source p={p} /></td>
               </tr>
@@ -52,7 +52,7 @@ export function ProList({ pros }: { pros: ProSetting[] }) {
         {pros.map((p) => (
           <Card as="li" key={p.id} className="grid gap-1 text-sm">
             <div className="flex min-w-0 flex-wrap justify-between gap-x-2"><span className="min-w-0 font-bold wrap-anywhere">{p.name}</span><span className="text-sm text-rl-muted">{p.team ?? ""}</span></div>
-            <div>振り向き <span className="font-display tabular-nums text-rl-highlight">{proCm(p)}cm</span> ・ DPI {p.dpi} ・ 感度 {p.sens} ・ eDPI {proEdpi(p)}</div>
+            <div>振り向き <span className="font-bold tabular-nums text-rl-highlight">{proCm(p)}cm</span> ・ DPI {p.dpi} ・ 感度 {p.sens} ・ eDPI {proEdpi(p)}</div>
             <div className="wrap-anywhere">マウス:<Mouse p={p} /></div>
             <div><Source p={p} /></div>
           </Card>

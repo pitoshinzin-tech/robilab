@@ -32,7 +32,7 @@ export function ProsClient() {
           <Skeleton className="h-24 w-full rounded-rl-md" />
         ) : user ? (
           <>
-            <p className="text-base">あなたの振り向き:<span className="font-display tabular-nums text-rl-highlight">約 {user.cm}cm</span>({getSensGame(user.game)!.name})</p>
+            <p className="text-base">あなたの振り向き:<span className="font-bold tabular-nums text-rl-highlight">約 {user.cm}cm</span>({getSensGame(user.game)!.name})</p>
             {/* 近いプロは箱にしない行(ProCard)。このカードの中にカードを入れない */}
             <ul className="grid gap-x-6 gap-y-4 md:grid-cols-2">
               {nearPros(user.cm, user.game, PROS, 5).map((item) => <ProCard key={item.pro.id} item={item} userCm={user.cm} />)}

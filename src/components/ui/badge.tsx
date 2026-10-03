@@ -9,7 +9,7 @@ const badgeVariants = cva("inline-flex shrink-0 items-center justify-center gap-
       count: "h-5 min-w-5 rounded-rl-pill bg-rl-highlight px-1 text-xs tabular-nums text-rl-on-highlight",
       success: "h-6 bg-rl-success/16 px-2 text-xs text-rl-success",
       code: "h-6 font-display text-sm tracking-[0.08em] text-rl-highlight",
-      rank: "h-6 min-w-6 font-display text-sm tabular-nums",
+      rank: "h-6 min-w-6 text-sm tabular-nums",
       status: "h-6 border border-rl-warning px-2 text-xs text-rl-warning",
     },
   },

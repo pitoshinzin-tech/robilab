@@ -120,3 +120,21 @@ describe("mouseOptionGroups(マウスを選ぶ欄)", () => {
     expect(g.map((x) => x.brand)).toEqual(["A", "B", "Z", "C"]);
   });
 });
+
+describe("skateCountCaption / skateFilterCount(上の数字の説明・畳んだ絞り込みの見出し)", () => {
+  it("絞り込みなし・マウスなしは「公式の数字で比べられる数」", () => {
+    expect(skateMatch.skateCountCaption(NO_SKATE_FILTER, 58)).toBe("公式の数字で比べられる数");
+  });
+  it("マウスなしで絞り込み中は「絞り込みに合う数(全 N 件)」(0 件でも)", () => {
+    expect(skateMatch.skateCountCaption({ mouse: null, material: "UPE", shape: "full" }, 58)).toBe("絞り込みに合う数(全 58 件)");
+  });
+  it("マウスを選んでいて絞り込みなしは「このマウスに使える数」、絞り込み中はこのマウスに使える数を添える", () => {
+    expect(skateMatch.skateCountCaption({ mouse: "m1", material: "all", shape: "all" }, 9)).toBe("このマウスに使える数");
+    expect(skateMatch.skateCountCaption({ mouse: "m1", material: "glass", shape: "all" }, 9)).toBe("絞り込みに合う数(このマウスに使える 9 件)");
+  });
+  it("「すべて」でない条件の数(マウスは数えない)", () => {
+    expect(skateMatch.skateFilterCount(NO_SKATE_FILTER)).toBe(0);
+    expect(skateMatch.skateFilterCount({ mouse: "m1", material: "glass", shape: "all" })).toBe(1);
+    expect(skateMatch.skateFilterCount({ mouse: null, material: "UPE", shape: "dot" })).toBe(2);
+  });
+});

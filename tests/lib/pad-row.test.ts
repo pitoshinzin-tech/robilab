@@ -80,3 +80,12 @@ describe("PadRow のサイズ表", () => {
     expect(render(withSizes)).toContain('role="img"');
   });
 });
+
+describe("PadRow の図の説明は一覧の先頭だけ", () => {
+  const p = pads.find((x) => x.sizes.some((z) => z.widthMm !== null && z.depthMm !== null))!;
+  const row = (primary: boolean) => renderToStaticMarkup(createElement("ul", null, createElement(PadRow, { pad: p, sizes: p.sizes, narrowed: false, primary, links: shopLinks(`${p.brand} ${p.name}`, p.officialUrl, {}) })));
+  it("先頭の行は見える figcaption、ほかの行は sr-only", () => {
+    expect(row(true)).not.toMatch(/<figcaption class="sr-only">線は公式/);
+    expect(row(false)).toMatch(/<figcaption class="sr-only">線は公式/);
+  });
+});

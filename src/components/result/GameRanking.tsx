@@ -12,7 +12,7 @@ export function GameRanking({ ranks, showScore = true }: { ranks: GameRank[]; sh
         <Card as="li" key={r.game.id} className="grid gap-1">
           <div className="flex items-baseline justify-between gap-3">
             <span className="min-w-0 text-base font-bold">{i + 1}. {r.game.name}</span>
-            {showScore && <span className="font-display text-xl tabular-nums text-rl-highlight">{r.best.score}%</span>}
+            {showScore && <span className="text-xl font-bold tabular-nums text-rl-highlight">{r.best.score}%</span>}
           </div>
           <p className="text-base">合うロール:<b>{r.best.role.name}</b> — {r.best.role.reason}</p>
           <p className="text-sm text-rl-muted">{r.roles.slice(1).map((x) => (showScore ? `${x.role.name} ${x.score}%` : x.role.name)).join(" / ")}</p>

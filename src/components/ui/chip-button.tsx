@@ -2,17 +2,19 @@
 import * as React from "react";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { chipCheckClassName, chipClassName } from "./chip-style";
+import { chipBoxClassName, chipCheckClassName, chipClassName } from "./chip-style";
+import { ChipBox } from "./chip-box";
 
-export { chipCheckClassName, chipClassName };
+export { chipBoxClassName, chipCheckClassName, chipClassName };
 
-/** ふつうの <button aria-pressed> のチップ。 */
+/** ふつうの <button aria-pressed> のチップ。選んでいないときは 8px の線の四角、押すとチェック(同じ 16px の場所。ChipLink と同じ形)。 */
 export function ChipButton({ pressed, className, children, onClick, ...props }: Omit<React.ComponentProps<"button">, "aria-pressed"> & { pressed: boolean }) {
   // 押したら(Enter・Space も click になる)チェックを引けるようにする。effect は使わない
   const [touched, setTouched] = React.useState(false);
   return (
     <button type="button" aria-pressed={pressed} data-rl-touched={touched || undefined} className={cn(chipClassName, className)}
       onClick={(e) => { setTouched(true); onClick?.(e); }} {...props}>
+      <ChipBox className={chipBoxClassName} />
       <Check aria-hidden className={chipCheckClassName} />
       {children}
     </button>

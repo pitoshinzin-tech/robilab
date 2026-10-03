@@ -9,7 +9,7 @@ import { NO_DATA } from "@/lib/gear-labels";
 
 /**
  * 追補 6 章:先頭は箱ではなく大きな行。左に順位(display-2・Orbitron・マゼンタ。ふだんは「1」、絞り込みで 1 位が外れたときは残った先頭の本当の順位)、真ん中に名前と理由、右に店のボタン(主ボタンはここだけ)。
- * 寸法は Orbitron の数字 + 小さい単位(NumUnit)。単位が 12px を割らないよう、数字は 32px(text-rl-title)。
+ * 合う度は本文の書体の太字(14px の Orbitron の 0 は斜線入りの箱に見えるため)。寸法は Orbitron の数字 + 小さい単位(NumUnit)。単位が 12px を割らないよう、数字は 32px(text-rl-title)。
  */
 export function TopMouseRow({ rank, item, brand, name, reason, links, overlaid, onOverlay, compare = null, skateHref = null }: {
   /** 本当の順位(絞り込みの前の並びで何位か) */
@@ -25,7 +25,7 @@ export function TopMouseRow({ rank, item, brand, name, reason, links, overlaid, 
     <li className="grid gap-4 border-y border-rl-line py-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:gap-6">
       <p className="font-display text-rl-display-2 font-black tabular-nums text-rl-highlight">{rank}<span className="sr-only">位</span></p>
       <div className="grid min-w-0 gap-2">
-        <p className="text-sm text-rl-muted">{brand}・合う度 <span className="font-display tabular-nums text-rl-highlight">{item.score}</span></p>
+        <p className="text-sm text-rl-muted">{brand}・合う度 <span className="font-bold tabular-nums text-rl-highlight">{item.score}</span></p>
         <h3 data-long-name className="text-2xl font-bold wrap-anywhere">{name}</h3>
         <p className="text-base">{reason}</p>
         <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-rl-muted">

@@ -8,7 +8,7 @@ import type { SkateSpec } from "@/data/gear-types";
 import { firstParam, type SearchParams } from "@/lib/gear-query";
 import { subnavFor } from "@/lib/nav";
 import { affiliateEnv, shopLinks, type AffiliateEnv } from "@/lib/shop-links";
-import { mouseOptionGroups, parseSkateFilter, skateCounts, skateChipHref, skateView, type SkateFilter } from "@/lib/skate-match";
+import { mouseOptionGroups, parseSkateFilter, skateCountCaption, skateCounts, skateChipHref, skateFilterCount, skateView, type SkateFilter } from "@/lib/skate-match";
 import { skateGrid } from "@/lib/skate-grid";
 import { PageShell } from "@/components/ui/page-shell";
 import { SubNav } from "@/components/brand/SubNav";
@@ -23,6 +23,7 @@ import { FilterGroup, type FilterOption } from "@/components/gear/FilterGroup";
 import { SkateRow } from "@/components/gear/SkateRow";
 import { SkateGrid } from "@/components/gear/SkateGrid";
 import { MyMousePreselect } from "@/components/gear/MyMousePreselect";
+import { FilterDisclosure } from "@/components/gear/FilterDisclosure";
 
 const TITLE = "マウスソール探し(自分のマウスに合うソール)";
 const DESCRIPTION = "使っているマウスに合うマウスソール(マウスフィート)を、メーカー公式の素材・厚さ・入数で一覧します。";
@@ -62,12 +63,23 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
   const grid = skateGrid(view);
   const shownCount = view.kind === "mouse" ? view.dedicated.length + view.universal.length : view.total;
   const clearHref = skateChipHref(filter, { material: "all", shape: "all" });
-  const filtered = filter.material !== "all" || filter.shape !== "all";
+  const filterCount = skateFilterCount(filter);
+  const filtered = filterCount > 0;
+  // 上の数字の説明の「全 N 件」:マウスを選んでいればそのマウスに使える数(素材・形で絞る前)、選んでいなければ全件
+  const unfiltered = skateView(SKATES, { ...filter, material: "all", shape: "all" });
+  const baseCount = unfiltered.kind === "mouse" ? unfiltered.dedicated.length + unfiltered.universal.length : unfiltered.total;
+  const filters = (
+    <>
+      <FilterGroup label="素材" options={options(filter, "material", MATERIALS)} />
+      <FilterGroup label="形" options={options(filter, "shape", SHAPES)} />
+      {filtered && <ButtonLink href={clearHref} scroll={false} variant="ghost" size="sm" className="justify-self-start px-0">絞り込みを外す</ButtonLink>}
+    </>
+  );
 
   return (
     <PageShell width="wide" title="マウスソール探し" description="使っているマウスを選ぶと、合うソールだけを公式の素材・厚さ・入数で並べます。"
       subnav={<SubNav label="感度・マウス" items={subnavFor("mouse", PROS_READY)} />}
-      actions={<p className="grid justify-items-start md:justify-items-end"><NumUnit value={shownCount} unit="件" className="text-rl-display-2" /><span className="text-sm text-rl-muted">{selected ? "このマウスに使える数" : "公式の数字で比べられる数"}</span></p>}>
+      actions={<p className="grid justify-items-start md:justify-items-end"><NumUnit value={shownCount} unit="件" className="text-rl-display-2" /><span className="text-sm text-rl-muted">{skateCountCaption(filter, baseCount)}</span></p>}>
       <div className="grid gap-8">
         <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
           <div className="grid gap-6 lg:sticky lg:top-6">
@@ -91,15 +103,15 @@ export default async function SkatesPage({ searchParams }: { searchParams: Promi
               {fromMy && <p className="text-sm text-rl-muted">マイ設定のマウス({selected.brand} {selected.name})で絞り込みました。</p>}
               <MyMousePreselect />
             </Card>
-            <Card as="section" aria-labelledby="skate-filters" className="grid gap-4">
+            {/* lg 以上は左の列に開いたまま。lg 未満は一覧の上に畳む(/pads・/mouse と同じ) */}
+            <Card as="section" aria-labelledby="skate-filters" className="hidden gap-4 lg:grid">
               <h2 id="skate-filters" className="text-xl font-bold">絞り込み</h2>
-              <FilterGroup label="素材" options={options(filter, "material", MATERIALS)} />
-              <FilterGroup label="形" options={options(filter, "shape", SHAPES)} />
-              {filtered && <ButtonLink href={clearHref} scroll={false} variant="ghost" size="sm" className="justify-self-start">絞り込みを外す</ButtonLink>}
+              {filters}
             </Card>
           </div>
 
           <div className="grid gap-6">
+            <FilterDisclosure count={filterCount}>{filters}</FilterDisclosure>
             {shownCount > 0 && <p className="flex flex-wrap items-center gap-2 text-sm text-rl-muted"><Badge variant="pr">PR</Badge>このリンクから買うと、ロビラボに紹介料が入ることがあります</p>}
             {view.kind === "mouse" ? (
               <>

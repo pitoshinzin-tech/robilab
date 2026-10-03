@@ -4,7 +4,8 @@ import { Check } from "lucide-react";
 import { AXES } from "@/data/axes";
 import { matchesAxisFilter } from "@/lib/type-axes";
 // チップの見た目は chip-button.tsx のものをそのまま使う(このファイルは base-ui を読まない)
-import { chipCheckClassName, chipClassName } from "@/components/ui/chip-button";
+import { chipBoxClassName, chipCheckClassName, chipClassName } from "@/components/ui/chip-button";
+import { ChipBox } from "@/components/ui/chip-box";
 
 type Picked = [string | null, string | null, string | null, string | null];
 
@@ -31,6 +32,7 @@ export function TypeAxisFilter({ codes, rules, children }: { codes: readonly str
                 {[[a.leftLetter, a.left], [a.rightLetter, a.right]].map(([letter, word]) => (
                   <button key={letter} type="button" aria-pressed={picked[i] === letter} onClick={() => toggle(i, letter)} className={chipClassName}>
                     {/* (追補 S4)選んだときにチェックが線で引かれる(rl-draw-check は globals.css) */}
+                    <ChipBox className={chipBoxClassName} />
                     <Check aria-hidden className={chipCheckClassName} />
                     <span className="font-display">{letter}</span>{word}
                   </button>
@@ -41,7 +43,7 @@ export function TypeAxisFilter({ codes, rules, children }: { codes: readonly str
           ))}
         </ul>
         <p role="status" className="text-sm text-rl-muted">
-          {any ? <><span className="font-display tabular-nums text-rl-highlight">{count}</span> タイプが残っています(もう一度押すと外れます)</> : "文字を押すと、その文字を持つタイプだけが名簿に残ります"}
+          {any ? <><span className="font-bold tabular-nums text-rl-highlight">{count}</span> タイプが残っています(もう一度押すと外れます)</> : "文字を押すと、その文字を持つタイプだけが名簿に残ります"}
         </p>
       </section>
       <div className="rl-roster-filter" data-f0={picked[0] ?? undefined} data-f1={picked[1] ?? undefined} data-f2={picked[2] ?? undefined} data-f3={picked[3] ?? undefined}>
