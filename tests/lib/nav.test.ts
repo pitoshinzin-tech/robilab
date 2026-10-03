@@ -22,20 +22,22 @@ describe("activeTabId", () => {
     ["/aim", "aim"], ["/aim#ranking", "aim"],
     ["/diagnosis", "diagnosis"], ["/type/ARCH", "diagnosis"], ["/types", "diagnosis"], ["/types/", "diagnosis"],
     ["/mouse", "mouse"], ["/tools/sensitivity", "mouse"], ["/pros", "mouse"],
+    ["/pads", "mouse"], ["/pads?surface=glass", "mouse"], ["/skates", "mouse"], ["/skates?mouse=razer-viper-v3-pro", "mouse"],
     ["/lobby", "lobby"], ["/lobby/", "lobby"], ["/lobby/inbox", "lobby"], ["/lobby/abc/x", "lobby"],
     ["/my", "my"], ["/my?x=1", "my"],
   ])("%s → %s", (path, id) => {
     expect(activeTabId(path)).toBe(id);
   });
-  it.each([["/"], [""], [null], [undefined], ["/tools"], ["/mypage"], ["/typesx"], ["/c/abc"], ["/terms"]])("%s → null", (path) => {
+  it.each([["/"], [""], [null], [undefined], ["/tools"], ["/mypage"], ["/typesx"], ["/c/abc"], ["/terms"], ["/padsx"], ["/skate"]])("%s → null", (path) => {
     expect(activeTabId(path)).toBeNull();
   });
 });
 
 describe("subnav", () => {
-  it("プロ設定はデータが入るまで出さない", () => {
-    expect(subnavFor("mouse", false).map((i) => i.href)).toEqual(["/mouse", "/tools/sensitivity"]);
-    expect(subnavFor("mouse", true).map((i) => i.href)).toEqual(["/mouse", "/tools/sensitivity", "/pros"]);
+  it("マウスの段はマウス探し・マウスパッド・ソール・感度計算(プロ設定はデータが入るまで出さない)", () => {
+    expect(subnavFor("mouse", false).map((i) => i.href)).toEqual(["/mouse", "/pads", "/skates", "/tools/sensitivity"]);
+    expect(subnavFor("mouse", false).map((i) => i.label)).toEqual(["マウス探し", "マウスパッド", "ソール", "感度計算"]);
+    expect(subnavFor("mouse", true).map((i) => i.href)).toEqual(["/mouse", "/pads", "/skates", "/tools/sensitivity", "/pros"]);
     expect(subnavFor("diagnosis", false).map((i) => i.label)).toEqual(["診断", "タイプ一覧"]);
   });
   it("今いるページの印", () => {
@@ -44,5 +46,8 @@ describe("subnav", () => {
     expect(activeSubnavHref("/diagnosis", items)).toBe("/diagnosis");
     expect(activeSubnavHref("/type/ARCH", items)).toBeNull();
     expect(activeSubnavHref(null, items)).toBeNull();
+    const mouse = subnavFor("mouse", false);
+    expect(activeSubnavHref("/skates?mouse=razer-viper-v3-pro", mouse)).toBe("/skates");
+    expect(activeSubnavHref("/pads/", mouse)).toBe("/pads");
   });
 });
