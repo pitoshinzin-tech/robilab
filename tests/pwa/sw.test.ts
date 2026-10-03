@@ -15,11 +15,12 @@ const nav = (path: string, init: Partial<Req> = {}): Req => ({ url: path.startsW
 
 /** sw.js の文をそのまま、偽の self・caches・fetch で動かす(ビルドしない) */
 /** offlinePage = 今の版のキャッシュ(CACHE)にある offline.html。otherCachePage = ほかのキャッシュ(古い版など)にあるもの */
-function loadSw(opts: { fetchImpl?: () => Promise<Response>; offlinePage?: Response | undefined; otherCachePage?: Response; existingKeys?: string[]; noPreload?: boolean } = {}) {
+function loadSw(opts: { fetchImpl?: () => Promise<Response>; offlinePage?: Response | undefined; otherCachePage?: Response; existingKeys?: string[]; noPreload?: boolean; openFails?: boolean } = {}) {
   const handlers: Record<string, (event: unknown) => void> = {};
   const stores = new Map<string, Store>();
   const caches = {
     open: vi.fn(async (name: string) => {
+      if (opts.openFails) throw new DOMException("quota", "QuotaExceededError");
       if (!stores.has(name)) {
         const own = name === CURRENT_CACHE;
         stores.set(name, {
@@ -138,6 +139,11 @@ describe("fetch", () => {
   });
   it("キャッシュにも無いときはブラウザのいつものエラー(Response.error)", async () => {
     const sw = loadSw({ fetchImpl: async () => { throw new TypeError("Failed to fetch"); }, offlinePage: undefined });
+    const res = await sw.fetchEvent(nav("/")).response();
+    expect(res.type).toBe("error");
+  });
+  it("キャッシュを開けない(caches.open が投げる)ときも、落ちずに Response.error", async () => {
+    const sw = loadSw({ fetchImpl: async () => { throw new TypeError("Failed to fetch"); }, openFails: true });
     const res = await sw.fetchEvent(nav("/")).response();
     expect(res.type).toBe("error");
   });

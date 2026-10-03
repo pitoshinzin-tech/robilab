@@ -56,9 +56,14 @@ self.addEventListener("fetch", (event) => {
       } catch {
         // ネットにつながらないときだけ。成功した応答は保存しない
         // 探すのは今の版のキャッシュだけ(古い版や、ほかのキャッシュのものを返さない)
-        const cache = await caches.open(CACHE);
-        const offline = await cache.match(OFFLINE_URL);
-        return offline || Response.error();
+        // キャッシュを開けない・読めない(容量・壊れた保存)ときも、投げずにブラウザのいつものエラーにする
+        try {
+          const cache = await caches.open(CACHE);
+          const offline = await cache.match(OFFLINE_URL);
+          return offline || Response.error();
+        } catch {
+          return Response.error();
+        }
       }
     })(),
   );
