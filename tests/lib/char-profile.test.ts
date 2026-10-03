@@ -58,6 +58,8 @@ describe("1 体のページの中身(代表 66 体すべて。スト6 も描け�
       expect(html, c.id).toContain("一番合うタイプ");
       expect(html, c.id).toMatch(new RegExp(`text-rl-display-1[^"]*"[^>]*>${top.code}<`));
       expect(html, c.id).toContain("rl-axis-link");
+      expect((html.match(new RegExp(`href="/type/${top.code}"`, "g")) ?? []).length, c.id).toBe(1);
+      expect(html.indexOf("char-same") < 0 || html.indexOf("char-same") < html.indexOf("char-lean"), `${c.id}:同じロールは左の列(傾向より前)`).toBe(true);
       for (const r of charAxisRows(c)) expect((html.match(new RegExp(`data-axis="${r.axis}"`, "g")) ?? []).length, c.id).toBe(2);
     }
   });

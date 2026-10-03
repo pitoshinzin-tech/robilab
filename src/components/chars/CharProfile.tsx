@@ -49,120 +49,122 @@ export function CharProfile({ char, game, role, setting, axisRows, fits, sameRol
 }) {
   const matched = axisRows !== null;
   return (
-    <div className="grid gap-rl-ma-sm lg:grid-cols-12 lg:grid-rows-[auto_1fr_auto] lg:gap-x-6">
-      <div className="grid content-start gap-rl-ma-sm lg:col-span-5 lg:row-start-1 lg:self-start">
-      {matched && fits[0] && (
-        <Link href={`/type/${fits[0].code}`} className="rl-lock group grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 border-b border-rl-line pb-6">
-          <span className="grid min-w-0 gap-2">
-            <span className="text-sm text-rl-muted">一番合うタイプ</span>
-            <span className="font-display text-rl-display-1 font-extrabold text-rl-highlight">{fits[0].code}</span>
-            <span className="text-xl font-bold wrap-anywhere group-hover:underline group-hover:underline-offset-4">{fits[0].name}</span>
-          </span>
-          <TypeIcon code={fits[0].code} size={160} className="size-24 md:size-40" />
-        </Link>
-      )}
-      <section aria-label="ロール" className="flex items-center gap-4">
-        <PixelArt grid={roleSymbol(game.id, setting.groupByRole && char.matchable ? char.roleId : null)} size={96} className="size-12 lg:size-24" />
-        <div className="grid min-w-0 gap-1">
-          <p className="text-sm text-rl-muted">{game.name}{setting.nameMark}</p>
-          {setting.groupByRole && <p className="text-xl font-bold wrap-anywhere">{char.officialRole}</p>}
-          {setting.groupByRole && setting.styleNote && role && char.matchable && <p className="text-sm text-rl-muted">ロビラボの分け方:{role.name}</p>}
-        </div>
-      </section>
-      </div>
-
-      <div className="grid min-w-0 content-start gap-rl-ma-sm lg:col-span-7 lg:col-start-6 lg:row-span-2 lg:row-start-1">
-        {setting.showQuotes ? (
-          <figure className="grid gap-2">
-            <figcaption className="text-sm font-bold text-rl-muted">公式の言葉</figcaption>
-            <blockquote cite={char.quote.url} lang={isLatinText(char.quote.text) ? "en" : undefined} className="border-l-2 border-rl-line-strong pl-4 text-xl text-pretty [word-break:auto-phrase]">
-              「{char.quote.text}」
-            </blockquote>
-            <p className="text-sm text-rl-muted">
-              <a href={char.quote.url} {...outLink} className={OUT}>出典:公式サイト<span className="sr-only">(新しいタブで開きます)</span></a>・確認日 {char.checkedAt}
-            </p>
-          </figure>
-        ) : (
-          <p className="text-base text-rl-muted">
-            公式の紹介は、<a href={char.sourceUrl} {...outLink} className={OUT}>公式のキャラページ<span className="sr-only">(新しいタブで開きます)</span></a>で読めます。
-          </p>
+    <div className="grid gap-rl-ma-sm lg:grid-cols-12 lg:items-start lg:gap-x-6">
+      {/* PC は左 5 列・右 7 列の 2 本の独立した列(段をそろえないので空きの帯ができない)。スマホは display: contents で 1 列にし、order で読む順を決める */}
+      <div className="contents lg:col-span-5 lg:grid lg:content-start lg:gap-rl-ma-sm">
+        <div className="grid content-start gap-rl-ma-sm max-lg:order-1">
+        {matched && fits[0] && (
+          <Link href={`/type/${fits[0].code}`} className="rl-lock group grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 border-b border-rl-line pb-6">
+            <span className="grid min-w-0 gap-2">
+              <span className="text-sm text-rl-muted">一番合うタイプ</span>
+              <span className="font-display text-rl-display-1 font-extrabold text-rl-highlight">{fits[0].code}</span>
+              <span className="text-xl font-bold wrap-anywhere group-hover:underline group-hover:underline-offset-4">{fits[0].name}</span>
+            </span>
+            <TypeIcon code={fits[0].code} size={160} className="size-24 md:size-40" />
+          </Link>
         )}
-
-        {axisRows ? (
-          <section aria-labelledby="char-lean" className="rl-axis-link grid gap-4">
-            <SectionHeading id="char-lean" title="このキャラの傾向" description={setting.showQuotes ? "4 つの軸を、数字でなく言葉で。土台はロールで、公式の言葉に手がかりがある軸だけ少しずらしています。" : "4 つの軸を、数字でなく言葉で。土台は型で、公式ページの内容に手がかりがある軸だけ少しずらしています(出典は各行のリンクから)。"} />
-            <ul className="flex flex-wrap gap-2">
-              {axisRows.map((r) => (
-                <li key={r.axis} data-axis={r.axis} className="inline-flex h-11 items-center gap-2 rounded-rl-sm border border-rl-line px-3 text-sm">
-                  <span className="text-rl-muted">{r.left}/{r.right}</span>
-                  <span className="font-bold">{r.word}</span>
+        <section aria-label="ロール" className="flex items-center gap-4">
+          <PixelArt grid={roleSymbol(game.id, setting.groupByRole && char.matchable ? char.roleId : null)} size={96} className="size-12 lg:size-24" />
+          <div className="grid min-w-0 gap-1">
+            <p className="text-sm text-rl-muted">{game.name}{setting.nameMark}</p>
+            {setting.groupByRole && <p className="text-xl font-bold wrap-anywhere">{char.officialRole}</p>}
+            {setting.groupByRole && setting.styleNote && role && char.matchable && <p className="text-sm text-rl-muted">ロビラボの分け方:{role.name}</p>}
+          </div>
+        </section>
+        </div>
+        {matched && (
+          <section aria-labelledby="char-fit" className="grid content-start gap-4 max-lg:order-3">
+            <SectionHeading id="char-fit" title="ほかに近いタイプ" description="16 タイプのうち、一番合うタイプの次に近い 2 つ" />
+            <ol className="border-t border-rl-line">
+              {fits.slice(1).map((t) => (
+                <li key={t.code} className="border-b border-rl-line">
+                  <Link href={`/type/${t.code}`} className="rl-lock group grid grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-4 py-4">
+                    <TypeIcon code={t.code} size={48} />
+                    <span className="grid min-w-0">
+                      <span className="font-display text-sm text-rl-muted">{t.code}</span>
+                      <span className="text-xl font-bold wrap-anywhere">{t.name}</span>
+                    </span>
+                    <ChevronRight aria-hidden className="size-6 text-rl-muted transition-colors group-hover:text-rl-text" />
+                  </Link>
                 </li>
               ))}
-            </ul>
-            <table className="w-full text-sm">
-              <caption className="sr-only">傾向の根拠</caption>
-              <thead className="text-left text-rl-muted max-md:sr-only">
-                <tr>
-                  <th scope="col" className="py-2 pr-3 font-bold">軸</th>
-                  <th scope="col" className="py-2 pr-3 font-bold">傾向</th>
-                  <th scope="col" className="py-2 font-bold">根拠</th>
-                </tr>
-              </thead>
-              <tbody>
-                {axisRows.map((r) => (
-                  <tr key={r.axis} data-axis={r.axis} className="border-t border-rl-line align-top max-md:grid max-md:grid-cols-[auto_minmax(0,1fr)] max-md:gap-x-3">
-                    <th scope="row" className="py-2 pr-3 text-left font-normal whitespace-nowrap text-rl-muted">{r.left}/{r.right}</th>
-                    <td className="py-2 pr-3 font-bold whitespace-nowrap">{r.word}</td>
-                    <td className="py-2 wrap-anywhere max-md:col-span-2 max-md:pt-0"><Basis row={r} showQuotes={setting.showQuotes} /></td>
-                  </tr>
+            </ol>
+          </section>
+        )}
+          {sameRole.length > 0 && (
+            <section aria-labelledby="char-same" className="grid gap-2 max-lg:order-4">
+              <SectionHeading id="char-same" title={<>同じ「{role?.name ?? "ロール"}」の<span className="inline-block">代表キャラ</span></>} />
+              <ul className="flex flex-wrap gap-x-4">
+                {sameRole.map((c) => (
+                  <li key={c.href}><Link href={c.href} className="inline-flex min-h-11 items-center font-bold text-rl-accent underline-offset-4 hover:underline">{c.name}</Link></li>
                 ))}
-              </tbody>
-            </table>
-          </section>
-        ) : (
-          <p className="text-base">{setting.unmatchableNote}</p>
-        )}
+              </ul>
+            </section>
+          )}
       </div>
+      <div className="contents lg:col-span-7 lg:col-start-6 lg:grid lg:min-w-0 lg:content-start lg:gap-rl-ma-sm">
+        <div className="grid min-w-0 content-start gap-rl-ma-sm max-lg:order-2">
+          {setting.showQuotes ? (
+            <figure className="grid gap-2">
+              <figcaption className="text-sm font-bold text-rl-muted">公式の言葉</figcaption>
+              <blockquote cite={char.quote.url} lang={isLatinText(char.quote.text) ? "en" : undefined} className="border-l-2 border-rl-line-strong pl-4 text-xl text-pretty [word-break:auto-phrase]">
+                「{char.quote.text}」
+              </blockquote>
+              <p className="text-sm text-rl-muted">
+                <a href={char.quote.url} {...outLink} className={OUT}>出典:公式サイト<span className="sr-only">(新しいタブで開きます)</span></a>・確認日 {char.checkedAt}
+              </p>
+            </figure>
+          ) : (
+            <p className="text-base text-rl-muted">
+              公式の紹介は、<a href={char.sourceUrl} {...outLink} className={OUT}>公式のキャラページ<span className="sr-only">(新しいタブで開きます)</span></a>で読めます。
+            </p>
+          )}
 
-      {matched && (
-        <section aria-labelledby="char-fit" className="grid content-start gap-4 lg:col-span-5 lg:col-start-1 lg:row-start-2">
-          <SectionHeading id="char-fit" title="このキャラが合うタイプ" description="16 タイプのうち、近い順に 3 つ" />
-          <ol className="border-t border-rl-line">
-            {fits.map((t) => (
-              <li key={t.code} className="border-b border-rl-line">
-                <Link href={`/type/${t.code}`} className="rl-lock group grid grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-4 py-4">
-                  <TypeIcon code={t.code} size={48} />
-                  <span className="grid min-w-0">
-                    <span className="font-display text-sm text-rl-muted">{t.code}</span>
-                    <span className="text-xl font-bold wrap-anywhere">{t.name}</span>
-                  </span>
-                  <ChevronRight aria-hidden className="size-6 text-rl-muted transition-colors group-hover:text-rl-text" />
-                </Link>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-
-      <div className="grid min-w-0 gap-rl-ma-sm lg:col-span-7 lg:col-start-6">
-        {sameRole.length > 0 && (
-          <section aria-labelledby="char-same" className="grid gap-2">
-            <SectionHeading id="char-same" title={<>同じ「{role?.name ?? "ロール"}」の<span className="inline-block">代表キャラ</span></>} />
-            <ul className="flex flex-wrap gap-x-4">
-              {sameRole.map((c) => (
-                <li key={c.href}><Link href={c.href} className="inline-flex min-h-11 items-center font-bold text-rl-accent underline-offset-4 hover:underline">{c.name}</Link></li>
-              ))}
-            </ul>
-          </section>
-        )}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
-          <ButtonLink href="/diagnosis" variant="primary">
-            <FlaskConical aria-hidden />
-            {matched ? "診断して、自分に合うか見る" : "診断して、自分のタイプを知る"}
-          </ButtonLink>
-          <ButtonLink href={`/games/${game.id}/chars`} variant="ghost">{game.shortName} のキャラ一覧へ</ButtonLink>
+          {axisRows ? (
+            <section aria-labelledby="char-lean" className="rl-axis-link grid gap-4">
+              <SectionHeading id="char-lean" title="このキャラの傾向" description={setting.showQuotes ? "4 つの軸を、数字でなく言葉で。土台はロールで、公式の言葉に手がかりがある軸だけ少しずらしています。" : "4 つの軸を、数字でなく言葉で。土台は型で、公式ページの内容に手がかりがある軸だけ少しずらしています(出典は各行のリンクから)。"} />
+              <ul className="flex flex-wrap gap-2">
+                {axisRows.map((r) => (
+                  <li key={r.axis} data-axis={r.axis} className="inline-flex h-11 items-center gap-2 rounded-rl-sm border border-rl-line px-3 text-sm">
+                    <span className="text-rl-muted">{r.left}/{r.right}</span>
+                    <span className="font-bold">{r.word}</span>
+                  </li>
+                ))}
+              </ul>
+              <table className="w-full text-sm">
+                <caption className="sr-only">傾向の根拠</caption>
+                <thead className="text-left text-rl-muted max-md:sr-only">
+                  <tr>
+                    <th scope="col" className="py-2 pr-3 font-bold">軸</th>
+                    <th scope="col" className="py-2 pr-3 font-bold">傾向</th>
+                    <th scope="col" className="py-2 font-bold">根拠</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {axisRows.map((r) => (
+                    <tr key={r.axis} data-axis={r.axis} className="border-t border-rl-line align-top max-md:grid max-md:grid-cols-[auto_minmax(0,1fr)] max-md:gap-x-3">
+                      <th scope="row" className="py-2 pr-3 text-left font-normal whitespace-nowrap text-rl-muted">{r.left}/{r.right}</th>
+                      <td className="py-2 pr-3 font-bold whitespace-nowrap">{r.word}</td>
+                      <td className="py-2 wrap-anywhere max-md:col-span-2 max-md:pt-0"><Basis row={r} showQuotes={setting.showQuotes} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          ) : (
+            <p className="text-base">{setting.unmatchableNote}</p>
+          )}
         </div>
-        <DexNotices settings={[setting]} checkedAt={char.checkedAt} sources={sources} />
+        <div className="grid min-w-0 gap-rl-ma-sm max-lg:order-5">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+            <ButtonLink href="/diagnosis" variant="primary">
+              <FlaskConical aria-hidden />
+              {matched ? "診断して、自分に合うか見る" : "診断して、自分のタイプを知る"}
+            </ButtonLink>
+            <ButtonLink href={`/games/${game.id}/chars`} variant="ghost">{game.shortName} のキャラ一覧へ</ButtonLink>
+          </div>
+          <DexNotices settings={[setting]} checkedAt={char.checkedAt} sources={sources} />
+        </div>
       </div>
     </div>
   );
