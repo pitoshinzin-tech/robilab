@@ -118,10 +118,20 @@ body {
   --text-2xl--line-height: 1.4;
 }
 
+/*
+ * 表示速度(docs/design/perf.md):Zen Kaku が届くまでの間の日本語は、かなが全角の幅の書体で出す。
+ * system-ui だけだと Windows では Yu Gothic UI(かなが詰まる)になり、入れ替わるときに行が折り直されてずれる(CLS)。
+ * 英数字は next/font の寸法合わせ済みの代わり(Zen Kaku Gothic New Fallback = Arial)が --font-zen の中で先に効く。
+ * テーマの変数(@theme)にすると font-ja-fallback の道具が増えるので、ふつうの変数にする。
+ */
+:root {
+  --rl-font-ja-fallback: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, "Noto Sans JP", "Noto Sans CJK JP", Meiryo;
+}
+
 @theme inline {
-  --font-sans: var(--font-zen), system-ui, sans-serif;
-  --font-heading: var(--font-zen), system-ui, sans-serif;
-  --font-display: var(--font-orbitron), var(--font-zen), sans-serif;
+  --font-sans: var(--font-zen), var(--rl-font-ja-fallback), system-ui, sans-serif;
+  --font-heading: var(--font-zen), var(--rl-font-ja-fallback), system-ui, sans-serif;
+  --font-display: var(--font-orbitron), var(--font-zen), var(--rl-font-ja-fallback), sans-serif;
 
   --color-rl-bg: var(--rl-bg);
   --color-rl-bg-glow: var(--rl-bg-glow);
