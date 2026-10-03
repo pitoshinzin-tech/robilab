@@ -7,7 +7,7 @@ import { DEVICES } from "@/data/devices";
 import { NO_SKATE_FILTER, skateGridSource, skateView, type SkateFilter } from "@/lib/skate-match";
 import { skateGrid, skateGridFromSource, type SkateGridModel } from "@/lib/skate-grid";
 import { SkateGrid } from "@/components/gear/SkateGrid";
-import { SkateGridLive } from "@/components/gear/SkateGridLive";
+import { SkateGridLive, SkateGridApplyHint, isMousePending } from "@/components/gear/SkateGridLive";
 
 /** 製品の id はブラウザに渡さないので、比べるのは種類・置き場所・数・大きさ */
 const shape = (g: SkateGridModel) => ({ ...g, cells: g.cells.map(({ kind, x, y }) => ({ kind, x, y })) });
@@ -63,6 +63,24 @@ describe("SkateGridLive(client の部品)", () => {
     const text = readFileSync("src/components/gear/SkateGridLive.tsx", "utf8");
     expect(text).toMatch(/^"use client";/);
     expect(text).toContain('addEventListener("change"');
+  });
+});
+
+describe("「このマウスで絞り込む」の案内(選んだ値と表示中のマウスが違うときだけ)", () => {
+  it("同じ・どちらも未選択なら出さない。違うときだけ出す", () => {
+    expect(isMousePending("a", "a")).toBe(false);
+    expect(isMousePending(null, null)).toBe(false);
+    expect(isMousePending("b", "a")).toBe(true);
+    expect(isMousePending(null, "a")).toBe(true);
+    expect(isMousePending("a", null)).toBe(true);
+  });
+  it("出すときは aria-live=polite・14px の muted、出さないときは何も描かない", () => {
+    expect(renderToStaticMarkup(createElement(SkateGridApplyHint, { pending: false }))).toBe("");
+    const html = renderToStaticMarkup(createElement(SkateGridApplyHint, { pending: true }));
+    expect(html).toContain('aria-live="polite"');
+    expect(html).toContain("text-sm");
+    expect(html).toContain("text-rl-muted");
+    expect(html).toContain("「このマウスで絞り込む」を押すと、一覧がこのマウスに変わります。");
   });
 });
 

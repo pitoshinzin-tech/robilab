@@ -91,7 +91,7 @@ export function HandSetup({ initial, onDone, onCancel, mice }: {
                 <GripFigure grip={g} />
                 <span className="grid">
                   <span className="text-base font-bold">{GRIP_INFO[g].label}</span>
-                  <span className="text-sm font-medium text-rl-muted">{GRIP_INFO[g].note}</span>
+                  <span className="text-sm font-medium text-rl-muted text-balance [word-break:auto-phrase]">{GRIP_INFO[g].note}</span>
                 </span>
               </ChipButton>
             ))}

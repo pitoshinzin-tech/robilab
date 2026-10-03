@@ -47,12 +47,12 @@ export function PadRow({ pad, sizes, links, primary, narrowed }: {
             <table className="w-full table-fixed text-sm">
               <colgroup><col className="w-[35%]" /><col className="w-[40%]" /><col className="w-[25%]" /></colgroup>
               <thead className="text-left text-rl-muted">
-                <tr><th scope="col" className="py-1 pr-3 pl-2 font-bold">名前</th><th scope="col" className="py-1 pr-3 font-bold">幅×奥行き</th><th scope="col" className="py-1 font-bold">厚さ</th></tr>
+                <tr><th scope="col" className="py-1 pr-3 font-bold [@media(hover:hover)]:pl-2">名前</th><th scope="col" className="py-1 pr-3 font-bold">幅×奥行き</th><th scope="col" className="py-1 font-bold">厚さ</th></tr>
               </thead>
               <tbody>
                 {sizes.map((s, i) => (
                   <tr key={`${s.label}-${i}`} data-size-i={outlineOf(s) ?? undefined} className="border-t border-rl-line">
-                    <td className="py-2 pr-3 pl-2 wrap-anywhere">{s.label}</td>
+                    <td className="py-2 pr-3 wrap-anywhere [@media(hover:hover)]:pl-2">{s.label}</td>
                     <td className="py-2 pr-3">
                       {s.widthMm === null || s.depthMm === null
                         ? <span className="text-rl-muted">{NO_DATA}</span>

@@ -4,6 +4,15 @@ import { useEffect, useState } from "react";
 import { skateGridFromSource, type SkateGridSource } from "@/lib/skate-grid";
 import { SkateGrid } from "@/components/gear/SkateGrid";
 
+/** 選んだ値が、サーバーが出している今のマウスと違うか(違うあいだ、マスだけ先に変わっている) */
+export const isMousePending = (pickId: string | null, shownId: string | null) => pickId !== shownId;
+
+/** マスだけ新しいマウスになっているとき、一覧はまだ前のままだと知らせる(同じなら何も出さない) */
+export function SkateGridApplyHint({ pending }: { pending: boolean }) {
+  if (!pending) return null;
+  return <p aria-live="polite" className="text-sm text-rl-muted">「このマウスで絞り込む」を押すと、一覧がこのマウスに変わります。</p>;
+}
+
 /**
  * マス「このマウスに使えるソール」を、選ぶ欄(<select id={selectId}>)を変えたら送る前に描き直す(触ると答える)。
  * 数は source(サーバーで作った数だけ)から作る。最初の描画はサーバーの SkateGrid と同じなので、JS が無いときは今までどおり送れば変わる。
@@ -26,5 +35,10 @@ export function SkateGridLive({ selectId, source, mouseId, mouseName }: {
     document.addEventListener("change", onChange);
     return () => document.removeEventListener("change", onChange);
   }, [selectId]);
-  return <SkateGrid grid={skateGridFromSource(source, pick.id)} mouseName={pick.name} live />;
+  return (
+    <>
+      <SkateGrid grid={skateGridFromSource(source, pick.id)} mouseName={pick.name} live />
+      <SkateGridApplyHint pending={isMousePending(pick.id, mouseId)} />
+    </>
+  );
 }
