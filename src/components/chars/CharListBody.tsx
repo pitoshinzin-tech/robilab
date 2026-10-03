@@ -25,6 +25,20 @@ export function CharListBody({ game, setting, sections, checkedAt }: {
   };
   return (
     <div className="grid gap-rl-ma-sm">
+      {sections.length > 1 && (
+        <nav aria-label="ロールの段へ移る">
+          <ul className="flex flex-wrap gap-2">
+            {sections.map((s) => (
+              <li key={s.key}>
+                <a href={`#role-${s.key}`} className="rl-lock inline-flex min-h-11 items-center gap-2 rounded-rl-sm border border-rl-line px-3 text-sm font-bold hover:border-rl-line-strong">
+                  {s.roleId && <PixelArt grid={roleSymbol(game.id, s.roleId)} size={16} />}
+                  {s.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
       {setting.matching && (
         <p className="max-w-prose text-sm text-rl-muted text-pretty">
           合うタイプはロールで決まるので、段の見出しに 1 つだけ出しています。行の札は、{setting.showQuotes ? "公式の言葉" : "公式ページの内容"}の手がかりでロールの土台からずれた軸です(札のないキャラは、ロールのとおり)。
@@ -33,7 +47,7 @@ export function CharListBody({ game, setting, sections, checkedAt }: {
       {sections.map((s) => {
         const type = roleType(s.roleId);
         return (
-        <section key={s.key} aria-labelledby={`dex-${s.key}`} className={type ? "rl-role-link grid gap-4" : "grid gap-4"}>
+        <section key={s.key} id={`role-${s.key}`} aria-labelledby={`dex-${s.key}`} className={type ? "rl-role-link grid scroll-mt-24 gap-4" : "grid scroll-mt-24 gap-4"}>
           <div className="grid grid-cols-[48px_minmax(0,1fr)] items-center gap-4 md:grid-cols-[48px_minmax(0,1fr)_auto]">
             <PixelArt grid={roleSymbol(game.id, s.roleId)} size={48} />
             <div className="grid min-w-0 gap-1">

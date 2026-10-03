@@ -61,6 +61,17 @@ describe("一覧の中身(全 5 本。スト6 も描けることを確かめる)
     expect((html.match(/data-role-type/g) ?? []).length).toBe(typed);
     expect(renderList("overwatch")).toContain("data-shift");
   });
+  it("h1 の下にロールの段へのページ内リンク(DbD は「型を決めていないキャラ」も)。飛び先の id がある", () => {
+    for (const id of ["overwatch", "dbd"]) {
+      const html = renderList(id);
+      const game = GAMES.find((g) => g.id === id)!;
+      for (const s of dexSections(game, { ...CHAR_GAME_SETTINGS[id as "overwatch" | "dbd"], published: true })) {
+        expect(html, s.key).toContain(`href="#role-${s.key}"`);
+        expect(html, s.key).toContain(`id="role-${s.key}"`);
+      }
+    }
+    expect(renderList("dbd")).toContain('href="#role-unmatched"');
+  });
   it("行の札は、ロールの土台からずれた軸だけ(ウィンストンは「直感寄り」、札のないキャラは札なし)", () => {
     const html = renderList("overwatch");
     const w = CHARS.find((c) => c.game === "overwatch" && c.id === "winston")!;
